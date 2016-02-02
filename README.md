@@ -53,25 +53,14 @@ Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
 for turning programs into statically linked binaries.
 
 # TODO for initial release
-Make `px` list all processes with:
-* PID
-* owner
-* memory usage (in % of available RAM or in bytes?)
-* used CPU time
-* full command line
-
-Output should be in table format just like `top` or `ps`.
-
-Output should be sorted by `score`, with `score` being `(used CPU time) *
+* Output should be truncated at the rightmost column of the terminal window
+* Each column should be wide enough to fit its widest value
+* Output should be sorted by `score`, with `score` being `(used CPU time) *
 (memory usage)`. The intention here is to put the most interesting processes on
 top.
-
-We also need to add a section about installation instructions to this document.
-
-# TODO for easy installation
-* Create making-a-release instructions (`./pants binary px` basically)
-* Update the Installation Instructions in this document with this new
-information.
+* Add making-a-release instructions (`./pants binary px` basically) to this
+document
+* Add a section about installation instructions to this document.
 
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
@@ -102,3 +91,8 @@ PID show:
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
 usage and present that in one or more columns.
+
+# DONE
+* Make `px` list all processes with PID, owner, memory usage (in % of available
+RAM), used CPU time, full command line
+* Output should be in table format just like `top` or `ps`.
