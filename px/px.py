@@ -3,12 +3,20 @@
 import os
 import psutil
 
+def get_terminal_window_width():
+    result = os.popen('stty size', 'r').read().split()
+    if len(result) >= 2:
+        rows, columns = result
+    else:
+        columns = 12345678 # Really wide to disable truncation
+    return int(columns)
+
 # List all processes, and print for each process: PID, owner,
 # memory usage (in %), used CPU time and full command line
 #
-# FIXME: Print in columns
-#
 # FIXME: Sort printed list by (memory usage) * (used CPU time)
+terminal_window_width = get_terminal_window_width()
+print terminal_window_width
 for proc in psutil.process_iter():
     try:
         pinfo = proc.as_dict(attrs=[
@@ -45,5 +53,6 @@ for proc in psutil.process_iter():
             exe = pinfo['exe']
             cmdline = exe + " [...]"
 
-        print("{:>6} {:9} {:>9} {:>4} {}".format(
-            pid, user, cpu_time_s, memory_percent_s, cmdline))
+        line = "{:>6} {:9} {:>9} {:>4} {}".format(
+            pid, user, cpu_time_s, memory_percent_s, cmdline)
+        print line[0:terminal_window_width]

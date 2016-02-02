@@ -53,7 +53,6 @@ Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
 for turning programs into statically linked binaries.
 
 # TODO for initial release
-* Output should be truncated at the rightmost column of the terminal window
 * Each column should be wide enough to fit its widest value
 * Output should be sorted by `score`, with `score` being `(used CPU time) *
 (memory usage)`. The intention here is to put the most interesting processes on
@@ -92,7 +91,12 @@ PID show:
 * When given the `--top` flag and enough permissions, record per process IO
 usage and present that in one or more columns.
 
+# TODO Misc
+* There should be a `--long` / `-l` option for showing full command lines rather
+than truncating at terminal window width
+
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
 RAM), used CPU time, full command line
 * Output should be in table format just like `top` or `ps`.
+* Output should be truncated at the rightmost column of the terminal window
