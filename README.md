@@ -11,6 +11,13 @@ other information about that process)
 * Possibly `lsof`
 * Possibly `iotop`
 
+# Development
+* Clone: `git clone git@github.com:walles/px.git ; cd px`
+* Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
+* Run: `./dist/px.pex`
+* To run without first doing the build step: `./pants run px`
+* To add dependencies, edit `3rdparty/requirements.txt`
+
 # Installation
 
 It must be simple to install in a random directory on a vanilla
@@ -61,19 +68,8 @@ top.
 
 We also need to add a section about installation instructions to this document.
 
-# TODO: Move to public GitHub
-Now that we have something that can actually be useful to somebody, move to
-public GitHub.
-
-Make sure there's a Development section in this README helping people get set
-up.
-
 # TODO for easy installation
-* Decide on `virtualenv` + `curl` script vs static binaries
-* Either make a `curl` script, test on OS X and vanilla Ubuntu 12.4 Precise and
-commit that to the repo, or...
-* ... create a compile-static-binaries build script together with documentation
-on how to make releases using that script
+* Create making-a-release instructions (`./pants binary px` basically)
 * Update the Installation Instructions in this document with this new
 information.
 
