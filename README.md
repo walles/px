@@ -58,12 +58,31 @@ Output should be sorted by `score`, with `score` being `(used CPU time) *
 (memory usage)`. The intention here is to put the most interesting processes on
 top.
 
+We also need to add a section about installation instructions to this document.
+
+# TODO: Move to public GitHub
+Now that we have something that can actually be useful to somebody, move to
+public GitHub.
+
+Make sure there's a Development section in this README helping people get set
+up.
+
 # TODO for easy installation
 * Decide on `virtualenv` + `curl` script vs static binaries
-* Either make a `curl` script, test on OS X and vanilla Ubuntu 12.4 Precies and
+* Either make a `curl` script, test on OS X and vanilla Ubuntu 12.4 Precise and
 commit that to the repo, or...
 * ... create a compile-static-binaries build script together with documentation
 on how to make releases using that script
+* Update the Installation Instructions in this document with this new
+information.
+
+# TODO Continuous Integration
+Add a `.travis.yml` config to the project that:
+* Runs `flake8` on the code
+* Tests the code on OS X
+* Tests the code on Linux
+* Can or should Travis create binaries for us? Think about security vs
+ease-of-deployment.
 
 # TODO `pgrep` replacement
 * If we get one command line argument, only show processes matching that string
@@ -82,3 +101,7 @@ PID show:
  * A list of all open files, pipes and sockets
  * For each pipe, print the process at the other end of that pipe
  * For each socket, print where it's going
+
+# TODO `iotop` replacement
+* When given the `--top` flag and enough permissions, record per process IO
+usage and present that in one or more columns.
