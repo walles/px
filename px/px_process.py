@@ -6,6 +6,7 @@ class PxProcess:
         self.pid = psutil_process.pid
         self.user = psutil_process.username()
 
+        cpu_time = 0
         try:
             cpu_times = psutil_process.cpu_times()
             cpu_time = cpu_times.user + cpu_times.system
@@ -17,6 +18,7 @@ class PxProcess:
             # ordinary processes when we aren't root, treat as AccessDenied.
             self.cpu_time_s = "--"
 
+        memory_percent = 0
         try:
             memory_percent = psutil_process.memory_percent()
             self.memory_percent_s = "{:.0f}%".format(memory_percent)
@@ -35,3 +37,5 @@ class PxProcess:
             # On OS X 10.11.2 and psutil 3.4.2 this sometimes happens for
             # ordinary processes when we aren't root, treat as AccessDenied.
             self.cmdline = psutil_process.exe() + " [...]"
+
+        self.score = (cpu_time + 1) * (memory_percent + 1)
