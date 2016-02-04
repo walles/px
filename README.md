@@ -19,6 +19,9 @@ cd px
 sudo install ./dist/px.pex /usr/local/bin/px
 ```
 
+# Usage
+Just type `px`. That's all there's to it!
+
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
 * Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
