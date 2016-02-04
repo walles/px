@@ -92,6 +92,11 @@ usage and present that in one or more columns.
 than truncating at terminal window width
 * The init process on OS X has no command line. We should try just listing the
 `exe` in that case.
+* On insufficient privileges, print a warning to stderr about this and how to
+fix it (`sudo chown root <px.pex> ; sudo chmod u+s <px.pex>`). Make sure to
+print the canonical path to the binary; symlinks should be resolved and the path
+should be absolute.
+* When piping to some other command, don't truncate lines to terminal width
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
