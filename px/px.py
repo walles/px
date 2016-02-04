@@ -46,4 +46,6 @@ procs = []
 for proc in psutil.process_iter():
     procs.append(px_process.PxProcess(proc))
 
-print_procs(sorted(procs, key=lambda proc: -proc.score))
+# Print the most interesting processes last; there are lots of processes and
+# the end of the list is where your eyes will be when you get the prompt back.
+print_procs(sorted(procs, key=lambda proc: proc.score))
