@@ -53,7 +53,6 @@ Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
 for turning programs into statically linked binaries.
 
 # TODO for initial release
-* Each column should be wide enough to fit its widest value
 * Add making-a-release instructions (`./pants binary px` basically) to this
 document
 * Add a section about installation instructions to this document.
@@ -91,6 +90,8 @@ usage and present that in one or more columns.
 # TODO Misc
 * There should be a `--long` / `-l` option for showing full command lines rather
 than truncating at terminal window width
+* The init process on OS X has no command line. We should try just listing the
+`exe` in that case.
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
@@ -100,3 +101,4 @@ RAM), used CPU time, full command line
 * Output should be sorted by `score`, with `score` being `(used CPU time) *
 (memory usage)`. The intention here is to put the most interesting processes on
 top.
+* Each column should be wide enough to fit its widest value
