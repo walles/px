@@ -11,6 +11,14 @@ other information about that process)
 * Possibly `lsof`
 * Possibly `iotop`
 
+# Installation
+```
+git clone git@github.com:walles/px.git
+cd px
+./pants binary px
+sudo install ./dist/px.pex /usr/local/bin/px
+```
+
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
 * Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
@@ -18,25 +26,12 @@ other information about that process)
 * To run without first doing the build step: `./pants run px`
 * To add dependencies, edit `3rdparty/requirements.txt`
 
-# Installation
-
-It must be simple to install in a random directory on a vanilla
-Ubuntu 12.4 Precise system. In this case that's because what Github Enterprise
-2.3.3 is running on.
-
-"Simple to install" in this case means:
-* no root access required
-* single command line install (most likely `curl` based)
-* everything should end up in one single directory of the user's choosing
-* the install process should end with printing the path to the binary
-* it should be possible to make symlinks to this binary and execute it through
-those
-
-Candidates are:
-* Python 2.7 + `virtualenv` if that's available on a vanilla Ubuntu Precise
-system
-* Python 2.7 + compile to a binary executable that's runnable on a vanilla
-Ubuntu Precise system
+# Releasing a new Version
+1. Do `git tag` and think about what the next version number should be.
+2. Do ```git tag --annotate 1.2.3``` to set the next version number. The
+text you write for this tag will show up as the release description on Github,
+write something nice!
+3. `git push --tags`
 
 # Implementation Language (Python 2.7)
 Language requirements:
@@ -51,11 +46,6 @@ static binary
 Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
 [psutil](https://pythonhosted.org/psutil/), `virtualenv` and a number of options
 for turning programs into statically linked binaries.
-
-# TODO for initial release
-* Add making-a-release instructions (`./pants binary px` basically) to this
-document
-* Add a section about installation instructions to this document.
 
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
@@ -107,3 +97,5 @@ RAM), used CPU time, full command line
 (memory usage)`. The intention here is to put the most interesting processes on
 top.
 * Each column should be wide enough to fit its widest value
+* Add a section about installation instructions to this document.
+* Add making-a-release instructions to this document
