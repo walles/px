@@ -36,20 +36,6 @@ text you write for this tag will show up as the release description on Github,
 write something nice!
 3. `git push --tags`
 
-# Implementation Language (Python 2.7)
-Language requirements:
-
-1. There must be a useable process listing library for OS X and Linux
-2. It must be available on a vanilla Ubuntu 12.4 Precise system
-3. It must be available on a vanilla OS X 10.11 system
-4. It must be possible to install the resulting product together with all its
-dependencies in a single directory *or* possible to compile everything into one
-static binary
-
-Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
-[psutil](https://pythonhosted.org/psutil/), `virtualenv` and a number of options
-for turning programs into statically linked binaries.
-
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
 * Runs `flake8` on the code
