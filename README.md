@@ -13,7 +13,7 @@ other information about that process)
 
 # Installation
 ```
-git clone git@github.com:walles/px.git
+git clone https://github.com/walles/px.git
 cd px
 ./pants binary px
 sudo install ./dist/px.pex /usr/local/bin/px
