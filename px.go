@@ -15,7 +15,10 @@ func totalCPUTime(t *cpu.CPUTimesStat) float64 {
 	return total
 }
 
+// FIXME: This program is terribly slow (on OS X). Listing all processes takes
+// over 3s. Doing the same thing with ps takes 0.05s on the same machine.
 func main() {
+	// FIXME: process.Pids doesn't list PID 0 (init)
 	pids, _ := process.Pids()
 
 	for _, pid := range pids {
