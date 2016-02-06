@@ -9,5 +9,7 @@ import (
 func main() {
 	pids, _ := process.Pids()
 
-	fmt.Println(pids)
+	for _, pid := range pids {
+		fmt.Println(pid)
+	}
 }
