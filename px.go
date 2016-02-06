@@ -38,10 +38,16 @@ func main() {
 		}
 
 		// FIXME: proc.Name() is truncated at 16 characters
-		name, _ := proc.Name()
+		name, err := proc.Name()
+		if err != nil {
+			name = "--"
+		}
 
-		// cmdline, _ := proc.Cmdline()
+		cmdline, err := proc.Cmdline()
+		if err != nil {
+			cmdline = "--"
+		}
 
-		fmt.Printf("%d %s %s %s %s\n", pid, user, cpuTimeString, memoryPercentString, name)
+		fmt.Printf("%d %s %s %s %s %s\n", pid, user, cpuTimeString, memoryPercentString, name, cmdline)
 	}
 }
