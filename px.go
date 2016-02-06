@@ -24,21 +24,24 @@ func main() {
 		// FIXME: proc.Username() returns 'root' even for non-root processes
 		user, _ := proc.Username()
 
-		var cpuTimeString string
+		cpuTimeString := "--"
 		cpuTime, err := proc.CPUTimes()
 		if err == nil {
 			cpuTimeString = fmt.Sprintf("%.3fs", totalCPUTime(cpuTime))
-		} else {
-			cpuTimeString = "--"
 		}
 
-		// memoryPercent, _ := proc.MemoryPercent()
+		memoryPercentString := "--"
+		// FIXME: proc.MemoryPercent() is "not implemented yet"
+		memoryPercent, err := proc.MemoryPercent()
+		if err == nil {
+			memoryPercentString = fmt.Sprintf("%.1f%%", memoryPercent)
+		}
 
 		// FIXME: proc.Name() is truncated at 16 characters
 		name, _ := proc.Name()
 
 		// cmdline, _ := proc.Cmdline()
 
-		fmt.Printf("%d %s %s %s\n", pid, user, cpuTimeString, name)
+		fmt.Printf("%d %s %s %s %s\n", pid, user, cpuTimeString, memoryPercentString, name)
 	}
 }
