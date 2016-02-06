@@ -10,6 +10,20 @@ func main() {
 	pids, _ := process.Pids()
 
 	for _, pid := range pids {
-		fmt.Println(pid)
+		proc, _ := process.NewProcess(pid)
+
+		// FIXME: proc.Username() returns 'root' even for non-root processes
+		user, _ := proc.Username()
+
+		// cpuTime, _ := proc.CPUTimes()
+
+		// memoryPercent, _ := proc.MemoryPercent()
+
+		// FIXME: proc.Name() is truncated at 16 characters
+		name, _ := proc.Name()
+
+		// cmdline, _ := proc.Cmdline()
+
+		fmt.Printf("%d %s %s\n", pid, user, name)
 	}
 }
