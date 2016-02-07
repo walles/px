@@ -10,17 +10,8 @@ import (
 
 	"strings"
 
-	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/process"
 )
-
-// FIXME: This function is simply copied from process.totalCpuTime. It would be
-// better if this was exported so that we could just call it.
-func totalCPUTime(t *cpu.CPUTimesStat) float64 {
-	total := t.User + t.System + t.Nice + t.Iowait + t.Irq + t.Softirq + t.Steal +
-		t.Guest + t.GuestNice + t.Idle
-	return total
-}
 
 // Get a printf() format truncating a string at terminal width
 func getLineFormat() string {
