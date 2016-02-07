@@ -51,37 +51,11 @@ func main() {
 	lineFormat := getLineFormat()
 
 	for _, pid := range pids {
-		proc, _ := process.NewProcess(pid)
-
-		// FIXME: proc.Username() returns 'root' even for non-root processes
-		user, _ := proc.Username()
-
-		cpuTimeString := "--"
-		cpuTime, err := proc.CPUTimes()
-		if err == nil {
-			cpuTimeString = fmt.Sprintf("%.3fs", totalCPUTime(cpuTime))
-		}
-
-		memoryPercentString := "--"
-		// FIXME: proc.MemoryPercent() is "not implemented yet"
-		memoryPercent, err := proc.MemoryPercent()
-		if err == nil {
-			memoryPercentString = fmt.Sprintf("%.1f%%", memoryPercent)
-		}
-
-		// FIXME: proc.Name() is truncated at 16 characters
-		name, err := proc.Name()
-		if err != nil {
-			name = "--"
-		}
-
-		cmdline, err := proc.Cmdline()
-		if err != nil {
-			cmdline = "--"
-		}
+		psutilproc, _ := process.NewProcess(pid)
+		proc := NewProcess(psutilproc)
 
 		line := fmt.Sprintf("%d %s %s %s %s %s",
-			pid, user, cpuTimeString, memoryPercentString, name, cmdline)
+			pid, proc.User(), proc.CPUTimeString(), proc.MemoryPercentString(), proc.Name(), proc.Cmdline())
 		fmt.Printf(lineFormat, line)
 	}
 }
