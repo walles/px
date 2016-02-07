@@ -51,7 +51,10 @@ func main() {
 	lineFormat := getLineFormat()
 
 	for _, pid := range pids {
-		psutilproc, _ := process.NewProcess(pid)
+		psutilproc, err := process.NewProcess(pid)
+		if err != nil {
+			continue
+		}
 		proc := NewProcess(psutilproc)
 
 		line := fmt.Sprintf("%d %s %s %s %s %s",
