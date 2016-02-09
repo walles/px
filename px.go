@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-
 	"os"
 	"os/exec"
-
+	"sort"
 	"strconv"
-
 	"strings"
 
 	"github.com/shirou/gopsutil/process"
@@ -49,6 +47,8 @@ func main() {
 		}
 		processes = append(processes, NewProcess(psutilproc))
 	}
+
+	sort.Sort(ByRelevance(processes))
 
 	for _, proc := range processes {
 		line := fmt.Sprintf("%s %s %s %s %s %s",

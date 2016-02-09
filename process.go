@@ -12,9 +12,49 @@ type Process struct {
 	pidString           string
 	user                string
 	cpuTimeString       string
+	cpuTimeSeconds      float64
 	memoryPercentString string
+	memoryPercent       float32
+	score               float64
 	name                string
 	cmdline             string
+}
+
+// ByRelevance orders processes by how interesting they are
+type ByRelevance []*Process
+
+func (p ByRelevance) Len() int      { return len(p) }
+func (p ByRelevance) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p ByRelevance) Less(i, j int) bool {
+	if p[i].score < p[j].score {
+		return true
+	}
+	if p[i].score > p[j].score {
+		return false
+	}
+
+	if p[i].memoryPercent < p[j].memoryPercent {
+		return true
+	}
+	if p[i].memoryPercent > p[j].memoryPercent {
+		return false
+	}
+
+	if p[i].cpuTimeSeconds < p[j].cpuTimeSeconds {
+		return true
+	}
+	if p[i].cpuTimeSeconds > p[j].cpuTimeSeconds {
+		return false
+	}
+
+	if p[i].name < p[j].name {
+		return true
+	}
+	if p[i].name > p[j].name {
+		return false
+	}
+
+	return p[i].cmdline < p[j].cmdline
 }
 
 // FIXME: This function is simply copied from process.totalCpuTime. It would be
@@ -34,9 +74,11 @@ func NewProcess(proc *process.Process) *Process {
 	}
 
 	cpuTimeString := "--"
+	var cpuTimeSeconds float64
 	cpuTime, err := proc.CPUTimes()
 	if err == nil {
-		cpuTimeString = fmt.Sprintf("%.3fs", totalCPUTime(cpuTime))
+		cpuTimeSeconds = totalCPUTime(cpuTime)
+		cpuTimeString = fmt.Sprintf("%.3fs", cpuTimeSeconds)
 	}
 
 	memoryPercentString := "--"
@@ -61,7 +103,10 @@ func NewProcess(proc *process.Process) *Process {
 		pidString:           fmt.Sprintf("%d", proc.Pid),
 		user:                user,
 		cpuTimeString:       cpuTimeString,
+		cpuTimeSeconds:      cpuTimeSeconds,
 		memoryPercentString: memoryPercentString,
+		memoryPercent:       memoryPercent,
+		score:               cpuTimeSeconds * float64(memoryPercent),
 		name:                name,
 		cmdline:             cmdline,
 	}
