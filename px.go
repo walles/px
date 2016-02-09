@@ -31,10 +31,29 @@ func getLineFormat() string {
 	return fmt.Sprintf("%%.%ds\n", width)
 }
 
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+
 func printProcesses(processes []*Process) {
+	var pidW, userW, cpuTimeW, memPercentW, nameW int
+	for _, proc := range processes {
+		pidW = max(pidW, len(proc.PidString()))
+		userW = max(userW, len(proc.User()))
+		cpuTimeW = max(cpuTimeW, len(proc.CPUTimeString()))
+		memPercentW = max(memPercentW, len(proc.MemoryPercentString()))
+		nameW = max(nameW, len(proc.Name()))
+	}
+
+	procFormat := fmt.Sprintf("%%%ds %%-%ds %%%ds %%%ds %%-%ds %%s",
+		pidW, userW, cpuTimeW, memPercentW, nameW)
+
 	lineFormat := getLineFormat()
 	for _, proc := range processes {
-		line := fmt.Sprintf("%s %s %s %s %s %s",
+		line := fmt.Sprintf(procFormat,
 			proc.PidString(),
 			proc.User(),
 			proc.CPUTimeString(),
