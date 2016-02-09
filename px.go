@@ -31,13 +31,25 @@ func getLineFormat() string {
 	return fmt.Sprintf("%%.%ds\n", width)
 }
 
+func printProcesses(processes []*Process) {
+	lineFormat := getLineFormat()
+	for _, proc := range processes {
+		line := fmt.Sprintf("%s %s %s %s %s %s",
+			proc.PidString(),
+			proc.User(),
+			proc.CPUTimeString(),
+			proc.MemoryPercentString(),
+			proc.Name(),
+			proc.Cmdline())
+		fmt.Printf(lineFormat, line)
+	}
+}
+
 // FIXME: This program is terribly slow (on OS X). Listing all processes takes
 // over 3s. Doing the same thing with ps takes 0.05s on the same machine.
 func main() {
 	// FIXME: process.Pids doesn't list PID 0 (init)
 	pids, _ := process.Pids()
-
-	lineFormat := getLineFormat()
 
 	var processes []*Process
 	for _, pid := range pids {
@@ -49,15 +61,5 @@ func main() {
 	}
 
 	sort.Sort(ByRelevance(processes))
-
-	for _, proc := range processes {
-		line := fmt.Sprintf("%s %s %s %s %s %s",
-			proc.PidString(),
-			proc.User(),
-			proc.CPUTimeString(),
-			proc.MemoryPercentString(),
-			proc.Name(),
-			proc.Cmdline())
-		fmt.Printf(lineFormat, line)
-	}
+	printProcesses(processes)
 }
