@@ -41,15 +41,23 @@ func main() {
 
 	lineFormat := getLineFormat()
 
+	var processes []*Process
 	for _, pid := range pids {
 		psutilproc, err := process.NewProcess(pid)
 		if err != nil {
 			continue
 		}
-		proc := NewProcess(psutilproc)
+		processes = append(processes, NewProcess(psutilproc))
+	}
 
-		line := fmt.Sprintf("%d %s %s %s %s %s",
-			pid, proc.User(), proc.CPUTimeString(), proc.MemoryPercentString(), proc.Name(), proc.Cmdline())
+	for _, proc := range processes {
+		line := fmt.Sprintf("%s %s %s %s %s %s",
+			proc.PidString(),
+			proc.User(),
+			proc.CPUTimeString(),
+			proc.MemoryPercentString(),
+			proc.Name(),
+			proc.Cmdline())
 		fmt.Printf(lineFormat, line)
 	}
 }
