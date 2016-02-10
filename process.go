@@ -57,14 +57,6 @@ func (p ByRelevance) Less(i, j int) bool {
 	return p[i].cmdline < p[j].cmdline
 }
 
-// FIXME: This function is simply copied from process.totalCpuTime. It would be
-// better if this was exported so that we could just call it.
-func totalCPUTime(t *cpu.CPUTimesStat) float64 {
-	total := t.User + t.System + t.Nice + t.Iowait + t.Irq + t.Softirq + t.Steal +
-		t.Guest + t.GuestNice + t.Idle
-	return total
-}
-
 // NewProcess creates a new Process based on a psutil Process object
 func NewProcess(proc *process.Process) *Process {
 	// FIXME: proc.Username() returns 'root' even for non-root processes
@@ -77,7 +69,7 @@ func NewProcess(proc *process.Process) *Process {
 	var cpuTimeSeconds float64
 	cpuTime, err := proc.CPUTimes()
 	if err == nil {
-		cpuTimeSeconds = totalCPUTime(cpuTime)
+		cpuTimeSeconds = cpuTime.Total()
 		cpuTimeString = fmt.Sprintf("%.3fs", cpuTimeSeconds)
 	}
 
