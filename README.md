@@ -11,23 +11,12 @@ other information about that process)
 * Possibly `lsof`
 * Possibly `iotop`
 
-# Installation
-```
-git clone https://github.com/walles/px.git
-cd px
-./pants binary px
-sudo install ./dist/px.pex /usr/local/bin/px
-```
-
 # Usage
 Just type `px`. That's all there's to it!
 
 # Development
-* Clone: `git clone git@github.com:walles/px.git ; cd px`
-* Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
-* Run: `./dist/px.pex`
-* To run without first doing the build step: `./pants run px`
-* To add dependencies, edit `3rdparty/requirements.txt`
+If you aren't familiar with Go you must [read this
+first](https://golang.org/doc/code.html), then the rest should be obvious.
 
 # Releasing a new Version
 1. Do `git tag` and think about what the next version number should be.
@@ -35,6 +24,14 @@ Just type `px`. That's all there's to it!
 text you write for this tag will show up as the release description on Github,
 write something nice!
 3. `git push --tags`
+4. Build + upload a binary to the
+[release web page](https://github.com/walles/px/releases). Make sure to include
+both the platform (`Darwin`), architecture (`x86_64`) and the version number in
+the binary name when you upload.
+
+# TODO First Release of the Go Version
+* Follow the release instructions
+* Update this document with installation instructions
 
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
