@@ -15,8 +15,12 @@ other information about that process)
 Just type `px`. That's all there's to it!
 
 # Development
-If you aren't familiar with Go you must [read this
-first](https://golang.org/doc/code.html), then the rest should be obvious.
+* [Make a Go workspace directory and point `$GOPATH` to
+it](https://golang.org/doc/code.html)
+* `go get github.com/walles/px`
+* Source code is now in `$GOPATH/src/github.com/walles/px`
+* To build: `go install github.com/walles/px`
+* To run: `$GOPATH/bin/px`
 
 # Releasing a new Version
 1. Do `git tag` and think about what the next version number should be.
@@ -30,20 +34,24 @@ both the platform (`Darwin`), architecture (`x86_64`) and the version number in
 the binary name when you upload.
 
 # TODO First Release of the Go Version
+* Make a shell script for building for at least OS X and Linux
+* Add that shell script to the release instructions
 * Follow the release instructions
-* Update this document with installation instructions
+* Add installation instructions to this document
 
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
-* Runs `flake8` on the code
-* Tests the code on OS X
-* Tests the code on Linux
-* Can or should Travis create binaries for us? Think about security vs
-ease-of-deployment.
+* Verifies code formatting using `gofmt -l`
+* Lints code using `go vet` and `golint`
+* Runs the build-release shell script on OS X and Linux (verify cross
+  compilation)
+* Builds and runs the code on OS X
+* Builds and runs the code on Linux
 
 # TODO `pgrep` replacement
 * If we get one command line argument, only show processes matching that string
-as either a user or the name of an executable.
+as either a user or the name of an executable. Use
+[Docopt](https://github.com/docopt/docopt.go) for command line parsing.
 
 # TODO `top` replacement
 * Print system load before the process listing
