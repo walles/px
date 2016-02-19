@@ -58,7 +58,6 @@ func (p ByRelevance) Less(i, j int) bool {
 
 // NewProcess creates a new Process based on a psutil Process object
 func NewProcess(proc *process.Process) *Process {
-	// FIXME: proc.Username() returns 'root' even for non-root processes
 	user, err := proc.Username()
 	if err != nil {
 		user = "--"
@@ -73,7 +72,6 @@ func NewProcess(proc *process.Process) *Process {
 	}
 
 	memoryPercentString := "--"
-	// FIXME: proc.MemoryPercent() is "not implemented yet"
 	memoryPercent, err := proc.MemoryPercent()
 	if err == nil {
 		memoryPercentString = fmt.Sprintf("%.1f%%", memoryPercent)

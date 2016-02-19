@@ -67,7 +67,8 @@ func printProcesses(processes []*Process) {
 // FIXME: This program is terribly slow (on OS X). Listing all processes takes
 // over 3s. Doing the same thing with ps takes 0.05s on the same machine.
 func main() {
-	// FIXME: process.Pids doesn't list PID 0 (init)
+	// FIXME: process.Pids doesn't list PID 0 ("kernel_task" according to Activity
+	// Monitor on OS X)
 	pids, _ := process.Pids()
 
 	var processes []*Process
