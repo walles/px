@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/shirou/gopsutil/process"
 )
@@ -71,13 +72,27 @@ func main() {
 	// Monitor on OS X)
 	pids, _ := process.Pids()
 
-	var processes []*Process
+	var wg sync.WaitGroup
+	processesChan := make(chan *Process, 4)
 	for _, pid := range pids {
-		psutilproc, err := process.NewProcess(pid)
-		if err != nil {
-			continue
-		}
-		processes = append(processes, NewProcess(psutilproc))
+		wg.Add(1)
+		go func(pid int32) {
+			defer wg.Done()
+
+			psutilproc, err := process.NewProcess(pid)
+			if err != nil {
+				return
+			}
+
+			processesChan <- NewProcess(psutilproc)
+		}(pid)
+	}
+	wg.Wait()
+	close(processesChan)
+
+	var processes []*Process
+	for process := range processesChan {
+		processes = append(processes, process)
 	}
 
 	sort.Sort(ByRelevance(processes))
