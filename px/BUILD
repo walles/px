@@ -1,3 +1,5 @@
+python_requirements()
+
 python_library(
   name='pxlib',
   sources=globs('*.py'),
@@ -6,7 +8,7 @@ python_library(
 python_binary(
   name='px',
   dependencies=[
-    '3rdparty:psutil',
+    'px:psutil',
     'px:pxlib'
   ],
   entry_point='px',
