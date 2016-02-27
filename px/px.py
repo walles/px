@@ -38,7 +38,7 @@ def print_procs(procs):
         line = format.format(
             proc.pid, proc.user, proc.cpu_time_s, proc.memory_percent_s,
             proc.cmdline)
-        print line[0:terminal_window_width]
+        print(line[0:terminal_window_width])
 
 
 procs = px_process.get_all()

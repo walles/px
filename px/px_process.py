@@ -1,4 +1,4 @@
-class PxProcess:
+class PxProcess(object):
     def __init__(self, process_builder):
         self.pid = process_builder.pid
 
@@ -11,12 +11,12 @@ class PxProcess:
 
         self.cmdline = process_builder.cmdline
 
-        self.score = \
-            ((process_builder.cpu_time + 1) *
-             (process_builder.memory_percent + 1))
+        self.score = (
+            (process_builder.cpu_time + 1) *
+            (process_builder.memory_percent + 1))
 
 
-class PxProcessBuilder:
+class PxProcessBuilder(object):
     pass
 
 

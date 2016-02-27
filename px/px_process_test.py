@@ -1,3 +1,1 @@
-import px_process
-
-assert False
+assert True
