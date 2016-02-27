@@ -8,7 +8,6 @@ python_library(
 python_binary(
   name='px',
   dependencies=[
-    'px:psutil',
     'px:pxlib'
   ],
   entry_point='px',

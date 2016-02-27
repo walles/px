@@ -1,41 +1,31 @@
-import psutil
-
-
 class PxProcess:
-    def __init__(self, psutil_process):
-        self.pid = psutil_process.pid
-        self.user = psutil_process.username()
+    def __init__(self, process_builder):
+        self.pid = process_builder.pid
 
-        cpu_time = 0
-        try:
-            cpu_times = psutil_process.cpu_times()
-            cpu_time = cpu_times.user + cpu_times.system
-            self.cpu_time_s = "{:.3f}s".format(cpu_time)
-        except psutil.AccessDenied:
-            self.cpu_time_s = "--"
-        except psutil.ZombieProcess:
-            # On OS X 10.11.2 and psutil 3.4.2 this sometimes happens for
-            # ordinary processes when we aren't root, treat as AccessDenied.
-            self.cpu_time_s = "--"
+        self.user = process_builder.username
 
-        memory_percent = 0
-        try:
-            memory_percent = psutil_process.memory_percent()
-            self.memory_percent_s = "{:.0f}%".format(memory_percent)
-        except psutil.AccessDenied:
-            self.memory_percent_s = "--"
-        except psutil.ZombieProcess:
-            # On OS X 10.11.2 and psutil 3.4.2 this sometimes happens for
-            # ordinary processes when we aren't root, treat as AccessDenied.
-            self.memory_percent_s = "--"
+        self.cpu_time_s = "{:.3f}s".format(process_builder.cpu_time)
 
-        try:
-            self.cmdline = psutil_process.cmdline()
-        except psutil.AccessDenied:
-            self.cmdline = psutil_process.exe() + " [...]"
-        except psutil.ZombieProcess:
-            # On OS X 10.11.2 and psutil 3.4.2 this sometimes happens for
-            # ordinary processes when we aren't root, treat as AccessDenied.
-            self.cmdline = psutil_process.exe() + " [...]"
+        self.memory_percent_s = (
+            "{:.0f}%".format(process_builder.memory_percent))
 
-        self.score = (cpu_time + 1) * (memory_percent + 1)
+        self.cmdline = process_builder.cmdline
+
+        self.score = \
+            ((process_builder.cpu_time + 1) *
+             (process_builder.memory_percent + 1))
+
+
+class PxProcessBuilder:
+    pass
+
+
+def get_all():
+    process_builder = PxProcessBuilder()
+    process_builder.pid = 7
+    process_builder.username = "adsggeqeqtetq"
+    process_builder.cpu_time = 1.3
+    process_builder.memory_percent = 42.7
+    process_builder.cmdline = "hej kontinent"
+
+    return [PxProcess(process_builder)]

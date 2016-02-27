@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import os
-import psutil
 
 import px_process
 
@@ -42,9 +41,7 @@ def print_procs(procs):
         print line[0:terminal_window_width]
 
 
-procs = []
-for proc in psutil.process_iter():
-    procs.append(px_process.PxProcess(proc))
+procs = px_process.get_all()
 
 # Print the most interesting processes last; there are lots of processes and
 # the end of the list is where your eyes will be when you get the prompt back.
