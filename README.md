@@ -24,11 +24,11 @@ Just type `px`. That's all there's to it!
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
-* Test: `./pants test px:unittests`
+* Test: `./ci.sh`
 * Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
 * Run: `./dist/px.pex`
 * To run without first doing the build step: `./pants run px`
-* To add dependencies, edit `3rdparty/requirements.txt`
+* To add dependencies, edit `px/requirements.txt` and `px/BUILD`
 
 # Releasing a new Version
 1. Do `git tag` and think about what the next version number should be.
