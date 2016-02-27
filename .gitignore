@@ -1,2 +1,4 @@
 /.pants.d
 /dist
+*.pyc
+__pycache__

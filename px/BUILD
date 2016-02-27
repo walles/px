@@ -12,3 +12,11 @@ python_binary(
   ],
   entry_point='px',
 )
+
+python_tests(
+  name = 'unittests',
+  sources = globs('*.py'),
+  dependencies=[
+    'px:pxlib'
+  ],
+)

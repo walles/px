@@ -24,6 +24,7 @@ Just type `px`. That's all there's to it!
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
+* Test: `./pants test px:unittests`
 * Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
 * Run: `./dist/px.pex`
 * To run without first doing the build step: `./pants run px`
