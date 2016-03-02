@@ -1,11 +1,17 @@
 import subprocess
 
+import re
+
+
+# Match + group: "47536 root              0:00.03  0.0 /usr/sbin/cupsd -l"
+PS_LINE = re.compile(" *([0-9]+) +([^ ]+) +([0-9:.]+) +([0-9.]+) +(.*)")
+
 
 class PxProcess(object):
     def __init__(self, process_builder):
         self.pid = process_builder.pid
 
-        self.user = process_builder.username
+        self.username = process_builder.username
 
         self.cpu_time_s = "{:.3f}s".format(process_builder.cpu_time)
 
@@ -32,13 +38,21 @@ def call_ps():
     return ps.communicate()[0].splitlines()[1:]
 
 
+def parse_time(timestring):
+    """Convert a CPU time string returned by ps to a number of seconds"""
+    return 5
+
+
 def ps_line_to_process(ps_line):
+    match = PS_LINE.match(ps_line)
+    assert match is not None
+
     process_builder = PxProcessBuilder()
-    process_builder.pid = 7
-    process_builder.username = "adsggeqeqtetq"
-    process_builder.cpu_time = 1.3
-    process_builder.memory_percent = 42.7
-    process_builder.cmdline = "hej kontinent"
+    process_builder.pid = int(match.group(1))
+    process_builder.username = match.group(2)
+    process_builder.cpu_time = parse_time(match.group(3))
+    process_builder.memory_percent = float(match.group(4))
+    process_builder.cmdline = match.group(5)
 
     return PxProcess(process_builder)
 

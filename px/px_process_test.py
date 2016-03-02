@@ -14,7 +14,7 @@ def test_create_process():
     test_me = px_process.PxProcess(process_builder)
 
     assert test_me.pid == 7
-    assert test_me.user == "usernamex"
+    assert test_me.username == "usernamex"
     assert test_me.cpu_time_s == "1.300s"
     assert test_me.memory_percent_s == "43%"
     assert test_me.cmdline == "hej kontinent"
@@ -37,19 +37,31 @@ def test_call_ps():
     assert "COMMAND" not in lines[0]
 
 
-def test_ps_line_to_process():
+def test_ps_line_to_process_1():
     process = px_process.ps_line_to_process(
         "47536 root              0:00.03  0.0 /usr/sbin/cupsd -l"
     )
 
     assert process.pid == 47536
-    assert process.user == "root"
+    assert process.username == "root"
     assert process.cpu_time_s == "0.030s"
     assert process.memory_percent_s == "0%"
     assert process.cmdline == "/usr/sbin/cupsd -l"
 
 
-def test_get_all():
+def test_ps_line_to_process_2():
+    process = px_process.ps_line_to_process(
+        "    1 root              2:14.15  0.1 /sbin/launchd"
+    )
+
+    assert process.pid == 1
+    assert process.username == "root"
+    assert process.cpu_time_s == "134.150s"
+    assert process.memory_percent_s == "0%"
+    assert process.cmdline == "/sbin/launchd"
+
+
+def _test_get_all():
     all = px_process.get_all()
 
     pids = map(lambda p: p.pid, all)
@@ -71,3 +83,18 @@ def test_get_all():
     # Assert that the current PID has the correct user name
     current_process = filter(lambda process: process.pid == os.getpid(), all)[0]
     assert current_process.username == getpass.getuser()
+
+
+def test_get_all_swedish():
+    """
+    In Swedish, floating point numbers are indicated with comma, so 4.2 in
+    English is 4,2 in Swedish. This test verifies that setting a Swedish locale
+    won't mess up our parsing.
+    """
+    os.environ["LANG"] = "sv_SE.UTF-8"
+    _test_get_all()
+
+
+def test_get_all_defaultlocale():
+    del os.environ["LANG"]
+    _test_get_all()
