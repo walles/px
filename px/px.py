@@ -1,16 +1,26 @@
 #!/usr/bin/python
 
-import os
+import sys
 
+import os
 import px_process
 
 
 def get_terminal_window_width():
+    """
+    Return the width of the terminal if available, or None if not.
+    """
+
+    if not sys.stdout.isatty():
+        # We shouldn't truncate lines when piping
+        return None
+
     result = os.popen('stty size', 'r').read().split()
-    if len(result) >= 2:
-        rows, columns = result
-    else:
-        columns = 12345678  # Really wide to disable truncation
+    if len(result) < 2:
+        # Getting the terminal window width failed, don't truncate
+        return None
+
+    rows, columns = result
     return int(columns)
 
 
