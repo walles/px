@@ -7,6 +7,9 @@ import re
 # Match + group: "47536 root              0:00.03  0.0 /usr/sbin/cupsd -l"
 PS_LINE = re.compile(" *([0-9]+) +([^ ]+) +([0-9:.]+) +([0-9.]+) +(.*)")
 
+# Match + group: "1:02.03"
+CPUTIME = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
+
 
 class PxProcess(object):
     def __init__(self, process_builder):
@@ -45,7 +48,11 @@ def call_ps():
 
 def parse_time(timestring):
     """Convert a CPU time string returned by ps to a number of seconds"""
-    return 5
+    match = CPUTIME.match(timestring)
+    minutes = int(match.group(1))
+    seconds = float(match.group(2))
+
+    return 60 * minutes + seconds
 
 
 def ps_line_to_process(ps_line):

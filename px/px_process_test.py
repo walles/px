@@ -98,3 +98,8 @@ def test_get_all_swedish():
 def test_get_all_defaultlocale():
     del os.environ["LANG"]
     _test_get_all()
+
+
+def test_parse_time():
+    assert px_process.parse_time("0:00.03") == 0.03
+    assert px_process.parse_time("1:02.03") == 62.03
