@@ -1,3 +1,6 @@
+import subprocess
+
+
 class PxProcess(object):
     def __init__(self, process_builder):
         self.pid = process_builder.pid
@@ -20,7 +23,16 @@ class PxProcessBuilder(object):
     pass
 
 
-def get_all():
+def call_ps():
+    """
+    Call ps and return the result in an array of one output line per process
+    """
+    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,user,time,%mem,command"],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return ps.communicate()[0].splitlines()[1:]
+
+
+def ps_line_to_process(ps_line):
     process_builder = PxProcessBuilder()
     process_builder.pid = 7
     process_builder.username = "adsggeqeqtetq"
@@ -28,4 +40,8 @@ def get_all():
     process_builder.memory_percent = 42.7
     process_builder.cmdline = "hej kontinent"
 
-    return [PxProcess(process_builder)]
+    return PxProcess(process_builder)
+
+
+def get_all():
+    return map(lambda line: ps_line_to_process(line), call_ps())
