@@ -46,7 +46,8 @@ def main():
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
-    print_procs(sorted(procs, key=lambda proc: proc.score))
+    print_procs(px_process.order_best_last(procs))
+
 
 if __name__ == "__main__":
     main()

@@ -110,3 +110,21 @@ def test_parse_time():
     with pytest.raises(ValueError) as e:
         px_process.parse_time("Constantinople")
     assert "Constantinople" in str(e.value)
+
+
+def test_order_best_last():
+    # Verify ordering by score
+    p0 = px_process.ps_line_to_process("1 root 0:10.00 10.0 /usr/sbin/cupsd -l")
+    p1 = px_process.ps_line_to_process("1 root 0:11.00  1.0 /usr/sbin/cupsd -l")
+    p2 = px_process.ps_line_to_process("1 root 0:01.00 11.0 /usr/sbin/cupsd -l")
+    ordered = px_process.order_best_last([p0, p1, p2])
+
+    # The first process should have the highest CPU*Memory score, and should
+    # therefore be ordered last
+    assert ordered[2] == p0
+
+    # Verify ordering same-scored processes by command line
+    p0 = px_process.ps_line_to_process("1 root 0:10.00 10.0 awk")
+    p1 = px_process.ps_line_to_process("1 root 0:10.00 10.0 bash")
+    assert px_process.order_best_last([p0, p1]) == [p0, p1]
+    assert px_process.order_best_last([p1, p0]) == [p0, p1]

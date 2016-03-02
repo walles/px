@@ -1,3 +1,4 @@
+import operator
 import subprocess
 
 import os
@@ -95,3 +96,8 @@ def ps_line_to_process(ps_line):
 
 def get_all():
     return map(lambda line: ps_line_to_process(line), call_ps())
+
+
+def order_best_last(processes):
+    """Returns process list ordered with the most interesting one last"""
+    return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
