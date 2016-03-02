@@ -2,6 +2,10 @@
 # https://docs.travis-ci.com/user/workers/container-based-infrastructure/#Routing-your-build-to-container-based-infrastructure
 sudo: false
 
+os:
+  - linux
+  - osx
+
 language: python
 
 python:
