@@ -39,7 +39,7 @@ def test_call_ps():
 
 def test_ps_line_to_process():
     process = px_process.ps_line_to_process(
-        "47536 root              0:00.03  0,0 /usr/sbin/cupsd -l"
+        "47536 root              0:00.03  0.0 /usr/sbin/cupsd -l"
     )
 
     assert process.pid == 47536
