@@ -1,5 +1,6 @@
 import subprocess
 
+import os
 import re
 
 
@@ -33,8 +34,12 @@ def call_ps():
     """
     Call ps and return the result in an array of one output line per process
     """
+    env = os.environ.copy()
+    if "LANG" in env:
+        del env["LANG"]
     ps = subprocess.Popen(["ps", "-ax", "-o", "pid,user,time,%mem,command"],
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          env=env)
     return ps.communicate()[0].splitlines()[1:]
 
 
