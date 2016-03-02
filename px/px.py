@@ -41,8 +41,12 @@ def print_procs(procs):
         print(line[0:terminal_window_width])
 
 
-procs = px_process.get_all()
+def main():
+    procs = px_process.get_all()
 
-# Print the most interesting processes last; there are lots of processes and
-# the end of the list is where your eyes will be when you get the prompt back.
-print_procs(sorted(procs, key=lambda proc: proc.score))
+    # Print the most interesting processes last; there are lots of processes and
+    # the end of the list is where your eyes will be when you get the prompt back.
+    print_procs(sorted(procs, key=lambda proc: proc.score))
+
+if __name__ == "__main__":
+    main()
