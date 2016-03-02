@@ -1,6 +1,7 @@
 import getpass
 
 import os
+import pytest
 import px_process
 
 
@@ -103,3 +104,9 @@ def test_get_all_defaultlocale():
 def test_parse_time():
     assert px_process.parse_time("0:00.03") == 0.03
     assert px_process.parse_time("1:02.03") == 62.03
+    assert px_process.parse_time("03:35:32") == 3 * 60 * 60 + 35 * 60 + 32
+    assert px_process.parse_time("9-03:35:32") == 9 * 86400 + 3 * 60 * 60 + 35 * 60 + 32
+
+    with pytest.raises(ValueError) as e:
+        px_process.parse_time("Constantinople")
+    assert "Constantinople" in str(e.value)

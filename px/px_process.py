@@ -8,7 +8,13 @@ import re
 PS_LINE = re.compile(" *([0-9]+) +([^ ]+) +([0-9:.]+) +([0-9.]+) +(.*)")
 
 # Match + group: "1:02.03"
-CPUTIME = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
+CPUTIME_OSX = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
+
+# Match + group: "01:23:45"
+CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
+
+# Match + group: "123-01:23:45"
+CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
 class PxProcess(object):
@@ -48,11 +54,29 @@ def call_ps():
 
 def parse_time(timestring):
     """Convert a CPU time string returned by ps to a number of seconds"""
-    match = CPUTIME.match(timestring)
-    minutes = int(match.group(1))
-    seconds = float(match.group(2))
 
-    return 60 * minutes + seconds
+    match = CPUTIME_OSX.match(timestring)
+    if match:
+        minutes = int(match.group(1))
+        seconds = float(match.group(2))
+        return 60 * minutes + seconds
+
+    match = CPUTIME_LINUX.match(timestring)
+    if match:
+        hours = int(match.group(1))
+        minutes = int(match.group(2))
+        seconds = int(match.group(3))
+        return 3600 * hours + 60 * minutes + seconds
+
+    match = CPUTIME_LINUX_DAYS.match(timestring)
+    if match:
+        days = int(match.group(1))
+        hours = int(match.group(2))
+        minutes = int(match.group(3))
+        seconds = int(match.group(4))
+        return 86400 * days + 3600 * hours + 60 * minutes + seconds
+
+    raise ValueError("Unparsable timestamp: <" + timestring + ">")
 
 
 def ps_line_to_process(ps_line):
