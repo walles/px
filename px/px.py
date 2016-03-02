@@ -21,7 +21,13 @@ def get_terminal_window_width():
         return None
 
     rows, columns = result
-    return int(columns)
+    columns = int(columns)
+    if columns < 1:
+        # This seems to happen during OS X CI runs:
+        # https://travis-ci.org/walles/px/jobs/113134994
+        return None
+
+    return columns
 
 
 def print_procs(procs):
@@ -42,7 +48,7 @@ def print_procs(procs):
         '} {:>' + str(cpu_width) +
         '} {:>' + str(mem_width) + '} {}')
 
-    # FIXME: Print process list using the computed column widths
+    # Print process list using the computed column widths
     terminal_window_width = get_terminal_window_width()
     for proc in procs:
         line = format.format(

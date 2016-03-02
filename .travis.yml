@@ -2,9 +2,8 @@
 # https://docs.travis-ci.com/user/workers/container-based-infrastructure/#Routing-your-build-to-container-based-infrastructure
 sudo: false
 
-language: python
-
-python:
-  - "2.7"
+os:
+  - linux
+  - osx
 
 script: ./ci.sh
