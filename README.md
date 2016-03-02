@@ -41,11 +41,9 @@ write something nice!
 * If we get one command line argument, only show processes matching that string
 as either a user or the name of an executable.
 
-# TODO `top` replacement
-* Print system load before the process listing
-* Maybe add a `--top` / `--top=5s` flag which samples the system for one second
-(or five) and adds a CPU usage column to the output
-* Maybe add a command line option for truncating output at screen width
+# TODO `--version`
+* Doing `px --version` should print a `git describe` like version string. Don't
+know how, [asked here](http://stackoverflow.com/q/35756339/473672).
 
 # TODO `pstree` (and partly `lsof`) replacement
 * If we get something looking like a PID as a command line argument, for that
@@ -54,6 +52,12 @@ PID show:
  * A list of all open files, pipes and sockets
  * For each pipe, print the process at the other end of that pipe
  * For each socket, print where it's going
+
+# TODO `top` replacement
+* Print system load before the process listing
+* Maybe add a `--top` / `--top=5s` flag which samples the system for one second
+(or five) and adds a CPU usage column to the output
+* Maybe add a command line option for truncating output at screen width
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
@@ -68,7 +72,6 @@ than truncating at terminal window width
 fix it. Note that just [suid-ing `px.pex` won't
 work](http://www.faqs.org/faqs/unix-faq/faq/part4/section-7.html), so this point
 may require some research.
-* When piping to some other command, don't truncate lines to terminal width
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
@@ -85,3 +88,4 @@ top.
   * OK: Runs `flake8` on the code
   * OK: Tests the code on OS X
   * OK: Tests the code on Linux
+* When piping to some other command, don't truncate lines to terminal width
