@@ -3,15 +3,33 @@
 # Implementation Language (Python 2.7)
 Language requirements:
 
-1. There must be a useable process listing library for OS X and Linux
+1. There must be a useable way to list processes for OS X and Linux
 2. It must be available on a vanilla Ubuntu 12.4 Precise system
 3. It must be available on a vanilla OS X 10.11 system
 4. It must be possible to install the resulting product together with all its
 dependencies in a single directory / executable file
+5. It must be possible to get as much information as `ps` without being root, on
+both OS X and Linux.
 
-Python-2.7 is available on Ubuntu 12.4 Precise and OS X, it has
-[psutil](https://pythonhosted.org/psutil/), `virtualenv` and a number of options
-for turning programs into single-file binaries.
+Regarding the last requirement of being able to match `ps` without being root,
+the only way to do that on OS X is to actually call `ps` and parse its output.
+A lot of information about processes can only be accessed as root, and `ps` just
+happens to be installed setuid root to be able to get at this info.
+
+Since `ps`' syntax and output are almost the same between Linux and OS X we can
+just call `ps` on Linux as well.
+
+Any language can run `ps` and parse its output really, so 1 and 5 in the above
+list doesn't really limit our choice of languages.
+
+What does limit it though is availability on various systems and packaging. One
+environment that does fulfill everything in the above list is Python 2.7, which
+is available on all of our target platforms.
+
+And using [Pants](https://pantsbuild.github.io/python-readme.html) we can turn
+Python programs into [platform independent
+executables](https://pex.readthedocs.org/en/stable/whatispex.html#whatispex),
+which is excellent for distribution.
 
 ## Installation
 It must be simple to install in a random directory on a vanilla
@@ -28,4 +46,5 @@ those
 
 Candidates are:
 * Python 2.7 + build with
-[Pants](https://pantsbuild.github.io/python-readme.html)
+[Pants](https://pantsbuild.github.io/python-readme.html) and parse `ps` output
+manually.

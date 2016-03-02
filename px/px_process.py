@@ -24,7 +24,7 @@ class PxProcess(object):
 
         self.username = process_builder.username
 
-        self.cpu_time_s = "{:.3f}s".format(process_builder.cpu_time)
+        self.cpu_time_s = seconds_to_str(process_builder.cpu_time)
 
         self.memory_percent_s = (
             "{:.0f}%".format(process_builder.memory_percent))
@@ -101,3 +101,7 @@ def get_all():
 def order_best_last(processes):
     """Returns process list ordered with the most interesting one last"""
     return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
+
+
+def seconds_to_str(seconds):
+    return "{:.3f}s".format(seconds)

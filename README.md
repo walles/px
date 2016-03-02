@@ -39,10 +39,10 @@ write something nice!
 
 # TODO Continuous Integration
 Add a `.travis.yml` config to the project that:
-* Runs `flake8` on the code
+* OK: Runs `flake8` on the code
 * Tests the code on OS X
-* Tests the code on Linux
-* Can or should Travis create binaries for us? Think about security vs
+* OK: Tests the code on Linux
+* NO: Can or should Travis create binaries for us? Think about security vs
 ease-of-deployment.
 
 # TODO `pgrep` replacement
