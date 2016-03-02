@@ -104,4 +104,24 @@ def order_best_last(processes):
 
 
 def seconds_to_str(seconds):
-    return "{:.3f}s".format(seconds)
+    if seconds < 60:
+        seconds_s = str(seconds)
+        decimal_index = seconds_s.rfind('.')
+        if decimal_index > -1:
+            # Chop to at most three decimals
+            seconds_s = seconds_s[0:decimal_index + 4]
+        return seconds_s + "s"
+
+    if seconds < 3600:
+        minutes = int(seconds / 60)
+        remaining_seconds = int(seconds - minutes * 60)
+        return "{}m{:02d}s".format(minutes, remaining_seconds)
+
+    if seconds < 86400:
+        hours = int(seconds / 3600)
+        minutes = int((seconds - 3600 * hours) / 60)
+        return "{}h{:02d}m".format(hours, minutes)
+
+    days = int(seconds / 86400)
+    hours = int((seconds - 86400 * days) / 3600)
+    return "{}d{:02d}h".format(days, hours)

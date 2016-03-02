@@ -16,7 +16,7 @@ def test_create_process():
 
     assert test_me.pid == 7
     assert test_me.username == "usernamex"
-    assert test_me.cpu_time_s == "1.300s"
+    assert test_me.cpu_time_s == "1.3s"
     assert test_me.memory_percent_s == "43%"
     assert test_me.cmdline == "hej kontinent"
 
@@ -45,7 +45,7 @@ def test_ps_line_to_process_1():
 
     assert process.pid == 47536
     assert process.username == "root"
-    assert process.cpu_time_s == "0.030s"
+    assert process.cpu_time_s == "0.03s"
     assert process.memory_percent_s == "0%"
     assert process.cmdline == "/usr/sbin/cupsd -l"
 
@@ -57,7 +57,7 @@ def test_ps_line_to_process_2():
 
     assert process.pid == 1
     assert process.username == "root"
-    assert process.cpu_time_s == "134.150s"
+    assert process.cpu_time_s == "2m14s"
     assert process.memory_percent_s == "0%"
     assert process.cmdline == "/sbin/launchd"
 
@@ -128,3 +128,23 @@ def test_order_best_last():
     p1 = px_process.ps_line_to_process("1 root 0:10.00 10.0 bash")
     assert px_process.order_best_last([p0, p1]) == [p0, p1]
     assert px_process.order_best_last([p1, p0]) == [p0, p1]
+
+
+def test_seconds_to_str():
+    assert px_process.seconds_to_str(0.54321) == "0.543s"
+    assert px_process.seconds_to_str(0.5) == "0.5s"
+    assert px_process.seconds_to_str(1.0) == "1.0s"
+    assert px_process.seconds_to_str(1) == "1s"
+
+    assert px_process.seconds_to_str(60.54321) == "1m00s"
+
+    assert px_process.seconds_to_str(3598.54321) == "59m58s"
+    assert px_process.seconds_to_str(3659.54321) == "1h00m"
+    assert px_process.seconds_to_str(3660.54321) == "1h01m"
+    assert px_process.seconds_to_str(4260.54321) == "1h11m"
+
+    t1h = 3600
+    t1d = t1h * 24
+    assert px_process.seconds_to_str(t1d + 3598) == "1d00h"
+    assert px_process.seconds_to_str(t1d + 3659) == "1d01h"
+    assert px_process.seconds_to_str(t1d + t1h * 11) == "1d11h"
