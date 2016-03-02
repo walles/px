@@ -37,14 +37,6 @@ text you write for this tag will show up as the release description on Github,
 write something nice!
 3. `git push --tags`
 
-# TODO Continuous Integration
-Add a `.travis.yml` config to the project that:
-* OK: Runs `flake8` on the code
-* Tests the code on OS X
-* OK: Tests the code on Linux
-* NO: Can or should Travis create binaries for us? Think about security vs
-ease-of-deployment.
-
 # TODO `pgrep` replacement
 * If we get one command line argument, only show processes matching that string
 as either a user or the name of an executable.
@@ -89,3 +81,7 @@ top.
 * Each column should be wide enough to fit its widest value
 * Add a section about installation instructions to this document.
 * Add making-a-release instructions to this document
+* Add a `.travis.yml` config to the project that:
+  * OK: Runs `flake8` on the code
+  * OK: Tests the code on OS X
+  * OK: Tests the code on Linux
