@@ -1,8 +1,22 @@
 #!/usr/bin/python
 
+"""px - A Cross Functional Process Explorer
+
+Usage:
+  px
+  px (-h | --help)
+
+In the base case, px list all processes much like ps, but with the most
+interesting processes last. A process is considered interesting if it has high
+memory usage or has used lots of CPU.
+
+-h --help: Print this help
+"""
+
 import sys
 
 import os
+import docopt
 import px_process
 
 
@@ -66,4 +80,5 @@ def main():
 
 
 if __name__ == "__main__":
+    arguments = docopt.docopt(__doc__)
     main()

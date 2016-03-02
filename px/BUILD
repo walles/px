@@ -8,14 +8,15 @@ python_library(
 python_binary(
   name='px',
   dependencies=[
-    'px:pxlib'
+    'px:pxlib',
+    'px:docopt'
   ],
   entry_point='px',
 )
 
 python_tests(
   name = 'unittests',
-  sources = globs('*.py'),
+  sources = globs('*_test.py'),
   dependencies=[
     'px:pxlib'
   ],
