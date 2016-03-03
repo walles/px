@@ -5,6 +5,7 @@
 Usage:
   px
   px <filter>
+  px <PID>
   px (-h | --help)
 
 In the base case, px list all processes much like ps, but with the most
@@ -14,6 +15,9 @@ memory usage or has used lots of CPU.
 If the optional filter parameter is specified, processes will be shown if:
 * The filter matches the user name of the process
 * The filter matches a substring of the command line
+
+If the optional PID parameter is specified, you'll get detailed information
+about that particular PID.
 
 -h --help: Print this help
 """
