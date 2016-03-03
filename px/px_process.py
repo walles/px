@@ -56,6 +56,11 @@ class PxProcess(object):
 
         return False
 
+    def get_command_line_array(self):
+        # FIXME: Can we get this from ps? Reverse engineering it is bound to be
+        # error prone
+        return self.cmdline.split(" ")
+
 
 class PxProcessBuilder(object):
     pass

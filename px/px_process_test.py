@@ -163,3 +163,11 @@ def test_seconds_to_str():
     assert px_process.seconds_to_str(t1d + 3598) == "1d00h"
     assert px_process.seconds_to_str(t1d + 3659) == "1d01h"
     assert px_process.seconds_to_str(t1d + t1h * 11) == "1d11h"
+
+
+def test_get_command_line_array():
+    p = px_process.ps_line_to_process("105 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
+    assert p.get_command_line_array() == ["/usr/libexec/AirPlayXPCHelper"]
+
+    p = px_process.ps_line_to_process("506 johan 0:04.27 0.1 /usr/sbin/universalaccessd launchd -s")
+    assert p.get_command_line_array() == ["/usr/sbin/universalaccessd", "launchd", "-s"]
