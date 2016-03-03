@@ -4,11 +4,16 @@
 
 Usage:
   px
+  px <filter>
   px (-h | --help)
 
 In the base case, px list all processes much like ps, but with the most
 interesting processes last. A process is considered interesting if it has high
 memory usage or has used lots of CPU.
+
+If the optional filter parameter is specified, processes will be shown if:
+* The filter matches the user name of the process
+* The filter matches a substring of the command line
 
 -h --help: Print this help
 """
@@ -71,8 +76,9 @@ def print_procs(procs):
         print(line[0:terminal_window_width])
 
 
-def main():
+def main(args):
     procs = px_process.get_all()
+    procs = filter(lambda p: px_process.match(p, args['<filter>']), procs)
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
@@ -80,5 +86,4 @@ def main():
 
 
 if __name__ == "__main__":
-    arguments = docopt.docopt(__doc__)
-    main()
+    main(docopt.docopt(__doc__))

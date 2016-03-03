@@ -103,6 +103,28 @@ def order_best_last(processes):
     return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
 
 
+def match(process, string):
+    """
+    Returns True if this process matches the string.
+
+    See px_process_test.test_match() for the exact definition of how the
+    matching is done.
+    """
+    if string is None:
+        return True
+
+    if process.username == string:
+        return True
+
+    if string in process.cmdline:
+        return True
+
+    if string in process.cmdline.lower():
+        return True
+
+    return False
+
+
 def seconds_to_str(seconds):
     if seconds < 60:
         seconds_s = str(seconds)

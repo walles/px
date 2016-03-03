@@ -2,10 +2,10 @@
 
 # Vision
 One utility, supporting at least OS X and Linux, replacing
-* `ps`, but with sensible defaults
-* `pgrep` (running `px root` should list only root's processes, running
-`px java` should list only java processes)
-* `top` (by running `watch px`)
+* :white_check_mark: `ps`, but with sensible defaults
+* :white_check_mark: `pgrep` (running `px root` lists only root's processes,
+running `px java` lists only java processes)
+* `top` (by running `watch px --top`)
 * `pstree` (running `px 1234` should show PID 1234 in a tree, plus a lot of
 other information about that process)
 * Possibly `lsof`
@@ -20,7 +20,10 @@ sudo install ./dist/px.pex /usr/local/bin/px
 ```
 
 # Usage
-Just type `px`. That's all there's to it!
+Just type `px`, that's a good start!
+
+Otherwise, `px --help` will show you what else `px` can do except for just
+listing all processes.
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
@@ -36,10 +39,6 @@ Just type `px`. That's all there's to it!
 text you write for this tag will show up as the release description on Github,
 write something nice!
 3. `git push --tags`
-
-# TODO `pgrep` replacement
-* If we get one command line argument, only show processes matching that string
-as either a user or the name of an executable.
 
 # TODO `--version`
 * Doing `px --version` should print a `git describe` like version string. Don't
@@ -89,3 +88,5 @@ top.
   * OK: Tests the code on OS X
   * OK: Tests the code on Linux
 * When piping to some other command, don't truncate lines to terminal width
+* If we get one command line argument, only show processes matching that string
+as either a user or the name of an executable.
