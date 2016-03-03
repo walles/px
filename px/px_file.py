@@ -46,9 +46,15 @@ def lsof_to_files(lsof):
         if type == 'p':
             pid = int(value)
         elif type == 'f':
+            if file:
+                if file.type is not None and file.type != "REG":
+                    # Decorate non-regular files with their type
+                    file.name = "[" + file.type + "] " + file.name
+
             file = PxFile()
             file.fd = value
             file.pid = pid
+            file.type = None
             files.append(file)
         elif type == 'a':
             file.access = {

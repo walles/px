@@ -53,6 +53,7 @@ def print_process_tree(process):
 
 
 def print_fds(process):
+    # FIXME: Handle lsof not being available on the system
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 

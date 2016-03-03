@@ -18,7 +18,7 @@ def test_lsof_to_files():
     assert files[0].pid == 123
     assert files[0].access is None
     assert files[0].type == "DIR"
-    assert files[0].name == "/"
+    assert files[0].name == "[DIR] /"
 
     assert files[1].pid == 123
     assert files[1].access == "r"
@@ -34,3 +34,11 @@ def test_lsof_to_files():
     assert files[3].access == "rw"
     assert files[3].type == "REG"
     assert files[3].name == "/someotherfile"
+
+
+def test_get_all():
+    files = px_file.get_all()
+
+    # As non-root I get 6000 on my system, 100 should be fine anywhere. And if
+    # not, we'll just have to document our finding and lower this value
+    assert len(files) > 100
