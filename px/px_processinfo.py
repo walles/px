@@ -57,7 +57,7 @@ def print_fds(process):
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
     print("Open files:")
-    for file in sorted(files_for_process, operator.attrgetter('name')):
+    for file in sorted(files_for_process, key=operator.attrgetter("name")):
         # FIXME: Print which other processes pipes and domain sockets end up in,
         # and if possible who's reading or writing them.
 

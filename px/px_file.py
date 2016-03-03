@@ -4,8 +4,7 @@ import os
 
 
 class PxFile(object):
-    def __init__():
-        pass
+    pass
 
 
 def call_lsof():
@@ -27,7 +26,44 @@ def call_lsof():
 
 
 def lsof_to_files(lsof):
-    return None
+    pid = None
+    file = None
+    files = []
+    for shard in lsof.split('\0'):
+        if shard[0] == "\n":
+            # Some shards start with newlines. Looks pretty when viewing the
+            # lsof output in less, but makes the parsing code have to deal with
+            # it.
+            shard = shard[1:]
+
+        if len(shard) == 0:
+            # The output ends with a single newline, which we just stripped away
+            break
+
+        type = shard[0]
+        value = shard[1:]
+
+        if type == 'p':
+            pid = int(value)
+        elif type == 'f':
+            file = PxFile()
+            file.fd = value
+            file.pid = pid
+            files.append(file)
+        elif type == 'a':
+            file.access = {
+                ' ': None,
+                'r': "r",
+                'w': "w",
+                'u': "rw"}[value]
+        elif type == 't':
+            file.type = value
+        elif type == 'n':
+            file.name = value
+        else:
+            raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))
+
+    return files
 
 
 def get_all():

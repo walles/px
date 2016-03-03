@@ -7,11 +7,14 @@ def test_lsof_to_files():
     lsof += '\0'.join(["p123", "\n"])
     lsof += '\0'.join(["fcwd", "a ", "tDIR", "n/", "\n"])
     lsof += '\0'.join(["f5", "ar", "tREG", "ncontains\nnewline", "\n"])
-    lsof += '\0'.join(["f6", "aw", "tREG", "/somefile", "\n"])
+    lsof += '\0'.join(["f6", "aw", "tREG", "n/somefile", "\n"])
     lsof += '\0'.join(["p456", "\n"])
-    lsof += '\0'.join(["f7", "au", "tREG", "/someotherfile", "\n"])
+    lsof += '\0'.join(["f7", "au", "tREG", "n/someotherfile", "\n"])
 
     files = px_file.lsof_to_files(lsof)
+
+    assert len(files) == 4
+
     assert files[0].pid == 123
     assert files[0].access is None
     assert files[0].type == "DIR"
