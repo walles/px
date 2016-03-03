@@ -52,17 +52,32 @@ def print_process_tree(process):
         print_process_subtree(child, indentation)
 
 
-def print_fds(process):
+def print_fds(process, pid2process):
     # FIXME: Handle lsof not being available on the system
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
-    print("Open files:")
+    print("Communication with other processes:")
     for file in sorted(files_for_process, key=operator.attrgetter("name")):
-        # FIXME: Print which other processes pipes and domain sockets end up in,
-        # and if possible who's reading or writing them.
-
+        if file.type not in ['IPv4', 'IPv6', 'PIPE', 'unix']:
+            # Only print files relating us to other local or remote processes
+            continue
         print("  " + file.name)
+
+        # FIXME: Print which other processes have the same files open, and if
+        # possible whether they are reading or writing them.
+        for other_accessor in filter(lambda f: f.name == file.name, files):
+            if other_accessor.pid == process.pid:
+                # This is me, never mind
+                continue
+
+            other_process = pid2process.get(other_accessor.pid)
+            description = None
+            if other_process is not None:
+                description = str(other_process)
+            else:
+                description = "PID " + str(other_accessor.pid)
+            print("    " + description)
 
     # FIXME: If we were unable to find all information we wanted, hint the user
     # to sudo us next time
@@ -71,6 +86,14 @@ def print_fds(process):
 
 def print_process_info(pid):
     processes = px_process.get_all()
+
+    pid2process = {}
+    for process in processes:
+        # Guard against duplicate PIDs
+        assert process.pid not in pid2process
+
+        pid2process[process.pid] = process
+
     process = find_process_by_pid(pid, processes)
     if not process:
         sys.stderr.write("No such PID: {}\n".format(pid))
@@ -82,6 +105,6 @@ def print_process_info(pid):
     print("")
     print_process_tree(process)
 
-    # FIXME: List all files PID has open
+    # List all files PID has open
     print("")
-    print_fds(process)
+    print_fds(process, pid2process)
