@@ -56,6 +56,23 @@ class PxProcess(object):
 
         return False
 
+    def get_command_line_array(self):
+        # FIXME: Can we get an actual array from ps? Reverse engineering the
+        # array like we do here is bound to be error prone.
+        base_split = self.cmdline.split(" ")
+
+        # Try to reverse engineer executables with spaces in their names
+        merged_split = list(base_split)
+        while not os.path.isfile(merged_split[0]):
+            if len(merged_split) == 1:
+                # Nothing more to merge, give up
+                return base_split
+
+            # Merge the two first elements: http://stackoverflow.com/a/1142879/473672
+            merged_split[0:2] = [' '.join(merged_split[0:2])]
+
+        return merged_split
+
 
 class PxProcessBuilder(object):
     pass

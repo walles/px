@@ -58,6 +58,10 @@ PID show:
 (or five) and adds a CPU usage column to the output
 * Maybe add a command line option for truncating output at screen width
 
+# TODO `lsof` replacement
+* Giving a path as parameter to `px` should list all processes that have that
+file open.
+
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
 usage and present that in one or more columns.
