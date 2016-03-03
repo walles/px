@@ -8,6 +8,7 @@ import px_process
 def test_create_process():
     process_builder = px_process.PxProcessBuilder()
     process_builder.pid = 7
+    process_builder.ppid = 1
     process_builder.username = "usernamex"
     process_builder.cpu_time = 1.3
     process_builder.memory_percent = 42.7
@@ -15,6 +16,7 @@ def test_create_process():
     test_me = px_process.PxProcess(process_builder)
 
     assert test_me.pid == 7
+    assert test_me.ppid == 1
     assert test_me.username == "usernamex"
     assert test_me.cpu_time_s == "1.3s"
     assert test_me.memory_percent_s == "43%"
@@ -40,10 +42,11 @@ def test_call_ps():
 
 def test_ps_line_to_process_1():
     process = px_process.ps_line_to_process(
-        "47536 root              0:00.03  0.0 /usr/sbin/cupsd -l"
+        "47536 1234 root              0:00.03  0.0 /usr/sbin/cupsd -l"
     )
 
     assert process.pid == 47536
+    assert process.ppid == 1234
     assert process.username == "root"
     assert process.cpu_time_s == "0.03s"
     assert process.memory_percent_s == "0%"
@@ -52,10 +55,11 @@ def test_ps_line_to_process_1():
 
 def test_ps_line_to_process_2():
     process = px_process.ps_line_to_process(
-        "    1 root              2:14.15  0.1 /sbin/launchd"
+        "    1 234 root              2:14.15  0.1 /sbin/launchd"
     )
 
     assert process.pid == 1
+    assert process.ppid == 234
     assert process.username == "root"
     assert process.cpu_time_s == "2m14s"
     assert process.memory_percent_s == "0%"
@@ -114,9 +118,9 @@ def test_parse_time():
 
 def test_order_best_last():
     # Verify ordering by score
-    p0 = px_process.ps_line_to_process("1 root 0:10.00 10.0 /usr/sbin/cupsd -l")
-    p1 = px_process.ps_line_to_process("1 root 0:11.00  1.0 /usr/sbin/cupsd -l")
-    p2 = px_process.ps_line_to_process("1 root 0:01.00 11.0 /usr/sbin/cupsd -l")
+    p0 = px_process.ps_line_to_process("1 2 root 0:10.00 10.0 /usr/sbin/cupsd -l")
+    p1 = px_process.ps_line_to_process("1 2 root 0:11.00  1.0 /usr/sbin/cupsd -l")
+    p2 = px_process.ps_line_to_process("1 2 root 0:01.00 11.0 /usr/sbin/cupsd -l")
     ordered = px_process.order_best_last([p0, p1, p2])
 
     # The first process should have the highest CPU*Memory score, and should
@@ -124,14 +128,14 @@ def test_order_best_last():
     assert ordered[2] == p0
 
     # Verify ordering same-scored processes by command line
-    p0 = px_process.ps_line_to_process("1 root 0:10.00 10.0 awk")
-    p1 = px_process.ps_line_to_process("1 root 0:10.00 10.0 bash")
+    p0 = px_process.ps_line_to_process("1 2 root 0:10.00 10.0 awk")
+    p1 = px_process.ps_line_to_process("1 2 root 0:10.00 10.0 bash")
     assert px_process.order_best_last([p0, p1]) == [p0, p1]
     assert px_process.order_best_last([p1, p0]) == [p0, p1]
 
 
 def test_match():
-    p = px_process.ps_line_to_process("105 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
+    p = px_process.ps_line_to_process("105 1 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
 
     assert p.match(None)
 
@@ -166,10 +170,11 @@ def test_seconds_to_str():
 
 
 def test_get_command_line_array():
-    p = px_process.ps_line_to_process("105 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
+    p = px_process.ps_line_to_process("105 1 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
     assert p.get_command_line_array() == ["/usr/libexec/AirPlayXPCHelper"]
 
-    p = px_process.ps_line_to_process("506 johan 0:04.27 0.1 /usr/sbin/universalaccessd launchd -s")
+    p = px_process.ps_line_to_process(
+        "506 1 johan 0:04.27 0.1 /usr/sbin/universalaccessd launchd -s")
     assert p.get_command_line_array() == ["/usr/sbin/universalaccessd", "launchd", "-s"]
 
 
@@ -180,9 +185,9 @@ def test_get_command_line_array_space_in_binary(tmpdir):
     spaced_name = str(spaced_path)
 
     # Verify splitting of the spaced file name
-    p = px_process.ps_line_to_process("105 root 0:01.00 0.1 " + spaced_name)
+    p = px_process.ps_line_to_process("105 1 root 0:01.00 0.1 " + spaced_name)
     assert p.get_command_line_array() == [spaced_name]
 
     # Verify splitting with more parameters on the line
-    p = px_process.ps_line_to_process("105 root 0:01.00 0.1 " + spaced_name + " parameter")
+    p = px_process.ps_line_to_process("105 1 root 0:01.00 0.1 " + spaced_name + " parameter")
     assert p.get_command_line_array() == [spaced_name, "parameter"]
