@@ -35,6 +35,27 @@ class PxProcess(object):
             (process_builder.cpu_time + 1) *
             (process_builder.memory_percent + 1))
 
+    def match(self, string):
+        """
+        Returns True if this process matches the string.
+
+        See px_process_test.test_match() for the exact definition of how the
+        matching is done.
+        """
+        if string is None:
+            return True
+
+        if self.username == string:
+            return True
+
+        if string in self.cmdline:
+            return True
+
+        if string in self.cmdline.lower():
+            return True
+
+        return False
+
 
 class PxProcessBuilder(object):
     pass
@@ -101,28 +122,6 @@ def get_all():
 def order_best_last(processes):
     """Returns process list ordered with the most interesting one last"""
     return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
-
-
-def match(process, string):
-    """
-    Returns True if this process matches the string.
-
-    See px_process_test.test_match() for the exact definition of how the
-    matching is done.
-    """
-    if string is None:
-        return True
-
-    if process.username == string:
-        return True
-
-    if string in process.cmdline:
-        return True
-
-    if string in process.cmdline.lower():
-        return True
-
-    return False
 
 
 def seconds_to_str(seconds):

@@ -133,16 +133,16 @@ def test_order_best_last():
 def test_match():
     p = px_process.ps_line_to_process("105 root 0:01.00 0.1 /usr/libexec/AirPlayXPCHelper")
 
-    assert px_process.match(p, None)
+    assert p.match(None)
 
-    assert px_process.match(p, "root")
-    assert not px_process.match(p, "roo")
+    assert p.match("root")
+    assert not p.match("roo")
 
-    assert px_process.match(p, "Air")
-    assert px_process.match(p, "Play")
+    assert p.match("Air")
+    assert p.match("Play")
 
-    assert px_process.match(p, "air")
-    assert px_process.match(p, "play")
+    assert p.match("air")
+    assert p.match("play")
 
 
 def test_seconds_to_str():

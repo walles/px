@@ -78,7 +78,7 @@ def print_procs(procs):
 
 def main(args):
     procs = px_process.get_all()
-    procs = filter(lambda p: px_process.match(p, args['<filter>']), procs)
+    procs = filter(lambda p: p.match(args['<filter>']), procs)
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
