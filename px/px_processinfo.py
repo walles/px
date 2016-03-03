@@ -3,7 +3,7 @@ import sys
 import px_process
 
 
-def find_pid(pid, processes):
+def find_process_by_pid(pid, processes):
     for process in processes:
         if process.pid == pid:
             return process
@@ -22,7 +22,7 @@ def print_command_line(process):
 
 def print_process_info(pid):
     processes = px_process.get_all()
-    process = find_pid(pid, processes)
+    process = find_process_by_pid(pid, processes)
     if not process:
         sys.stderr.write("No such PID: {}\n".format(pid))
         exit(1)
