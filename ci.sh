@@ -9,5 +9,10 @@ set -x
   xargs ./pants filter --filter-type=python_tests | \
   xargs ./pants test
 
+./pants binary px
+
 echo
-./pants run px
+./dist/px.pex
+
+echo
+./dist/px.pex $$

@@ -5,9 +5,9 @@ One utility, supporting at least OS X and Linux, replacing
 * :white_check_mark: `ps`, but with sensible defaults
 * :white_check_mark: `pgrep` (running `px root` lists only root's processes,
 running `px java` lists only java processes)
-* `top` (by running `watch px --top`)
-* `pstree` (running `px 1234` should show PID 1234 in a tree, plus a lot of
+* :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
+* `top` (by running `watch px --top`)
 * Possibly `lsof`
 * Possibly `iotop`
 
@@ -44,10 +44,9 @@ write something nice!
 * Doing `px --version` should print a `git describe` like version string. Don't
 know how, [asked here](http://stackoverflow.com/q/35756339/473672).
 
-# TODO `pstree` (and partly `lsof`) replacement
+# TODO (partly) `lsof` replacement
 * If we get something looking like a PID as a command line argument, for that
 PID show:
- * The process in a tree with all parents up to the top and all children down
  * A list of all open files, pipes and sockets
  * For each pipe, print the process at the other end of that pipe
  * For each socket, print where it's going
@@ -94,3 +93,6 @@ top.
 * When piping to some other command, don't truncate lines to terminal width
 * If we get one command line argument, only show processes matching that string
 as either a user or the name of an executable.
+* If we get something looking like a PID as a command line argument, show that
+PID process in a tree with all parents up to the top and all children down. This
+would replace `pstree`.

@@ -49,7 +49,7 @@ class PxProcess(object):
         # I guess this is really what __str__ should be doing, but the point of
         # implementing this method is to make the py.test output more readable,
         # and py.test calls repr() and not str().
-        return str(self.pid) + ":" + os.path.basename(self.get_command_line_array()[0])
+        return str(self.pid) + ":" + self.get_command()
 
     def match(self, string):
         """
@@ -88,6 +88,10 @@ class PxProcess(object):
             merged_split[0:2] = [' '.join(merged_split[0:2])]
 
         return merged_split
+
+    def get_command(self):
+        """Return just the command without any arguments or path"""
+        return os.path.basename(self.get_command_line_array()[0])
 
 
 class PxProcessBuilder(object):
