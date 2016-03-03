@@ -2,7 +2,7 @@
 
 # Vision
 One utility, supporting at least OS X and Linux, replacing
-* :white_check_mark: `ps`, but with sensible defaults
+* :white_check_mark: `ps`, but with sensible defaults (just do `px`)
 * :white_check_mark: `pgrep` (running `px root` lists only root's processes,
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
@@ -10,6 +10,18 @@ other information about that process)
 * `top` (by running `watch px --top`)
 * Possibly `lsof`
 * Possibly `iotop`
+
+# Demo
+This screenshot shows:
+* The end of the output from just typing `px`. Note how the most CPU and memory
+hungry processes are at the end of the list so you can find them without
+scrolling.
+* The output from the details view of PID 95970:
+  * Note how the command line has been split with one argument per line. This
+  makes long command lines readable.
+  * Also, the process tree shows how 95970 relates to other processes.
+
+![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
 
 # Installation
 ```
