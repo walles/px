@@ -20,21 +20,30 @@ CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9]
 
 class PxProcess(object):
     def __init__(self, process_builder):
+        has_cputime = process_builder.cpu_time is not None
+        has_memory = process_builder.memory_percent is not None
+
         self.pid = process_builder.pid
         self.ppid = process_builder.ppid
 
         self.username = process_builder.username
 
-        self.cpu_time_s = seconds_to_str(process_builder.cpu_time)
+        self.cpu_time_s = "--"
+        if has_cputime:
+            self.cpu_time_s = seconds_to_str(process_builder.cpu_time)
 
-        self.memory_percent_s = (
-            "{:.0f}%".format(process_builder.memory_percent))
+        self.memory_percent_s = "--"
+        if has_memory:
+            self.memory_percent_s = (
+                "{:.0f}%".format(process_builder.memory_percent))
 
         self.cmdline = process_builder.cmdline
 
-        self.score = (
-            (process_builder.cpu_time + 1) *
-            (process_builder.memory_percent + 1))
+        self.score = 0
+        if has_memory and has_cputime:
+            self.score = (
+                (process_builder.cpu_time + 1) *
+                (process_builder.memory_percent + 1))
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -151,7 +160,38 @@ def resolve_links(processes):
     Also, all processes will have a (possibly empty) "children" field containing
     a set of references to child processes.
     """
-    pass
+    pid2process = {}
+    for process in processes:
+        # Guard against duplicate PIDs
+        assert process.pid not in pid2process
+
+        pid2process[process.pid] = process
+
+        process.children = set()
+
+    if 0 not in pid2process:
+        # Fake a process 0, this one isn't returned by ps. More info about PID 0:
+        # https://en.wikipedia.org/wiki/Process_identifier
+        process_builder = PxProcessBuilder()
+        process_builder.pid = 0
+        process_builder.ppid = None
+        process_builder.username = "root"
+        process_builder.cpu_time = None
+        process_builder.memory_percent = None
+        process_builder.cmdline = "kernel PID 0"
+        process = PxProcess(process_builder)
+
+        process.children = set()
+
+        processes.append(process)
+        pid2process[0] = process
+
+    for process in processes:
+        if process.pid == 0:
+            process.parent = None
+        else:
+            process.parent = pid2process[process.ppid]
+            process.parent.children.add(process)
 
 
 def get_all():

@@ -69,9 +69,14 @@ def test_ps_line_to_process_2():
 def _validate_references(processes):
     """Fsck the parent / children relationships between all processes"""
     for process in processes:
-        assert process.parent is not None
+        if process.pid == 0:
+            assert process.parent is None
+        else:
+            assert process.parent is not None
+
         assert type(process.children) is set
-        assert process in process.parent.children
+        if process.parent:
+            assert process in process.parent.children
 
         for child in process.children:
             assert child.parent == process
