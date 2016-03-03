@@ -66,6 +66,17 @@ def test_ps_line_to_process_2():
     assert process.cmdline == "/sbin/launchd"
 
 
+def _validate_references(processes):
+    """Fsck the parent / children relationships between all processes"""
+    for process in processes:
+        assert process.parent is not None
+        assert type(process.children) is set
+        assert process in process.parent.children
+
+        for child in process.children:
+            assert child.parent == process
+
+
 def _test_get_all():
     all = px_process.get_all()
 
@@ -88,6 +99,8 @@ def _test_get_all():
     # Assert that the current PID has the correct user name
     current_process = filter(lambda process: process.pid == os.getpid(), all)[0]
     assert current_process.username == getpass.getuser()
+
+    _validate_references(all)
 
 
 def test_get_all_swedish():
