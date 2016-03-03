@@ -1,6 +1,7 @@
 import sys
 import operator
 
+import px_file
 import px_process
 
 
@@ -51,6 +52,22 @@ def print_process_tree(process):
         print_process_subtree(child, indentation)
 
 
+def print_fds(process):
+    files = px_file.get_all()
+    files_for_process = filter(lambda f: f.pid == process.pid, files)
+
+    print("Open files:")
+    for file in sorted(files_for_process, operator.attrgetter('name')):
+        # FIXME: Print which other processes pipes and domain sockets end up in,
+        # and if possible who's reading or writing them.
+
+        print("  " + file.name)
+
+    # FIXME: If we were unable to find all information we wanted, hint the user
+    # to sudo us next time
+    pass
+
+
 def print_process_info(pid):
     processes = px_process.get_all()
     process = find_process_by_pid(pid, processes)
@@ -65,7 +82,5 @@ def print_process_info(pid):
     print_process_tree(process)
 
     # FIXME: List all files PID has open
-
-    # FIXME: List all sockets PID has open, and where they lead
-
-    # FIXME: List all pipes PID has open, and where they lead
+    print("")
+    print_fds(process)
