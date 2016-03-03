@@ -10,10 +10,11 @@ def test_lsof_to_files():
     lsof += '\0'.join(["f6", "aw", "tREG", "n/somefile", "\n"])
     lsof += '\0'.join(["p456", "\n"])
     lsof += '\0'.join(["f7", "au", "tREG", "n/someotherfile", "\n"])
+    lsof += '\0'.join(["f7", "a ", "n(revoked)", "\n"])
 
     files = px_file.lsof_to_files(lsof)
 
-    assert len(files) == 4
+    assert len(files) == 5
 
     assert files[0].pid == 123
     assert files[0].access is None
@@ -34,6 +35,11 @@ def test_lsof_to_files():
     assert files[3].access == "rw"
     assert files[3].type == "REG"
     assert files[3].name == "/someotherfile"
+
+    assert files[4].pid == 456
+    assert files[4].access is None
+    assert files[4].type == "??"
+    assert files[4].name == "[??] (revoked)"
 
 
 def test_get_all():
