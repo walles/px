@@ -27,6 +27,7 @@ import sys
 import os
 import docopt
 import px_process
+import px_processinfo
 
 
 def get_terminal_window_width():
@@ -81,8 +82,18 @@ def print_procs(procs):
 
 
 def main(args):
+    filterstring = args['<filter>']
+    if filterstring:
+        try:
+            pid = int(filterstring)
+            px_processinfo.print_process_info(pid)
+            return
+        except ValueError:
+            # It's a search filter and not a PID, keep moving
+            pass
+
     procs = px_process.get_all()
-    procs = filter(lambda p: p.match(args['<filter>']), procs)
+    procs = filter(lambda p: p.match(filterstring), procs)
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
