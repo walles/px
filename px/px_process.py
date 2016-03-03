@@ -57,8 +57,8 @@ class PxProcess(object):
         return False
 
     def get_command_line_array(self):
-        # FIXME: Can we get this from ps? Reverse engineering it is bound to be
-        # error prone
+        # FIXME: Can we get an actual array from ps? Reverse engineering the
+        # array like we do here is bound to be error prone.
         base_split = self.cmdline.split(" ")
 
         # Try to reverse engineer executables with spaces in their names
