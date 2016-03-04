@@ -4,7 +4,11 @@ import os
 
 
 class PxFile(object):
-    pass
+    def __repr__(self):
+        # I guess this is really what __str__ should be doing, but the point of
+        # implementing this method is to make the py.test output more readable,
+        # and py.test calls repr() and not str().
+        return str(self.pid) + ":" + self.name
 
 
 def call_lsof():
@@ -19,7 +23,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-F', 'fnapt0'],
+    lsof = subprocess.Popen(["lsof", '-F', 'fnaptd0'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
     return lsof.communicate()[0]
@@ -50,6 +54,7 @@ def lsof_to_files(lsof):
             file.fd = value
             file.pid = pid
             file.type = "??"
+            file.device = None
             files.append(file)
         elif type == 'a':
             file.access = {
@@ -59,6 +64,8 @@ def lsof_to_files(lsof):
                 'u': "rw"}[value]
         elif type == 't':
             file.type = value
+        elif type == 'd':
+            file.device = value
         elif type == 'n':
             file.name = value
             if file.type != "REG":
