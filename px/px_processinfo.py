@@ -1,4 +1,5 @@
 import sys
+import errno
 import operator
 
 import px_file
@@ -120,7 +121,6 @@ def get_ipc_map(process, files, pid2process):
 
 
 def print_fds(process, pid2process):
-    # FIXME: Handle lsof not being available on the system
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
@@ -172,4 +172,9 @@ def print_process_info(pid):
 
     # List all files PID has open
     print("")
-    print_fds(process, pid2process)
+    try:
+        print_fds(process, pid2process)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
+        print("Can't list IPC / network sockets, make sure \"lsof\" is installed and in your $PATH")
