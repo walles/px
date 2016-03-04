@@ -10,6 +10,20 @@ class PxFile(object):
         # and py.test calls repr() and not str().
         return str(self.pid) + ":" + self.name
 
+    def device_number(self):
+        if self.device is None:
+            return None
+
+        number = int(self.device, 16)
+        if number == 0:
+            # 0x000lotsofmore000 is what we get on lsof 4.86 and Linux 4.2.0
+            # when lsof doesn't have root privileges
+
+            # FIXME: We should ask the user to run as root if we get this
+            return None
+
+        return number
+
 
 def call_lsof():
     """

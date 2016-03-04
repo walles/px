@@ -62,27 +62,30 @@ def get_other_end_pids(file, files):
         # scanning for it.
         name = name[2:]
 
+    pids = set()
     for candidate in files:
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
         if candidate.device == name:
-            return [candidate.pid]
+            return set([candidate.pid])
 
         if candidate.name != file.name:
             continue
 
         if file.access == 'w' and candidate.access == 'r':
             # On Linux, this is how we identify named FIFOs
-            # FIXME: Can we have more than one endpoint?
-            return [candidate.pid]
+            pids.add(candidate.pid)
 
         if file.access == 'r' and candidate.access == 'w':
             # On Linux, this is how we identify named FIFOs
-            # FIXME: Can we have more than one endpoint?
-            return [candidate.pid]
+            pids.add(candidate.pid)
 
-    return []
+        if file.device_number() is not None:
+            if file.device_number() == candidate.device_number():
+                pids.add(candidate.pid)
+
+    return pids
 
 
 def create_fake_process(pid=None, name=None):
@@ -127,7 +130,7 @@ def get_ipc_map(process, files, pid2process):
             # Only deal with IPC related files
             continue
 
-        if file.plain_name in ['socket', 'pipe', '(none)']:
+        if file.plain_name in ['pipe', '(none)']:
             # These are placeholders, not names, can't do anything with these
             continue
 
