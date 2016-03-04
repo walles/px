@@ -52,6 +52,24 @@ def print_process_tree(process):
         print_process_subtree(child, indentation)
 
 
+def get_other_end(name, files):
+    """Locate the other end of a pipe / domain socket"""
+    if name.startswith("->"):
+        # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",
+        # but their endpoint names don't. Strip initial "->" from name before
+        # scanning for it.
+        name = name[2:]
+
+    for file in files:
+        # The other end of the socket / pipe is encoded in the DEVICE field of
+        # lsof's output ("view source" in your browser to see the conversation):
+        # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
+        if file.device == name:
+            return file
+
+    return None
+
+
 def print_fds(process, pid2process):
     # FIXME: Handle lsof not being available on the system
     files = px_file.get_all()
@@ -59,25 +77,35 @@ def print_fds(process, pid2process):
 
     print("Communication with other processes:")
     for file in sorted(files_for_process, key=operator.attrgetter("name")):
-        if file.type not in ['IPv4', 'IPv6', 'PIPE', 'unix']:
+        if file.type in ['IPv4', 'IPv6']:
+            # Print remote communication
+            # FIXME: If this socket is open towards a port on the local machine,
+            # can we trace its destination and print that process here?
+            print("  " + file.name)
+            continue
+
+        if file.type not in ['PIPE', 'unix']:
             # Only print files relating us to other local or remote processes
             continue
+
+        other_end = get_other_end(file.plain_name, files)
+        if other_end is None:
+            # Other end not found, never mind
+            # FIXME: Maybe tell the user to sudo us in this case?
+            continue
+
+        if other_end.pid == process.pid:
+            # Talking to ourselves, never mind
+            continue
+
+        other_process = pid2process.get(other_end.pid)
+        other_process_description = None
+        if other_process is not None:
+            other_process_description = str(other_process)
+        else:
+            other_process_description = "PID " + str(other_process.pid)
         print("  " + file.name)
-
-        # FIXME: Print which other processes have the same files open, and if
-        # possible whether they are reading or writing them.
-        for other_accessor in filter(lambda f: f.name == file.name, files):
-            if other_accessor.pid == process.pid:
-                # This is me, never mind
-                continue
-
-            other_process = pid2process.get(other_accessor.pid)
-            description = None
-            if other_process is not None:
-                description = str(other_process)
-            else:
-                description = "PID " + str(other_accessor.pid)
-            print("    " + description)
+        print("    " + other_process_description)
 
     # FIXME: If we were unable to find all information we wanted, hint the user
     # to sudo us next time
