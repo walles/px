@@ -74,6 +74,12 @@ def get_other_end_pid(file, files):
 
         if file.access == 'w' and candidate.access == 'r':
             # On Linux, this is how we identify named FIFOs
+            # FIXME: Can we have more than one endpoint?
+            return candidate.pid
+
+        if file.access == 'r' and candidate.access == 'w':
+            # On Linux, this is how we identify named FIFOs
+            # FIXME: Can we have more than one endpoint?
             return candidate.pid
 
     return None

@@ -20,10 +20,19 @@ def test_get_other_end_pid_basic():
     assert found is None
 
 
-def test_get_other_end_pid_socket():
+def test_get_other_end_pid_socket1():
     File = collections.namedtuple('File', ['name', 'plain_name', 'device', 'pid', 'access'])
     files = [File("[] /fifo/name", "/fifo/name", None, 25, "r")]
 
     my_end = File("[] /fifo/name", "/fifo/name", None, 42, "w")
+    found = px_processinfo.get_other_end_pid(my_end, files)
+    assert found == 25
+
+
+def test_get_other_end_pid_socket2():
+    File = collections.namedtuple('File', ['name', 'plain_name', 'device', 'pid', 'access'])
+    files = [File("[] /fifo/name", "/fifo/name", None, 25, "w")]
+
+    my_end = File("[] /fifo/name", "/fifo/name", None, 42, "r")
     found = px_processinfo.get_other_end_pid(my_end, files)
     assert found == 25
