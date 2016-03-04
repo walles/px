@@ -184,6 +184,9 @@ def print_fds(process, pid2process):
 
 
 def print_process_info(pid):
+    # FIXME: If the user isn't root, hint the user that running as root will
+    # generally give better results, even if it's their own process they want
+    # info about.
     processes = px_process.get_all()
 
     pid2process = {}
