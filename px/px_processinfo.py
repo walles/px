@@ -53,20 +53,28 @@ def print_process_tree(process):
         print_process_subtree(child, indentation)
 
 
-def get_other_end_pid(name, files):
+def get_other_end_pid(file, files):
     """Locate the other end of a pipe / domain socket"""
+    name = file.plain_name
     if name.startswith("->"):
         # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",
         # but their endpoint names don't. Strip initial "->" from name before
         # scanning for it.
         name = name[2:]
 
-    for file in files:
+    for candidate in files:
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
-        if file.device == name:
-            return file.pid
+        if candidate.device == name:
+            return candidate.pid
+
+        if candidate.name != file.name:
+            continue
+
+        if file.access == 'w' and candidate.access == 'r':
+            # On Linux, this is how we identify named FIFOs
+            return candidate.pid
 
     return None
 
@@ -113,7 +121,7 @@ def get_ipc_map(process, files, pid2process):
             # Only deal with IPC related files
             continue
 
-        other_end_pid = get_other_end_pid(file.plain_name, files)
+        other_end_pid = get_other_end_pid(file, files)
         if other_end_pid is None:
             add_ipc_entry(return_me, unknown, file)
             continue
