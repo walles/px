@@ -121,6 +121,10 @@ def get_ipc_map(process, files, pid2process):
             # Only deal with IPC related files
             continue
 
+        if file.plain_name in ['socket', 'pipe', '(none)']:
+            # These are placeholders, not names, can't do anything with these
+            continue
+
         other_end_pid = get_other_end_pid(file, files)
         if other_end_pid is None:
             add_ipc_entry(return_me, unknown, file)
