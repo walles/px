@@ -137,9 +137,10 @@ def print_fds(process, pid2process):
 
     print("")
     print("Inter Process Communication:")
-    # FIXME: List IPC targets in ascending PID order
-    for process, channels in get_ipc_map(process, files, pid2process).items():
+    ipc_map = get_ipc_map(process, files, pid2process)
+    for process in sorted(ipc_map.keys(), key=operator.attrgetter('pid')):
         print("  " + str(process))
+        channels = ipc_map[process]
         for channel in sorted(channels, key=operator.attrgetter("name")):
             print("    " + channel.name)
 
