@@ -53,7 +53,7 @@ def print_process_tree(process):
         print_process_subtree(child, indentation)
 
 
-def get_other_end_pid(file, files):
+def get_other_end_pids(file, files):
     """Locate the other end of a pipe / domain socket"""
     name = file.plain_name
     if name.startswith("->"):
@@ -67,7 +67,7 @@ def get_other_end_pid(file, files):
         # lsof's output ("view source" in your browser to see the conversation):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
         if candidate.device == name:
-            return candidate.pid
+            return [candidate.pid]
 
         if candidate.name != file.name:
             continue
@@ -75,14 +75,14 @@ def get_other_end_pid(file, files):
         if file.access == 'w' and candidate.access == 'r':
             # On Linux, this is how we identify named FIFOs
             # FIXME: Can we have more than one endpoint?
-            return candidate.pid
+            return [candidate.pid]
 
         if file.access == 'r' and candidate.access == 'w':
             # On Linux, this is how we identify named FIFOs
             # FIXME: Can we have more than one endpoint?
-            return candidate.pid
+            return [candidate.pid]
 
-    return None
+    return []
 
 
 def create_fake_process(pid=None, name=None):
@@ -131,20 +131,21 @@ def get_ipc_map(process, files, pid2process):
             # These are placeholders, not names, can't do anything with these
             continue
 
-        other_end_pid = get_other_end_pid(file, files)
-        if other_end_pid is None:
+        other_end_pids = get_other_end_pids(file, files)
+        if other_end_pids == []:
             add_ipc_entry(return_me, unknown, file)
             continue
 
-        if other_end_pid == process.pid:
-            # Talking to ourselves, never mind
-            continue
+        for other_end_pid in other_end_pids:
+            if other_end_pid == process.pid:
+                # Talking to ourselves, never mind
+                continue
 
-        process = pid2process.get(other_end_pid)
-        if not process:
-            process = create_fake_process(pid=other_end_pid)
-            pid2process[other_end_pid] = process
-        add_ipc_entry(return_me, process, file)
+            process = pid2process.get(other_end_pid)
+            if not process:
+                process = create_fake_process(pid=other_end_pid)
+                pid2process[other_end_pid] = process
+            add_ipc_entry(return_me, process, file)
 
     return return_me
 
