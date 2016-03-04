@@ -71,18 +71,25 @@ def get_other_end(name, files):
     return None
 
 
-def add_ipc_entry(ipc_map, pid, file, pid2process):
-    process = pid2process.get(pid)
-    if not process:
-        # Fake a process with a useable name
-        class NamedProcess(object):
-            pass
+def create_fake_process(pid=None, name=None):
+    """Fake a process with a useable name"""
+    if pid is None and name is None:
+        raise ValueError("At least one of pid and name must be set")
 
-        process = NamedProcess()
-        process.name = "PID " + str(pid)
-        process.pid = pid
-        pid2process[pid] = process
+    if name is None:
+        name = "PID " + str(pid)
 
+    class FakeProcess(object):
+        def __repr__(self):
+            return self.name
+
+    process = FakeProcess()
+    process.name = name
+    process.pid = pid
+    return process
+
+
+def add_ipc_entry(ipc_map, process, file):
     if process not in ipc_map:
         ipc_map[process] = set()
 
@@ -99,6 +106,8 @@ def get_ipc_map(process, files, pid2process):
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
     return_me = {}
+    unknown = create_fake_process(
+        name="UNKNOWN destinations: Running with sudo might help find out where these go")
     for file in files_for_process:
         if file.type not in ['PIPE', 'unix']:
             # Only deal with IPC related files
@@ -106,16 +115,18 @@ def get_ipc_map(process, files, pid2process):
 
         other_end = get_other_end(file.plain_name, files)
         if other_end is None:
-            # Other end not found, never mind
-            # FIXME: Maybe tell the user to sudo us in this case? Or add an
-            # "unknown" destination process mentioning sudo?
+            add_ipc_entry(return_me, unknown, file)
             continue
 
         if other_end.pid == process.pid:
             # Talking to ourselves, never mind
             continue
 
-        add_ipc_entry(return_me, other_end.pid, file, pid2process)
+        process = pid2process.get(other_end.pid)
+        if not process:
+            process = create_fake_process(pid=other_end.pid)
+            pid2process[other_end.pid] = process
+        add_ipc_entry(return_me, process, file)
 
     return return_me
 
@@ -126,7 +137,7 @@ def print_fds(process, pid2process):
 
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
-    # here, maybe with a hint to install lsof and run as root.
+    # here, maybe with a hint to run as root if we think that would help.
     for file in sorted(files_for_process, key=operator.attrgetter("name")):
         if file.type in ['IPv4', 'IPv6']:
             # Print remote communication
@@ -143,10 +154,6 @@ def print_fds(process, pid2process):
         channels = ipc_map[process]
         for channel in sorted(channels, key=operator.attrgetter("name")):
             print("    " + channel.name)
-
-    # FIXME: If we were unable to find all information we wanted, hint the user
-    # to sudo us next time
-    pass
 
 
 def print_process_info(pid):
