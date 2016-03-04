@@ -58,7 +58,3 @@ def test_get_all():
     # As non-root I get 6000 on my system, 100 should be fine anywhere. And if
     # not, we'll just have to document our finding and lower this value
     assert len(files) > 100
-
-    # If we don't get any device info we're probably doing something wrong
-    files_with_device = filter(lambda f: f.device is not None, files)
-    assert len(files_with_device) > 0
