@@ -70,12 +70,63 @@ def get_other_end(name, files):
     return None
 
 
+def add_ipc_entry(ipc_map, pid, file, pid2process):
+    process = pid2process.get(pid)
+    if not process:
+        # Fake a process with a useable name
+        class NamedProcess(object):
+            pass
+
+        process = NamedProcess()
+        process.name = "PID " + str(pid)
+        process.pid = pid
+        pid2process[pid] = process
+
+    if process not in ipc_map:
+        ipc_map[process] = set()
+
+    ipc_map[process].add(file)
+
+
+def get_ipc_map(process, files, pid2process):
+    """
+    Construct a map of process->[channels], where "process" is a process we have
+    IPC communication open with, and a channel is a socket or a pipe that we
+    have open to that process.
+    """
+
+    files_for_process = filter(lambda f: f.pid == process.pid, files)
+
+    return_me = {}
+    for file in files_for_process:
+        if file.type not in ['PIPE', 'unix']:
+            # Only deal with IPC related files
+            continue
+
+        other_end = get_other_end(file.plain_name, files)
+        if other_end is None:
+            # Other end not found, never mind
+            # FIXME: Maybe tell the user to sudo us in this case? Or add an
+            # "unknown" destination process mentioning sudo?
+            continue
+
+        if other_end.pid == process.pid:
+            # Talking to ourselves, never mind
+            continue
+
+        add_ipc_entry(return_me, other_end.pid, file, pid2process)
+
+    return return_me
+
+
 def print_fds(process, pid2process):
     # FIXME: Handle lsof not being available on the system
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
-    print("Communication with other processes:")
+    print("Network connections:")
+    # FIXME: Print "nothing found" or something if we don't find anything to put
+    # here, maybe with a hint to install lsof and run as root.
     for file in sorted(files_for_process, key=operator.attrgetter("name")):
         if file.type in ['IPv4', 'IPv6']:
             # Print remote communication
@@ -84,28 +135,13 @@ def print_fds(process, pid2process):
             print("  " + file.name)
             continue
 
-        if file.type not in ['PIPE', 'unix']:
-            # Only print files relating us to other local or remote processes
-            continue
-
-        other_end = get_other_end(file.plain_name, files)
-        if other_end is None:
-            # Other end not found, never mind
-            # FIXME: Maybe tell the user to sudo us in this case?
-            continue
-
-        if other_end.pid == process.pid:
-            # Talking to ourselves, never mind
-            continue
-
-        other_process = pid2process.get(other_end.pid)
-        other_process_description = None
-        if other_process is not None:
-            other_process_description = str(other_process)
-        else:
-            other_process_description = "PID " + str(other_process.pid)
-        print("  " + file.name)
-        print("    " + other_process_description)
+    print("")
+    print("Inter Process Communication:")
+    # FIXME: List IPC targets in ascending PID order
+    for process, channels in get_ipc_map(process, files, pid2process).items():
+        print("  " + str(process))
+        for channel in sorted(channels, key=operator.attrgetter("name")):
+            print("    " + channel.name)
 
     # FIXME: If we were unable to find all information we wanted, hint the user
     # to sudo us next time
