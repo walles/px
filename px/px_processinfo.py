@@ -164,8 +164,10 @@ def print_fds(process, pid2process):
     for process in sorted(ipc_map.keys(), key=operator.attrgetter('pid')):
         print("  " + str(process))
         channels = ipc_map[process]
-        for channel in sorted(channels, key=operator.attrgetter("name")):
-            print("    " + channel.name)
+        channel_names = set()
+        channel_names.update(map(lambda c: c.name, channels))
+        for channel_name in sorted(channel_names):
+            print("    " + channel_name)
 
 
 def print_process_info(pid):
