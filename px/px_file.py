@@ -68,6 +68,7 @@ def lsof_to_files(lsof):
             file.device = value
         elif type == 'n':
             file.name = value
+            file.plain_name = value
             if file.type != "REG":
                 # Decorate non-regular files with their type
                 file.name = "[" + file.type + "] " + file.name
