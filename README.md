@@ -56,13 +56,6 @@ write something nice!
 * Doing `px --version` should print a `git describe` like version string. Don't
 know how, [asked here](http://stackoverflow.com/q/35756339/473672).
 
-# TODO (partly) `lsof` replacement
-* If we get something looking like a PID as a command line argument, for that
-PID show:
- * A list of all open files, pipes and sockets
- * For each pipe, print the process at the other end of that pipe
- * For each socket, print where it's going
-
 # TODO `top` replacement
 * Print system load before the process listing
 * Maybe add a `--top` / `--top=5s` flag which samples the system for one second
@@ -108,3 +101,8 @@ as either a user or the name of an executable.
 * If we get something looking like a PID as a command line argument, show that
 PID process in a tree with all parents up to the top and all children down. This
 would replace `pstree`.
+* If we get something looking like a PID as a command line argument, for that
+PID show:
+ * A list of all open files, pipes and sockets
+ * For each pipe / domain socket, print the process at the other end
+ * For each socket, print where it's going
