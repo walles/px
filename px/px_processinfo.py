@@ -2,6 +2,7 @@ import sys
 import errno
 import operator
 
+import os
 import px_file
 import px_process
 
@@ -181,11 +182,13 @@ def print_fds(process, pid2process):
         for channel_name in sorted(channel_names):
             print("    " + channel_name)
 
+    if os.getuid() != 0:
+        print("")
+        print("NOTE: This information might be incomplete, "
+              "running as root sometimes gets you better results")
+
 
 def print_process_info(pid):
-    # FIXME: If the user isn't root, hint the user that running as root will
-    # generally give better results, even if it's their own process they want
-    # info about.
     processes = px_process.get_all()
 
     pid2process = {}
