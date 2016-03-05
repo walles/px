@@ -32,6 +32,26 @@ def test_get_other_end_pids_basic():
     assert found == set([])
 
 
+def test_get_other_end_pids_osx_pipe1():
+    files = [
+        create_file("[] ->0xAdam", "0xEve", 25),
+        create_file("[] ->0xSnake", "0xEve", 26),
+    ]
+    my_end = create_file("[] ->0xEve", "0xBook", 42)
+    found = px_processinfo.get_other_end_pids(my_end, files)
+    assert found == set([25, 26])
+
+
+def test_get_other_end_pids_osx_pipe2():
+    files = [
+        create_file("[] ->0xAdam", "0xEve", 25),
+        create_file("[] ->0xAdam", "0xTree", 26),
+    ]
+    my_end = create_file("[] ->0xGarden", "0xAdam", 42)
+    found = px_processinfo.get_other_end_pids(my_end, files)
+    assert found == set([25, 26])
+
+
 def test_get_other_end_pids_fifo1():
     files = [create_file("[] /fifo/name", None, 25, "r")]
 

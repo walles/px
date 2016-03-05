@@ -68,7 +68,9 @@ def get_other_end_pids(file, files):
         # lsof's output ("view source" in your browser to see the conversation):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
         if candidate.device == name:
-            return set([candidate.pid])
+            pids.add(candidate.pid)
+        if candidate.plain_name.replace("->", "") == file.device:
+            pids.add(candidate.pid)
 
         if candidate.name != file.name:
             continue
