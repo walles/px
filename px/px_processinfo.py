@@ -122,9 +122,6 @@ def get_ipc_map(process, files, pid2process):
     have open to that process.
     """
 
-    # FIXME: On OS X, if we one of our files has a DEVICE field that is referred
-    # to by an FD in some other process, that should be included in this map.
-
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
     return_me = {}
