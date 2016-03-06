@@ -71,14 +71,11 @@ file that you just built to the release.
 usage and present that in one or more columns.
 
 # TODO Misc
-* There should be a `--long` / `-l` option for showing full command lines rather
-than truncating at terminal window width
-* The init process on OS X has no command line. We should try just listing the
-`exe` in that case.
-* On insufficient privileges, print a warning to stderr about this and how to
-fix it. Note that just [suid-ing `px.pex` won't
-work](http://www.faqs.org/faqs/unix-faq/faq/part4/section-7.html), so this point
-may require some research.
+* Put column headings at the top of each column
+* Add a first column with the name of the program; that's generally more
+interesting than the PID.
+* In the details view, list processes as `Name(PID)` rather than `PID:Name`.
+To humans the name is more important than the PID, so it should be first.
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
