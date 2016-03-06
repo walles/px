@@ -16,3 +16,6 @@ echo
 
 echo
 ./dist/px.pex $$
+
+echo
+./dist/px.pex --version

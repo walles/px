@@ -25,6 +25,7 @@ about that particular PID.
 """
 
 import sys
+import json
 import zipfile
 
 import os
@@ -88,10 +89,8 @@ def get_version():
     """Extract version string from PEX-INFO file"""
     my_pex_name = os.path.dirname(__file__)
     zip = zipfile.ZipFile(my_pex_name)
-    pex_info_string = str(zip.read("PEX-INFO"))
-    pex_info_string_python = pex_info_string.replace("false", "False").replace("true", "True")
-    pex_info = eval(pex_info_string_python)
-    return pex_info['build_properties']['tag']
+    with zip.open("PEX-INFO") as pex_info:
+        return json.load(pex_info)['build_properties']['tag']
 
 
 def main(args):
