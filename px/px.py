@@ -6,7 +6,8 @@ Usage:
   px
   px <filter>
   px <PID>
-  px (-h | --help)
+  px --help
+  px --version
 
 In the base case, px list all processes much like ps, but with the most
 interesting processes last. A process is considered interesting if it has high
@@ -19,10 +20,12 @@ If the optional filter parameter is specified, processes will be shown if:
 If the optional PID parameter is specified, you'll get detailed information
 about that particular PID.
 
--h --help: Print this help
+--help: Print this help
+--version: Print version information
 """
 
 import sys
+import zipfile
 
 import os
 import docopt
@@ -81,6 +84,16 @@ def print_procs(procs):
         print(line[0:terminal_window_width])
 
 
+def get_version():
+    """Extract version string from PEX-INFO file"""
+    my_pex_name = os.path.dirname(__file__)
+    zip = zipfile.ZipFile(my_pex_name)
+    pex_info_string = str(zip.read("PEX-INFO"))
+    pex_info_string_python = pex_info_string.replace("false", "False").replace("true", "True")
+    pex_info = eval(pex_info_string_python)
+    return pex_info['build_properties']['tag']
+
+
 def main(args):
     filterstring = args['<filter>']
     if filterstring:
@@ -101,4 +114,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(docopt.docopt(__doc__))
+    main(docopt.docopt(__doc__, version=get_version()))

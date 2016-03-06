@@ -52,10 +52,6 @@ text you write for this tag will show up as the release description on Github,
 write something nice!
 3. `git push --tags`
 
-# TODO `--version`
-* Doing `px --version` should print a `git describe` like version string. Don't
-know how, [asked here](http://stackoverflow.com/q/35756339/473672).
-
 # TODO `top` replacement
 * Print system load before the process listing
 * Maybe add a `--top` / `--top=5s` flag which samples the system for one second
@@ -106,3 +102,4 @@ PID show:
  * A list of all open files, pipes and sockets
  * For each pipe / domain socket, print the process at the other end
  * For each socket, print where it's going
+* Doing `px --version` prints a `git describe` version string.
