@@ -8,7 +8,6 @@ running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
 * `top` (by running `watch px --top`)
-* Possibly `lsof`
 * Possibly `iotop`
 
 # Demo
@@ -62,10 +61,6 @@ file that you just built to the release.
 * Maybe add a `--top` / `--top=5s` flag which samples the system for one second
 (or five) and adds a CPU usage column to the output
 * Maybe add a command line option for truncating output at screen width
-
-# TODO `lsof` replacement
-* Giving a path as parameter to `px` should list all processes that have that
-file open.
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
