@@ -26,18 +26,19 @@ scrolling.
 ![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
 
 # Installation
-```
-git clone https://github.com/walles/px.git
-cd px
-./pants binary px
-sudo install ./dist/px.pex /usr/local/bin/px
-```
+* Go to the [Releases](https://github.com/walles/px/releases) page and download
+`px.pex` from there. That file is the whole distribution and can be run as it
+is on any Python 2.7 equipped system.
+* `sudo install px.pex /usr/local/bin/px`
+
+Now, you should be able to run `px` or `px --help` from the command line.
+Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
 
 # Usage
 Just type `px`, that's a good start!
 
-Otherwise, `px --help` will show you what else `px` can do except for just
-listing all processes.
+Also try `px --help` to see what else `px` can do except for just listing all
+processes.
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
