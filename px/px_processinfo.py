@@ -182,6 +182,10 @@ def print_fds(process, pid2process):
         for channel_name in sorted(channel_names):
             print("    " + channel_name)
 
+    print("")
+    print("For a list of all open files, do \"lsof -p {0}\", "
+          "or \"watch lsof -p {0}\" for a live view".format(process.pid))
+
     if os.getuid() != 0:
         print("")
         print("NOTE: This information might be incomplete, "
