@@ -15,10 +15,13 @@ This screenshot shows:
 * The end of the output from just typing `px`. Note how the most CPU and memory
 hungry processes are at the end of the list so you can find them without
 scrolling.
-* The output from the details view of PID 95970:
-  * Note how the command line has been split with one argument per line. This
-  makes long command lines readable.
-  * Also, the process tree shows how 95970 relates to other processes.
+* The output from the details view of PID 699:
+  * The command line has been split with one argument per line. This makes long
+  command lines readable.
+  * The process tree shows how the Terminal relates to other processes.
+  * The IPC section shows that the Terminal is talking to `launchd` and
+  `syslogd` using
+  [Unix domain sockets](https://en.wikipedia.org/wiki/Unix_domain_socket).
 
 ![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
 
