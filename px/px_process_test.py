@@ -216,13 +216,13 @@ def test_get_command_dotted_prefix():
     # before the dot.
     p = px_process.ps_line_to_process(
         "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService")
-    assert p.get_command() == "TextReplacementService"
+    assert p.command == "TextReplacementService"
 
     # If there's a dot with four characters or less after it, assume it's a file
     # suffix and take the next to last section
     p = px_process.ps_line_to_process(
         "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService.1234")
-    assert p.get_command() == "TextReplacementService"
+    assert p.command == "TextReplacementService"
     p = px_process.ps_line_to_process(
         "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService.12345")
-    assert p.get_command() == "12345"
+    assert p.command == "12345"

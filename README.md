@@ -71,8 +71,8 @@ file that you just built to the release.
 usage and present that in one or more columns.
 
 # TODO Misc
-* In the details view, list processes as `Name(PID)` rather than `PID:Name`.
-To humans the name is more important than the PID, so it should be first.
+* In the details view, list two processes that were created just before the
+current one and two processes that were created just after the current one.
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
@@ -103,3 +103,5 @@ PID show:
 * Doing `px --version` prints a `git describe` version string.
 * Add a column with the name of each running process
 * Put column headings at the top of each column
+* In the details view, list processes as `Name(PID)` rather than `PID:Name`.
+To humans the name is more important than the PID, so it should be first.

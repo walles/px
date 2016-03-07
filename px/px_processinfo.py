@@ -26,7 +26,7 @@ def print_command_line(process):
 
 def print_process_subtree(process, indentation):
     print("  " * indentation + str(process))
-    for child in sorted(process.children, key=operator.attrgetter("pid")):
+    for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(child, indentation + 1)
 
 
@@ -49,7 +49,7 @@ def print_process_tree(process):
     indentation += 1
 
     # Print all our child trees
-    for child in sorted(process.children, key=operator.attrgetter("pid")):
+    for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(child, indentation)
 
 
@@ -104,6 +104,7 @@ def create_fake_process(pid=None, name=None):
 
     process = FakeProcess()
     process.name = name
+    process.lowercase_command = name.lower()
     process.pid = pid
     return process
 
@@ -173,7 +174,7 @@ def print_fds(process, pid2process):
     print("")
     print("Inter Process Communication:")
     ipc_map = get_ipc_map(process, files, pid2process)
-    for process in sorted(ipc_map.keys(), key=operator.attrgetter('pid')):
+    for process in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
         print("  " + str(process))
         channels = ipc_map[process]
         channel_names = set()
@@ -183,7 +184,7 @@ def print_fds(process, pid2process):
 
     print("")
     print("For a list of all open files, do \"lsof -p {0}\", "
-          "or \"watch lsof -p {0}\" for a live view".format(process.pid))
+          "or \"watch lsof -p {0}\" for a live view.".format(process.pid))
 
     if os.getuid() != 0:
         print("")

@@ -60,18 +60,16 @@ def get_terminal_window_width():
 
 def print_procs(procs):
     class Headings(px_process.PxProcess):
-        def get_command(self):
-            return "COMMAND"
-
         def __init__(self):
             pass
 
     headings = Headings()
     headings.pid = "PID"
-    headings.cmdline = "COMMANDLINE"
+    headings.command = "COMMAND"
     headings.username = "USERNAME"
     headings.cpu_time_s = "CPU"
     headings.memory_percent_s = "RAM"
+    headings.cmdline = "COMMANDLINE"
     procs = [headings] + procs
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
@@ -82,7 +80,7 @@ def print_procs(procs):
     mem_width = 0
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
-        command_width = max(command_width, len(proc.get_command()))
+        command_width = max(command_width, len(proc.command))
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_time_s))
         mem_width = max(mem_width, len(proc.memory_percent_s))
@@ -98,7 +96,7 @@ def print_procs(procs):
     terminal_window_width = get_terminal_window_width()
     for proc in procs:
         line = format.format(
-            proc.pid, proc.get_command(), proc.username,
+            proc.pid, proc.command, proc.username,
             proc.cpu_time_s, proc.memory_percent_s,
             proc.cmdline)
         print(line[0:terminal_window_width])

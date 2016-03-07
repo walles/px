@@ -45,11 +45,17 @@ class PxProcess(object):
                 (process_builder.cpu_time + 1) *
                 (process_builder.memory_percent + 1))
 
+        self.command = self._get_command()
+        self.lowercase_command = self.command.lower()
+
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
         # implementing this method is to make the py.test output more readable,
         # and py.test calls repr() and not str().
-        return str(self.pid) + ":" + self.get_command()
+        return str(self.pid) + ":" + self.command
+
+    def __str__(self):
+        return self.command + "(" + str(self.pid) + ")"
 
     def match(self, string):
         """
@@ -89,7 +95,7 @@ class PxProcess(object):
 
         return merged_split
 
-    def get_command(self):
+    def _get_command(self):
         """Return just the command without any arguments or path"""
         command = os.path.basename(self.get_command_line_array()[0])
 
