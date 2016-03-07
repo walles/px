@@ -1,12 +1,14 @@
+import datetime
 import operator
 import subprocess
 
 import os
 import re
+import dateutil.parser
 
 
-# Match + group: "47536  1234 root              0:00.03  0.0 /usr/sbin/cupsd -l"
-PS_LINE = re.compile(" *([0-9]+) +([0-9]+) +([^ ]+) +([0-9:.]+) +([0-9.]+) +(.*)")
+# Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
+PS_LINE = re.compile(" *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.:]+) +([0-9.]+) +(.*)")
 
 # Match + group: "1:02.03"
 CPUTIME_OSX = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
@@ -25,6 +27,9 @@ class PxProcess(object):
 
         self.pid = process_builder.pid
         self.ppid = process_builder.ppid
+
+        time = dateutil.parser.parse(process_builder.start_time_string)
+        self.start_seconds_since_epoch = (time - datetime.datetime(1970, 1, 1)).total_seconds()
 
         self.username = process_builder.username
 
@@ -124,7 +129,7 @@ def call_ps():
     env = os.environ.copy()
     if "LANG" in env:
         del env["LANG"]
-    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,user,time,%mem,command"],
+    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,user,time,%mem,command"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           env=env)
     return ps.communicate()[0].splitlines()[1:]
@@ -164,10 +169,11 @@ def ps_line_to_process(ps_line):
     process_builder = PxProcessBuilder()
     process_builder.pid = int(match.group(1))
     process_builder.ppid = int(match.group(2))
-    process_builder.username = match.group(3)
-    process_builder.cpu_time = parse_time(match.group(4))
-    process_builder.memory_percent = float(match.group(5))
-    process_builder.cmdline = match.group(6)
+    process_builder.start_time_string = match.group(3)
+    process_builder.username = match.group(4)
+    process_builder.cpu_time = parse_time(match.group(5))
+    process_builder.memory_percent = float(match.group(6))
+    process_builder.cmdline = match.group(7)
 
     return PxProcess(process_builder)
 
@@ -198,6 +204,10 @@ def resolve_links(processes):
         process_builder = PxProcessBuilder()
         process_builder.pid = 0
         process_builder.ppid = None
+
+        # FIXME: This should be the system boot timestamp
+        process_builder.start_time_string = "Jan 1 1970"
+
         process_builder.username = "root"
         process_builder.cpu_time = None
         process_builder.memory_percent = None

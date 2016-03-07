@@ -189,7 +189,7 @@ def print_fds(process, pid2process):
     if os.getuid() != 0:
         print("")
         print("NOTE: This information might be incomplete, "
-              "running as root sometimes gets you better results")
+              "running as root sometimes produces better results.")
 
 
 def print_process_info(pid):

@@ -9,7 +9,8 @@ python_binary(
   name='px',
   dependencies=[
     'px:pxlib',
-    'px:docopt'
+    'px:docopt',
+    'px:python-dateutil',
   ],
   entry_point='px',
 )
@@ -18,6 +19,7 @@ python_tests(
   name = 'unittests',
   sources = globs('*_test.py'),
   dependencies=[
-    'px:pxlib'
+    'px:pxlib',
+    'px:python-dateutil',
   ],
 )
