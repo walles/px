@@ -25,7 +25,7 @@ def print_command_line(process):
 
 
 def print_process_subtree(process, indentation):
-    print("{}{}:{}".format("  " * indentation, process.pid, process.get_command()))
+    print("  " * indentation + str(process))
     for child in sorted(process.children, key=operator.attrgetter("pid")):
         print_process_subtree(child, indentation + 1)
 
@@ -41,12 +41,11 @@ def print_process_tree(process):
     # Print all parents
     indentation = 0
     for parent in reversed(parents):
-        print("{}{}:{}".format("  " * indentation, parent.pid, parent.get_command()))
+        print("  " * indentation + str(parent))
         indentation += 1
 
     # Print ourselves
-    print("{}{}:{}".format(
-        "--" * (indentation - 1) + "> ", process.pid, process.get_command()))
+    print("--" * (indentation - 1) + "> " + str(process))
     indentation += 1
 
     # Print all our child trees
