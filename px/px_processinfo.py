@@ -156,6 +156,28 @@ def get_ipc_map(process, files, pid2process):
     return return_me
 
 
+def print_processes_started_at_the_same_time(process, all_processes):
+    by_temporal_vicinity = sorted(
+        all_processes,
+        key=lambda p: abs(p.start_seconds_since_epoch -
+                          process.start_seconds_since_epoch))
+
+    # "5" is arbitrarily chosen, look at the printouts to see if it needs tuning
+    closest = by_temporal_vicinity[0:6]
+
+    closest = filter(lambda p: p is not process, closest)
+    closest = sorted(closest, key=operator.attrgetter('start_seconds_since_epoch'))
+
+    print("Other processes started close to " + str(process) + ":")
+    for close in closest:
+        delta_seconds = close.start_seconds_since_epoch - process.start_seconds_since_epoch
+        delta_string = px_process.seconds_to_str(abs(delta_seconds))
+        before_or_after = "before"
+        if delta_seconds > 0:
+            before_or_after = "after"
+        print("  {} was started {} {} {}".format(close, delta_string, before_or_after, process))
+
+
 def print_fds(process, pid2process):
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
@@ -212,6 +234,9 @@ def print_process_info(pid):
     # Print a process tree with all PID's parents and all its children
     print("")
     print_process_tree(process)
+
+    print("")
+    print_processes_started_at_the_same_time(process, processes)
 
     # List all files PID has open
     print("")
