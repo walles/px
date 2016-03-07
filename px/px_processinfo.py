@@ -156,6 +156,19 @@ def get_ipc_map(process, files, pid2process):
     return return_me
 
 
+def to_relative_start_string(base, relative):
+    delta_seconds = relative.start_seconds_since_epoch - base.start_seconds_since_epoch
+    delta_string = px_process.seconds_to_str(abs(delta_seconds))
+    before_or_after = "before"
+    if delta_seconds > 0:
+        before_or_after = "after"
+    elif delta_seconds == 0:
+        delta_string = "just"
+        if relative.pid > base.pid:
+            before_or_after = "after"
+    return "{} was started {} {} {}".format(relative, delta_string, before_or_after, base)
+
+
 def print_processes_started_at_the_same_time(process, all_processes):
     by_temporal_vicinity = sorted(
         all_processes,
@@ -170,12 +183,7 @@ def print_processes_started_at_the_same_time(process, all_processes):
 
     print("Other processes started close to " + str(process) + ":")
     for close in closest:
-        delta_seconds = close.start_seconds_since_epoch - process.start_seconds_since_epoch
-        delta_string = px_process.seconds_to_str(abs(delta_seconds))
-        before_or_after = "before"
-        if delta_seconds > 0:
-            before_or_after = "after"
-        print("  {} was started {} {} {}".format(close, delta_string, before_or_after, process))
+        print("  " + to_relative_start_string(process, close))
 
 
 def print_fds(process, pid2process):

@@ -1,5 +1,6 @@
 import re
 import px_file
+import testutils
 import px_processinfo
 
 
@@ -83,3 +84,20 @@ def test_get_other_end_pids_linux_socket():
     my_end.pid = 25
     found = px_processinfo.get_other_end_pids(my_end, files)
     assert found == {25, 26}
+
+
+def test_to_relative_start_string():
+    base = testutils.create_process(pid=100, timestring="Mon Mar 7 09:33:11 2016")
+    close = testutils.create_process(pid=101, timestring="Mon Mar 7 09:33:12 2016")
+    assert ("cupsd(101) was started 1.0s after cupsd(100)" ==
+            px_processinfo.to_relative_start_string(base, close))
+
+    base = testutils.create_process(pid=100, timestring="Mon Mar 7 09:33:11 2016")
+    close = testutils.create_process(pid=101, timestring="Mon Mar 7 09:33:10 2016")
+    assert ("cupsd(101) was started 1.0s before cupsd(100)" ==
+            px_processinfo.to_relative_start_string(base, close))
+
+    base = testutils.create_process(pid=100, timestring="Mon Mar 7 09:33:11 2016")
+    close = testutils.create_process(pid=101, timestring="Mon Mar 7 09:33:11 2016")
+    assert ("cupsd(101) was started just after cupsd(100)" ==
+            px_processinfo.to_relative_start_string(base, close))
