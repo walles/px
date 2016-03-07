@@ -169,20 +169,40 @@ def to_relative_start_string(base, relative):
     return "{} was started {} {} {}".format(relative, delta_string, before_or_after, base)
 
 
-def print_processes_started_at_the_same_time(process, all_processes):
+def get_closest_starts(process, all_processes):
+    """
+    Return the processes that were started closest in time to the base process.
+
+    All processes started within 1s of the base process are returned, or the
+    five closest if not at least five were that close.
+    """
+    closest = set()
     by_temporal_vicinity = sorted(
         all_processes,
         key=lambda p: abs(p.start_seconds_since_epoch -
                           process.start_seconds_since_epoch))
 
-    # "5" is arbitrarily chosen, look at the printouts to see if it needs tuning
-    closest = by_temporal_vicinity[0:6]
+    for close in by_temporal_vicinity:
+        delta_seconds = abs(close.start_seconds_since_epoch - process.start_seconds_since_epoch)
+
+        if delta_seconds <= 1:
+            closest.add(close)
+            continue
+
+        # "5" is arbitrarily chosen, look at the printouts to see if it needs tuning
+        if len(closest) > 5:
+            break
+
+        closest.add(close)
 
     closest = filter(lambda p: p is not process, closest)
-    closest = sorted(closest, key=operator.attrgetter('start_seconds_since_epoch'))
+    closest = sorted(closest, key=operator.attrgetter('start_seconds_since_epoch', 'pid'))
+    return closest
 
+
+def print_processes_started_at_the_same_time(process, all_processes):
     print("Other processes started close to " + str(process) + ":")
-    for close in closest:
+    for close in get_closest_starts(process, all_processes):
         print("  " + to_relative_start_string(process, close))
 
 
