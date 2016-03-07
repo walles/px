@@ -209,3 +209,20 @@ def test_get_command_line_array_space_in_binary(tmpdir):
     # Verify splitting with more parameters on the line
     p = px_process.ps_line_to_process("105 1 root 0:01.00 0.1 " + spaced_name + " parameter")
     assert p.get_command_line_array() == [spaced_name, "parameter"]
+
+
+def test_get_command_dotted_prefix():
+    # If there's a dot with a lot of text after it we should drop everything
+    # before the dot.
+    p = px_process.ps_line_to_process(
+        "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService")
+    assert p.get_command() == "TextReplacementService"
+
+    # If there's a dot with four characters or less after it, assume it's a file
+    # suffix and take the next to last section
+    p = px_process.ps_line_to_process(
+        "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService.1234")
+    assert p.get_command() == "TextReplacementService"
+    p = px_process.ps_line_to_process(
+        "42 41 foo 0:00.34 0.1 /.../com.apple.InputMethodKit.TextReplacementService.12345")
+    assert p.get_command() == "12345"

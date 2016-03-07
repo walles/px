@@ -91,7 +91,20 @@ class PxProcess(object):
 
     def get_command(self):
         """Return just the command without any arguments or path"""
-        return os.path.basename(self.get_command_line_array()[0])
+        command = os.path.basename(self.get_command_line_array()[0])
+
+        command_split = command.split(".")
+        if len(command_split) > 1:
+            if len(command_split[-1]) > 4:
+                # Pretend all the dots are a kind of path and go for the last
+                # part only
+                command = command_split[-1]
+            else:
+                # Assume last part is a file suffix (like ".exe") and take the
+                # next to last part
+                command = command_split[-2]
+
+        return command
 
 
 class PxProcessBuilder(object):

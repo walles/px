@@ -59,19 +59,22 @@ def get_terminal_window_width():
 
 
 def print_procs(procs):
-    # Compute widest width for pid, user, cpu and memory usage columns
+    # Compute widest width for pid, command, user, cpu and memory usage columns
     pid_width = 0
+    command_width = 0
     username_width = 0
     cpu_width = 0
     mem_width = 0
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
+        command_width = max(command_width, len(proc.get_command()))
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_time_s))
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     format = (
         '{:>' + str(pid_width) +
+        '} {:' + str(command_width) +
         '} {:' + str(username_width) +
         '} {:>' + str(cpu_width) +
         '} {:>' + str(mem_width) + '} {}')
@@ -80,7 +83,8 @@ def print_procs(procs):
     terminal_window_width = get_terminal_window_width()
     for proc in procs:
         line = format.format(
-            proc.pid, proc.username, proc.cpu_time_s, proc.memory_percent_s,
+            proc.pid, proc.get_command(), proc.username,
+            proc.cpu_time_s, proc.memory_percent_s,
             proc.cmdline)
         print(line[0:terminal_window_width])
 

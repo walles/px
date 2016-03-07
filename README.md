@@ -72,8 +72,6 @@ usage and present that in one or more columns.
 
 # TODO Misc
 * Put column headings at the top of each column
-* Add a first column with the name of the program; that's generally more
-interesting than the PID.
 * In the details view, list processes as `Name(PID)` rather than `PID:Name`.
 To humans the name is more important than the PID, so it should be first.
 
@@ -104,3 +102,4 @@ PID show:
  * For each pipe / domain socket, print the process at the other end
  * For each socket, print where it's going
 * Doing `px --version` prints a `git describe` version string.
+* Add a column with the name of each running process
