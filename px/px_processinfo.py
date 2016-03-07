@@ -156,6 +156,56 @@ def get_ipc_map(process, files, pid2process):
     return return_me
 
 
+def to_relative_start_string(base, relative):
+    delta_seconds = relative.start_seconds_since_epoch - base.start_seconds_since_epoch
+    delta_string = px_process.seconds_to_str(abs(delta_seconds))
+    before_or_after = "before"
+    if delta_seconds > 0:
+        before_or_after = "after"
+    elif delta_seconds == 0:
+        delta_string = "just"
+        if relative.pid > base.pid:
+            before_or_after = "after"
+    return "{} was started {} {} {}".format(relative, delta_string, before_or_after, base)
+
+
+def get_closest_starts(process, all_processes):
+    """
+    Return the processes that were started closest in time to the base process.
+
+    All processes started within 1s of the base process are returned, or the
+    five closest if not at least five were that close.
+    """
+    closest = set()
+    by_temporal_vicinity = sorted(
+        all_processes,
+        key=lambda p: abs(p.start_seconds_since_epoch -
+                          process.start_seconds_since_epoch))
+
+    for close in by_temporal_vicinity:
+        delta_seconds = abs(close.start_seconds_since_epoch - process.start_seconds_since_epoch)
+
+        if delta_seconds <= 1:
+            closest.add(close)
+            continue
+
+        # "5" is arbitrarily chosen, look at the printouts to see if it needs tuning
+        if len(closest) > 5:
+            break
+
+        closest.add(close)
+
+    closest = filter(lambda p: p is not process, closest)
+    closest = sorted(closest, key=operator.attrgetter('start_seconds_since_epoch', 'pid'))
+    return closest
+
+
+def print_processes_started_at_the_same_time(process, all_processes):
+    print("Other processes started close to " + str(process) + ":")
+    for close in get_closest_starts(process, all_processes):
+        print("  " + to_relative_start_string(process, close))
+
+
 def print_fds(process, pid2process):
     files = px_file.get_all()
     files_for_process = filter(lambda f: f.pid == process.pid, files)
@@ -212,6 +262,9 @@ def print_process_info(pid):
     # Print a process tree with all PID's parents and all its children
     print("")
     print_process_tree(process)
+
+    print("")
+    print_processes_started_at_the_same_time(process, processes)
 
     # List all files PID has open
     print("")

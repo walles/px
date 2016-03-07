@@ -70,10 +70,6 @@ file that you just built to the release.
 * When given the `--top` flag and enough permissions, record per process IO
 usage and present that in one or more columns.
 
-# TODO Misc
-* In the details view, list two processes that were created just before the
-current one and two processes that were created just after the current one.
-
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
 RAM), used CPU time, full command line
@@ -105,3 +101,5 @@ PID show:
 * Put column headings at the top of each column
 * In the details view, list processes as `Name(PID)` rather than `PID:Name`.
 To humans the name is more important than the PID, so it should be first.
+* In the details view, list a number of processes that were created around the
+same time as the one we're currently looking at.
