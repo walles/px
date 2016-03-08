@@ -230,3 +230,14 @@ def test_command_dotted_prefix():
     p = testutils.create_process(
         commandline="/.../com.apple.InputMethodKit.TextReplacementService.12345")
     assert p.command == "12345"
+
+
+def test_command_linux_kernelproc():
+    p = testutils.create_process(commandline="[ksoftirqd/0]")
+    assert p.command == "[ksoftirqd/0]"
+
+    p = testutils.create_process(commandline="[kworker/0:0H]")
+    assert p.command == "[kworker/0:0H]"
+
+    p = testutils.create_process(commandline="[rcuob/3]")
+    assert p.command == "[rcuob/3]"

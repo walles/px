@@ -19,6 +19,9 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 # Match + group: "123-01:23:45"
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
+# Match "[kworker/0:0H]", no grouping
+LINUX_KERNEL_PROC = re.compile("^\[[^/ ]+/?[^/ ]+\]$")
+
 
 class PxProcess(object):
     def __init__(self, process_builder):
@@ -102,6 +105,9 @@ class PxProcess(object):
 
     def _get_command(self):
         """Return just the command without any arguments or path"""
+        if LINUX_KERNEL_PROC.match(self.cmdline):
+            return self.cmdline
+
         command = os.path.basename(self.get_command_line_array()[0])
 
         command_split = command.split(".")
