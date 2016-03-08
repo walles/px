@@ -21,7 +21,13 @@ def print_command_line(process):
     readability to long command lines
     """
     array = process.get_command_line_array()
-    print("\n  ".join(array))
+    print(array[0])
+    for parameter in array[1:]:
+        if parameter == "":
+            # Print empty parameters as "", otherwise the printout just looks
+            # broken.
+            parameter = '""'
+        print("  " + parameter)
 
 
 def print_process_subtree(process, indentation):
