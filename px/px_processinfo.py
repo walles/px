@@ -135,7 +135,7 @@ def get_ipc_map(process, files, pid2process):
     unknown = create_fake_process(
         name="UNKNOWN destinations: Running with sudo might help find out where these go.")
     for file in files_for_process:
-        if file.type not in ['PIPE', 'FIFO', 'unix']:
+        if file.type not in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']:
             # Only deal with IPC related files
             continue
 
@@ -145,6 +145,11 @@ def get_ipc_map(process, files, pid2process):
 
         other_end_pids = get_other_end_pids(file, files)
         if other_end_pids == set([]):
+            if file.type in ['IPv4', 'IPv6']:
+                # These are sometimes used for IPC, sometimes not, only report
+                # them if they are.
+                continue
+
             add_ipc_entry(return_me, unknown, file)
             continue
 
