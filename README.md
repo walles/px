@@ -49,14 +49,16 @@ processes.
 * To add dependencies, edit `px/requirements.txt` and `px/BUILD`
 
 # Releasing a new Version
-1. Do `git tag` and think about what the next version number should be.
-2. Do ```git tag --annotate 1.2.3``` to set the next version number. The
+1. Consider updating `screenshot.png` and [the Demo section in this
+document](#Demo), push those changes.
+2. Do `git tag` and think about what the next version number should be.
+3. Do ```git tag --annotate 1.2.3``` to set the next version number. The
 text you write for this tag will show up as the release description on Github,
 write something nice!
-3. `./pants binary px && ./dist/px.pex --version`, verify that the version
+4. `./pants binary px && ./dist/px.pex --version`, verify that the version
 number matches what you just set.
-4. `git push --tags`
-5. Go to the [Releases](https://github.com/walles/px/releases) page on GitHub,
+5. `git push --tags`
+6. Go to the [Releases](https://github.com/walles/px/releases) page on GitHub,
 click your new release, click the `Edit tag` button, then attach your `px.pex`
 file that you just built to the release.
 
