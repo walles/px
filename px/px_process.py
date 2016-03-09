@@ -8,7 +8,8 @@ import dateutil.parser
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
-PS_LINE = re.compile(" *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.:]+) +([0-9.]+) +(.*)")
+PS_LINE = re.compile(
+    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
 
 # Match + group: "1:02.03"
 CPUTIME_OSX = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")

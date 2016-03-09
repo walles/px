@@ -71,6 +71,30 @@ def test_ps_line_to_process_2():
     assert process.start_seconds_since_epoch == testutils.SECONDS_SINCE_EPOCH
 
 
+# From a real-world failure
+def test_ps_line_to_process_3():
+    process = px_process.ps_line_to_process(
+        "  5328"
+        "   4432"
+        " Thu Feb 25 07:42:36 2016"
+        " mysql"
+        "    1-19:31:31"
+        " 19.7"
+        " /usr/sbin/mysqld"
+        " --basedir=/usr"
+        " --datadir=/data/user/mysql"
+        " --plugin-dir=/usr/lib/mysql/plugin"
+        " --user=mysql"
+        " --log-error=/var/log/mysql/mysql.err"
+        " --pid-file=/var/run/mysqld/mysqld.pid"
+        " --socket=/var/run/mysqld/mysqld.sock"
+        " --port=3306")
+    assert process.username == "mysql"
+    assert process.memory_percent_s == "20%"
+    assert process.cpu_time_s == "1d19h"
+    assert process.command == "mysqld"
+
+
 def _validate_references(processes):
     """Fsck the parent / children relationships between all processes"""
     for process in processes:
