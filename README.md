@@ -11,6 +11,8 @@ other information about that process)
 * Possibly `iotop`
 
 # Demo
+![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
+
 This screenshot shows:
 * The end of the output from just typing `px`. Note how the most CPU and memory
 hungry processes are at the end of the list so you can find them without
@@ -18,12 +20,11 @@ scrolling.
 * The output from the details view of PID 699:
   * The command line has been split with one argument per line. This makes long
   command lines readable.
+  * A list of other processes started around the same time as Terminal.
   * The process tree shows how the Terminal relates to other processes.
   * The IPC section shows that the Terminal is talking to `launchd` and
   `syslogd` using
   [Unix domain sockets](https://en.wikipedia.org/wiki/Unix_domain_socket).
-
-![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
 
 # Installation
 * Go to the [Releases](https://github.com/walles/px/releases) page and download
