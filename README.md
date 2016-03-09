@@ -55,7 +55,8 @@ document](#Demo), push those changes.
 2. Do `git tag` and think about what the next version number should be.
 3. Do ```git tag --annotate 1.2.3``` to set the next version number. The
 text you write for this tag will show up as the release description on Github,
-write something nice!
+write something nice! And remember that the first line is the subject line for
+the release.
 4. `./pants binary px && ./dist/px.pex --version`, verify that the version
 number matches what you just set.
 5. `git push --tags`
