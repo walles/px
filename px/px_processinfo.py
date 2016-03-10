@@ -1,5 +1,6 @@
 import sys
 import errno
+import datetime
 import operator
 
 import os
@@ -218,9 +219,17 @@ def print_processes_started_at_the_same_time(process, all_processes):
 
 
 def print_fds(process, pid2process):
+    # It's true, I measured it myself /johan.walles@gmail.com
+    print(datetime.datetime.now().isoformat() +
+          ": Now invoking lsof, this can take 20s on a big system...")
+
     files = px_file.get_all()
+    print(datetime.datetime.now().isoformat() +
+          ": lsof done, proceeding.")
+
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
+    print("")
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
