@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 """px - A Cross Functional Process Explorer
+     https://github.com/walles/px
 
 Usage:
   px
