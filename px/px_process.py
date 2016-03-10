@@ -235,8 +235,19 @@ def resolve_links(processes):
 
 
 def get_all():
-    all = map(lambda line: ps_line_to_process(line), call_ps())
+    all = []
+    for ps_line in call_ps():
+        process = ps_line_to_process(ps_line)
+        if process.pid == os.getpid():
+            # Finding ourselves is just confusing
+            continue
+        if process.ppid == os.getpid():
+            # Finding the ps we spawned is also confusing
+            continue
+        all.append(process)
+
     resolve_links(all)
+
     return all
 
 

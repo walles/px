@@ -115,7 +115,12 @@ def _test_get_all():
     all = px_process.get_all()
 
     pids = map(lambda p: p.pid, all)
-    assert os.getpid() in pids
+
+    # Finding ourselves is just confusing...
+    assert os.getpid() not in pids
+
+    # ... but all other processes should be there
+    assert os.getppid() in pids
 
     # PID 1 is launchd on OS X, init on Linux.
     #
@@ -130,9 +135,10 @@ def _test_get_all():
         assert pid not in seen_pids
         seen_pids.add(pid)
 
-    # Assert that the current PID has the correct user name
-    current_process = filter(lambda process: process.pid == os.getpid(), all)[0]
-    assert current_process.username == getpass.getuser()
+    # Assert that there are processes with the current user name
+    current_users_processes = (
+        filter(lambda process: process.username == getpass.getuser(), all))
+    assert current_users_processes
 
     _validate_references(all)
 
