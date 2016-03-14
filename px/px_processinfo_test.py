@@ -1,6 +1,7 @@
 import re
 import px_file
 import testutils
+import px_process
 import px_processinfo
 
 
@@ -163,3 +164,10 @@ def test_get_closest_starts_five_closest():
     assert all[5] in close
     assert all[6] in close
     assert all[7] not in close
+
+
+def test_print_starttime():
+    # Just make sure it doesn't crash
+    all = px_process.get_all()
+    process0 = filter(lambda p: p.pid == 0, all)[0]
+    px_processinfo.print_start_time(process0)

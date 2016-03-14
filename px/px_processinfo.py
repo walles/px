@@ -272,12 +272,13 @@ def print_start_time(process):
         process.start_time.isoformat(),
     ))
 
-    cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
-    print("{:.1f}% has been its average CPU usage since then, or {}/{}".format(
-        cpu_percent,
-        process.cpu_time_s,
-        process.age_s,
-    ))
+    if process.cpu_time_seconds and process.age_seconds:
+        cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
+        print("{:.1f}% has been its average CPU usage since then, or {}/{}".format(
+            cpu_percent,
+            process.cpu_time_s,
+            process.age_s,
+        ))
 
 
 def print_process_info(pid):
