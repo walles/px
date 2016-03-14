@@ -7,6 +7,7 @@ Usage:
   px
   px <filter>
   px <PID>
+  px --top
   px --help
   px --version
 
@@ -21,6 +22,12 @@ If the optional filter parameter is specified, processes will be shown if:
 If the optional PID parameter is specified, you'll get detailed information
 about that particular PID.
 
+In --top mode, a new process list is shown every second. The most interesting
+processes are on top. In this mode, CPU times are counted from when you first
+invoked px, rather than from when each process started. This gives you a picture
+of which processes are most active right now.
+
+--top: Show a continuously refreshed process list
 --help: Print this help
 --version: Print version information
 """
@@ -31,6 +38,7 @@ import zipfile
 
 import os
 import docopt
+import px_top
 import px_process
 import px_processinfo
 
@@ -112,6 +120,10 @@ def get_version():
 
 
 def main(args):
+    if args['--top']:
+        px_top.top()
+        exit(0)
+
     filterstring = args['<filter>']
     if filterstring:
         try:
