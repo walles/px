@@ -265,6 +265,21 @@ def print_fds(process, pid2process):
               "running as root sometimes produces better results.")
 
 
+def print_start_time(process):
+    print("{} ago {} was started, at {}.".format(
+        process.age_s,
+        process.command,
+        process.start_time.isoformat(),
+    ))
+
+    cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
+    print("{:.1f}% has been its average CPU usage since then, or {}/{}".format(
+        cpu_percent,
+        process.cpu_time_s,
+        process.age_s,
+    ))
+
+
 def print_process_info(pid):
     processes = px_process.get_all()
 
@@ -285,6 +300,9 @@ def print_process_info(pid):
     # Print a process tree with all PID's parents and all its children
     print("")
     print_process_tree(process)
+
+    print("")
+    print_start_time(process)
 
     print("")
     print_processes_started_at_the_same_time(process, processes)

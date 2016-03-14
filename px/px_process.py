@@ -40,12 +40,15 @@ class PxProcess(object):
         self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())
         self.age_seconds = (now - self.start_time).total_seconds()
         assert self.age_seconds >= 0
+        self.age_s = seconds_to_str(self.age_seconds)
 
         self.username = process_builder.username
 
         self.cpu_time_s = "--"
+        self.cpu_time_seconds = None
         if has_cputime:
             self.cpu_time_s = seconds_to_str(process_builder.cpu_time)
+            self.cpu_time_seconds = process_builder.cpu_time
 
         self.memory_percent_s = "--"
         if has_memory:
