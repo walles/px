@@ -32,7 +32,6 @@ of which processes are most active right now.
 --version: Print version information
 """
 
-import sys
 import json
 import zipfile
 
@@ -40,31 +39,8 @@ import os
 import docopt
 import px_top
 import px_process
+import px_terminal
 import px_processinfo
-
-
-def get_terminal_window_width():
-    """
-    Return the width of the terminal if available, or None if not.
-    """
-
-    if not sys.stdout.isatty():
-        # We shouldn't truncate lines when piping
-        return None
-
-    result = os.popen('stty size', 'r').read().split()
-    if len(result) < 2:
-        # Getting the terminal window width failed, don't truncate
-        return None
-
-    rows, columns = result
-    columns = int(columns)
-    if columns < 1:
-        # This seems to happen during OS X CI runs:
-        # https://travis-ci.org/walles/px/jobs/113134994
-        return None
-
-    return columns
 
 
 def print_procs(procs):
@@ -102,13 +78,16 @@ def print_procs(procs):
         '} {:>' + str(mem_width) + '} {}')
 
     # Print process list using the computed column widths
-    terminal_window_width = get_terminal_window_width()
+    terminal_window_size = px_terminal.get_window_size()
+    columns = None
+    if terminal_window_size:
+        columns = terminal_window_size[1]
     for proc in procs:
         line = format.format(
             proc.pid, proc.command, proc.username,
             proc.cpu_time_s, proc.memory_percent_s,
             proc.cmdline)
-        print(line[0:terminal_window_width])
+        print(line[0:columns])
 
 
 def get_version():
@@ -122,7 +101,7 @@ def get_version():
 def main(args):
     if args['--top']:
         px_top.top()
-        exit(0)
+        return
 
     filterstring = args['<filter>']
     if filterstring:
