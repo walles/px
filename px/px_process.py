@@ -25,15 +25,21 @@ LINUX_KERNEL_PROC = re.compile("^\[[^/ ]+/?[^/ ]+\]$")
 
 
 class PxProcess(object):
-    def __init__(self, process_builder):
+    def __init__(self, process_builder, now):
         has_cputime = process_builder.cpu_time is not None
         has_memory = process_builder.memory_percent is not None
 
         self.pid = process_builder.pid
         self.ppid = process_builder.ppid
 
+        self.cmdline = process_builder.cmdline
+        self.command = self._get_command()
+        self.lowercase_command = self.command.lower()
+
         time = dateutil.parser.parse(process_builder.start_time_string)
-        self.start_seconds_since_epoch = (time - datetime.datetime(1970, 1, 1)).total_seconds()
+        self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())
+        self.age_seconds = (now - self.start_time).total_seconds()
+        assert self.age_seconds >= 0
 
         self.username = process_builder.username
 
@@ -46,16 +52,11 @@ class PxProcess(object):
             self.memory_percent_s = (
                 "{:.0f}%".format(process_builder.memory_percent))
 
-        self.cmdline = process_builder.cmdline
-
         self.score = 0
         if has_memory and has_cputime:
             self.score = (
-                (process_builder.cpu_time + 1) *
-                (process_builder.memory_percent + 1))
-
-        self.command = self._get_command()
-        self.lowercase_command = self.command.lower()
+                (process_builder.cpu_time + 1.0) *
+                (process_builder.memory_percent + 1.0) / (self.age_seconds + 1.0))
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -169,7 +170,7 @@ def parse_time(timestring):
     raise ValueError("Unparsable timestamp: <" + timestring + ">")
 
 
-def ps_line_to_process(ps_line):
+def ps_line_to_process(ps_line, now):
     match = PS_LINE.match(ps_line)
     assert match is not None
 
@@ -182,10 +183,10 @@ def ps_line_to_process(ps_line):
     process_builder.memory_percent = float(match.group(6))
     process_builder.cmdline = match.group(7)
 
-    return PxProcess(process_builder)
+    return PxProcess(process_builder, now)
 
 
-def resolve_links(processes):
+def resolve_links(processes, now):
     """
     On entry, this function assumes that all processes have a "ppid" field
     containing the PID of their parent process.
@@ -219,7 +220,7 @@ def resolve_links(processes):
         process_builder.cpu_time = None
         process_builder.memory_percent = None
         process_builder.cmdline = "kernel PID 0"
-        process = PxProcess(process_builder)
+        process = PxProcess(process_builder, now)
 
         process.children = set()
 
@@ -236,8 +237,10 @@ def resolve_links(processes):
 
 def get_all():
     all = []
-    for ps_line in call_ps():
-        process = ps_line_to_process(ps_line)
+    ps_lines = call_ps()
+    now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
+    for ps_line in ps_lines:
+        process = ps_line_to_process(ps_line, now)
         if process.pid == os.getpid():
             # Finding ourselves is just confusing
             continue
@@ -246,7 +249,7 @@ def get_all():
             continue
         all.append(process)
 
-    resolve_links(all)
+    resolve_links(all, now)
 
     return all
 

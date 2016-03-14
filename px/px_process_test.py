@@ -4,7 +4,6 @@ import os
 import pytest
 import testutils
 import px_process
-import dateutil.parser
 
 
 def test_create_process():
@@ -16,7 +15,7 @@ def test_create_process():
     process_builder.cpu_time = 1.3
     process_builder.memory_percent = 42.7
     process_builder.cmdline = "hej kontinent"
-    test_me = px_process.PxProcess(process_builder)
+    test_me = px_process.PxProcess(process_builder, testutils.now())
 
     assert test_me.pid == 7
     assert test_me.ppid == 1
@@ -25,9 +24,8 @@ def test_create_process():
     assert test_me.memory_percent_s == "43%"
     assert test_me.cmdline == "hej kontinent"
 
-    time = dateutil.parser.parse(testutils.TIMESTRING)
-    assert time.year == 2016
-    assert test_me.start_seconds_since_epoch == testutils.SECONDS_SINCE_EPOCH
+    assert test_me.start_time == testutils.TIME
+    assert test_me.age_seconds > 0
 
 
 def test_call_ps():
@@ -56,7 +54,9 @@ def test_ps_line_to_process_1():
     assert process.cpu_time_s == "0.03s"
     assert process.memory_percent_s == "0%"
     assert process.cmdline == "/usr/sbin/cupsd -l"
-    assert process.start_seconds_since_epoch == testutils.SECONDS_SINCE_EPOCH
+
+    assert process.start_time == testutils.TIME
+    assert process.age_seconds > 0
 
 
 def test_ps_line_to_process_2():
@@ -68,7 +68,9 @@ def test_ps_line_to_process_2():
     assert process.cpu_time_s == "2m14s"
     assert process.memory_percent_s == "0%"
     assert process.cmdline == "/usr/sbin/cupsd -l"
-    assert process.start_seconds_since_epoch == testutils.SECONDS_SINCE_EPOCH
+
+    assert process.start_time == testutils.TIME
+    assert process.age_seconds > 0
 
 
 # From a real-world failure
@@ -88,7 +90,7 @@ def test_ps_line_to_process_3():
         " --log-error=/var/log/mysql/mysql.err"
         " --pid-file=/var/run/mysqld/mysqld.pid"
         " --socket=/var/run/mysqld/mysqld.sock"
-        " --port=3306")
+        " --port=3306", testutils.now())
     assert process.username == "mysql"
     assert process.memory_percent_s == "20%"
     assert process.cpu_time_s == "1d19h"
@@ -142,6 +144,16 @@ def _test_get_all():
 
     _validate_references(all)
 
+    now = testutils.now()
+    for process in all:
+        # Scores should be computed via multiplications and divisions of
+        # positive numbers, if this value is negative something is wrong.
+        assert process.score >= 0
+
+        # Processes created in the future = fishy
+        assert process.age_seconds >= 0
+        assert process.start_time < now
+
 
 def test_get_all_swedish():
     """
@@ -181,8 +193,9 @@ def test_order_best_last():
     assert ordered[2] == p0
 
     # Verify ordering same-scored processes by command line
-    p0 = testutils.create_process(commandline="awk")
-    p1 = testutils.create_process(commandline="bash")
+    now = testutils.now()
+    p0 = testutils.create_process(commandline="awk", now=now)
+    p1 = testutils.create_process(commandline="bash", now=now)
     assert px_process.order_best_last([p0, p1]) == [p0, p1]
     assert px_process.order_best_last([p1, p0]) == [p0, p1]
 

@@ -169,7 +169,7 @@ def get_ipc_map(process, files, pid2process):
 
 
 def to_relative_start_string(base, relative):
-    delta_seconds = relative.start_seconds_since_epoch - base.start_seconds_since_epoch
+    delta_seconds = base.age_seconds - relative.age_seconds
     delta_string = px_process.seconds_to_str(abs(delta_seconds))
     before_or_after = "before"
     if delta_seconds > 0:
@@ -191,11 +191,10 @@ def get_closest_starts(process, all_processes):
     closest = set()
     by_temporal_vicinity = sorted(
         all_processes,
-        key=lambda p: abs(p.start_seconds_since_epoch -
-                          process.start_seconds_since_epoch))
+        key=lambda p: abs(p.age_seconds - process.age_seconds))
 
     for close in by_temporal_vicinity:
-        delta_seconds = abs(close.start_seconds_since_epoch - process.start_seconds_since_epoch)
+        delta_seconds = abs(close.age_seconds - process.age_seconds)
 
         if delta_seconds <= 1:
             closest.add(close)
@@ -207,8 +206,12 @@ def get_closest_starts(process, all_processes):
 
         closest.add(close)
 
+    # Remove ourselves from the closest processes list
     closest = filter(lambda p: p is not process, closest)
-    closest = sorted(closest, key=operator.attrgetter('start_seconds_since_epoch', 'pid'))
+
+    # Sort closest processes by age, command and PID in that order
+    closest = sorted(closest, key=operator.attrgetter('command', 'pid'))
+    closest = sorted(closest, key=operator.attrgetter('age_seconds'), reverse=True)
     return closest
 
 
