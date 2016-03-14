@@ -12,7 +12,7 @@ Usage:
 
 In the base case, px list all processes much like ps, but with the most
 interesting processes last. A process is considered interesting if it has high
-memory usage or has used lots of CPU.
+memory usage, has used lots of CPU or has been started recently.
 
 If the optional filter parameter is specified, processes will be shown if:
 * The filter matches the user name of the process
