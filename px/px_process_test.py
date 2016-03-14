@@ -284,3 +284,9 @@ def test_command_linux_kernelproc():
 
     p = testutils.create_process(commandline="[rcuob/3]")
     assert p.command == "[rcuob/3]"
+
+
+def test_command_in_parentheses():
+    # Observed on OS X
+    p = testutils.create_process(commandline="(python2.7)")
+    assert p.command == "(python2.7)"
