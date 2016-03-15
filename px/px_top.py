@@ -34,8 +34,17 @@ def top():
         rows, columns = window_size
         lines = px_terminal.to_screen_lines(px_process.order_best_first(adjusted), columns)
 
-        # FIXME: Clear the screen
-        print("FIXME: Clear the screen")
+        # Clear the screen and move cursor to top left corner:
+        # https://en.wikipedia.org/wiki/ANSI_escape_code
+        #
+        # Note that some experimentation was involved in coming up with this
+        # exact sequence; if you do first "clear" then "home" for example, the
+        # contents of the previous screen gets added to the scrollback buffer,
+        # which isn't what we want. Tread carefully if you intend to change
+        # these.
+        CSI = "\x1b["
+        sys.stderr.write(CSI + "1J")
+        sys.stderr.write(CSI + "H")
 
         sys.stdout.write("\n".join(lines[0:rows]))
         sys.stdout.flush()
