@@ -29,9 +29,6 @@ OSX_PARENTHESIZED_PROC = re.compile("^\([^()]+\)$")
 
 class PxProcess(object):
     def __init__(self, process_builder, now):
-        has_cputime = process_builder.cpu_time is not None
-        has_memory = process_builder.memory_percent is not None
-
         self.pid = process_builder.pid
         self.ppid = process_builder.ppid
 
@@ -47,22 +44,14 @@ class PxProcess(object):
 
         self.username = process_builder.username
 
-        self.cpu_time_s = "--"
-        self.cpu_time_seconds = None
-        if has_cputime:
-            self.cpu_time_s = seconds_to_str(process_builder.cpu_time)
-            self.cpu_time_seconds = process_builder.cpu_time
-
+        self.memory_percent = process_builder.memory_percent
         self.memory_percent_s = "--"
-        if has_memory:
+        if self.memory_percent is not None:
             self.memory_percent_s = (
                 "{:.0f}%".format(process_builder.memory_percent))
 
-        self.score = 0
-        if has_memory and has_cputime:
-            self.score = (
-                (process_builder.cpu_time + 1.0) *
-                (process_builder.memory_percent + 1.0) / (self.age_seconds + 1.0))
+        # Setting the CPU time like this implicitly recomputes the score
+        self.set_cpu_time_seconds(process_builder.cpu_time)
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -72,6 +61,32 @@ class PxProcess(object):
 
     def __str__(self):
         return self.command + "(" + str(self.pid) + ")"
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def _recompute_score(self):
+        self.score = 0
+        if self.memory_percent is None:
+            return
+        if self.cpu_time_seconds is None:
+            return
+
+        self.score = (
+            (self.cpu_time_seconds + 1.0) *
+            (self.memory_percent + 1.0) / (self.age_seconds + 1.0))
+
+    def set_cpu_time_seconds(self, seconds):
+        self.cpu_time_s = "--"
+        self.cpu_time_seconds = None
+        if seconds is not None:
+            self.cpu_time_s = seconds_to_str(seconds)
+            self.cpu_time_seconds = seconds
+
+        self._recompute_score()
 
     def match(self, string):
         """
@@ -195,6 +210,27 @@ def ps_line_to_process(ps_line, now):
     return PxProcess(process_builder, now)
 
 
+def create_kernel_process(now):
+    # Fake a process 0, this one isn't returned by ps. More info about PID 0:
+    # https://en.wikipedia.org/wiki/Process_identifier
+    process_builder = PxProcessBuilder()
+    process_builder.pid = 0
+    process_builder.ppid = None
+
+    # FIXME: This should be the system boot timestamp
+    process_builder.start_time_string = "Jan 1 1970"
+
+    process_builder.username = "root"
+    process_builder.cpu_time = None
+    process_builder.memory_percent = None
+    process_builder.cmdline = "kernel PID 0"
+    process = PxProcess(process_builder, now)
+
+    process.children = set()
+
+    return process
+
+
 def resolve_links(processes, now):
     """
     On entry, this function assumes that all processes have a "ppid" field
@@ -216,25 +252,10 @@ def resolve_links(processes, now):
         process.children = set()
 
     if 0 not in pid2process:
-        # Fake a process 0, this one isn't returned by ps. More info about PID 0:
-        # https://en.wikipedia.org/wiki/Process_identifier
-        process_builder = PxProcessBuilder()
-        process_builder.pid = 0
-        process_builder.ppid = None
+        kernel_process = create_kernel_process(now)
 
-        # FIXME: This should be the system boot timestamp
-        process_builder.start_time_string = "Jan 1 1970"
-
-        process_builder.username = "root"
-        process_builder.cpu_time = None
-        process_builder.memory_percent = None
-        process_builder.cmdline = "kernel PID 0"
-        process = PxProcess(process_builder, now)
-
-        process.children = set()
-
-        processes.append(process)
-        pid2process[0] = process
+        processes.append(kernel_process)
+        pid2process[0] = kernel_process
 
     for process in processes:
         if process.pid == 0:

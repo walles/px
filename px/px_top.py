@@ -1,4 +1,5 @@
 import sys
+import copy
 import time
 
 import px_process
@@ -6,17 +7,45 @@ import px_terminal
 
 
 def adjust_cpu_times(current, baseline):
-    # FIXME: Identify the same processes in current and baseline, and substract
-    # the baseline CPU time from all current matches
-    return current
+    """
+    Identify processes in current that are also in baseline.
 
+    For all matches, substract the baseline process' CPU time usage from the
+    current process' one.
 
-def to_screen_lines(processes, columns):
-    # FIXME: Turn a process list into a list of rows that can be printed to
-    # screen. Each row should be truncated to be at most columns long.
-    #
-    # Should most likely call the same code as in px.py
-    return ["imagine", "a", "process", "list", "here"]
+    This way we get CPU times computed from when "px --top" was started, rather
+    than from when each process was started.
+
+    Neither current nor baseline are changed by this function.
+    """
+    pid2proc = {}
+    for proc in current:
+        pid2proc[proc.pid] = proc
+
+    for baseline_proc in baseline:
+        current_proc = pid2proc.get(baseline_proc.pid)
+        if current_proc is None:
+            # This process is newer than the baseline
+            continue
+
+        if current_proc.start_time != baseline_proc.start_time:
+            # This PID has been reused
+            continue
+
+        if current_proc.cpu_time_seconds is None:
+            # We can't substract from None
+            continue
+
+        if baseline_proc.cpu_time_seconds is None:
+            # We can't substract None
+            continue
+
+        current_proc = copy.copy(current_proc)
+        current_proc.set_cpu_time_seconds(
+            current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds)
+        pid2proc[current_proc.pid] = current_proc
+
+    return pid2proc.values()
 
 
 def top():
@@ -26,7 +55,7 @@ def top():
 
         window_size = px_terminal.get_window_size()
         if window_size is None:
-            # FIXME: Print helpful error message
+            sys.stderr.write("Cannot find terminal window size, are you on a terminal?\n")
             exit(1)
 
         rows, columns = window_size
@@ -48,6 +77,7 @@ def top():
         sys.stdout.flush()
 
         # FIXME: Interrupt sleep and iterate if terminal window is resized
+        # FIXME: Interrupt sleep and terminate if user presses "q"
         time.sleep(1)
 
     return

@@ -7,7 +7,7 @@ One utility, supporting at least OS X and Linux, replacing
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
-* `top` (by running `watch px --top`)
+* `top` (by running `px --top`)
 * Possibly `iotop`
 
 # Demo
@@ -72,6 +72,8 @@ file that you just built to the release.
 * Maybe add a `--top` / `--top=5s` flag which samples the system for one second
 (or five) and adds a CPU usage column to the output
 * Maybe add a command line option for truncating output at screen width
+* If the user launches `px` through a symlink that's called something ending in
+`top`, enter `top` mode.
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO

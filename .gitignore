@@ -1,4 +1,6 @@
 /.pants.d
+/.pants.run
+/.cache
 /dist
 *.pyc
 __pycache__
