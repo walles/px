@@ -1,6 +1,7 @@
 import sys
 import copy
 import time
+import operator
 
 import px_process
 import px_terminal
@@ -58,8 +59,11 @@ def top():
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\n")
             exit(1)
 
+        # Sort by CPU time used, then most interesting first
+        ordered = px_process.order_best_first(adjusted)
+        ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
         rows, columns = window_size
-        lines = px_terminal.to_screen_lines(px_process.order_best_first(adjusted), columns)
+        lines = px_terminal.to_screen_lines(ordered, columns)
 
         # Clear the screen and move cursor to top left corner:
         # https://en.wikipedia.org/wiki/ANSI_escape_code
