@@ -268,6 +268,13 @@ def order_best_last(processes):
     return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
 
 
+def order_best_first(processes):
+    """Returns process list ordered with the most interesting one first"""
+    ordered = sorted(processes, key=operator.attrgetter('cmdline'))
+    ordered = sorted(ordered, key=operator.attrgetter('score'), reverse=True)
+    return ordered
+
+
 def seconds_to_str(seconds):
     if seconds < 60:
         seconds_s = str(seconds)

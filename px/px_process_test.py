@@ -182,22 +182,25 @@ def test_parse_time():
 
 
 def test_order_best_last():
-    # Verify ordering by score
     p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
-    p1 = testutils.create_process(cputime="0:11.00", mempercent="1.0")
-    p2 = testutils.create_process(cputime="0:01.00", mempercent="11.0")
-    ordered = px_process.order_best_last([p0, p1, p2])
+    p1 = testutils.create_process(commandline="awk", cputime="0:11.00", mempercent="1.0")
+    p2 = testutils.create_process(commandline="bash", cputime="0:01.00", mempercent="11.0")
 
-    # The first process should have the highest CPU*Memory score, and should
-    # therefore be ordered last
-    assert ordered[2] == p0
+    # P0 should be last because its score is the highest, and p1 and p2 should
+    # be ordered alphabetically
+    assert px_process.order_best_last([p0, p1, p2]) == [p1, p2, p0]
+    assert px_process.order_best_last([p2, p1, p0]) == [p1, p2, p0]
 
-    # Verify ordering same-scored processes by command line
-    now = testutils.now()
-    p0 = testutils.create_process(commandline="awk", now=now)
-    p1 = testutils.create_process(commandline="bash", now=now)
-    assert px_process.order_best_last([p0, p1]) == [p0, p1]
-    assert px_process.order_best_last([p1, p0]) == [p0, p1]
+
+def test_order_best_first():
+    p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
+    p1 = testutils.create_process(commandline="awk", cputime="0:11.00", mempercent="1.0")
+    p2 = testutils.create_process(commandline="bash", cputime="0:01.00", mempercent="11.0")
+
+    # P0 should be first because its score is the highest, then p1 and p2 should
+    # be ordered alphabetically
+    assert px_process.order_best_first([p0, p1, p2]) == [p0, p1, p2]
+    assert px_process.order_best_first([p2, p1, p0]) == [p0, p1, p2]
 
 
 def test_match():

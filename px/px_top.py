@@ -32,7 +32,7 @@ def top():
             exit(1)
 
         rows, columns = window_size
-        lines = px_terminal.to_screen_lines(adjusted, columns)
+        lines = px_terminal.to_screen_lines(px_process.order_best_first(adjusted), columns)
 
         # FIXME: Clear the screen
         print("FIXME: Clear the screen")
