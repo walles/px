@@ -21,10 +21,8 @@ def to_screen_lines(processes, columns):
 
 def top():
     baseline = px_process.get_all()
-
-    current = baseline
     while True:
-        adjusted = adjust_cpu_times(current, baseline)
+        adjusted = adjust_cpu_times(px_process.get_all(), baseline)
 
         window_size = px_terminal.get_window_size()
         if window_size is None:
