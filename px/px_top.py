@@ -1,3 +1,4 @@
+import sys
 import time
 
 import px_process
@@ -31,11 +32,13 @@ def top():
             exit(1)
 
         rows, columns = window_size
-        lines = to_screen_lines(adjusted, columns)
+        lines = px_terminal.to_screen_lines(adjusted, columns)
 
         # FIXME: Clear the screen
+        print("FIXME: Clear the screen")
 
-        print("\n".join(lines[0:rows - 1]))
+        sys.stdout.write("\n".join(lines[0:rows]))
+        sys.stdout.flush()
 
         # FIXME: Interrupt sleep and iterate if terminal window is resized
         time.sleep(1)

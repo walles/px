@@ -1,6 +1,7 @@
 import sys
 
 import os
+import px_process
 
 
 def get_window_size():
@@ -32,3 +33,57 @@ def get_window_size():
         return None
 
     return (rows, columns)
+
+
+def to_screen_lines(procs, columns):
+    """
+    Returns an array of lines that can be printed to screen. Each line is at
+    most columns wide.
+
+    If columns is None, line lengths are unbounded.
+    """
+    class Headings(px_process.PxProcess):
+        def __init__(self):
+            pass
+
+    headings = Headings()
+    headings.pid = "PID"
+    headings.command = "COMMAND"
+    headings.username = "USERNAME"
+    headings.cpu_time_s = "CPU"
+    headings.memory_percent_s = "RAM"
+    headings.cmdline = "COMMANDLINE"
+    procs = [headings] + procs
+
+    # Compute widest width for pid, command, user, cpu and memory usage columns
+    pid_width = 0
+    command_width = 0
+    username_width = 0
+    cpu_width = 0
+    mem_width = 0
+    for proc in procs:
+        pid_width = max(pid_width, len(str(proc.pid)))
+        command_width = max(command_width, len(proc.command))
+        username_width = max(username_width, len(proc.username))
+        cpu_width = max(cpu_width, len(proc.cpu_time_s))
+        mem_width = max(mem_width, len(proc.memory_percent_s))
+
+    format = (
+        '{:>' + str(pid_width) +
+        '} {:' + str(command_width) +
+        '} {:' + str(username_width) +
+        '} {:>' + str(cpu_width) +
+        '} {:>' + str(mem_width) + '} {}')
+
+    # Print process list using the computed column widths
+    lines = []
+    if columns is None:
+        columns = -1
+    for proc in procs:
+        line = format.format(
+            proc.pid, proc.command, proc.username,
+            proc.cpu_time_s, proc.memory_percent_s,
+            proc.cmdline)
+        lines.append(line[0:columns])
+
+    return lines
