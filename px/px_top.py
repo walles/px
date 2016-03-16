@@ -1,15 +1,15 @@
 import sys
-import copy
-import operator
-import select
 import tty
+import copy
+import select
+import termios
+import operator
 
 import px_process
 import px_terminal
 
 
-# FIXME: Get it working on bash; after pressing "q" to quit linefeeds don't work
-# properly in bash
+# FIXME: Try piping px --top to /dev/null and make sure nothing breaks
 def adjust_cpu_times(current, baseline):
     """
     Identify processes in current that are also in baseline.
@@ -106,8 +106,14 @@ def _top():
 
 def top():
     fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    tty.setraw(fd)
     try:
-        tty.setraw(fd)
         return _top()
     finally:
         tty.setcbreak(fd)
+
+        # tty.setraw() disables local echo, so we have to re-enable it here.
+        # See the "source code" comment to this answer:
+        # http://stackoverflow.com/a/8758047/473672
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
