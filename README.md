@@ -7,8 +7,8 @@ One utility, supporting at least OS X and Linux, replacing
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
-* :white_check_mark: `top` (by running `px --top`, or starting `px` through a
-symlink ending in `top`. `ptop` anyone?)
+* :white_check_mark: `top`, by running `px --top`, or starting `px` through a
+symlink ending in `top`. `ptop` anyone?
 * Possibly `iotop`
 
 # Demo
@@ -77,9 +77,6 @@ resizes.
 * Print system load before the process listing. Make sure it's really obvious
 which number is which if we print all three, maybe a graph of some kind? Maybe
 using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?
-* On pressing "q" to exit, maybe redraw the screen one last time with a few less
-rows than usual before exiting? This way, the top of the view won't scroll out
-of sight when the prompt is printed after exiting.
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
@@ -121,3 +118,5 @@ same time as the one we're currently looking at.
 * Implement support for `px --top`
 * If the user launches `px` through a symlink that's called something ending in
 `top`, enter `top` mode.
+* On pressing "q" to exit, redraw the screen one last time with a few less rows
+than usual before exiting.

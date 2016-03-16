@@ -91,45 +91,58 @@ def getch(timeout_seconds=0):
     return None
 
 
+def redraw(baseline, rows, columns):
+    """
+    Refresh display relative to the given baseline.
+
+    The new display will be (at most) rows rows x columns columns.
+    """
+    adjusted = adjust_cpu_times(px_process.get_all(), baseline)
+
+    # Sort by CPU time used, then most interesting first
+    ordered = px_process.order_best_first(adjusted)
+    ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
+    lines = px_terminal.to_screen_lines(ordered, columns)
+
+    # Clear the screen and move cursor to top left corner:
+    # https://en.wikipedia.org/wiki/ANSI_escape_code
+    #
+    # Note that some experimentation was involved in coming up with this
+    # exact sequence; if you do first "clear the full screen" then "home"
+    # for example, the contents of the previous screen gets added to the
+    # scrollback buffer, which isn't what we want. Tread carefully if you
+    # intend to change these.
+    #
+    # Writing to stderr since stderr is rumored not to be buffered.
+    CSI = "\x1b["
+    sys.stderr.write(CSI + "1J")
+    sys.stderr.write(CSI + "H")
+
+    # We need both \r and \n when the TTY is in tty.setraw() mode
+    sys.stdout.write("\r\n".join(lines[0:rows]))
+    sys.stdout.flush()
+
+
 def _top():
     baseline = px_process.get_all()
     while True:
-        adjusted = adjust_cpu_times(px_process.get_all(), baseline)
-
         window_size = px_terminal.get_window_size()
         if window_size is None:
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
-
-        # Sort by CPU time used, then most interesting first
-        ordered = px_process.order_best_first(adjusted)
-        ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
         rows, columns = window_size
-        lines = px_terminal.to_screen_lines(ordered, columns)
-
-        # Clear the screen and move cursor to top left corner:
-        # https://en.wikipedia.org/wiki/ANSI_escape_code
-        #
-        # Note that some experimentation was involved in coming up with this
-        # exact sequence; if you do first "clear the full screen" then "home"
-        # for example, the contents of the previous screen gets added to the
-        # scrollback buffer, which isn't what we want. Tread carefully if you
-        # intend to change these.
-        #
-        # Writing to stderr since stderr is rumored not to be buffered.
-        CSI = "\x1b["
-        sys.stderr.write(CSI + "1J")
-        sys.stderr.write(CSI + "H")
-
-        # We need both \r and \n when the TTY is in tty.setraw() mode
-        sys.stdout.write("\r\n".join(lines[0:rows]))
-        sys.stdout.flush()
+        redraw(baseline, rows, columns)
 
         char = getch(timeout_seconds=1)
 
         # Handle all keypresses before refreshing the display
         while char is not None:
             if char == 'q':
+                # The idea here is that if you terminate with "q" you still
+                # probably want the heading line on screen. So just do another
+                # update with somewhat fewer lines, and you'll get just that.
+                rows, columns = px_terminal.get_window_size()
+                redraw(baseline, rows - 4, columns)
                 return
 
             char = getch(timeout_seconds=0)
