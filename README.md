@@ -68,6 +68,8 @@ click your new release, click the `Edit tag` button, then attach your `px.pex`
 file that you just built to the release.
 
 # TODO `top` replacement
+* Disable terminal line wrapping for smoother handling of terminal window
+resizes.
 * Print system load before the process listing. Make sure it's really obvious
 which number is which if we print all three, maybe a graph of some kind? Maybe
 using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?

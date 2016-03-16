@@ -1,12 +1,19 @@
 import sys
 import tty
 import copy
+import errno
+import signal
 import select
 import termios
 import operator
 
+import os
 import px_process
 import px_terminal
+
+
+# Used for informing our getch() function that a window resize has occured
+SIGWINCH_PIPE = os.pipe()
 
 
 def adjust_cpu_times(current, baseline):
@@ -51,18 +58,37 @@ def adjust_cpu_times(current, baseline):
     return pid2proc.values()
 
 
+def read_select(fds, timeout_seconds):
+    """Select on any of the fds becoming ready for read, retry on EINTR"""
+    while True:
+        try:
+            return select.select(fds, [], [], timeout_seconds)[0]
+        except select.error as ex:
+            if ex[0] == errno.EINTR:
+                # EINTR happens when the terminal window is resized by the user,
+                # just try again.
+                continue
+
+            # Non-EINTR exceptions are unexpected, help!
+            raise
+
+
 def getch(timeout_seconds=0):
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
     Returns the character, or None on timeout.
     """
-    char = None
-    can_read_from = select.select([sys.stdin], [], [], timeout_seconds)[0]
-    if len(can_read_from) > 0:
-        char = can_read_from[0].read(1)
+    can_read_from = (
+        read_select([sys.stdin.fileno(), SIGWINCH_PIPE[0]], timeout_seconds))
 
-    return char
+    if len(can_read_from) > 0:
+        # Read one byte from the first ready-for-read stream. If more than one
+        # stream is ready, we'll catch the second one on the next call to this
+        # function, so just doing the first is fine.
+        return os.read(can_read_from[0], 1)
+
+    return None
 
 
 def _top():
@@ -99,16 +125,30 @@ def _top():
         sys.stdout.write("\r\n".join(lines[0:rows]))
         sys.stdout.flush()
 
-        # FIXME: Interrupt sleep and iterate if terminal window is resized
         char = getch(timeout_seconds=1)
-        if char == 'q':
-            return
+
+        # Handle all keypresses before refreshing the display
+        while char is not None:
+            if char == 'q':
+                return
+
+            char = getch(timeout_seconds=0)
+
+
+def sigwinch_handler(signum, frame):
+    """Handle window resize signals by telling our getch() function to return"""
+    # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
+    # doesn't collide with anything with some meaning other than "please
+    # redraw".
+    os.write(SIGWINCH_PIPE[1], 'r')
 
 
 def top():
     if not sys.stdout.isatty():
         sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
         exit(1)
+
+    signal.signal(signal.SIGWINCH, sigwinch_handler)
 
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
