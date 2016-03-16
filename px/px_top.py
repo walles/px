@@ -8,6 +8,8 @@ import px_process
 import px_terminal
 
 
+# FIXME: Get it working on bash; after pressing "q" to quit linefeeds don't work
+# properly in bash
 def adjust_cpu_times(current, baseline):
     """
     Identify processes in current that are also in baseline.
