@@ -10,13 +10,13 @@ def test_adjust_cpu_times():
         px_process.create_kernel_process(now),
         testutils.create_process(pid=100, cputime="0:10.00", commandline="only in current"),
         testutils.create_process(pid=200, cputime="0:20.00", commandline="re-used PID baseline",
-                                 timestring="2010 May 4"),
+                                 timestring="Mon May 7 09:33:11 2010"),
         testutils.create_process(pid=300, cputime="0:30.00", commandline="relevant baseline"),
     ]
     baseline = [
         px_process.create_kernel_process(now),
         testutils.create_process(pid=200, cputime="0:02.00", commandline="re-used PID baseline",
-                                 timestring="2010 April 1"),
+                                 timestring="Mon Apr 7 09:33:11 2010"),
         testutils.create_process(pid=300, cputime="0:03.00", commandline="relevant baseline"),
         testutils.create_process(pid=400, cputime="0:03.00", commandline="only in baseline"),
     ]
@@ -26,7 +26,7 @@ def test_adjust_cpu_times():
         px_process.create_kernel_process(now),
         testutils.create_process(pid=100, cputime="0:10.00", commandline="only in current"),
         testutils.create_process(pid=200, cputime="0:20.00", commandline="re-used PID baseline",
-                                 timestring="2010 May 4"),
+                                 timestring="Mon May 7 09:33:11 2010"),
         testutils.create_process(pid=300, cputime="0:27.00", commandline="relevant baseline"),
     ])
 
