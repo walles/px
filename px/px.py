@@ -32,6 +32,7 @@ of which processes are most active right now.
 --version: Print version information
 """
 
+import sys
 import json
 import zipfile
 
@@ -78,6 +79,8 @@ def main(args):
     lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns)
     print("\n".join(lines))
 
-
 if __name__ == "__main__":
+    if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
+        sys.argv.append("--top")
+
     main(docopt.docopt(__doc__, version=get_version()))

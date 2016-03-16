@@ -7,7 +7,8 @@ One utility, supporting at least OS X and Linux, replacing
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
-* :white_check_mark: `top` (by running `px --top`)
+* :white_check_mark: `top` (by running `px --top`, or starting `px` through a
+symlink ending in `top`. `ptop` anyone?)
 * Possibly `iotop`
 
 # Demo
@@ -34,12 +35,15 @@ without scrolling.
 `px.pex` from there. That file is the whole distribution and can be run as it
 is on any Python 2.7 equipped system.
 * `sudo install px.pex /usr/local/bin/px`
+* `sudo ln -s /usr/local/bin/px /usr/local/bin/ptop`
 
-Now, you should be able to run `px` or `px --help` from the command line.
-Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
+Now, you should be able to run `px`, `px --help` or `ptop` from the command
+line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
 
 # Usage
-Just type `px`, that's a good start!
+Just type `px` or `ptop`, that's a good start!
+
+To exit `ptop`, press "`q`".
 
 Also try `px --help` to see what else `px` can do except for just listing all
 processes.
@@ -76,8 +80,6 @@ using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?
 * On pressing "q" to exit, maybe redraw the screen one last time with a few less
 rows than usual before exiting? This way, the top of the view won't scroll out
 of sight when the prompt is printed after exiting.
-* If the user launches `px` through a symlink that's called something ending in
-`top`, enter `top` mode.
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
@@ -117,3 +119,5 @@ To humans the name is more important than the PID, so it should be first.
 * In the details view, list a number of processes that were created around the
 same time as the one we're currently looking at.
 * Implement support for `px --top`
+* If the user launches `px` through a symlink that's called something ending in
+`top`, enter `top` mode.
