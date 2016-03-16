@@ -1,12 +1,15 @@
 import sys
 import copy
-import time
 import operator
+import select
+import tty
 
 import px_process
 import px_terminal
 
 
+# FIXME: Test run on bash
+# FIXME: Test run on Linux
 def adjust_cpu_times(current, baseline):
     """
     Identify processes in current that are also in baseline.
@@ -49,7 +52,21 @@ def adjust_cpu_times(current, baseline):
     return pid2proc.values()
 
 
-def top():
+def getch(timeout_seconds=0):
+    """
+    Wait at most timeout_seconds for a character to become available on stdin.
+
+    Returns the character, or None on timeout.
+    """
+    char = None
+    can_read_from = select.select([sys.stdin], [], [], timeout_seconds)[0]
+    if len(can_read_from) > 0:
+        char = can_read_from[0].read(1)
+
+    return char
+
+
+def _top():
     baseline = px_process.get_all()
     while True:
         adjusted = adjust_cpu_times(px_process.get_all(), baseline)
@@ -69,19 +86,28 @@ def top():
         # https://en.wikipedia.org/wiki/ANSI_escape_code
         #
         # Note that some experimentation was involved in coming up with this
-        # exact sequence; if you do first "clear" then "home" for example, the
-        # contents of the previous screen gets added to the scrollback buffer,
-        # which isn't what we want. Tread carefully if you intend to change
-        # these.
+        # exact sequence; if you do first "clear the full screen" then "home"
+        # for example, the contents of the previous screen gets added to the
+        # scrollback buffer, which isn't what we want. Tread carefully if you
+        # intend to change these.
         CSI = "\x1b["
         sys.stderr.write(CSI + "1J")
         sys.stderr.write(CSI + "H")
 
-        sys.stdout.write("\n".join(lines[0:rows]))
+        # We need both \r and \n when the TTY is in tty.setraw() mode
+        sys.stdout.write("\r\n".join(lines[0:rows]))
         sys.stdout.flush()
 
         # FIXME: Interrupt sleep and iterate if terminal window is resized
-        # FIXME: Interrupt sleep and terminate if user presses "q"
-        time.sleep(1)
+        char = getch(timeout_seconds=1)
+        if char == 'q':
+            return
 
-    return
+
+def top():
+    fd = sys.stdin.fileno()
+    try:
+        tty.setraw(fd)
+        return _top()
+    finally:
+        tty.setcbreak(fd)
