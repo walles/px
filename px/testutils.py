@@ -1,8 +1,9 @@
 import random
 import datetime
 
-import dateutil
 import px_process
+import dateutil.tz
+import dateutil.parser
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar 7 09:33:11 2016"

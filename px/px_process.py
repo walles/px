@@ -4,7 +4,7 @@ import subprocess
 
 import os
 import re
-import dateutil.parser
+import dateutil.tz
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
@@ -36,7 +36,7 @@ class PxProcess(object):
         self.command = self._get_command()
         self.lowercase_command = self.command.lower()
 
-        time = dateutil.parser.parse(process_builder.start_time_string)
+        time = datetime.datetime.strptime(process_builder.start_time_string.strip(), "%c")
         self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())
         self.age_seconds = (now - self.start_time).total_seconds()
         assert self.age_seconds >= 0
@@ -217,8 +217,8 @@ def create_kernel_process(now):
     process_builder.pid = 0
     process_builder.ppid = None
 
-    # FIXME: This should be the system boot timestamp
-    process_builder.start_time_string = "Jan 1 1970"
+    # FIXME: This should be the system boot timestamp, not the epoch
+    process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime("%c")
 
     process_builder.username = "root"
     process_builder.cpu_time = None
