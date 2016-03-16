@@ -7,7 +7,7 @@ One utility, supporting at least OS X and Linux, replacing
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
-* `top` (by running `px --top`)
+* :white_check_mark: `top` (by running `px --top`)
 * Possibly `iotop`
 
 # Demo
@@ -116,3 +116,4 @@ PID show:
 To humans the name is more important than the PID, so it should be first.
 * In the details view, list a number of processes that were created around the
 same time as the one we're currently looking at.
+* Implement support for `px --top`
