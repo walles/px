@@ -9,7 +9,6 @@ import px_process
 import px_terminal
 
 
-# FIXME: Try piping px --top to /dev/null and make sure nothing breaks
 def adjust_cpu_times(current, baseline):
     """
     Identify processes in current that are also in baseline.
@@ -73,7 +72,7 @@ def _top():
 
         window_size = px_terminal.get_window_size()
         if window_size is None:
-            sys.stderr.write("Cannot find terminal window size, are you on a terminal?\n")
+            sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
 
         # Sort by CPU time used, then most interesting first
@@ -90,6 +89,8 @@ def _top():
         # for example, the contents of the previous screen gets added to the
         # scrollback buffer, which isn't what we want. Tread carefully if you
         # intend to change these.
+        #
+        # Writing to stderr since stderr is rumored not to be buffered.
         CSI = "\x1b["
         sys.stderr.write(CSI + "1J")
         sys.stderr.write(CSI + "H")
@@ -105,11 +106,15 @@ def _top():
 
 
 def top():
+    if not sys.stdout.isatty():
+        sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
+        exit(1)
+
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     tty.setraw(fd)
     try:
-        return _top()
+        _top()
     finally:
         tty.setcbreak(fd)
 
