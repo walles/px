@@ -7,7 +7,7 @@ One utility, supporting at least OS X and Linux, replacing
 running `px java` lists only java processes)
 * :white_check_mark: `pstree` (running `px 1234` shows PID 1234 in a tree, plus
 other information about that process)
-* `top` (by running `watch px --top`)
+* :white_check_mark: `top` (by running `px --top`)
 * Possibly `iotop`
 
 # Demo
@@ -68,10 +68,16 @@ click your new release, click the `Edit tag` button, then attach your `px.pex`
 file that you just built to the release.
 
 # TODO `top` replacement
-* Print system load before the process listing
-* Maybe add a `--top` / `--top=5s` flag which samples the system for one second
-(or five) and adds a CPU usage column to the output
-* Maybe add a command line option for truncating output at screen width
+* Disable terminal line wrapping for smoother handling of terminal window
+resizes.
+* Print system load before the process listing. Make sure it's really obvious
+which number is which if we print all three, maybe a graph of some kind? Maybe
+using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?
+* On pressing "q" to exit, maybe redraw the screen one last time with a few less
+rows than usual before exiting? This way, the top of the view won't scroll out
+of sight when the prompt is printed after exiting.
+* If the user launches `px` through a symlink that's called something ending in
+`top`, enter `top` mode.
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
@@ -110,3 +116,4 @@ PID show:
 To humans the name is more important than the PID, so it should be first.
 * In the details view, list a number of processes that were created around the
 same time as the one we're currently looking at.
+* Implement support for `px --top`

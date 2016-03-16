@@ -7,6 +7,7 @@ Usage:
   px
   px <filter>
   px <PID>
+  px --top
   px --help
   px --version
 
@@ -21,86 +22,25 @@ If the optional filter parameter is specified, processes will be shown if:
 If the optional PID parameter is specified, you'll get detailed information
 about that particular PID.
 
+In --top mode, a new process list is shown every second. The most interesting
+processes are on top. In this mode, CPU times are counted from when you first
+invoked px, rather than from when each process started. This gives you a picture
+of which processes are most active right now.
+
+--top: Show a continuously refreshed process list
 --help: Print this help
 --version: Print version information
 """
 
-import sys
 import json
 import zipfile
 
 import os
 import docopt
+import px_top
 import px_process
+import px_terminal
 import px_processinfo
-
-
-def get_terminal_window_width():
-    """
-    Return the width of the terminal if available, or None if not.
-    """
-
-    if not sys.stdout.isatty():
-        # We shouldn't truncate lines when piping
-        return None
-
-    result = os.popen('stty size', 'r').read().split()
-    if len(result) < 2:
-        # Getting the terminal window width failed, don't truncate
-        return None
-
-    rows, columns = result
-    columns = int(columns)
-    if columns < 1:
-        # This seems to happen during OS X CI runs:
-        # https://travis-ci.org/walles/px/jobs/113134994
-        return None
-
-    return columns
-
-
-def print_procs(procs):
-    class Headings(px_process.PxProcess):
-        def __init__(self):
-            pass
-
-    headings = Headings()
-    headings.pid = "PID"
-    headings.command = "COMMAND"
-    headings.username = "USERNAME"
-    headings.cpu_time_s = "CPU"
-    headings.memory_percent_s = "RAM"
-    headings.cmdline = "COMMANDLINE"
-    procs = [headings] + procs
-
-    # Compute widest width for pid, command, user, cpu and memory usage columns
-    pid_width = 0
-    command_width = 0
-    username_width = 0
-    cpu_width = 0
-    mem_width = 0
-    for proc in procs:
-        pid_width = max(pid_width, len(str(proc.pid)))
-        command_width = max(command_width, len(proc.command))
-        username_width = max(username_width, len(proc.username))
-        cpu_width = max(cpu_width, len(proc.cpu_time_s))
-        mem_width = max(mem_width, len(proc.memory_percent_s))
-
-    format = (
-        '{:>' + str(pid_width) +
-        '} {:' + str(command_width) +
-        '} {:' + str(username_width) +
-        '} {:>' + str(cpu_width) +
-        '} {:>' + str(mem_width) + '} {}')
-
-    # Print process list using the computed column widths
-    terminal_window_width = get_terminal_window_width()
-    for proc in procs:
-        line = format.format(
-            proc.pid, proc.command, proc.username,
-            proc.cpu_time_s, proc.memory_percent_s,
-            proc.cmdline)
-        print(line[0:terminal_window_width])
 
 
 def get_version():
@@ -112,6 +52,10 @@ def get_version():
 
 
 def main(args):
+    if args['--top']:
+        px_top.top()
+        return
+
     filterstring = args['<filter>']
     if filterstring:
         try:
@@ -127,7 +71,12 @@ def main(args):
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
-    print_procs(px_process.order_best_last(procs))
+    columns = None
+    window_size = px_terminal.get_window_size()
+    if window_size is not None:
+        columns = window_size[1]
+    lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns)
+    print("\n".join(lines))
 
 
 if __name__ == "__main__":
