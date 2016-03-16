@@ -68,10 +68,12 @@ click your new release, click the `Edit tag` button, then attach your `px.pex`
 file that you just built to the release.
 
 # TODO `top` replacement
-* Print system load before the process listing
-* Maybe add a `--top` / `--top=5s` flag which samples the system for one second
-(or five) and adds a CPU usage column to the output
-* Maybe add a command line option for truncating output at screen width
+* Print system load before the process listing. Make sure it's really obvious
+which number is which if we print all three, maybe a graph of some kind? Maybe
+using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?
+* On pressing "q" to exit, maybe redraw the screen one last time with a few less
+rows than usual before exiting? This way, the top of the view won't scroll out
+of sight when the prompt is printed after exiting.
 * If the user launches `px` through a symlink that's called something ending in
 `top`, enter `top` mode.
 

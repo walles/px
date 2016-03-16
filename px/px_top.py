@@ -8,8 +8,6 @@ import px_process
 import px_terminal
 
 
-# FIXME: Test run on bash
-# FIXME: Test run on Linux
 def adjust_cpu_times(current, baseline):
     """
     Identify processes in current that are also in baseline.
