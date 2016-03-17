@@ -90,4 +90,4 @@ def get_load_string(load_values=None):
     avg0to1, avg1to5, avg5to15 = load_values
     recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
     graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
-    return graph + " (scale 0-{:.1f})".format(peak)
+    return u"{:.1f}, history: |{}|".format(avg0to1, graph)
