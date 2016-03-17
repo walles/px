@@ -74,9 +74,6 @@ file that you just built to the release.
 # TODO `top` replacement
 * Disable terminal line wrapping for smoother handling of terminal window
 resizes.
-* Print system load before the process listing. Make sure it's really obvious
-which number is which if we print all three, maybe a graph of some kind? Maybe
-using unicode braille characters like [vtop](https://github.com/MrRio/vtop)?
 
 # TODO `iotop` replacement
 * When given the `--top` flag and enough permissions, record per process IO
@@ -120,3 +117,4 @@ same time as the one we're currently looking at.
 `top`, enter `top` mode.
 * On pressing "q" to exit, redraw the screen one last time with a few less rows
 than usual before exiting.
+* Print system load before the process listing.
