@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/walles/px.svg?branch=python)](https://travis-ci.org/walles/px)
 [![Coverage Status](https://coveralls.io/repos/github/walles/px/badge.svg?branch=python)](https://coveralls.io/github/walles/px?branch=python)
 
 # Cross Functional Process Explorer
