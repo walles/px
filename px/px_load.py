@@ -82,7 +82,10 @@ def get_load_values():
     return (avg0to1, avg1to5, avg5to15)
 
 
-def get_load_string(load_values=get_load_values()):
+def get_load_string(load_values=None):
+    if load_values is None:
+        load_values = get_load_values()
+
     avg0to1, avg1to5, avg5to15 = load_values
     recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
     graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])

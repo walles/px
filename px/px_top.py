@@ -8,6 +8,7 @@ import termios
 import operator
 
 import os
+import px_load
 import px_process
 import px_terminal
 
@@ -97,12 +98,14 @@ def redraw(baseline, rows, columns):
 
     The new display will be (at most) rows rows x columns columns.
     """
+    lines = ["System load: " + px_load.get_load_string(), ""]
+
     adjusted = adjust_cpu_times(px_process.get_all(), baseline)
 
     # Sort by CPU time used, then most interesting first
     ordered = px_process.order_best_first(adjusted)
     ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
-    lines = px_terminal.to_screen_lines(ordered, columns)
+    lines += px_terminal.to_screen_lines(ordered, columns)
 
     # Clear the screen and move cursor to top left corner:
     # https://en.wikipedia.org/wiki/ANSI_escape_code
