@@ -8,7 +8,7 @@ import os
 
 
 def average_to_level(average, peak):
-    level = 4 * (average / peak)
+    level = 3 * (average / peak)
     return int(round(level))
 
 
@@ -16,7 +16,7 @@ def averages_to_levels(avg0, avg1, avg2):
     """
     Converts three load averages into three levels.
 
-    A level is a 0-4 integer value.
+    A level is a 0-3 integer value.
 
     This function returns the three leves, plus the peak value the levels are
     based on.
@@ -35,13 +35,14 @@ def levels_to_graph(levels):
     """
     Convert an array of levels into a unicode string graph.
 
-    Each level in the levels array is an integer 0-4.
+    Each level in the levels array is an integer 0-3. Those levels will be
+    represented in the graph by 1-4 dots each.
 
     The returned string will contain two levels per rune.
     """
     if len(levels) % 2 == 1:
-        # Left pad uneven-length arrays
-        levels = [0] + levels
+        # Left pad uneven-length arrays with an empty column
+        levels = [-1] + levels
 
     # From: http://stackoverflow.com/a/19177754/473672
     unicodify = chr
@@ -58,8 +59,8 @@ def levels_to_graph(levels):
 
     graph = ""
     for index in range(0, len(levels) - 1, 2):
-        left_level = levels[index]
-        right_level = levels[index + 1]
+        left_level = levels[index] + 1
+        right_level = levels[index + 1] + 1
         code = 0x2800 + LEFT_BAR[left_level] + RIGHT_BAR[right_level]
         graph += unicodify(code)
 
