@@ -6,4 +6,10 @@ os:
   - linux
   - osx
 
+install:
+  - pip install coveralls
+
 script: ./ci.sh
+
+after_success:
+  - coveralls
