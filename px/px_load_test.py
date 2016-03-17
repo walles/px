@@ -24,3 +24,9 @@ def test_levels_to_graph():
     assert len(px_load.levels_to_graph([1, 2])) == 1
     assert len(px_load.levels_to_graph([3, 4, 1])) == 2
     assert len(px_load.levels_to_graph([1] * 15)) == 8
+
+
+def test_get_load_string():
+    assert px_load.get_load_string((0.1, 0.2, 0.3)).endswith("scale 0-1.0)")
+    assert px_load.get_load_string((0.1, 0.2, 3.0)).endswith("scale 0-3.0)")
+    assert px_load.get_load_string((0.1, 0.2, 1.135135)).endswith("scale 0-1.1)")

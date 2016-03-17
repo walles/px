@@ -1,13 +1,10 @@
-"""Functions for visualizing system load over time in a Unicode graph"""
+"""
+Functions for visualizing system load over time in a Unicode graph.
+
+The one you probably want to call is get_load_string().
+"""
 
 import os
-
-
-def get_load_string():
-    avg0to1, avg1to5, avg5to15 = get_load_values()
-    recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
-    graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
-    return graph + " (scale 0-{})".format(peak)
 
 
 def average_to_level(average, peak):
@@ -83,3 +80,10 @@ def get_load_values():
     avg5to15 = (15 * avg15 - 5 * avg5) / 10.0
 
     return (avg0to1, avg1to5, avg5to15)
+
+
+def get_load_string(load_values=get_load_values()):
+    avg0to1, avg1to5, avg5to15 = load_values
+    recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
+    graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
+    return graph + " (scale 0-{:.1f})".format(peak)
