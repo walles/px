@@ -1,9 +1,17 @@
-# Enables support for a docker container-based build:
-# https://docs.travis-ci.com/user/workers/container-based-infrastructure/#Routing-your-build-to-container-based-infrastructure
-sudo: false
+# We need sudo to install pip system-wide
+sudo: required
 
 os:
   - linux
   - osx
 
+install:
+  # The coverage version number must match what the Pants version declared in
+  # pants.ini uses.
+  - sudo pip install coverage==3.7.1
+  - sudo pip install coveralls
+
 script: ./ci.sh
+
+after_success:
+  - coveralls

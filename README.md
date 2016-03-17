@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/walles/px/badge.svg?branch=python)](https://coveralls.io/github/walles/px?branch=python)
+
 # Cross Functional Process Explorer
 
 # Vision
@@ -115,6 +117,6 @@ same time as the one we're currently looking at.
 * Implement support for `px --top`
 * If the user launches `px` through a symlink that's called something ending in
 `top`, enter `top` mode.
-* On pressing "q" to exit, redraw the screen one last time with a few less rows
-than usual before exiting.
-* Print system load before the process listing.
+* top: On pressing "q" to exit, redraw the screen one last time with a few less
+rows than usual before exiting.
+* top: Print system load before the process listing.
