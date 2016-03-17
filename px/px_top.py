@@ -178,3 +178,6 @@ def top():
         # See the "source code" comment to this answer:
         # http://stackoverflow.com/a/8758047/473672
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+        # Make sure we actually end up on a new line
+        print("")
