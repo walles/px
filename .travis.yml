@@ -6,6 +6,9 @@ os:
   - osx
 
 install:
+  # The coverage version number must match what the Pants version declared in
+  # pants.ini uses.
+  - sudo pip install coverage==3.7.1
   - sudo pip install coveralls
 
 script: ./ci.sh
