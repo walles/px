@@ -12,7 +12,7 @@ set -x
 ./pants binary px
 
 echo
-if unzip -l dist/px.pex |grep " .deps"|/usr/bin/egrep '\.so$' ; then
+if unzip -qq -l dist/px.pex '*.so' ; then
   cat << EOF
   ERROR: There are natively compiled dependencies in the .pex, this makes
          distribution a lot harder. Please fix your dependencies.
