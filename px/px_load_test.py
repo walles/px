@@ -17,7 +17,7 @@ def test_averages_to_levels():
 def test_levels_to_graph():
     # Arrays of uneven lengths shall be left padded with an empty column. So
     # this test case wants: "padding=0, 0", "1, 2", "3, 4".
-    assert px_load.levels_to_graph([0, 1, 2, 3, 4]) == "⠀⣠⣾"
+    assert px_load.levels_to_graph([0, 1, 2, 3, 4]) == u"⠀⣠⣾"
 
     assert px_load.levels_to_graph([]) == ""
     assert len(px_load.levels_to_graph([0])) == 1

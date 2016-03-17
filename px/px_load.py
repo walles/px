@@ -6,7 +6,7 @@ import os
 def get_load_string():
     avg0to1, avg1to5, avg5to15 = get_load_values()
     recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
-    graph = levels_to_graph([old] * 15 + [between] * 4 + [recent])
+    graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
     return graph + " (scale 0-{})".format(peak)
 
 
@@ -42,7 +42,31 @@ def levels_to_graph(levels):
 
     The returned string will contain two levels per rune.
     """
-    return None
+    if len(levels) % 2 == 1:
+        # Left pad uneven-length arrays
+        levels = [0] + levels
+
+    # From: http://stackoverflow.com/a/19177754/473672
+    unicodify = chr
+    try:
+        # Python 2
+        unicodify = unichr
+    except NameError:
+        # Python 3
+        pass
+
+    # https://en.wikipedia.org/wiki/Braille_Patterns#Identifying.2C_naming_and_ordering
+    LEFT_BAR = [0x00, 0x40, 0x44, 0x46, 0x47]
+    RIGHT_BAR = [0x00, 0x80, 0xA0, 0xB0, 0xB8]
+
+    graph = ""
+    for index in range(0, len(levels) - 1, 2):
+        left_level = levels[index]
+        right_level = levels[index + 1]
+        code = 0x2800 + LEFT_BAR[left_level] + RIGHT_BAR[right_level]
+        graph += unicodify(code)
+
+    return graph
 
 
 def get_load_values():
