@@ -243,13 +243,14 @@ def print_fds(process, pid2process):
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
-    for file in sorted(files_for_process, key=operator.attrgetter("name")):
+    network_connections = set()
+    for file in files_for_process:
         if file.type in ['IPv4', 'IPv6']:
-            # Print remote communication
             # FIXME: If this socket is open towards a port on the local machine,
             # can we trace its destination and print that process here?
-            print("  " + file.name)
-            continue
+            network_connections.add(file.name)
+    for connection in sorted(network_connections):
+        print("  " + connection)
 
     print("")
     print("Inter Process Communication:")
