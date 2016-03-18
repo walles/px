@@ -134,16 +134,17 @@ def get_ipc_map(process, files, pid2process):
     have open to that process.
     """
 
+    # Only deal with IPC related files
+    files = filter(
+        lambda f: f.type in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6'],
+        files)
+
     files_for_process = filter(lambda f: f.pid == process.pid, files)
 
     return_me = {}
     unknown = create_fake_process(
         name="UNKNOWN destinations: Running with sudo might help find out where these go.")
     for file in files_for_process:
-        if file.type not in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']:
-            # Only deal with IPC related files
-            continue
-
         if file.plain_name in ['pipe', '(none)']:
             # These are placeholders, not names, can't do anything with these
             continue
