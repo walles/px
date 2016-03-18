@@ -69,6 +69,10 @@ def get_other_end_pids(file, files):
         # scanning for it.
         name = name[2:]
 
+    file_device_with_arrow = None
+    if file.device is not None:
+        file_device_with_arrow = "->" + file.device
+
     pids = set()
     for candidate in files:
         # The other end of the socket / pipe is encoded in the DEVICE field of
@@ -76,7 +80,7 @@ def get_other_end_pids(file, files):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
         if candidate.device == name:
             pids.add(candidate.pid)
-        if candidate.plain_name.replace("->", "") == file.device:
+        if candidate.plain_name == file_device_with_arrow:
             pids.add(candidate.pid)
 
         if candidate.name != file.name:
