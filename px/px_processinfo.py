@@ -254,9 +254,9 @@ def print_fds(process, pid2process):
     print("")
     print("Inter Process Communication:")
     ipc_map = get_ipc_map(process, files, pid2process)
-    for process in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
-        print("  " + str(process))
-        channels = ipc_map[process]
+    for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
+        print("  " + str(target))
+        channels = ipc_map[target]
         channel_names = set()
         channel_names.update(map(lambda c: c.name, channels))
         for channel_name in sorted(channel_names):
