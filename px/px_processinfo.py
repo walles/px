@@ -73,8 +73,6 @@ def get_other_end_pids(file, files):
     if file.device is not None:
         file_device_with_arrow = "->" + file.device
 
-    file_device_number = file.device_number()
-
     pids = set()
     for candidate in files:
         # The other end of the socket / pipe is encoded in the DEVICE field of
@@ -96,8 +94,8 @@ def get_other_end_pids(file, files):
             # On Linux, this is how we identify named FIFOs
             pids.add(candidate.pid)
 
-        if file_device_number is not None:
-            if file_device_number == candidate.device_number():
+        if file.device_number is not None:
+            if file.device_number == candidate.device_number:
                 pids.add(candidate.pid)
 
     return pids

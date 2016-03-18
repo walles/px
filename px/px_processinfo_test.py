@@ -1,6 +1,7 @@
 import re
 import px_file
 import testutils
+import os.path
 import px_process
 import px_processinfo
 
@@ -15,17 +16,19 @@ def create_file(name, device, pid, access=None):
     file.pid = pid
     file.access = access
     file.device = device
+    file.device_number = px_file.device_to_number(device)
     return file
 
 
 def test_get_other_end_pids_basic():
-    files = [create_file("name", "0xPipeIdentifier", 25)]
+    PIPE_ID = '0x919E1D'
+    files = [create_file("name", PIPE_ID, 25)]
 
-    my_end = create_file("[] 0xPipeIdentifier", "0x1234", 42)
+    my_end = create_file("[] " + PIPE_ID, "0x1234", 42)
     found = px_processinfo.get_other_end_pids(my_end, files)
     assert found == set([25])
 
-    my_end = create_file("[] ->0xPipeIdentifier", "0x1234", 42)
+    my_end = create_file("[] ->" + PIPE_ID, "0x1234", 42)
     found = px_processinfo.get_other_end_pids(my_end, files)
     assert found == set([25])
 
@@ -171,3 +174,19 @@ def test_print_starttime():
     all = px_process.get_all()
     process0 = filter(lambda p: p.pid == 0, all)[0]
     px_processinfo.print_start_time(process0)
+
+
+def test_get_ipc_map():
+    files = None
+    my_dir = os.path.dirname(__file__)
+    with open(os.path.join(my_dir, "lsof-test-output.txt"), "r") as lsof_output:
+        files = px_file.lsof_to_files(lsof_output.read())
+
+    pid2process = {}
+    for file in files:
+        if file.pid in pid2process:
+            continue
+        pid2process[file.pid] = testutils.create_process(pid=file.pid)
+
+    process = testutils.create_process(pid=1997)
+    px_processinfo.get_ipc_map(process, files, pid2process)
