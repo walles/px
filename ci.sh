@@ -7,7 +7,7 @@ set -x
 # Run all Python tests
 ./pants list | \
   xargs ./pants filter --filter-type=python_tests | \
-  xargs ./pants test.pytest --coverage=modules:px
+  xargs ./pants test.pytest --coverage=modules:px --options=--durations=5
 
 ./pants binary px
 
