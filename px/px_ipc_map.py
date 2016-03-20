@@ -58,6 +58,7 @@ class IpcMap(object):
         self._device_to_pids = {}
         self._plain_name_to_pids = {}
         self._name_to_files = {}
+        self._device_number_to_files = {}
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -65,6 +66,9 @@ class IpcMap(object):
             add_arraymapping(self._plain_name_to_pids, file.plain_name, file.pid)
 
             add_arraymapping(self._name_to_files, file.name, file)
+
+            if file.device_number is not None:
+                add_arraymapping(self._device_number_to_files, file.device_number, file)
 
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
@@ -92,6 +96,14 @@ class IpcMap(object):
             if matching_pids:
                 pids.update(matching_pids)
 
+        if file.device_number:
+            matching_files = self._device_number_to_files.get(file.device_number)
+            if not matching_files:
+                matching_files = []
+            for candidate in matching_files:
+                if candidate.name == file.name:
+                    pids.add(candidate.pid)
+
         same_named_files = self._name_to_files.get(file.name)
         if not same_named_files:
             same_named_files = []
@@ -103,10 +115,6 @@ class IpcMap(object):
             if file.access == 'r' and candidate.access == 'w':
                 # On Linux, this is how we identify named FIFOs
                 pids.add(candidate.pid)
-
-            if file.device_number is not None:
-                if file.device_number == candidate.device_number:
-                    pids.add(candidate.pid)
 
         return pids
 
