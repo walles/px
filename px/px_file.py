@@ -4,25 +4,27 @@ import os
 
 
 class PxFile(object):
+    def __init__(self):
+        self._device_number = None
+
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
         # implementing this method is to make the py.test output more readable,
         # and py.test calls repr() and not str().
         return str(self.pid) + ":" + self.name
 
-    def device_number(self):
-        if self.device is None:
-            return None
 
-        number = int(self.device, 16)
-        if number == 0:
-            # 0x000lotsofmore000 is what we get on lsof 4.86 and Linux 4.2.0
-            # when lsof doesn't have root privileges
+def device_to_number(device):
+    if device is None:
+        return None
 
-            # FIXME: We should ask the user to run as root if we get this
-            return None
+    number = int(device, 16)
+    if number == 0:
+        # 0x000lotsofmore000 is what we get on lsof 4.86 and Linux 4.2.0
+        # when lsof doesn't have root privileges
+        return None
 
-        return number
+    return number
 
 
 def call_lsof():
@@ -69,6 +71,7 @@ def lsof_to_files(lsof):
             file.pid = pid
             file.type = "??"
             file.device = None
+            file.device_number = None
             files.append(file)
         elif type == 'a':
             file.access = {
@@ -80,6 +83,7 @@ def lsof_to_files(lsof):
             file.type = value
         elif type == 'd':
             file.device = value
+            file.device_number = device_to_number(value)
         elif type == 'n':
             file.name = value
             file.plain_name = value

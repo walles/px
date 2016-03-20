@@ -6,6 +6,7 @@ import operator
 import os
 import px_file
 import px_process
+import px_ipc_map
 
 
 def find_process_by_pid(pid, processes):
@@ -58,121 +59,6 @@ def print_process_tree(process):
     # Print all our child trees
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(child, indentation)
-
-
-def get_other_end_pids(file, files):
-    """Locate the other end of a pipe / domain socket"""
-    name = file.plain_name
-    if name.startswith("->"):
-        # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",
-        # but their endpoint names don't. Strip initial "->" from name before
-        # scanning for it.
-        name = name[2:]
-
-    file_device_with_arrow = None
-    if file.device is not None:
-        file_device_with_arrow = "->" + file.device
-
-    file_device_number = file.device_number()
-
-    pids = set()
-    for candidate in files:
-        # The other end of the socket / pipe is encoded in the DEVICE field of
-        # lsof's output ("view source" in your browser to see the conversation):
-        # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
-        if candidate.device == name:
-            pids.add(candidate.pid)
-        if candidate.plain_name == file_device_with_arrow:
-            pids.add(candidate.pid)
-
-        if candidate.name != file.name:
-            continue
-
-        if file.access == 'w' and candidate.access == 'r':
-            # On Linux, this is how we identify named FIFOs
-            pids.add(candidate.pid)
-
-        if file.access == 'r' and candidate.access == 'w':
-            # On Linux, this is how we identify named FIFOs
-            pids.add(candidate.pid)
-
-        if file_device_number is not None:
-            if file_device_number == candidate.device_number():
-                pids.add(candidate.pid)
-
-    return pids
-
-
-def create_fake_process(pid=None, name=None):
-    """Fake a process with a useable name"""
-    if pid is None and name is None:
-        raise ValueError("At least one of pid and name must be set")
-
-    if name is None:
-        name = "PID " + str(pid)
-
-    class FakeProcess(object):
-        def __repr__(self):
-            return self.name
-
-    process = FakeProcess()
-    process.name = name
-    process.lowercase_command = name.lower()
-    process.pid = pid
-    return process
-
-
-def add_ipc_entry(ipc_map, process, file):
-    if process not in ipc_map:
-        ipc_map[process] = set()
-
-    ipc_map[process].add(file)
-
-
-def get_ipc_map(process, files, pid2process):
-    """
-    Construct a map of process->[channels], where "process" is a process we have
-    IPC communication open with, and a channel is a socket or a pipe that we
-    have open to that process.
-    """
-
-    # Only deal with IPC related files
-    files = filter(
-        lambda f: f.type in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6'],
-        files)
-
-    files_for_process = filter(lambda f: f.pid == process.pid, files)
-
-    return_me = {}
-    unknown = create_fake_process(
-        name="UNKNOWN destinations: Running with sudo might help find out where these go.")
-    for file in files_for_process:
-        if file.plain_name in ['pipe', '(none)']:
-            # These are placeholders, not names, can't do anything with these
-            continue
-
-        other_end_pids = get_other_end_pids(file, files)
-        if other_end_pids == set([]):
-            if file.type in ['IPv4', 'IPv6']:
-                # These are sometimes used for IPC, sometimes not, only report
-                # them if they are.
-                continue
-
-            add_ipc_entry(return_me, unknown, file)
-            continue
-
-        for other_end_pid in other_end_pids:
-            if other_end_pid == process.pid:
-                # Talking to ourselves, never mind
-                continue
-
-            other_end_process = pid2process.get(other_end_pid)
-            if not other_end_process:
-                other_end_process = create_fake_process(pid=other_end_pid)
-                pid2process[other_end_pid] = other_end_process
-            add_ipc_entry(return_me, other_end_process, file)
-
-    return return_me
 
 
 def to_relative_start_string(base, relative):
@@ -228,10 +114,10 @@ def print_processes_started_at_the_same_time(process, all_processes):
         print("  " + to_relative_start_string(process, close))
 
 
-def print_fds(process, pid2process):
+def print_fds(process, processes):
     # It's true, I measured it myself /johan.walles@gmail.com
     print(datetime.datetime.now().isoformat() +
-          ": Now invoking lsof, this can take 20s on a big system...")
+          ": Now invoking lsof, this can take 30s on a big system...")
 
     files = px_file.get_all()
     print(datetime.datetime.now().isoformat() +
@@ -254,7 +140,7 @@ def print_fds(process, pid2process):
 
     print("")
     print("Inter Process Communication:")
-    ipc_map = get_ipc_map(process, files, pid2process)
+    ipc_map = px_ipc_map.IpcMap(process, files, processes)
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
         print("  " + str(target))
         channels = ipc_map[target]
@@ -292,13 +178,6 @@ def print_start_time(process):
 def print_process_info(pid):
     processes = px_process.get_all()
 
-    pid2process = {}
-    for process in processes:
-        # Guard against duplicate PIDs
-        assert process.pid not in pid2process
-
-        pid2process[process.pid] = process
-
     process = find_process_by_pid(pid, processes)
     if not process:
         sys.stderr.write("No such PID: {}\n".format(pid))
@@ -319,7 +198,7 @@ def print_process_info(pid):
     # List all files PID has open
     print("")
     try:
-        print_fds(process, pid2process)
+        print_fds(process, processes)
     except OSError as e:
         if e.errno != errno.ENOENT:
             raise
