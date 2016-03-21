@@ -219,7 +219,8 @@ def test_match():
 
 
 def test_seconds_to_str():
-    assert px_process.seconds_to_str(0.54321) == "0.543s"
+    assert px_process.seconds_to_str(0.54321) == "0.54s"
+    assert px_process.seconds_to_str(1.54321) == "1.54s"
     assert px_process.seconds_to_str(0.5) == "0.5s"
     assert px_process.seconds_to_str(1.0) == "1.0s"
     assert px_process.seconds_to_str(1) == "1s"

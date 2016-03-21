@@ -301,8 +301,8 @@ def seconds_to_str(seconds):
         seconds_s = str(seconds)
         decimal_index = seconds_s.rfind('.')
         if decimal_index > -1:
-            # Chop to at most three decimals
-            seconds_s = seconds_s[0:decimal_index + 4]
+            # Chop to at most two decimals
+            seconds_s = seconds_s[0:decimal_index + 3]
         return seconds_s + "s"
 
     if seconds < 3600:
