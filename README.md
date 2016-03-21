@@ -82,6 +82,10 @@ resizes.
 * When given the `--top` flag and enough permissions, record per process IO
 usage and present that in one or more columns.
 
+# TODO misc
+* In the details report, if the current process has a working directory that
+isn't `/`, list all other processes that have the same working directory.
+
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
 RAM), used CPU time, full command line
