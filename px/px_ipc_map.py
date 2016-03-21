@@ -20,6 +20,8 @@ class IpcMap(object):
         self._create_mapping()
 
     def _create_mapping(self):
+        self._create_indices()
+
         unknown = create_fake_process(
             name="UNKNOWN destinations: Running with sudo might help find out where these go.")
 
@@ -49,43 +51,72 @@ class IpcMap(object):
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
+    def _create_indices(self):
+        """
+        Creates indices used by _get_other_end_pids()
+        """
+        self._device_to_pids = {}
+        self._plain_name_to_pids = {}
+        self._name_to_files = {}
+        self._device_number_to_files = {}
+        self._fifo_name_and_access_to_pids = {}
+        for file in self.files:
+            if file.device is not None:
+                add_arraymapping(self._device_to_pids, file.device, file.pid)
+
+            add_arraymapping(self._plain_name_to_pids, file.plain_name, file.pid)
+
+            add_arraymapping(self._name_to_files, file.name, file)
+
+            if file.device_number is not None:
+                add_arraymapping(self._device_number_to_files, file.device_number, file)
+
+            if file.access is not None and file.type == 'FIFO':
+                add_arraymapping(self._fifo_name_and_access_to_pids,
+                                 file.name + file.access, file.pid)
+
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
-        name = file.plain_name
-        if name.startswith("->"):
+        plain_name = file.plain_name
+        if plain_name.startswith("->"):
             # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",
             # but their endpoint names don't. Strip initial "->" from name before
             # scanning for it.
-            name = name[2:]
+            plain_name = plain_name[2:]
 
         file_device_with_arrow = None
         if file.device is not None:
             file_device_with_arrow = "->" + file.device
 
         pids = set()
-        for candidate in self.files:
-            # The other end of the socket / pipe is encoded in the DEVICE field of
-            # lsof's output ("view source" in your browser to see the conversation):
-            # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
-            if candidate.device == name:
-                pids.add(candidate.pid)
-            if candidate.plain_name == file_device_with_arrow:
-                pids.add(candidate.pid)
 
-            if candidate.name != file.name:
-                continue
+        # The other end of the socket / pipe is encoded in the DEVICE field of
+        # lsof's output ("view source" in your browser to see the conversation):
+        # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
+        matching_pids = self._device_to_pids.get(plain_name)
+        if matching_pids:
+            pids.update(matching_pids)
+        if file_device_with_arrow:
+            matching_pids = self._plain_name_to_pids.get(file_device_with_arrow)
+            if matching_pids:
+                pids.update(matching_pids)
 
-            if file.access == 'w' and candidate.access == 'r':
-                # On Linux, this is how we identify named FIFOs
-                pids.add(candidate.pid)
-
-            if file.access == 'r' and candidate.access == 'w':
-                # On Linux, this is how we identify named FIFOs
-                pids.add(candidate.pid)
-
-            if file.device_number is not None:
-                if file.device_number == candidate.device_number:
+        if file.device_number:
+            matching_files = self._device_number_to_files.get(file.device_number)
+            if not matching_files:
+                matching_files = []
+            for candidate in matching_files:
+                if candidate.name == file.name:
                     pids.add(candidate.pid)
+
+        if file.access and file.type == 'FIFO':
+            # On Linux, this is how we identify named FIFOs
+            opposing_access = {'r': 'w', 'w': 'r'}.get(file.access)
+            if opposing_access:
+                name_and_opposing_access = file.name + opposing_access
+                matching_pids = self._fifo_name_and_access_to_pids.get(name_and_opposing_access)
+                if matching_pids:
+                    pids.update(matching_pids)
 
         return pids
 
@@ -130,3 +161,8 @@ def create_pid2process(processes):
         pid2process[process.pid] = process
 
     return pid2process
+
+
+def add_arraymapping(mapping, key, value):
+    array = mapping.setdefault(key, [])
+    array.append(value)

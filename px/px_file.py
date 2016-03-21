@@ -56,7 +56,7 @@ def lsof_to_files(lsof):
             # it.
             shard = shard[1:]
 
-        if len(shard) == 0:
+        if not shard:
             # The output ends with a single newline, which we just stripped away
             break
 
