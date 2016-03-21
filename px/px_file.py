@@ -13,6 +13,15 @@ class PxFile(object):
         # and py.test calls repr() and not str().
         return str(self.pid) + ":" + self.name
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return str(self.__dict__).__hash__()
+
 
 def device_to_number(device):
     if device is None:

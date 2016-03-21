@@ -63,3 +63,15 @@ def test_get_all():
     # As non-root I get 6000 on my system, 100 should be fine anywhere. And if
     # not, we'll just have to document our finding and lower this value
     assert len(files) > 100
+
+
+def lsof_to_file(shard_array):
+    return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
+
+
+def test_setability():
+    # Can files be stored in sets?
+    a = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
+    b = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
+    s = set([a, b])
+    assert len(s) == 1

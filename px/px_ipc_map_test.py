@@ -139,7 +139,7 @@ def test_get_ipc_map():
     assert len(ipc_map.keys()) == 2
 
     peer0 = ipc_map.keys()[0]
-    assert len(ipc_map[peer0]) == 14
+    assert len(ipc_map[peer0]) == 1
 
     peer1 = ipc_map.keys()[1]
-    assert len(ipc_map[peer1]) == 14
+    assert len(ipc_map[peer1]) == 1

@@ -6,6 +6,10 @@ class IpcMap(object):
     """
 
     def __init__(self, process, files, processes):
+        # On Linux, lsof reports the same open file once per thread of a
+        # process. Putting the files in a set gives us each file only once.
+        files = set(files)
+
         self._pid2process = create_pid2process(processes)
 
         # Only deal with IPC related files
