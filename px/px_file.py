@@ -22,11 +22,32 @@ class PxFile(object):
     def __hash__(self):
         return str(self.__dict__).__hash__()
 
-    def localhost_port(self):
-        return None
+    def _set_name(self, name):
+        self.name = name
+        self.plain_name = name
+        if self.type != "REG":
+            # Decorate non-regular files with their type
+            self.name = "[" + self.type + "] " + self.name
 
-    def target_localhost_port(self):
-        return None
+        localhost_port = None
+        target_localhost_port = None
+        if self.type in ['IPv4', 'IPv6']:
+            split_name = name.split('->')
+            localhost_port = split_name[0].split(':')[1]
+
+            if len(split_name) == 2:
+                split_remote = split_name[1].split(':')
+                if split_remote[0] == 'localhost':
+                    target_localhost_port = split_remote[1]
+        if localhost_port == '*':
+            # This is sometimes reported for UDP
+            localhost_port = None
+
+        # For network connections, this is the local port of the connection
+        self.localhost_port = localhost_port
+
+        # For network connections to localhost, this is the target port
+        self.target_localhost_port = target_localhost_port
 
 
 def device_to_number(device):
@@ -100,11 +121,7 @@ def lsof_to_files(lsof):
             file.device = value
             file.device_number = device_to_number(value)
         elif type == 'n':
-            file.name = value
-            file.plain_name = value
-            if file.type != "REG":
-                # Decorate non-regular files with their type
-                file.name = "[" + file.type + "] " + file.name
+            file._set_name(value)
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))

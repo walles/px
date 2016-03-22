@@ -11,7 +11,7 @@ import px_ipc_map
 def create_file(type, name, device, pid, access=None):
     file = px_file.PxFile()
     file.type = type
-    file.name = name
+    file._set_name(name)
 
     # Remove leading [] group from name if any
     file.plain_name = re.match('(\[[^]]*\] )?(.*)', name).group(2)

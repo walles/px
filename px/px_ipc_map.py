@@ -83,9 +83,8 @@ class IpcMap(object):
 
             add_arraymapping(self._name_to_files, file.name, file)
 
-            localhost_port = file.localhost_port()
-            if localhost_port:
-                self._localhost_port_to_pid[localhost_port] = file.pid
+            if file.localhost_port:
+                self._localhost_port_to_pid[file.localhost_port] = file.pid
 
             if file.device_number is not None:
                 add_arraymapping(self._device_number_to_files, file.device_number, file)
@@ -97,7 +96,7 @@ class IpcMap(object):
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
         if file.type in ['IPv4', 'IPv6']:
-            pid = self._localhost_port_to_pid.get(file.target_localhost_port())
+            pid = self._localhost_port_to_pid.get(file.target_localhost_port)
             if pid:
                 return [pid]
             else:
