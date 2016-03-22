@@ -88,6 +88,8 @@ def test_localhost_port():
                          "n*:57919"]).localhost_port == "57919"
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
                          "n*:57919"]).localhost_port == "57919"
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "nlocalhost:ipp (LISTEN)"]).localhost_port == "ipp"
 
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
                          "n*:*"]).localhost_port is None

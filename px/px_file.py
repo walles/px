@@ -35,6 +35,9 @@ class PxFile(object):
             split_name = name.split('->')
             localhost_port = split_name[0].split(':')[1]
 
+            # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
+            localhost_port = localhost_port.split(' ')[0]
+
             if len(split_name) == 2:
                 split_remote = split_name[1].split(':')
                 if split_remote[0] == 'localhost':
