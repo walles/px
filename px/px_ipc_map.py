@@ -3,6 +3,12 @@ class IpcMap(object):
     This is a map of process->[channels], where "process" is a process we have
     IPC communication open with, and a channel is a socket or a pipe that we
     have open to that process.
+
+    After creating an IpcMap, you can access:
+    * ipc_map.network_connections: This is a list of non-IPC network connections
+    * ipc_map.keys(): A set of other px_processes this process is connected to
+    * ipc_map[px_process]: A set of px_files through which we're connected to the
+      px_process
     """
 
     def __init__(self, process, files, processes):
@@ -10,14 +16,13 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
-        self._pid2process = create_pid2process(processes)
-
         # Only deal with IPC related files
         self.files = filter(
             lambda f: f.type in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6'],
             files)
 
         self.process = process
+        self.processes = processes
         self.files_for_process = filter(lambda f: f.pid == self.process.pid, self.files)
 
         self._map = {}
@@ -29,16 +34,18 @@ class IpcMap(object):
         unknown = create_fake_process(
             name="UNKNOWN destinations: Running with sudo might help find out where these go.")
 
+        network_connections = set()
         for file in self.files_for_process:
             if file.plain_name in ['pipe', '(none)']:
                 # These are placeholders, not names, can't do anything with these
                 continue
 
             other_end_pids = self._get_other_end_pids(file)
-            if other_end_pids == set([]):
+            if not other_end_pids:
                 if file.type in ['IPv4', 'IPv6']:
                     # These are sometimes used for IPC, sometimes not, only report
                     # them if they are.
+                    network_connections.add(file)
                     continue
 
                 self.add_ipc_entry(unknown, file)
@@ -55,10 +62,14 @@ class IpcMap(object):
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
+        self.network_connections = network_connections
+
     def _create_indices(self):
         """
         Creates indices used by _get_other_end_pids()
         """
+        self._pid2process = create_pid2process(self.processes)
+
         self._device_to_pids = {}
         self._plain_name_to_pids = {}
         self._name_to_files = {}
