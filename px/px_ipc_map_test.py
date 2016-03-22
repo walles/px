@@ -128,6 +128,23 @@ def test_get_other_end_pids_osx_socket():
     assert 1234 in get_other_end_pids(python_file, files)
 
 
+def test_get_other_end_pids_localhost_socket():
+    # Real world test data
+    tc_file = create_file(
+        "IPv4", "localhost:33815->localhost:postgresql", "444139298", 33019, "u")
+    postgres_file = create_file(
+        "IPv4", "localhost:postgresql->localhost:33815", "444206166", 42745, "u")
+    files = [tc_file, postgres_file]
+
+    tc_ipc_map = create_ipc_map(33019, files)
+    assert 42745 in tc_ipc_map.get_other_end_pids(tc_file, files)
+    assert tc_file not in tc_ipc_map.network_connections
+
+    postgres_ipc_map = create_ipc_map(42745, files)
+    assert 33019 in postgres_ipc_map.get_other_end_pids(postgres_file, files)
+    assert postgres_file not in postgres_ipc_map.network_connections
+
+
 def test_get_ipc_map():
     """Tyre kick IpcMap with some real world data"""
     files = None
