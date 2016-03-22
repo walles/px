@@ -107,4 +107,4 @@ def lsof_to_files(lsof):
 
 
 def get_all():
-    return lsof_to_files(call_lsof())
+    return set(lsof_to_files(call_lsof()))
