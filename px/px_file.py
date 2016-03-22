@@ -20,7 +20,7 @@ class PxFile(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return str(self.__dict__).__hash__()
+        return hash(frozenset(self.__dict__.items()))
 
     def _set_name(self, name):
         self.name = name
