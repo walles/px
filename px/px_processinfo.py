@@ -129,8 +129,8 @@ def print_fds(process, processes):
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
-    for connection in sorted(ipc_map.network_connections):
-        print("  " + connection)
+    for connection in sorted(ipc_map.network_connections, key=operator.attrgetter("name")):
+        print("  " + connection.name)
 
     print("")
     print("Inter Process Communication:")
