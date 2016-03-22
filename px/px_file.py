@@ -29,28 +29,26 @@ class PxFile(object):
             # Decorate non-regular files with their type
             self.name = "[" + self.type + "] " + self.name
 
-        localhost_port = None
-        target_localhost_port = None
+        local_endpoint = None
+        remote_endpoint = None
         if self.type in ['IPv4', 'IPv6']:
             split_name = name.split('->')
-            localhost_port = split_name[0].split(':')[1]
+            local_endpoint = split_name[0]
 
             # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
-            localhost_port = localhost_port.split(' ')[0]
+            local_endpoint = local_endpoint.split(' ')[0]
+            if '*' in local_endpoint:
+                # We can't match against this endpoint
+                local_endpoint = None
 
             if len(split_name) == 2:
-                split_remote = split_name[1].split(':')
-                if split_remote[0] == 'localhost':
-                    target_localhost_port = split_remote[1]
-        if localhost_port == '*':
-            # This is sometimes reported for UDP
-            localhost_port = None
+                remote_endpoint = split_name[1]
 
         # For network connections, this is the local port of the connection
-        self.localhost_port = localhost_port
+        self.local_endpoint = local_endpoint
 
-        # For network connections to localhost, this is the target port
-        self.target_localhost_port = target_localhost_port
+        # For network connections targets
+        self.remote_endpoint = remote_endpoint
 
 
 def device_to_number(device):

@@ -69,6 +69,10 @@ def lsof_to_file(shard_array):
     return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
 
 
+def create_file(type, name):
+    return lsof_to_file(["f6", "au", "t" + type, "d0x42", "n" + name])
+
+
 def test_setability():
     # Can files be stored in sets?
     a = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
@@ -77,40 +81,47 @@ def test_setability():
     assert len(s) == 1
 
 
-def test_localhost_port():
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:postgresql->localhost:33331"]).localhost_port == "postgresql"
+def test_local_endpoint():
+    local_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                                   "nlocalhost:postgres->localhost:33331"]).local_endpoint
+    assert local_endpoint == "localhost:postgres"
+
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:39252->localhost:39252"]).localhost_port == "39252"
+                         "nlocalhost:39252->localhost:39252"]).local_endpoint == "localhost:39252"
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).localhost_port == "19091"
+                         "nlocalhost:19091"]).local_endpoint == "localhost:19091"
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "nlocalhost:ipp (LISTEN)"]).local_endpoint == "localhost:ipp"
+
+    # We can't match against endpoint address "*"
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).localhost_port == "57919"
+                         "n*:57919"]).local_endpoint is None
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).localhost_port == "57919"
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:ipp (LISTEN)"]).localhost_port == "ipp"
+                         "n*:57919"]).local_endpoint is None
 
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).localhost_port is None
+                         "n*:*"]).local_endpoint is None
     assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).localhost_port is None
+                         "n/somefile"]).local_endpoint is None
 
 
-def test_target_localhost_port():
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:postgresql->localhost:3331"]).target_localhost_port == "3331"
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:postgresql->otherhost:3331"]).target_localhost_port is None
+def test_remote_endpoint():
+    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                                    "nlocalhost:postgresql->localhost:3331"]).remote_endpoint
+    assert remote_endpoint == "localhost:3331"
+
+    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                                    "nlocalhost:postgresql->otherhost:3331"]).remote_endpoint
+    assert remote_endpoint == "otherhost:3331"
 
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).target_localhost_port is None
+                         "nlocalhost:19091"]).remote_endpoint is None
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).target_localhost_port is None
+                         "n*:57919"]).remote_endpoint is None
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).target_localhost_port is None
+                         "n*:57919"]).remote_endpoint is None
 
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).target_localhost_port is None
+                         "n*:*"]).remote_endpoint is None
     assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).target_localhost_port is None
+                         "n/somefile"]).remote_endpoint is None

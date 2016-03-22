@@ -74,7 +74,7 @@ class IpcMap(object):
         self._name_to_files = {}
         self._device_number_to_files = {}
         self._fifo_name_and_access_to_pids = {}
-        self._localhost_port_to_pid = {}
+        self._local_endpoint_to_pid = {}
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -83,8 +83,8 @@ class IpcMap(object):
 
             add_arraymapping(self._name_to_files, file.name, file)
 
-            if file.localhost_port:
-                self._localhost_port_to_pid[file.localhost_port] = file.pid
+            if file.local_endpoint:
+                self._local_endpoint_to_pid[file.local_endpoint] = file.pid
 
             if file.device_number is not None:
                 add_arraymapping(self._device_number_to_files, file.device_number, file)
@@ -96,7 +96,7 @@ class IpcMap(object):
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
         if file.type in ['IPv4', 'IPv6']:
-            pid = self._localhost_port_to_pid.get(file.target_localhost_port)
+            pid = self._local_endpoint_to_pid.get(file.remote_endpoint)
             if pid:
                 return [pid]
             else:
