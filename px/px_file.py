@@ -22,6 +22,12 @@ class PxFile(object):
     def __hash__(self):
         return str(self.__dict__).__hash__()
 
+    def localhost_port(self):
+        return None
+
+    def target_localhost_port(self):
+        return None
+
 
 def device_to_number(device):
     if device is None:

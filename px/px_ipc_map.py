@@ -43,8 +43,7 @@ class IpcMap(object):
             other_end_pids = self._get_other_end_pids(file)
             if not other_end_pids:
                 if file.type in ['IPv4', 'IPv6']:
-                    # These are sometimes used for IPC, sometimes not, only report
-                    # them if they are.
+                    # This is a remote connection
                     network_connections.add(file)
                     continue
 
@@ -75,6 +74,7 @@ class IpcMap(object):
         self._name_to_files = {}
         self._device_number_to_files = {}
         self._fifo_name_and_access_to_pids = {}
+        self._localhost_port_to_pid = {}
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -82,6 +82,10 @@ class IpcMap(object):
             add_arraymapping(self._plain_name_to_pids, file.plain_name, file.pid)
 
             add_arraymapping(self._name_to_files, file.name, file)
+
+            localhost_port = file.localhost_port()
+            if localhost_port:
+                self._localhost_port_to_pid[localhost_port] = file.pid
 
             if file.device_number is not None:
                 add_arraymapping(self._device_number_to_files, file.device_number, file)
@@ -92,6 +96,13 @@ class IpcMap(object):
 
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
+        if file.type in ['IPv4', 'IPv6']:
+            pid = self._localhost_port_to_pid.get(file.target_localhost_port())
+            if pid:
+                return [pid]
+            else:
+                return []
+
         plain_name = file.plain_name
         if plain_name.startswith("->"):
             # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",

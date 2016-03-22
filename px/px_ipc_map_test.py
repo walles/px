@@ -137,11 +137,11 @@ def test_get_other_end_pids_localhost_socket():
     files = [tc_file, postgres_file]
 
     tc_ipc_map = create_ipc_map(33019, files)
-    assert 42745 in tc_ipc_map.get_other_end_pids(tc_file, files)
+    assert 42745 in tc_ipc_map._get_other_end_pids(tc_file)
     assert tc_file not in tc_ipc_map.network_connections
 
     postgres_ipc_map = create_ipc_map(42745, files)
-    assert 33019 in postgres_ipc_map.get_other_end_pids(postgres_file, files)
+    assert 33019 in postgres_ipc_map._get_other_end_pids(postgres_file)
     assert postgres_file not in postgres_ipc_map.network_connections
 
 

@@ -75,3 +75,40 @@ def test_setability():
     b = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
     s = set([a, b])
     assert len(s) == 1
+
+
+def test_localhost_port():
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "nlocalhost:postgresql->localhost:33331"]).localhost_port() == "postgresql"
+    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                         "nlocalhost:39252->localhost:39252"]).localhost_port() == "39252"
+    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                         "nlocalhost:19091"]).localhost_port() == "19091"
+    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                         "n*:57919"]).localhost_port() == "57919"
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "n*:57919"]).localhost_port() == "57919"
+
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "n*:*"]).localhost_port() is None
+    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
+                         "n/somefile"]).localhost_port() is None
+
+
+def test_target_localhost_port():
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "nlocalhost:postgresql->localhost:3331"]).target_localhost_port() == "3331"
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "nlocalhost:postgresql->otherhost:3331"]).target_localhost_port() is None
+
+    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                         "nlocalhost:19091"]).target_localhost_port() is None
+    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                         "n*:57919"]).target_localhost_port() is None
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "n*:57919"]).target_localhost_port() is None
+
+    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+                         "n*:*"]).target_localhost_port() is None
+    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
+                         "n/somefile"]).target_localhost_port() is None
