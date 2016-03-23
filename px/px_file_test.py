@@ -21,8 +21,8 @@ def test_lsof_to_files():
     assert files[0].device is None
     assert files[0].device_number is None
     assert files[0].type == "DIR"
-    assert files[0].name == "[DIR] /"
-    assert files[0].plain_name == "/"
+    assert files[0].name == "/"
+    assert str(files[0]) == "[DIR] /"
 
     assert files[1].pid == 123
     assert files[1].access == "r"
@@ -30,7 +30,7 @@ def test_lsof_to_files():
     assert files[1].device_number is None
     assert files[1].type == "REG"
     assert files[1].name == "contains\nnewline"
-    assert files[1].plain_name == "contains\nnewline"
+    assert str(files[1]) == "contains\nnewline"
 
     assert files[2].pid == 123
     assert files[2].access == "w"
@@ -38,7 +38,7 @@ def test_lsof_to_files():
     assert files[2].device_number == 0x42
     assert files[2].type == "REG"
     assert files[2].name == "/somefile"
-    assert files[2].plain_name == "/somefile"
+    assert str(files[2]) == "/somefile"
 
     assert files[3].pid == 456
     assert files[3].access == "rw"
@@ -46,15 +46,15 @@ def test_lsof_to_files():
     assert files[3].device_number is None
     assert files[3].type == "REG"
     assert files[3].name == "/someotherfile"
-    assert files[3].plain_name == "/someotherfile"
+    assert str(files[3]) == "/someotherfile"
 
     assert files[4].pid == 456
     assert files[4].access is None
     assert files[4].device is None
     assert files[4].device_number is None
     assert files[4].type == "??"
-    assert files[4].name == "[??] (revoked)"
-    assert files[4].plain_name == "(revoked)"
+    assert files[4].name == "(revoked)"
+    assert str(files[4]) == "[??] (revoked)"
 
 
 def test_get_all():

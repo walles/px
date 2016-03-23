@@ -130,7 +130,7 @@ def print_fds(process, processes):
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
     for connection in sorted(ipc_map.network_connections, key=operator.attrgetter("name")):
-        print("  " + connection.name)
+        print("  " + str(connection))
 
     print("")
     print("Inter Process Communication:")
@@ -138,7 +138,7 @@ def print_fds(process, processes):
         print("  " + str(target))
         channels = ipc_map[target]
         channel_names = set()
-        channel_names.update(map(lambda c: c.name, channels))
+        channel_names.update(map(lambda c: str(c), channels))
         for channel_name in sorted(channel_names):
             print("    " + channel_name)
 

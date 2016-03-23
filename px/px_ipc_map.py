@@ -36,7 +36,7 @@ class IpcMap(object):
 
         network_connections = set()
         for file in self.files_for_process:
-            if file.plain_name in ['pipe', '(none)']:
+            if file.name in ['pipe', '(none)']:
                 # These are placeholders, not names, can't do anything with these
                 continue
 
@@ -70,7 +70,7 @@ class IpcMap(object):
         self._pid2process = create_pid2process(self.processes)
 
         self._device_to_pids = {}
-        self._plain_name_to_pids = {}
+        self._name_to_pids = {}
         self._name_to_files = {}
         self._device_number_to_files = {}
         self._fifo_name_and_access_to_pids = {}
@@ -79,7 +79,7 @@ class IpcMap(object):
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
 
-            add_arraymapping(self._plain_name_to_pids, file.plain_name, file.pid)
+            add_arraymapping(self._name_to_pids, file.name, file.pid)
 
             add_arraymapping(self._name_to_files, file.name, file)
 
@@ -107,12 +107,12 @@ class IpcMap(object):
             else:
                 return []
 
-        plain_name = file.plain_name
-        if plain_name.startswith("->"):
+        name = file.name
+        if name.startswith("->"):
             # With lsof 4.87 on OS X 10.11.3, pipe and socket names start with "->",
             # but their endpoint names don't. Strip initial "->" from name before
             # scanning for it.
-            plain_name = plain_name[2:]
+            name = name[2:]
 
         file_device_with_arrow = None
         if file.device is not None:
@@ -123,11 +123,11 @@ class IpcMap(object):
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):
         # http://www.justskins.com/forums/lsof-find-both-endpoints-of-a-unix-socket-123037.html
-        matching_pids = self._device_to_pids.get(plain_name)
+        matching_pids = self._device_to_pids.get(name)
         if matching_pids:
             pids.update(matching_pids)
         if file_device_with_arrow:
-            matching_pids = self._plain_name_to_pids.get(file_device_with_arrow)
+            matching_pids = self._name_to_pids.get(file_device_with_arrow)
             if matching_pids:
                 pids.update(matching_pids)
 

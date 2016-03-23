@@ -8,10 +8,9 @@ class PxFile(object):
         self._device_number = None
 
     def __repr__(self):
-        # I guess this is really what __str__ should be doing, but the point of
-        # implementing this method is to make the py.test output more readable,
-        # and py.test calls repr() and not str().
-        return str(self.pid) + ":" + self.name
+        # The point of implementing this method is to make the py.test output
+        # more readable.
+        return str(self.pid) + ":" + str(self)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -22,12 +21,12 @@ class PxFile(object):
     def __hash__(self):
         return hash(frozenset(self.__dict__.items()))
 
-    def _set_name(self, name):
-        self.name = name
-        self.plain_name = name
-        if self.type != "REG":
-            # Decorate non-regular files with their type
-            self.name = "[" + self.type + "] " + self.name
+    def __str__(self):
+        if self.type == "REG":
+            return self.name
+
+        # Decorate non-regular files with their type
+        return "[" + self.type + "] " + self.name
 
     def get_endpoints(self):
         """
@@ -43,7 +42,7 @@ class PxFile(object):
         local = None
         remote = None
 
-        split_name = self.plain_name.split('->')
+        split_name = self.name.split('->')
         local = split_name[0]
 
         # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
@@ -129,7 +128,7 @@ def lsof_to_files(lsof):
             file.device = value
             file.device_number = device_to_number(value)
         elif type == 'n':
-            file._set_name(value)
+            file.name = value
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))
