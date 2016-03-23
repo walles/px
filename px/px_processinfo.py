@@ -123,24 +123,17 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() +
           ": lsof done, proceeding.")
 
-    files_for_process = filter(lambda f: f.pid == process.pid, files)
+    ipc_map = px_ipc_map.IpcMap(process, files, processes)
 
     print("")
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
-    network_connections = set()
-    for file in files_for_process:
-        if file.type in ['IPv4', 'IPv6']:
-            # FIXME: If this socket is open towards a port on the local machine,
-            # can we trace its destination and print that process here?
-            network_connections.add(file.name)
-    for connection in sorted(network_connections):
-        print("  " + connection)
+    for connection in sorted(ipc_map.network_connections, key=operator.attrgetter("name")):
+        print("  " + connection.name)
 
     print("")
     print("Inter Process Communication:")
-    ipc_map = px_ipc_map.IpcMap(process, files, processes)
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
         print("  " + str(target))
         channels = ipc_map[target]

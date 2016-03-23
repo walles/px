@@ -20,7 +20,35 @@ class PxFile(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return str(self.__dict__).__hash__()
+        return hash(frozenset(self.__dict__.items()))
+
+    def _set_name(self, name):
+        self.name = name
+        self.plain_name = name
+        if self.type != "REG":
+            # Decorate non-regular files with their type
+            self.name = "[" + self.type + "] " + self.name
+
+        local_endpoint = None
+        remote_endpoint = None
+        if self.type in ['IPv4', 'IPv6']:
+            split_name = name.split('->')
+            local_endpoint = split_name[0]
+
+            # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
+            local_endpoint = local_endpoint.split(' ')[0]
+            if '*' in local_endpoint:
+                # We can't match against this endpoint
+                local_endpoint = None
+
+            if len(split_name) == 2:
+                remote_endpoint = split_name[1]
+
+        # For network connections, this is the local port of the connection
+        self.local_endpoint = local_endpoint
+
+        # For network connections targets
+        self.remote_endpoint = remote_endpoint
 
 
 def device_to_number(device):
@@ -94,11 +122,7 @@ def lsof_to_files(lsof):
             file.device = value
             file.device_number = device_to_number(value)
         elif type == 'n':
-            file.name = value
-            file.plain_name = value
-            if file.type != "REG":
-                # Decorate non-regular files with their type
-                file.name = "[" + file.type + "] " + file.name
+            file._set_name(value)
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))

@@ -11,7 +11,7 @@ import px_ipc_map
 def create_file(type, name, device, pid, access=None):
     file = px_file.PxFile()
     file.type = type
-    file.name = name
+    file._set_name(name)
 
     # Remove leading [] group from name if any
     file.plain_name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
@@ -126,6 +126,42 @@ def test_get_other_end_pids_osx_socket():
 
     assert 4567 in get_other_end_pids(atom_file, files)
     assert 1234 in get_other_end_pids(python_file, files)
+
+
+def test_get_other_end_pids_localhost_socket():
+    # Real world test data
+    tc_file = create_file(
+        "IPv4", "localhost:33815->localhost:postgresql", "444139298", 33019, "u")
+    postgres_file = create_file(
+        "IPv4", "localhost:postgresql->localhost:33815", "444206166", 42745, "u")
+    files = [tc_file, postgres_file]
+
+    tc_ipc_map = create_ipc_map(33019, files)
+    assert 42745 in tc_ipc_map._get_other_end_pids(tc_file)
+    assert tc_file not in tc_ipc_map.network_connections
+
+    postgres_ipc_map = create_ipc_map(42745, files)
+    assert 33019 in postgres_ipc_map._get_other_end_pids(postgres_file)
+    assert postgres_file not in postgres_ipc_map.network_connections
+
+
+def test_get_other_end_pids_localhost_socket_names():
+    # lsof usually presents a number of different names for localhost, because
+    # of different network interfaces and other reasons. Make sure we identify
+    # those and treat them like localhost.
+    tc_file = create_file(
+        "IPv4", "127.0.0.42:33815->localhost:postgresql", "444139298", 33019, "u")
+    postgres_file = create_file(
+        "IPv4", "localhost:postgresql->127.0.0.42:33815", "444206166", 42745, "u")
+    files = [tc_file, postgres_file]
+
+    tc_ipc_map = create_ipc_map(33019, files)
+    assert 42745 in tc_ipc_map._get_other_end_pids(tc_file)
+    assert tc_file not in tc_ipc_map.network_connections
+
+    postgres_ipc_map = create_ipc_map(42745, files)
+    assert 33019 in postgres_ipc_map._get_other_end_pids(postgres_file)
+    assert postgres_file not in postgres_ipc_map.network_connections
 
 
 def test_get_ipc_map():
