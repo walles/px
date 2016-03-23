@@ -29,26 +29,33 @@ class PxFile(object):
             # Decorate non-regular files with their type
             self.name = "[" + self.type + "] " + self.name
 
-        local_endpoint = None
-        remote_endpoint = None
-        if self.type in ['IPv4', 'IPv6']:
-            split_name = name.split('->')
-            local_endpoint = split_name[0]
+    def get_endpoints(self):
+        """
+        Returns a (local,remote) tuple. They represent the local and the remote
+        endpoints of a network connection.
 
-            # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
-            local_endpoint = local_endpoint.split(' ')[0]
-            if '*' in local_endpoint:
-                # We can't match against this endpoint
-                local_endpoint = None
+        This method will never return None, but both local and remote can be
+        None in case this isn't a network connection for example.
+        """
+        if self.type not in ['IPv4', 'IPv6']:
+            return (None, None)
 
-            if len(split_name) == 2:
-                remote_endpoint = split_name[1]
+        local = None
+        remote = None
 
-        # For network connections, this is the local port of the connection
-        self.local_endpoint = local_endpoint
+        split_name = self.plain_name.split('->')
+        local = split_name[0]
 
-        # For network connections targets
-        self.remote_endpoint = remote_endpoint
+        # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
+        local = local.split(' ')[0]
+        if '*' in local:
+            # We can't match against this endpoint
+            local = None
+
+        if len(split_name) == 2:
+            remote = split_name[1]
+
+        return (local, remote)
 
 
 def device_to_number(device):

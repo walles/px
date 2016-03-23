@@ -83,45 +83,47 @@ def test_setability():
 
 def test_local_endpoint():
     local_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                   "nlocalhost:postgres->localhost:33331"]).local_endpoint
+                                   "nlocalhost:postgres->localhost:33331"]).get_endpoints()[0]
     assert local_endpoint == "localhost:postgres"
 
+    local_endpoint = lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+                                   "nlocalhost:39252->localhost:39252"]).get_endpoints()[0]
+    assert local_endpoint == "localhost:39252"
+
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:39252->localhost:39252"]).local_endpoint == "localhost:39252"
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).local_endpoint == "localhost:19091"
+                         "nlocalhost:19091"]).get_endpoints()[0] == "localhost:19091"
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:ipp (LISTEN)"]).local_endpoint == "localhost:ipp"
+                         "nlocalhost:ipp (LISTEN)"]).get_endpoints()[0] == "localhost:ipp"
 
     # We can't match against endpoint address "*"
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).local_endpoint is None
+                         "n*:57919"]).get_endpoints()[0] is None
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).local_endpoint is None
+                         "n*:57919"]).get_endpoints()[0] is None
 
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).local_endpoint is None
+                         "n*:*"]).get_endpoints()[0] is None
     assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).local_endpoint is None
+                         "n/somefile"]).get_endpoints()[0] is None
 
 
 def test_remote_endpoint():
     remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->localhost:3331"]).remote_endpoint
+                                    "nlocalhost:postgresql->localhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "localhost:3331"
 
     remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->otherhost:3331"]).remote_endpoint
+                                    "nlocalhost:postgresql->otherhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "otherhost:3331"
 
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).remote_endpoint is None
+                         "nlocalhost:19091"]).get_endpoints()[1] is None
     assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).remote_endpoint is None
+                         "n*:57919"]).get_endpoints()[1] is None
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).remote_endpoint is None
+                         "n*:57919"]).get_endpoints()[1] is None
 
     assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).remote_endpoint is None
+                         "n*:*"]).get_endpoints()[1] is None
     assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).remote_endpoint is None
+                         "n/somefile"]).get_endpoints()[1] is None
