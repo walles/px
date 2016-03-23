@@ -117,7 +117,7 @@ def print_processes_started_at_the_same_time(process, all_processes):
 def print_fds(process, processes):
     # It's true, I measured it myself /johan.walles@gmail.com
     print(datetime.datetime.now().isoformat() +
-          ": Now invoking lsof, this can take 30s on a big system...")
+          ": Now invoking lsof, this can take over a minute on a big system...")
 
     files = px_file.get_all()
     print(datetime.datetime.now().isoformat() +
