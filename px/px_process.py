@@ -113,6 +113,8 @@ class PxProcess(object):
         # FIXME: Can we get an actual array from ps? Reverse engineering the
         # array like we do here is bound to be error prone.
         base_split = self.cmdline.split(" ")
+        if len(base_split) == 1:
+            return base_split
 
         # Try to reverse engineer executables with spaces in their names
         merged_split = list(base_split)
