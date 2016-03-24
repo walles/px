@@ -47,6 +47,10 @@ import px_processinfo
 def get_version():
     """Extract version string from PEX-INFO file"""
     my_pex_name = os.path.dirname(__file__)
+    if not os.path.isfile(my_pex_name):
+        # This happens if we aren't run from a .pex file
+        return "<unknown>"
+
     zip = zipfile.ZipFile(my_pex_name)
     with zip.open("PEX-INFO") as pex_info:
         return json.load(pex_info)['build_properties']['tag']
