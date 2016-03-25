@@ -57,4 +57,23 @@ def get_command(commandline):
             # next to last part
             command = command_split[-2]
 
+    if command in ['python', 'Python']:
+        return get_python_command(commandline)
+
     return command
+
+
+def get_python_command(commandline):
+    array = to_array(commandline)
+    python = os.path.basename(array[0])
+    if len(array) == 1:
+        return python
+
+    if not array[1].startswith('-'):
+        return os.path.basename(array[1])
+
+    if len(array) > 2:
+        if array[1] == '-m' and not array[2].startswith('-'):
+            return os.path.basename(array[2])
+
+    return python
