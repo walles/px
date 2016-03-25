@@ -5,6 +5,7 @@ import subprocess
 import os
 import re
 import dateutil.tz
+import px_commandline
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
@@ -19,12 +20,6 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 # Match + group: "123-01:23:45"
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
-
-# Match "[kworker/0:0H]", no grouping
-LINUX_KERNEL_PROC = re.compile("^\[[^/ ]+/?[^/ ]+\]$")
-
-# Match "(python2.7)", no grouping
-OSX_PARENTHESIZED_PROC = re.compile("^\([^()]+\)$")
 
 
 class PxProcess(object):
@@ -110,46 +105,11 @@ class PxProcess(object):
         return False
 
     def get_command_line_array(self):
-        # FIXME: Can we get an actual array from ps? Reverse engineering the
-        # array like we do here is bound to be error prone.
-        base_split = self.cmdline.split(" ")
-        if len(base_split) == 1:
-            return base_split
-
-        # Try to reverse engineer executables with spaces in their names
-        merged_split = list(base_split)
-        while not os.path.isfile(merged_split[0]):
-            if len(merged_split) == 1:
-                # Nothing more to merge, give up
-                return base_split
-
-            # Merge the two first elements: http://stackoverflow.com/a/1142879/473672
-            merged_split[0:2] = [' '.join(merged_split[0:2])]
-
-        return merged_split
+        return px_commandline.to_array(self.cmdline)
 
     def _get_command(self):
         """Return just the command without any arguments or path"""
-        if LINUX_KERNEL_PROC.match(self.cmdline):
-            return self.cmdline
-
-        if OSX_PARENTHESIZED_PROC.match(self.cmdline):
-            return self.cmdline
-
-        command = os.path.basename(self.get_command_line_array()[0])
-
-        command_split = command.split(".")
-        if len(command_split) > 1:
-            if len(command_split[-1]) > 4:
-                # Pretend all the dots are a kind of path and go for the last
-                # part only
-                command = command_split[-1]
-            else:
-                # Assume last part is a file suffix (like ".exe") and take the
-                # next to last part
-                command = command_split[-2]
-
-        return command
+        return px_commandline.get_command(self.cmdline)
 
 
 class PxProcessBuilder(object):
