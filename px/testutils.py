@@ -2,6 +2,7 @@ import random
 import datetime
 
 import px_process
+import px_ipc_map
 import dateutil.tz
 import dateutil.parser
 
@@ -35,3 +36,21 @@ def create_process(pid=47536, ppid=1234,
               commandline)
 
     return px_process.ps_line_to_process(psline, now)
+
+
+def create_ipc_map(pid, all_files):
+    """Wrapper around IpcMap() so that we can test it"""
+    pid2process = {}
+    for file in all_files:
+        if file.pid in pid2process:
+            continue
+        pid2process[file.pid] = create_process(pid=file.pid)
+    if pid not in pid2process:
+        pid2process[pid] = create_process(pid=pid)
+
+    processes = pid2process.values()
+    random.shuffle(processes)
+
+    process = pid2process[pid]
+
+    return px_ipc_map.IpcMap(process, all_files, processes)

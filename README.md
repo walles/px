@@ -74,6 +74,13 @@ number matches what you just set.
 click your new release, click the `Edit tag` button, then attach your `px.pex`
 file that you just built to the release.
 
+# Performance testing
+* Store the output of `lsof -F fnaptd0` from a big system in lsof.txt.
+* `./px/benchmark_ipcmap.py lsof.txt`
+
+Keeping this benchmark performant is important to be able to use `px` on big
+systems.
+
 # TODO `top` replacement
 * Disable terminal line wrapping for smoother handling of terminal window
 resizes.

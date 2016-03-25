@@ -1,11 +1,8 @@
-import random
-
 import re
 import os.path
 
 import px_file
 import testutils
-import px_ipc_map
 
 
 def create_file(type, name, device, pid, access=None):
@@ -22,29 +19,9 @@ def create_file(type, name, device, pid, access=None):
     return file
 
 
-def create_ipc_map(pid, all_files):
-    """Wrapper around IpcMap() so that we can test it"""
-    pid2process = {}
-    # The "+ [my_file]" is there to make sure my_file is part of all files.
-    # Having dupes in that list should be fine.
-    for file in all_files:
-        if file.pid in pid2process:
-            continue
-        pid2process[file.pid] = testutils.create_process(pid=file.pid)
-    if pid not in pid2process:
-        pid2process[pid] = testutils.create_process(pid=pid)
-
-    processes = pid2process.values()
-    random.shuffle(processes)
-
-    process = pid2process[pid]
-
-    return px_ipc_map.IpcMap(process, all_files, processes)
-
-
 def get_other_end_pids(my_file, all_files):
     """Wrapper around IpcMap._get_other_end_pids() so that we can test it"""
-    return create_ipc_map(my_file.pid, all_files)._get_other_end_pids(my_file)
+    return testutils.create_ipc_map(my_file.pid, all_files)._get_other_end_pids(my_file)
 
 
 def test_get_other_end_pids_basic():
@@ -135,11 +112,11 @@ def test_get_other_end_pids_localhost_socket():
         "IPv4", "localhost:postgresql->localhost:33815", "444206166", 42745, "u")
     files = [tc_file, postgres_file]
 
-    tc_ipc_map = create_ipc_map(33019, files)
+    tc_ipc_map = testutils.create_ipc_map(33019, files)
     assert 42745 in tc_ipc_map._get_other_end_pids(tc_file)
     assert tc_file not in tc_ipc_map.network_connections
 
-    postgres_ipc_map = create_ipc_map(42745, files)
+    postgres_ipc_map = testutils.create_ipc_map(42745, files)
     assert 33019 in postgres_ipc_map._get_other_end_pids(postgres_file)
     assert postgres_file not in postgres_ipc_map.network_connections
 
@@ -154,11 +131,11 @@ def test_get_other_end_pids_localhost_socket_names():
         "IPv4", "localhost:postgresql->127.0.0.42:33815", "444206166", 42745, "u")
     files = [tc_file, postgres_file]
 
-    tc_ipc_map = create_ipc_map(33019, files)
+    tc_ipc_map = testutils.create_ipc_map(33019, files)
     assert 42745 in tc_ipc_map._get_other_end_pids(tc_file)
     assert tc_file not in tc_ipc_map.network_connections
 
-    postgres_ipc_map = create_ipc_map(42745, files)
+    postgres_ipc_map = testutils.create_ipc_map(42745, files)
     assert 33019 in postgres_ipc_map._get_other_end_pids(postgres_file)
     assert postgres_file not in postgres_ipc_map.network_connections
 
@@ -170,7 +147,7 @@ def test_get_ipc_map():
     with open(os.path.join(my_dir, "lsof-test-output-linux.txt"), "r") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
 
-    ipc_map = create_ipc_map(1997, files)
+    ipc_map = testutils.create_ipc_map(1997, files)
     assert len(ipc_map.keys()) == 2
 
     peer0 = ipc_map.keys()[0]
