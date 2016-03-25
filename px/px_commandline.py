@@ -1,3 +1,5 @@
+"""Extract information from command lines"""
+
 import re
 import os.path
 
@@ -57,7 +59,7 @@ def get_command(commandline):
             # next to last part
             command = command_split[-2]
 
-    if command in ['python', 'Python']:
+    if command.startswith('python') or command == 'Python':
         return get_python_command(commandline)
 
     return command

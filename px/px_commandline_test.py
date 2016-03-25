@@ -9,6 +9,7 @@ def test_get_command_python():
     # These are inspired by Python 2.7.11 --help output
     assert px_commandline.get_command("python apa.py") == "apa.py"
     assert px_commandline.get_command("python /usr/bin/apa.py") == "apa.py"
+    assert px_commandline.get_command("python2.7 /usr/bin/apa.py") == "apa.py"
     assert px_commandline.get_command("python /usr/bin/hej") == "hej"
     assert px_commandline.get_command("python /usr/bin/hej gris --flaska") == "hej"
     assert px_commandline.get_command("python -c cmd") == "python"
