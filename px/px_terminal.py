@@ -77,8 +77,6 @@ def to_screen_lines(procs, columns):
 
     # Print process list using the computed column widths
     lines = []
-    if columns is None:
-        columns = -1
     for proc in procs:
         line = format.format(
             proc.pid, proc.command, proc.username,
