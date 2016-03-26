@@ -25,8 +25,14 @@ class PxFile(object):
         if self.type == "REG":
             return self.name
 
+        listen_suffix = ''
+        if self.type in ['IPv4', 'IPv6']:
+            local, remote_endpoint = self.get_endpoints()
+            if not remote_endpoint:
+                listen_suffix = ' (LISTEN)'
+
         # Decorate non-regular files with their type
-        return "[" + self.type + "] " + self.name
+        return "[" + self.type + "] " + self.name + listen_suffix
 
     def get_endpoints(self):
         """

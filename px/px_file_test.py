@@ -73,6 +73,16 @@ def create_file(type, name):
     return lsof_to_file(["f6", "au", "t" + type, "d0x42", "n" + name])
 
 
+def test_listen_name():
+    file = lsof_to_file(["f6", "au", "tIPv4", "d0x42", "nlocalhost:63342"])
+    assert file.name == "localhost:63342"
+    assert str(file) == "[IPv4] localhost:63342 (LISTEN)"
+
+    file = lsof_to_file(["f6", "au", "tIPv6", "d0x42", "nlocalhost:63342"])
+    assert file.name == "localhost:63342"
+    assert str(file) == "[IPv6] localhost:63342 (LISTEN)"
+
+
 def test_setability():
     # Can files be stored in sets?
     a = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
