@@ -32,7 +32,25 @@ def test_get_command_python():
 
 
 def test_get_command_java():
+    assert px_commandline.get_command("java") == "java"
     assert px_commandline.get_command("java -version") == "java"
+    assert px_commandline.get_command("java -help") == "java"
+
+    assert px_commandline.get_command("java SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java x.y.SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -jar flaska.jar") == "flaska.jar"
+
+    # Tests for invalid command lines
+    assert px_commandline.get_command("java -cp /a/b/c") == "java"
+    assert px_commandline.get_command("java  ") == "java"
+    assert px_commandline.get_command("java -jar") == "java"
+    assert px_commandline.get_command("java -jar    ") == "java"
+
+    # FIXME: Add test for classpath containing spaces? I say this should be
+    # postponed until we have a real world use case for that.
+    pass
 
 
 def test_get_command_java_gradled():
