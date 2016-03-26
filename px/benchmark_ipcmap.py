@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """Benchmark loading the output of "lsof -F fnaptd0" from a big system
 
@@ -17,6 +18,9 @@ import docopt
 import testutils
 import px_file
 
+# For how long should we do the benchmarking run (in seconds)
+DURATION_S = 30
+
 
 def get_most_common_pid(files):
     counts = {}
@@ -28,23 +32,58 @@ def get_most_common_pid(files):
     return sorted(counts.keys(), key=lambda pid: counts[pid])[-1]
 
 
-def main(args):
+def get_timings(file, pid):
+    """
+    Loads file and creates an IPC map for PID.
+
+    Returns timings in a tuple (load, mapping) in seconds.
+    """
     t0 = time.time()
     files = None
-    with open(args['<FILE>'], "r") as lsof_output:
+    with open(file, "r") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
     t1 = time.time()
-    dt = t1 - t0
-    print("Parsing lsof output: {}s".format(dt))
-
-    pid = get_most_common_pid(files)
-    print("Most popular PID: {}".format(pid))
+    dt_load = t1 - t0
 
     t0 = time.time()
     testutils.create_ipc_map(pid, files)
     t1 = time.time()
-    dt = t1 - t0
-    print("Creating PID {} IPC map: {}s".format(pid, dt))
+    dt_mapping = t1 - t0
+
+    return (dt_load, dt_mapping)
+
+
+def print_statistics(name, values):
+    lowest = min(values)
+    highest = max(values)
+    middle = (lowest + highest) / 2
+    radius = (highest - lowest) / 2
+    print("{} is {:.2f}s±{:.2f}s".format(name, middle, radius))
+
+
+def main(args):
+    lsof_file = args['<FILE>']
+
+    print("Finding most popular PID...")
+    files = None
+    with open(lsof_file, "r") as lsof_output:
+        files = px_file.lsof_to_files(lsof_output.read())
+    pid = get_most_common_pid(files)
+    print("Most popular PID: {}".format(pid))
+
+    end = time.time() + DURATION_S
+    lap_number = 0
+    load_times = []
+    mapping_times = []
+    while time.time() < end:
+        lap_number += 1
+        print("Lap {}, {:.0f}s left...".format(lap_number, end - time.time()))
+        load_time, mapping_time = get_timings(lsof_file, pid)
+        load_times.append(load_time)
+        mapping_times.append(mapping_time)
+
+    print_statistics("Loading time", load_times)
+    print_statistics("Mapping time", mapping_times)
 
 
 if __name__ == "__main__":
