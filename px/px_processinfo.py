@@ -119,7 +119,7 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() +
           ": Now invoking lsof, this can take over a minute on a big system...")
 
-    files = px_file.get_all()
+    files = px_file.get_all(px_ipc_map.FILE_TYPES)
     print(datetime.datetime.now().isoformat() +
           ": lsof done, proceeding.")
 

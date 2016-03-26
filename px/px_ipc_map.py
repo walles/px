@@ -1,3 +1,6 @@
+FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
+
+
 class IpcMap(object):
     """
     This is a map of process->[channels], where "process" is a process we have
@@ -17,9 +20,7 @@ class IpcMap(object):
         files = set(files)
 
         # Only deal with IPC related files
-        self.files = filter(
-            lambda f: f.type in ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6'],
-            files)
+        self.files = filter(lambda f: f.type in FILE_TYPES, files)
 
         self.process = process
         self.processes = processes

@@ -88,7 +88,7 @@ def call_lsof():
     return lsof.communicate()[0]
 
 
-def lsof_to_files(lsof):
+def lsof_to_files(lsof, file_types=None):
     pid = None
     file = None
     files = []
@@ -115,7 +115,18 @@ def lsof_to_files(lsof):
             file.type = "??"
             file.device = None
             file.device_number = None
-            files.append(file)
+
+            if not files:
+                # No files, just add the new one
+                files.append(file)
+            elif not file_types:
+                # No filter specified
+                files.append(file)
+            elif files[-1].type in file_types:
+                files.append(file)
+            else:
+                # Overwrite the last file since it's of the wrong type
+                files[-1] = file
         elif type == 'a':
             file.access = {
                 ' ': None,
@@ -136,5 +147,11 @@ def lsof_to_files(lsof):
     return files
 
 
-def get_all():
-    return set(lsof_to_files(call_lsof()))
+def get_all(file_types=None):
+    """
+    Get all files.
+
+    If a file_types array is specified, only files of the listed types will be
+    returned.
+    """
+    return set(lsof_to_files(call_lsof(), file_types))
