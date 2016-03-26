@@ -29,3 +29,32 @@ def test_get_command_python():
     assert px_commandline.get_command("python -m   ") == "python"
     assert px_commandline.get_command("python -m -u") == "python"
     assert px_commandline.get_command("python    ") == "python"
+
+
+def test_get_command_java():
+    assert px_commandline.get_command("java -version") == "java"
+
+
+def test_get_command_java_gradled():
+    commandline = (
+        "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java " +
+        "-XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Xmx1024m " +
+        "-Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp " +
+        "/Users/johan/.gradle/wrapper/dists/gradle-2.8-all/gradle-2.8/lib/gradle-launcher-2.8.jar" +
+        " org.gradle.launcher.daemon.bootstrap.GradleDaemon 2.8")
+    assert px_commandline.get_command(commandline) == "GradleDaemon"
+
+
+def test_get_command_java_teamcity():
+    # FIXME: Get an example TeamCity command line here
+    assert False
+
+
+def test_get_command_java_logstash():
+    # FIXME: Get an example logstash command line here
+    assert False
+
+
+def test_get_command_java_jar():
+    # FIXME: Get an example java -jar command line here
+    assert False
