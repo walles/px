@@ -67,6 +67,7 @@ def get_command(commandline):
 
 def get_python_command(commandline):
     array = to_array(commandline)
+    array = filter(lambda s: s, array)
     python = os.path.basename(array[0])
     if len(array) == 1:
         return python

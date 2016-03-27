@@ -26,4 +26,6 @@ def test_get_command_python():
     assert px_commandline.get_command("python -W") == "python"
     assert px_commandline.get_command("python -c") == "python"
     assert px_commandline.get_command("python -m") == "python"
+    assert px_commandline.get_command("python -m   ") == "python"
     assert px_commandline.get_command("python -m -u") == "python"
+    assert px_commandline.get_command("python    ") == "python"
