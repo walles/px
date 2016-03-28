@@ -62,6 +62,9 @@ def get_command(commandline):
     if command.startswith('python') or command == 'Python':
         return get_python_command(commandline)
 
+    if command == "java":
+        return get_java_command(commandline)
+
     return command
 
 
@@ -80,3 +83,24 @@ def get_python_command(commandline):
             return os.path.basename(array[2])
 
     return python
+
+
+def get_java_command(commandline):
+    array = to_array(commandline)
+    java = os.path.basename(array[0])
+    if len(array) == 1:
+        return java
+
+    state = "skip next"
+    for component in array:
+        if state == "skip next":
+            if component.startswith("-"):
+                # Skipping switches doesn't make sense. We're lost, fall back to
+                # just returning the command name
+                return java
+            state = "scanning"
+            continue
+        else:
+            raise ValueError("Unhandled state <{}> at <{}> for: {}".format(state, component, array))
+
+    return java
