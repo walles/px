@@ -93,6 +93,10 @@ def get_java_command(commandline):
 
     state = "skip next"
     for component in array:
+        if not component:
+            # Skip all empties
+            continue
+
         if state == "skip next":
             if component.startswith("-"):
                 # Skipping switches doesn't make sense. We're lost, fall back to
@@ -100,7 +104,29 @@ def get_java_command(commandline):
                 return java
             state = "scanning"
             continue
+        if state == "return next":
+            if component.startswith("-"):
+                # Returning switches doesn't make sense. We're lost, fall back
+                # to just returning the command name
+                return java
+            return os.path.basename(component)
+        elif state == "scanning":
+            if component.startswith('-X'):
+                continue
+            if component.startswith('-D'):
+                continue
+            if component == "-cp" or component == "-classpath":
+                state = "skip next"
+                continue
+            if component == '-jar':
+                state = "return next"
+                continue
+            if component.startswith('-'):
+                # Unsupported switch, give up
+                return java
+            return component.split('.')[-1]
         else:
             raise ValueError("Unhandled state <{}> at <{}> for: {}".format(state, component, array))
 
+    # We got to the end without being able to come up with a better name, give up
     return java

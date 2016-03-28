@@ -41,6 +41,7 @@ def test_get_command_java():
     assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
     assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
     assert px_commandline.get_command("java -jar flaska.jar") == "flaska.jar"
+    assert px_commandline.get_command("java -jar /a/b/flaska.jar") == "flaska.jar"
 
     # Tests for invalid command lines
     assert px_commandline.get_command("java -cp /a/b/c") == "java"
