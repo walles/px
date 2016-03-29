@@ -18,9 +18,11 @@ symlink ending in `top`. `ptop` anyone?
 ![Screenshot](https://raw.githubusercontent.com/walles/px/python/screenshot.png)
 
 This screenshot shows:
-* The end of the output from just typing `px`. Note how the newest and the most
-CPU and memory hungry processes are at the end of the list so you can find them
-without scrolling.
+* The end of the output from just typing `px`.
+  * Note how the newest and the most CPU and memory hungry processes are at the
+  end of the list so you can find them without scrolling.
+  * Note how the Gradle daemon processes running in Java is listed by class name
+  (`GradleDaemon`) rather than the JVM executable name (`java`).
 * The result of searching for "terminal" processes.
 * The output from the details view of PID 699:
   * The command line has been split with one argument per line. This makes long
@@ -92,6 +94,9 @@ usage and present that in one or more columns.
 # TODO misc
 * In the details report, if the current process has a working directory that
 isn't `/`, list all other processes that have the same working directory.
+* In the details tree view, maybe print process owners for each line?
+* In the px / top views, in the process owner column, maybe print other non-root
+process owners of parent processes inside parentheses?
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
@@ -132,3 +137,5 @@ same time as the one we're currently looking at.
 * top: On pressing "q" to exit, redraw the screen one last time with a few less
 rows than usual before exiting.
 * top: Print system load before the process listing.
+* Parse Java and Python command lines and print the name of the program being
+executed rather than the VM.
