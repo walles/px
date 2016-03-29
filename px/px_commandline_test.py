@@ -73,8 +73,19 @@ def test_get_command_java_gradled():
 
 
 def test_get_command_java_teamcity():
-    # FIXME: Get an example TeamCity command line here
-    assert False
+    commandline = (
+        "/usr/lib/jvm/jdk-8-oracle-x64/jre/bin/java " +
+        "-Djava.util.logging.config.file=/teamcity/conf/logging.properties " +
+        "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
+        "-Dsun.net.inetaddr.ttl=60 -server -Xms31g -Xmx31g " +
+        "-Dteamcity.configuration.path=../conf/teamcity-startup.properties " +
+        "-Dlog4j.configuration=file:/teamcity/bin/../conf/teamcity-server-log4j.xml " +
+        "-Dteamcity_logs=../logs/ -Djsse.enableSNIExtension=false -Djava.awt.headless=true " +
+        "-Djava.endorsed.dirs=/teamcity/endorsed " +
+        "-classpath /teamcity/bin/bootstrap.jar:/teamcity/bin/tomcat-juli.jar " +
+        "-Dcatalina.base=/teamcity -Dcatalina.home=/teamcity " +
+        "-Djava.io.tmpdir=/teamcity/temp org.apache.catalina.startup.Bootstrap start")
+    assert px_commandline.get_command(commandline) == "Bootstrap"
 
 
 def test_get_command_java_logstash():
