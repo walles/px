@@ -38,10 +38,15 @@ def test_get_command_java():
 
     assert px_commandline.get_command("java SomeClass") == "SomeClass"
     assert px_commandline.get_command("java x.y.SomeClass") == "SomeClass"
-    assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
-    assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
     assert px_commandline.get_command("java -jar flaska.jar") == "flaska.jar"
     assert px_commandline.get_command("java -jar /a/b/flaska.jar") == "flaska.jar"
+
+    # We should ignore certain command line parameters
+    assert px_commandline.get_command("java -server SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -Xwhatever SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -Dwhatever SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
 
     # Tests for invalid command lines
     assert px_commandline.get_command("java -cp /a/b/c") == "java"

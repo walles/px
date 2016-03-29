@@ -115,6 +115,8 @@ def get_java_command(commandline):
                 continue
             if component.startswith('-D'):
                 continue
+            if component == "-server":
+                continue
             if component == "-cp" or component == "-classpath":
                 state = "skip next"
                 continue
