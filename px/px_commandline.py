@@ -85,6 +85,18 @@ def get_python_command(commandline):
     return python
 
 
+def prettify_fully_qualified_java_class(class_name):
+    split = class_name.split('.')
+    if len(split) == 1:
+        return split[-1]
+
+    if split[-1] == 'Main':
+        # Attempt to make "Main" class names more meaningful
+        return split[-2] + '.' + split[-1]
+
+    return split[-1]
+
+
 def get_java_command(commandline):
     array = to_array(commandline)
     java = os.path.basename(array[0])
@@ -126,7 +138,7 @@ def get_java_command(commandline):
             if component.startswith('-'):
                 # Unsupported switch, give up
                 return java
-            return component.split('.')[-1]
+            return prettify_fully_qualified_java_class(component)
         else:
             raise ValueError("Unhandled state <{}> at <{}> for: {}".format(state, component, array))
 
