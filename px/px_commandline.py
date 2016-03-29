@@ -62,6 +62,9 @@ def get_command(commandline):
     if command.startswith('python') or command == 'Python':
         return get_python_command(commandline)
 
+    if command == "java":
+        return get_java_command(commandline)
+
     return command
 
 
@@ -80,3 +83,64 @@ def get_python_command(commandline):
             return os.path.basename(array[2])
 
     return python
+
+
+def prettify_fully_qualified_java_class(class_name):
+    split = class_name.split('.')
+    if len(split) == 1:
+        return split[-1]
+
+    if split[-1] == 'Main':
+        # Attempt to make "Main" class names more meaningful
+        return split[-2] + '.' + split[-1]
+
+    return split[-1]
+
+
+def get_java_command(commandline):
+    array = to_array(commandline)
+    java = os.path.basename(array[0])
+    if len(array) == 1:
+        return java
+
+    state = "skip next"
+    for component in array:
+        if not component:
+            # Skip all empties
+            continue
+
+        if state == "skip next":
+            if component.startswith("-"):
+                # Skipping switches doesn't make sense. We're lost, fall back to
+                # just returning the command name
+                return java
+            state = "scanning"
+            continue
+        if state == "return next":
+            if component.startswith("-"):
+                # Returning switches doesn't make sense. We're lost, fall back
+                # to just returning the command name
+                return java
+            return os.path.basename(component)
+        elif state == "scanning":
+            if component.startswith('-X'):
+                continue
+            if component.startswith('-D'):
+                continue
+            if component == "-server":
+                continue
+            if component == "-cp" or component == "-classpath":
+                state = "skip next"
+                continue
+            if component == '-jar':
+                state = "return next"
+                continue
+            if component.startswith('-'):
+                # Unsupported switch, give up
+                return java
+            return prettify_fully_qualified_java_class(component)
+        else:
+            raise ValueError("Unhandled state <{}> at <{}> for: {}".format(state, component, array))
+
+    # We got to the end without being able to come up with a better name, give up
+    return java

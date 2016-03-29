@@ -29,3 +29,78 @@ def test_get_command_python():
     assert px_commandline.get_command("python -m   ") == "python"
     assert px_commandline.get_command("python -m -u") == "python"
     assert px_commandline.get_command("python    ") == "python"
+
+
+def test_get_command_java():
+    assert px_commandline.get_command("java") == "java"
+    assert px_commandline.get_command("java -version") == "java"
+    assert px_commandline.get_command("java -help") == "java"
+
+    assert px_commandline.get_command("java SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java x.y.SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -jar flaska.jar") == "flaska.jar"
+    assert px_commandline.get_command("java -jar /a/b/flaska.jar") == "flaska.jar"
+
+    # Special handling of class name "Main"
+    assert px_commandline.get_command("java a.b.c.Main") == "c.Main"
+
+    # We should ignore certain command line parameters
+    assert px_commandline.get_command("java -server SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -Xwhatever SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -Dwhatever SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
+
+    # Tests for invalid command lines
+    assert px_commandline.get_command("java -cp /a/b/c") == "java"
+    assert px_commandline.get_command("java  ") == "java"
+    assert px_commandline.get_command("java -jar") == "java"
+    assert px_commandline.get_command("java -jar    ") == "java"
+
+    # FIXME: Add test for classpath containing spaces? I say this should be
+    # postponed until we have a real world use case for that.
+    pass
+
+
+def test_get_command_java_gradled():
+    commandline = (
+        "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java " +
+        "-XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Xmx1024m " +
+        "-Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp " +
+        "/Users/johan/.gradle/wrapper/dists/gradle-2.8-all/gradle-2.8/lib/gradle-launcher-2.8.jar" +
+        " org.gradle.launcher.daemon.bootstrap.GradleDaemon 2.8")
+    assert px_commandline.get_command(commandline) == "GradleDaemon"
+
+
+def test_get_command_java_teamcity():
+    commandline = (
+        "/usr/lib/jvm/jdk-8-oracle-x64/jre/bin/java " +
+        "-Djava.util.logging.config.file=/teamcity/conf/logging.properties " +
+        "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
+        "-Dsun.net.inetaddr.ttl=60 -server -Xms31g -Xmx31g " +
+        "-Dteamcity.configuration.path=../conf/teamcity-startup.properties " +
+        "-Dlog4j.configuration=file:/teamcity/bin/../conf/teamcity-server-log4j.xml " +
+        "-Dteamcity_logs=../logs/ -Djsse.enableSNIExtension=false -Djava.awt.headless=true " +
+        "-Djava.endorsed.dirs=/teamcity/endorsed " +
+        "-classpath /teamcity/bin/bootstrap.jar:/teamcity/bin/tomcat-juli.jar " +
+        "-Dcatalina.base=/teamcity -Dcatalina.home=/teamcity " +
+        "-Djava.io.tmpdir=/teamcity/temp org.apache.catalina.startup.Bootstrap start")
+    assert px_commandline.get_command(commandline) == "Bootstrap"
+
+
+def test_get_command_java_logstash():
+    # From: https://github.com/elastic/logstash/issues/3315
+    commandline = (
+        "/usr/bin/java -XX:+UseParNewGC -XX:+UseConcMarkSweepGC " +
+        "-Djava.awt.headless=true -XX:CMSInitiatingOccupancyFraction=75 " +
+        "-XX:+UseCMSInitiatingOccupancyOnly -Djava.io.tmpdir=/var/lib/logstash " +
+        "-Xmx128m -Xss2048k -Djffi.boot.library.path=/opt/logstash/vendor/jruby/lib/jni " +
+        "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -Djava.awt.headless=true " +
+        "-XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly " +
+        "-Djava.io.tmpdir=/var/lib/logstash " +
+        "-Xbootclasspath/a:/opt/logstash/vendor/jruby/lib/jruby.jar -classpath : " +
+        "-Djruby.home=/opt/logstash/vendor/jruby " +
+        "-Djruby.lib=/opt/logstash/vendor/jruby/lib -Djruby.script=jruby " +
+        "-Djruby.shell=/bin/sh org.jruby.Main --1.9 /opt/logstash/lib/bootstrap/environment.rb " +
+        "logstash/runner.rb agent -f /etc/logstash/conf.d -l /var/log/logstash/logstash.log")
+    assert px_commandline.get_command(commandline) == "jruby.Main"
