@@ -92,11 +92,13 @@ resizes.
 usage and present that in one or more columns.
 
 # TODO misc
-* In the details report, if the current process has a working directory that
-isn't `/`, list all other processes that have the same working directory.
+* In the details view, list users that were logged in when the process was
+started.
 * In the details tree view, maybe print process owners for each line?
 * In the px / top views, in the process owner column, maybe print other non-root
 process owners of parent processes inside parentheses?
+* In the details report, if the current process has a working directory that
+isn't `/`, list all other processes that have the same working directory.
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
