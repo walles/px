@@ -1,6 +1,7 @@
 import datetime
 
 import dateutil.tz
+import px_loginhistory
 
 
 def get_users_at(last_output, now, testtime):
@@ -98,7 +99,7 @@ def test_get_users_at_until_crash():
         datetime.datetime(2015, 12, 26, 19, 55, tzinfo=dateutil.tz.tzlocal()))
 
 
-def test_get_users_at_until_shutdown():
+def test_get_users_at_until_shutdown_osx():
     now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
     lastline = "_mbsetupuser  console                   Mon Jan 18 20:31 - shutdown (34+01:29)"
 
@@ -111,7 +112,7 @@ def test_get_users_at_until_shutdown():
     assert set(["_mbsetupuser"]) == get_users_at(
         lastline, now,
         datetime.datetime(2016, 01, 18, 20, 31, tzinfo=dateutil.tz.tzlocal()))
-    assert set(["johan"]) == get_users_at(
+    assert set(["_mbsetupuser"]) == get_users_at(
         lastline, now,
         datetime.datetime(2016, 02, 18, 20, 30, tzinfo=dateutil.tz.tzlocal()))
 
@@ -119,6 +120,29 @@ def test_get_users_at_until_shutdown():
     assert not get_users_at(
         lastline, now,
         datetime.datetime(2016, 02, 28, 20, 30, tzinfo=dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_until_shutdown_linux():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "johan    :0           :0               Sat Mar 26 22:04 - down   (00:08)"
+
+    # Before
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 26, 22, 03, tzinfo=dateutil.tz.tzlocal()))
+
+    # During
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 26, 22, 04, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 26, 22, 9, tzinfo=dateutil.tz.tzlocal()))
+
+    # A bit after
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 26, 22, 15, tzinfo=dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_multiple():
@@ -170,7 +194,15 @@ def test_get_users_at_pseudousers_osx():
 
 
 def test_get_users_at_pseudousers_linux():
-    # FIXME: Test reboot pseudo user on Linux
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
 
-    # FIXME: Test shutdown pseudo user on Linux
-    pass
+    lastline = "reboot   system boot  4.2.0-30-generic Thu Mar  3 11:19 - 13:38 (6+02:18)"
+    # "reboot" is not a real user, it shouldn't be listed
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 03, 11, 19, tzinfo=dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_just_run_it():
+    # Just tyre kick it live wherever we happen to be. This shouldn't crash.
+    px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
