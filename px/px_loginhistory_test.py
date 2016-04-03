@@ -75,11 +75,50 @@ def test_get_users_at_local():
         datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
-def test_get_users_at_until_event():
-    # FIXME: Test user logged in until crash
+def test_get_users_at_until_crash():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "johan     ttys001                   Thu Nov 26 19:55 - crash (27+07:11)"
 
-    # FIXME: Test user logged in until shutdown
-    pass
+    # Before
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 11, 26, 19, 54, tzinfo=dateutil.tz.tzlocal()))
+
+    # During
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 11, 26, 19, 55, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 12, 10, 19, 53, tzinfo=dateutil.tz.tzlocal()))
+
+    # A bit after
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 12, 26, 19, 55, tzinfo=dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_until_shutdown():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "_mbsetupuser  console                   Mon Jan 18 20:31 - shutdown (34+01:29)"
+
+    # Before
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 01, 18, 20, 30, tzinfo=dateutil.tz.tzlocal()))
+
+    # During
+    assert set(["_mbsetupuser"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 01, 18, 20, 31, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 02, 18, 20, 30, tzinfo=dateutil.tz.tzlocal()))
+
+    # A bit after
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 02, 28, 20, 30, tzinfo=dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_pseudousers_linux():
