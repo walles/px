@@ -58,13 +58,21 @@ def test_get_users_at_still_logged_in():
 
 
 def test_get_users_at_remote():
-    # FIXME: Test user logged in remotely
-    pass
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "root     pts/1        10.1.6.120       Tue Jan 28 05:59   still logged in"
+
+    assert set(["root from 10.1.6.120"]) == get_users_at(
+        lastline, now,
+        datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_local():
-    # FIXME: Test user logged in locally
-    pass
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "johan     ttys000                   Sun Apr  3 11:54   still logged in"
+
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_until_event():
