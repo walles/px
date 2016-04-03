@@ -7,6 +7,7 @@ import os
 import px_file
 import px_process
 import px_ipc_map
+import px_loginhistory
 
 
 def find_process_by_pid(pid, processes):
@@ -114,6 +115,17 @@ def print_processes_started_at_the_same_time(process, all_processes):
         print("  " + to_relative_start_string(process, close))
 
 
+def print_users_when_process_started(process):
+    print("Users logged in when " + str(process) + " started:")
+    users = px_loginhistory.get_users_at(process.start_time)
+    if not users:
+        print("  <No users logged in>")
+        return
+
+    for user in sorted(users):
+        print("  " + user)
+
+
 def print_fds(process, processes):
     # It's true, I measured it myself /johan.walles@gmail.com
     print(datetime.datetime.now().isoformat() +
@@ -187,6 +199,9 @@ def print_process_info(pid):
 
     print("")
     print_processes_started_at_the_same_time(process, processes)
+
+    print("")
+    print_users_when_process_started(process)
 
     # List all files PID has open
     print("")

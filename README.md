@@ -99,6 +99,8 @@ started.
 process owners of parent processes inside parentheses?
 * In the details report, if the current process has a working directory that
 isn't `/`, list all other processes that have the same working directory.
+* Ignore -E switch on Python command lines
+
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
