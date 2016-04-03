@@ -122,7 +122,7 @@ def test_get_users_at_until_shutdown():
 
 
 def test_get_users_at_multiple():
-    # Test user logged in between two timestamps
+    # Test multiple users logged in between two timestamps
     now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
     lastline = "\n".join([
         "johan1     ttys000                   Thu Mar 31 14:39 - 11:08  (20:29)",
@@ -151,15 +151,26 @@ def test_get_users_at_multiple():
         datetime.datetime(2016, 04, 01, 11, 9, tzinfo=dateutil.tz.tzlocal()))
 
 
+def test_get_users_at_pseudousers_osx():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+
+    # Note trailing space in test string, we get that from last on OS X 10.11.3
+    lastline = "reboot    ~                         Fri Oct 23 06:50 "
+    # "reboot" is not a real user, it shouldn't be listed
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 10, 23, 06, 50, tzinfo=dateutil.tz.tzlocal()))
+
+    # Note trailing space in test string, we get that from last on OS X 10.11.3
+    lastline = "shutdown  ~                         Fri Oct 23 06:49 "
+    # "shutdown" is not a real user, it shouldn't be listed
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2015, 10, 23, 06, 49, tzinfo=dateutil.tz.tzlocal()))
+
+
 def test_get_users_at_pseudousers_linux():
     # FIXME: Test reboot pseudo user on Linux
 
     # FIXME: Test shutdown pseudo user on Linux
-    pass
-
-
-def test_get_users_at_pseudousers_osx():
-    # FIXME: Test reboot pseudo user on OS X
-
-    # FIXME: Test shutdown pseudo user on OS X
     pass
