@@ -3,9 +3,9 @@ import datetime
 import dateutil.tz
 
 
-def get_users_at(last_string, now, testtime):
+def get_users_at(last_output, now, testtime):
     """
-    Ask px_loginhistory to parse last_string given the current timestamp of now.
+    Ask px_loginhistory to parse last_output given the current timestamp of now.
 
     Then return the users px_loginhistory claims were logged in at testtime.
     """
@@ -119,6 +119,36 @@ def test_get_users_at_until_shutdown():
     assert not get_users_at(
         lastline, now,
         datetime.datetime(2016, 02, 28, 20, 30, tzinfo=dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_multiple():
+    # Test user logged in between two timestamps
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "\n".join([
+        "johan1     ttys000                   Thu Mar 31 14:39 - 11:08  (20:29)",
+        "johan2     ttys000                   Thu Mar 31 14:39 - 11:08  (20:29)",
+    ])
+
+    # Before
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 31, 14, 38, tzinfo=dateutil.tz.tzlocal()))
+
+    # During
+    assert set(["johan1", "johan2"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 31, 14, 39, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan1", "johan2"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 31, 17, 46, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan1", "johan2"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 04, 01, 11, 8, tzinfo=dateutil.tz.tzlocal()))
+
+    # After
+    assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 04, 01, 11, 9, tzinfo=dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_pseudousers_linux():
