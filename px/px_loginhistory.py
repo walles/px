@@ -10,8 +10,8 @@ LAST_USERNAME = "([^ ]+)"
 LAST_DEVICE = "([^ ]+)"
 LAST_ADDRESS = "([^ ]+)?"
 LAST_FROM = "(... ... .. ..:..)"
-LAST_DASH = " . "
-LAST_TO = ".*"
+LAST_DASH = " [- ] "
+LAST_TO = "[^(]*"
 LAST_DURATION = "([0-9+:]+)"
 
 LAST_RE = re.compile(
@@ -24,9 +24,9 @@ LAST_RE = re.compile(
   LAST_FROM +
   LAST_DASH +
   LAST_TO +
-  " *\(" +
+  " *(\(" +
   LAST_DURATION +
-  "\)"
+  "\))?"
 )
 
 TIMEDELTA_RE = re.compile("(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
@@ -72,7 +72,7 @@ def get_users_at(timestamp, last_output=None, now=None):
         device = match.group(2)
         address = match.group(3)
         from_s = match.group(4)
-        duration_s = match.group(5)
+        duration_s = match.group(6)
         print("FIXME: Remove this printout: u={}, d={}, a={}, f={}, d={}".format(
             username, device, address, from_s, duration_s
         ))
@@ -85,6 +85,11 @@ def get_users_at(timestamp, last_output=None, now=None):
             sys.stderr.write(
                 "WARNING: Please report problematic1 last line at {}: <{}>\n".format(
                     "https://github.com/walles/px/issues/new", line))
+            continue
+
+        if duration_s is None:
+            # Still logged in
+            users.add(username)
             continue
 
         try:
