@@ -154,4 +154,4 @@ def _to_timedelta(string):
 
     minutes = int(match.group(4))
 
-    return datetime.timedelta(days, hours, minutes)
+    return datetime.timedelta(days, hours=hours, minutes=minutes)

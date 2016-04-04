@@ -223,6 +223,6 @@ def test_to_timestamp():
 
 
 def test_to_timedelta():
-    assert px_loginhistory._to_timedelta("01:29") == datetime.timedelta(0, 1, 29)
-    assert px_loginhistory._to_timedelta("4+01:29") == datetime.timedelta(4, 1, 29)
-    assert px_loginhistory._to_timedelta("34+01:29") == datetime.timedelta(34, 1, 29)
+    assert px_loginhistory._to_timedelta("01:29") == datetime.timedelta(0, hours=1, minutes=29)
+    assert px_loginhistory._to_timedelta("4+01:29") == datetime.timedelta(4, hours=1, minutes=29)
+    assert px_loginhistory._to_timedelta("34+01:29") == datetime.timedelta(34, hours=1, minutes=29)
