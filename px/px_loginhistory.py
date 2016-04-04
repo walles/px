@@ -31,6 +31,22 @@ LAST_RE = re.compile(
 
 TIMEDELTA_RE = re.compile("(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
 
+# Month names in English locale
+MONTHS = {
+    "Jan": 1,
+    "Feb": 2,
+    "Mar": 3,
+    "Apr": 4,
+    "May": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Oct": 10,
+    "Nov": 11,
+    "Dec": 12,
+}
+
 
 def get_users_at(timestamp, last_output=None, now=None):
     """
@@ -89,10 +105,40 @@ def get_users_at(timestamp, last_output=None, now=None):
 
 
 def _to_timestamp(string, now):
-    timestamp = datetime.datetime.strptime(string, "%a %b %d %H:%M")
-    timestamp = timestamp.replace(tzinfo=dateutil.tz.tzlocal())
-    timestamp = timestamp.replace(year=now.year)
-    return timestamp
+    """
+    Parse a timestamp like "Mon Feb  7 13:19".
+
+    Names of months and days must be in English, make sure you call "last"
+    without the LANG= environment variable set.
+
+    Now is the current timestamp, and the returned timestamp is supposed to be
+    before now.
+    """
+
+    # FIXME: Use day of week as a checksum before returning from this function?
+
+    split = string.split()
+    month = MONTHS[split[1]]
+    day = int(split[2])
+
+    hour, minute = split[3].split(":")
+    hour = int(hour)
+    minute = int(minute)
+
+    try:
+        timestamp = datetime.datetime(
+            now.year, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal())
+        if timestamp <= now:
+            return timestamp
+    except ValueError:
+        if month == 2 and day == 29:
+            # This happens at leap years when we get the year wrong
+            pass
+        else:
+            raise
+
+    return datetime.datetime(
+        now.year - 1, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal())
 
 
 def _to_timedelta(string):
