@@ -1,6 +1,8 @@
+import datetime
 import sys
 
 import re
+
 
 # last regexp parts
 LAST_USERNAME = "([^ ]+)"
@@ -25,6 +27,8 @@ LAST_RE = re.compile(
   LAST_DURATION +
   "\)"
 )
+
+TIMEDELTA_RE = re.compile("(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
 
 
 def get_users_at(timestamp, last_output=None, now=None):
@@ -57,13 +61,25 @@ def get_users_at(timestamp, last_output=None, now=None):
             username, device, address, from_s, to_s, duration_s
         ))
 
-        from_timestamp = _to_timestamp(from_s, now)
-        if timestamp < from_timestamp:
+        try:
+            from_timestamp = _to_timestamp(from_s, now)
+            if timestamp < from_timestamp:
+                continue
+        except Exception:
+            sys.stderr.write(
+                "WARNING: Please report problematic1 last line at {}: <{}>\n".format(
+                    "https://github.com/walles/px/issues/new", line))
             continue
 
-        duration_delta = _to_timedelta(duration_s)
-        to_timestamp = from_timestamp + duration_delta
-        if timestamp > to_timestamp:
+        try:
+            duration_delta = _to_timedelta(duration_s)
+            to_timestamp = from_timestamp + duration_delta
+            if timestamp > to_timestamp:
+                continue
+        except Exception:
+            sys.stderr.write(
+                "WARNING: Please report problematic2 last line at {}: <{}>\n".format(
+                    "https://github.com/walles/px/issues/new", line))
             continue
 
         users.add(username)
@@ -76,4 +92,16 @@ def _to_timestamp(string, now):
 
 
 def _to_timedelta(string):
-    return None
+    match = TIMEDELTA_RE.match(string)
+
+    days = match.group(2)
+    if days is None:
+        days = 0
+    else:
+        days = int(days)
+
+    hours = int(match.group(3))
+
+    minutes = int(match.group(4))
+
+    return datetime.timedelta(days, hours, minutes)
