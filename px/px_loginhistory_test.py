@@ -67,13 +67,22 @@ def test_get_users_at_remote():
         datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
-def test_get_users_at_local():
+def test_get_users_at_local_osx():
     now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
     lastline = "johan     ttys000                   Sun Apr  3 11:54   still logged in"
 
     assert set(["johan"]) == get_users_at(
         lastline, now,
         datetime.datetime.now(dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_local_linux():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    lastline = "johan    pts/2        :0               Wed Mar  9 13:25 - 13:38  (00:12)"
+
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 9, 13, 26, tzinfo=dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_until_crash():
@@ -199,6 +208,16 @@ def test_get_users_at_pseudousers_linux():
     lastline = "reboot   system boot  4.2.0-30-generic Thu Mar  3 11:19 - 13:38 (6+02:18)"
     # "reboot" is not a real user, it shouldn't be listed
     assert not get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 03, 03, 11, 19, tzinfo=dateutil.tz.tzlocal()))
+
+
+def test_get_users_at_gone_no_logout():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+
+    lastline = "johan    pts/3        :0               Mon Apr  4 23:10    gone - no logout"
+
+    assert "FIXME: How do we handle this?" == get_users_at(
         lastline, now,
         datetime.datetime(2016, 03, 03, 11, 19, tzinfo=dateutil.tz.tzlocal()))
 
