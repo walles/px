@@ -206,3 +206,23 @@ def test_get_users_at_pseudousers_linux():
 def test_get_users_at_just_run_it():
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
     px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
+
+
+def test_to_timestamp():
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    expected = datetime.datetime(2016, 03, 05, 11, 19, tzinfo=dateutil.tz.tzlocal())
+    assert px_loginhistory._to_timestamp("Thu Mar  5 11:19", now) == expected
+
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    expected = datetime.datetime(2016, 02, 29, 13, 19, tzinfo=dateutil.tz.tzlocal())
+    assert px_loginhistory._to_timestamp("Mon Feb 29 13:19", now) == expected
+
+    now = datetime.datetime(2017, 01, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    expected = datetime.datetime(2016, 02, 29, 13, 19, tzinfo=dateutil.tz.tzlocal())
+    assert px_loginhistory._to_timestamp("Mon Feb 29 13:19", now) == expected
+
+
+def test_to_timedelta():
+    assert px_loginhistory._to_timedelta("01:29") == datetime.timedelta(0, 1, 29)
+    assert px_loginhistory._to_timedelta("4+01:29") == datetime.timedelta(4, 1, 29)
+    assert px_loginhistory._to_timedelta("34+01:29") == datetime.timedelta(34, 1, 29)

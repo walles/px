@@ -3,26 +3,26 @@ import sys
 import re
 
 # last regexp parts
-USERNAME_PART = "([^ ]+)"
-DEVICE_PART = "([^ ]+)"
-ADDRESS_PART = "([^ ]+)?"
-FROM_PART = "(... ... .. ..:..)"
-DASH_PART = " . "
-TO_PART = "(..:..)"
-DURATION_PART = "([0-9+:]+)"
+LAST_USERNAME = "([^ ]+)"
+LAST_DEVICE = "([^ ]+)"
+LAST_ADDRESS = "([^ ]+)?"
+LAST_FROM = "(... ... .. ..:..)"
+LAST_DASH = " . "
+LAST_TO = "(..:..)"
+LAST_DURATION = "([0-9+:]+)"
 
 LAST_RE = re.compile(
-  USERNAME_PART +
+  LAST_USERNAME +
   " +" +
-  DEVICE_PART +
+  LAST_DEVICE +
   " +" +
-  ADDRESS_PART +
+  LAST_ADDRESS +
   " +" +
-  FROM_PART +
-  DASH_PART +
-  TO_PART +
+  LAST_FROM +
+  LAST_DASH +
+  LAST_TO +
   " *\(" +
-  DURATION_PART +
+  LAST_DURATION +
   "\)"
 )
 
@@ -57,4 +57,23 @@ def get_users_at(timestamp, last_output=None, now=None):
             username, device, address, from_s, to_s, duration_s
         ))
 
+        from_timestamp = _to_timestamp(from_s, now)
+        if timestamp < from_timestamp:
+            continue
+
+        duration_delta = _to_timedelta(duration_s)
+        to_timestamp = from_timestamp + duration_delta
+        if timestamp > to_timestamp:
+            continue
+
+        users.add(username)
+
     return users
+
+
+def _to_timestamp(string, now):
+    return None
+
+
+def _to_timedelta(string):
+    return None
