@@ -1,7 +1,8 @@
-import datetime
 import sys
+import datetime
 
 import re
+import dateutil.tz
 
 
 # last regexp parts
@@ -88,7 +89,10 @@ def get_users_at(timestamp, last_output=None, now=None):
 
 
 def _to_timestamp(string, now):
-    return None
+    timestamp = datetime.datetime.strptime(string, "%a %b %d %H:%M")
+    timestamp = timestamp.replace(tzinfo=dateutil.tz.tzlocal())
+    timestamp = timestamp.replace(year=now.year)
+    return timestamp
 
 
 def _to_timedelta(string):
