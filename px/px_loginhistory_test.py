@@ -10,7 +10,7 @@ def get_users_at(last_output, now, testtime):
 
     Then return the users px_loginhistory claims were logged in at testtime.
     """
-    return None
+    return px_loginhistory.get_users_at(testtime, last_output=last_output, now=now)
 
 
 def test_get_users_at_range():
