@@ -11,7 +11,7 @@ LAST_DEVICE = "([^ ]+)"
 LAST_ADDRESS = "([^ ]+)?"
 LAST_FROM = "(... ... .. ..:..)"
 LAST_DASH = " . "
-LAST_TO = "(..:..)"
+LAST_TO = ".*"
 LAST_DURATION = "([0-9+:]+)"
 
 LAST_RE = re.compile(
@@ -72,10 +72,9 @@ def get_users_at(timestamp, last_output=None, now=None):
         device = match.group(2)
         address = match.group(3)
         from_s = match.group(4)
-        to_s = match.group(5)
-        duration_s = match.group(6)
-        print("FIXME: Remove this printout: u={}, d={}, a={}, f={}, t={}, d={}".format(
-            username, device, address, from_s, to_s, duration_s
+        duration_s = match.group(5)
+        print("FIXME: Remove this printout: u={}, d={}, a={}, f={}, d={}".format(
+            username, device, address, from_s, duration_s
         ))
 
         try:
