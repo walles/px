@@ -88,8 +88,9 @@ class IpcMap(object):
             if local_endpoint:
                 self._local_endpoint_to_pid[local_endpoint] = file.pid
 
-            if file.device_number is not None:
-                add_arraymapping(self._device_number_to_files, file.device_number, file)
+            device_number = file.device_number()
+            if device_number is not None:
+                add_arraymapping(self._device_number_to_files, device_number, file)
 
             if file.access is not None and file.type == 'FIFO':
                 add_arraymapping(self._fifo_name_and_access_to_pids,
@@ -132,8 +133,9 @@ class IpcMap(object):
             if matching_pids:
                 pids.update(matching_pids)
 
-        if file.device_number:
-            matching_files = self._device_number_to_files.get(file.device_number)
+        device_number = file.device_number()
+        if device_number:
+            matching_files = self._device_number_to_files.get(device_number)
             if not matching_files:
                 matching_files = []
             for candidate in matching_files:

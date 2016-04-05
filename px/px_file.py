@@ -34,6 +34,18 @@ class PxFile(object):
         # Decorate non-regular files with their type
         return "[" + self.type + "] " + self.name + listen_suffix
 
+    def device_number(self):
+        if self.device is None:
+            return None
+
+        number = int(self.device, 16)
+        if number == 0:
+            # 0x000lotsofmore000 is what we get on lsof 4.86 and Linux 4.2.0
+            # when lsof doesn't have root privileges
+            return None
+
+        return number
+
     def get_endpoints(self):
         """
         Returns a (local,remote) tuple. They represent the local and the remote
@@ -61,19 +73,6 @@ class PxFile(object):
             remote = split_name[1]
 
         return (local, remote)
-
-
-def device_to_number(device):
-    if device is None:
-        return None
-
-    number = int(device, 16)
-    if number == 0:
-        # 0x000lotsofmore000 is what we get on lsof 4.86 and Linux 4.2.0
-        # when lsof doesn't have root privileges
-        return None
-
-    return number
 
 
 def call_lsof():
@@ -120,7 +119,6 @@ def lsof_to_files(lsof, file_types=None):
             file.pid = pid
             file.type = "??"
             file.device = None
-            file.device_number = None
 
             if not files:
                 # No files, just add the new one
@@ -143,7 +141,6 @@ def lsof_to_files(lsof, file_types=None):
             file.type = value
         elif type == 'd':
             file.device = value
-            file.device_number = device_to_number(value)
         elif type == 'n':
             file.name = value
 

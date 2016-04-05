@@ -15,7 +15,6 @@ def create_file(type, name, device, pid, access=None):
     file.pid = pid
     file.access = access
     file.device = device
-    file.device_number = px_file.device_to_number(device)
     return file
 
 
