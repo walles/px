@@ -253,6 +253,18 @@ def test_get_users_at_trailing_noise(check_output):
     assert not get_users_at("wtmp begins Thu Oct  1 22:54 ", now, now)
 
 
+def test_get_users_at_unexpected_last_output(capfd):
+    UNEXPECTED = "glasskiosk"
+
+    now = datetime.datetime(2016, 04, 07, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    assert not get_users_at(UNEXPECTED, now, now)
+
+    out, err = capfd.readouterr()
+    assert not out
+    assert UNEXPECTED in err
+    assert 'https://github.com/walles/px/issues' in err
+
+
 def test_get_users_at_just_run_it(check_output):
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
     px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
