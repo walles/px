@@ -77,6 +77,9 @@ def get_users_at(timestamp, last_output=None, now=None):
             username, device, address, from_s, duration_s
         ))
 
+        if address:
+            username += " from " + address
+
         try:
             from_timestamp = _to_timestamp(from_s, now)
             if timestamp < from_timestamp:
