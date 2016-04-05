@@ -1,6 +1,8 @@
 import sys
 import datetime
+import subprocess
 
+import os
 import re
 import dateutil.tz
 
@@ -59,6 +61,13 @@ def get_users_at(timestamp, last_output=None, now=None):
     Optional argument now is the current timestamp for parsing last_output. Will
     be taken from the system clock if not provided.
     """
+
+    if now is None:
+        now = datetime.datetime.now(dateutil.tz.tzlocal())
+
+    if last_output is None:
+        last_output = call_last()
+
     users = set()
     for line in last_output.splitlines():
         match = LAST_RE.match(line)
@@ -109,6 +118,20 @@ def get_users_at(timestamp, last_output=None, now=None):
         users.add(username)
 
     return users
+
+
+def call_last():
+    """
+    Call last and return the result as one big string
+    """
+    env = os.environ.copy()
+    if "LANG" in env:
+        del env["LANG"]
+
+    last = subprocess.Popen("last",
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            env=env)
+    return last.communicate()[0]
 
 
 def _to_timestamp(string, now):
