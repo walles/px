@@ -227,7 +227,7 @@ def test_get_users_at_gone_no_logout(check_output):
 
     That's the only place I've seen it.
     """
-    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 04, 07, 12, 8, tzinfo=dateutil.tz.tzlocal())
     lastline = "johan    pts/3        :0               Mon Apr  4 23:10    gone - no logout"
 
     # Before
