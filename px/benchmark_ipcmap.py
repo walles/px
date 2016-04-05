@@ -76,15 +76,18 @@ def main(args):
     lap_number = 0
     load_times = []
     mapping_times = []
+    total_times = []
     while time.time() < end:
         lap_number += 1
         print("Lap {}, {:.0f}s left...".format(lap_number, end - time.time()))
         load_time, mapping_time = get_timings(lsof_file, pid)
         load_times.append(load_time)
         mapping_times.append(mapping_time)
+        total_times.append(load_time + mapping_time)
 
     print_statistics("Loading time", load_times)
     print_statistics("Mapping time", mapping_times)
+    print_statistics("  Total time", total_times)
 
 
 if __name__ == "__main__":
