@@ -244,6 +244,14 @@ def test_get_users_at_gone_no_logout(check_output):
         datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
+def test_get_users_at_trailing_noise(check_output):
+    now = datetime.datetime(2016, 04, 07, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    assert not get_users_at("", now, now)
+
+    # Note trailing space in test string, we get that from last on OS X 10.11.3
+    assert not get_users_at("wtmp begins Thu Oct  1 22:54 ", now, now)
+
+
 def test_get_users_at_just_run_it(check_output):
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
     px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))

@@ -70,6 +70,12 @@ def get_users_at(timestamp, last_output=None, now=None):
 
     users = set()
     for line in last_output.splitlines():
+        if not line:
+            continue
+        if line.startswith("wtmp begins"):
+            # This is trailing noise printed by last
+            continue
+
         match = LAST_RE.match(line)
         if not match:
             sys.stderr.write(
