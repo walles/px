@@ -222,13 +222,26 @@ def test_get_users_at_pseudousers_linux(check_output):
 
 
 def test_get_users_at_gone_no_logout(check_output):
-    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    """
+    Treat "gone - no logout" as "still logged in".
 
+    That's the only place I've seen it.
+    """
+    now = datetime.datetime(2016, 04, 03, 12, 8, tzinfo=dateutil.tz.tzlocal())
     lastline = "johan    pts/3        :0               Mon Apr  4 23:10    gone - no logout"
 
-    assert "FIXME: How do we handle this?" == get_users_at(
+    # Before
+    assert not get_users_at(
         lastline, now,
-        datetime.datetime(2016, 03, 03, 11, 19, tzinfo=dateutil.tz.tzlocal()))
+        datetime.datetime(2016, 04, 04, 23, 9, tzinfo=dateutil.tz.tzlocal()))
+
+    # During
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime(2016, 04, 04, 23, 10, tzinfo=dateutil.tz.tzlocal()))
+    assert set(["johan"]) == get_users_at(
+        lastline, now,
+        datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
 def test_get_users_at_just_run_it(check_output):
