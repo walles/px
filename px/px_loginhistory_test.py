@@ -11,6 +11,7 @@ def check_output(capfd):
 
     out, err = capfd.readouterr()
     assert not err
+    assert not out
 
 
 def get_users_at(last_output, now, testtime):

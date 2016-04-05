@@ -88,13 +88,9 @@ def get_users_at(timestamp, last_output=None, now=None):
             continue
 
         username = match.group(1)
-        device = match.group(2)
         address = match.group(3)
         from_s = match.group(4)
         duration_s = match.group(6)
-        print("FIXME: Remove this printout: u={}, d={}, a={}, f={}, d={}".format(
-            username, device, address, from_s, duration_s
-        ))
 
         if address:
             username += " from " + address
