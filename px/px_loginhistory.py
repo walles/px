@@ -75,6 +75,10 @@ def get_users_at(timestamp, last_output=None, now=None):
         if line.startswith("wtmp begins"):
             # This is trailing noise printed by last
             continue
+        if line.startswith("reboot "):
+            continue
+        if line.startswith("shutdown "):
+            continue
 
         match = LAST_RE.match(line)
         if not match:
