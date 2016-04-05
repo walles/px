@@ -104,3 +104,9 @@ def test_get_command_java_logstash():
         "-Djruby.shell=/bin/sh org.jruby.Main --1.9 /opt/logstash/lib/bootstrap/environment.rb " +
         "logstash/runner.rb agent -f /etc/logstash/conf.d -l /var/log/logstash/logstash.log")
     assert px_commandline.get_command(commandline) == "jruby.Main"
+
+
+def test_get_command_resque():
+    # These command names are from a real-world system
+    assert px_commandline.get_command("resque-1.20.0: x y z") == "resque-1.20.0:"
+    assert px_commandline.get_command("resqued-0.7.12 a b c") == "resqued-0.7.12"

@@ -48,6 +48,15 @@ def get_command(commandline):
 
     command = os.path.basename(to_array(commandline)[0])
 
+    if command.startswith('python') or command == 'Python':
+        return get_python_command(commandline)
+
+    if command == "java":
+        return get_java_command(commandline)
+
+    if len(command) < 25:
+        return command
+
     command_split = command.split(".")
     if len(command_split) > 1:
         if len(command_split[-1]) > 4:
@@ -58,12 +67,6 @@ def get_command(commandline):
             # Assume last part is a file suffix (like ".exe") and take the
             # next to last part
             command = command_split[-2]
-
-    if command.startswith('python') or command == 'Python':
-        return get_python_command(commandline)
-
-    if command == "java":
-        return get_java_command(commandline)
 
     return command
 
