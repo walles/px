@@ -157,7 +157,7 @@ def test_str_resolve():
     test_me.name = "[::1]:17600"
 
     resolution = re.match("^\[IPv6\] (.*):17600 \(LISTEN\)$", str(test_me)).group(1)
-    assert resolution == "[::1]" or resolution.startswith("localhost")
+    assert resolution == "[::1]" or "localhost" in resolution
 
     test_me = px_file.PxFile()
     test_me.type = "IPv4"
