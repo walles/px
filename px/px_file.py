@@ -1,3 +1,4 @@
+import socket
 import subprocess
 
 import os
@@ -25,14 +26,28 @@ class PxFile(object):
         if self.type == "REG":
             return self.name
 
+        name = self.name
         listen_suffix = ''
         if self.type in ['IPv4', 'IPv6']:
             local, remote_endpoint = self.get_endpoints()
             if not remote_endpoint:
                 listen_suffix = ' (LISTEN)'
 
+            name = self._resolve_name()
+
         # Decorate non-regular files with their type
-        return "[" + self.type + "] " + self.name + listen_suffix
+        return "[" + self.type + "] " + name + listen_suffix
+
+    def _resolve_name(self):
+        local, remote = self.get_endpoints()
+        if not local:
+            return self.name
+
+        local = resolve_endpoint(local)
+        if not remote:
+            return local
+
+        return local + "->" + resolve_endpoint(remote)
 
     def device_number(self):
         if self.device is None:
@@ -73,6 +88,32 @@ class PxFile(object):
             remote = split_name[1]
 
         return (local, remote)
+
+
+def resolve_endpoint(endpoint):
+    """
+    Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
+    """
+    # Find the rightmost :, necessary for IPv6 addresses
+    splitindex = endpoint.rfind(':')
+    if splitindex == -1:
+        return endpoint
+
+    address = endpoint[0:splitindex]
+    if address[0] == '[' and address[-1] == ']':
+        # This is how lsof presents IPv6 addresses
+        address = address[1:-1]
+
+    port = endpoint[splitindex + 1:]
+
+    try:
+        return socket.gethostbyaddr(address)[0] + ":" + port
+    except socket.herror:
+        # Unknown host
+        return endpoint
+    except socket.gaierror:
+        # Malformed hostname
+        return endpoint
 
 
 def call_lsof():
