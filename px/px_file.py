@@ -87,7 +87,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-F', 'fnaptd0'],
+    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
     return lsof.communicate()[0]
