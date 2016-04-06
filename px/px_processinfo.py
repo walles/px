@@ -119,7 +119,7 @@ def print_users_when_process_started(process):
     print("Users logged in when " + str(process) + " started:")
     users = px_loginhistory.get_users_at(process.start_time)
     if not users:
-        print("  <No users logged in>")
+        print('  <Nobody found, either nobody was logged in or the wtmp logs have been rotated>')
         return
 
     for user in sorted(users):

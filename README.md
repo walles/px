@@ -94,6 +94,10 @@ usage and present that in one or more columns.
 # TODO misc
 * In the details view, list users that were logged in when the process was
 started.
+* Details: When no users were found to be logged in at process start,
+automatically detect whether it's because we don't have history that far back or
+whether it seems to be that nobody was actually logged in. Inform the user about
+the outcome.
 * In the details tree view, maybe print process owners for each line?
 * In the px / top views, in the process owner column, maybe print other non-root
 process owners of parent processes inside parentheses?
