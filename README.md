@@ -92,13 +92,17 @@ resizes.
 usage and present that in one or more columns.
 
 # TODO misc
-* In the details view, list users that were logged in when the process was
-started.
+* Details: When no users were found to be logged in at process start,
+automatically detect whether it's because we don't have history that far back or
+whether it seems to be that nobody was actually logged in. Inform the user about
+the outcome.
 * In the details tree view, maybe print process owners for each line?
 * In the px / top views, in the process owner column, maybe print other non-root
 process owners of parent processes inside parentheses?
 * In the details report, if the current process has a working directory that
 isn't `/`, list all other processes that have the same working directory.
+* Ignore -E switch on Python command lines
+
 
 # DONE
 * Make `px` list all processes with PID, owner, memory usage (in % of available
@@ -141,3 +145,5 @@ rows than usual before exiting.
 * top: Print system load before the process listing.
 * Parse Java and Python command lines and print the name of the program being
 executed rather than the VM.
+* In the details view, list users that were logged in when the process was
+started.
