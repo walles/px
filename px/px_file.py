@@ -108,11 +108,8 @@ def resolve_endpoint(endpoint):
 
     try:
         return socket.gethostbyaddr(address)[0] + ":" + port
-    except socket.herror:
-        # Unknown host
-        return endpoint
-    except socket.gaierror:
-        # Malformed hostname
+    except Exception:
+        # Lookup failed for whatever reason, give up
         return endpoint
 
 
