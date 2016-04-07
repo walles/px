@@ -1,3 +1,4 @@
+import socket
 import subprocess
 
 import os
@@ -25,14 +26,28 @@ class PxFile(object):
         if self.type == "REG":
             return self.name
 
+        name = self.name
         listen_suffix = ''
         if self.type in ['IPv4', 'IPv6']:
             local, remote_endpoint = self.get_endpoints()
             if not remote_endpoint:
                 listen_suffix = ' (LISTEN)'
 
+            name = self._resolve_name()
+
         # Decorate non-regular files with their type
-        return "[" + self.type + "] " + self.name + listen_suffix
+        return "[" + self.type + "] " + name + listen_suffix
+
+    def _resolve_name(self):
+        local, remote = self.get_endpoints()
+        if not local:
+            return self.name
+
+        local = resolve_endpoint(local)
+        if not remote:
+            return local
+
+        return local + "->" + resolve_endpoint(remote)
 
     def device_number(self):
         if self.device is None:
@@ -75,6 +90,29 @@ class PxFile(object):
         return (local, remote)
 
 
+def resolve_endpoint(endpoint):
+    """
+    Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
+    """
+    # Find the rightmost :, necessary for IPv6 addresses
+    splitindex = endpoint.rfind(':')
+    if splitindex == -1:
+        return endpoint
+
+    address = endpoint[0:splitindex]
+    if address[0] == '[' and address[-1] == ']':
+        # This is how lsof presents IPv6 addresses
+        address = address[1:-1]
+
+    port = endpoint[splitindex + 1:]
+
+    try:
+        return socket.gethostbyaddr(address)[0] + ":" + port
+    except Exception:
+        # Lookup failed for whatever reason, give up
+        return endpoint
+
+
 def call_lsof():
     """
     Call lsof and return the result as one big string
@@ -87,7 +125,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-F', 'fnaptd0'],
+    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
     return lsof.communicate()[0]

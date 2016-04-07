@@ -1,3 +1,4 @@
+import re
 import px_file
 
 
@@ -137,3 +138,28 @@ def test_remote_endpoint():
                          "n*:*"]).get_endpoints()[1] is None
     assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
                          "n/somefile"]).get_endpoints()[1] is None
+
+
+def test_str_resolve():
+    # FIXME: This will break if Google changes the name of 8.8.8.8
+    test_me = px_file.PxFile()
+    test_me.type = "IPv4"
+    test_me.name = "127.0.0.1:51786->8.8.8.8:https"
+    assert str(test_me) == "[IPv4] localhost:51786->google-public-dns-a.google.com:https"
+
+    test_me = px_file.PxFile()
+    test_me.type = "IPv4"
+    test_me.name = "127.0.0.1:17600"
+    assert str(test_me) == "[IPv4] localhost:17600 (LISTEN)"
+
+    test_me = px_file.PxFile()
+    test_me.type = "IPv6"
+    test_me.name = "[::1]:17600"
+
+    resolution = re.match("^\[IPv6\] (.*):17600 \(LISTEN\)$", str(test_me)).group(1)
+    assert resolution == "[::1]" or "localhost" in resolution
+
+    test_me = px_file.PxFile()
+    test_me.type = "IPv4"
+    test_me.name = "this:is:garbage:17600"
+    assert str(test_me) == "[IPv4] this:is:garbage:17600 (LISTEN)"
