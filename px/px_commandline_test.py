@@ -110,3 +110,21 @@ def test_get_command_resque():
     # These command names are from a real-world system
     assert px_commandline.get_command("resque-1.20.0: x y z") == "resque-1.20.0:"
     assert px_commandline.get_command("resqued-0.7.12 a b c") == "resqued-0.7.12"
+
+
+def test_get_command_interpreters():
+    assert px_commandline.get_command("ruby") == "ruby"
+    assert px_commandline.get_command("ruby /some/path/apa.rb") == "apa.rb"
+    assert px_commandline.get_command("ruby -option /some/path/apa.rb") == "ruby"
+
+    assert px_commandline.get_command("sh") == "sh"
+    assert px_commandline.get_command("sh /some/path/apa.sh") == "apa.sh"
+    assert px_commandline.get_command("sh -option /some/path/apa.sh") == "sh"
+
+    assert px_commandline.get_command("bash") == "bash"
+    assert px_commandline.get_command("bash /some/path/apa.sh") == "apa.sh"
+    assert px_commandline.get_command("bash -option /some/path/apa.sh") == "bash"
+
+    assert px_commandline.get_command("perl") == "perl"
+    assert px_commandline.get_command("perl /some/path/apa.pl") == "apa.pl"
+    assert px_commandline.get_command("perl -option /some/path/apa.pl") == "perl"

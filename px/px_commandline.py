@@ -54,6 +54,9 @@ def get_command(commandline):
     if command == "java":
         return get_java_command(commandline)
 
+    if command in ["bash", "sh", "ruby", "perl"]:
+        return get_generic_script_command(commandline)
+
     if len(command) < 25:
         return command
 
@@ -147,3 +150,16 @@ def get_java_command(commandline):
 
     # We got to the end without being able to come up with a better name, give up
     return java
+
+
+def get_generic_script_command(commandline):
+    array = to_array(commandline)
+    vm = os.path.basename(array[0])
+    if len(array) == 1:
+        return vm
+
+    if array[1].startswith('-'):
+        # This is some option, we don't do options
+        return vm
+
+    return os.path.basename(array[1])
