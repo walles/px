@@ -111,6 +111,21 @@ class PxProcess(object):
         """Return just the command without any arguments or path"""
         return px_commandline.get_command(self.cmdline)
 
+    def get_sudo_user(self):
+        """Retrieves the $SUDO_USER value for this process, or None if not set"""
+        env = os.environ.copy()
+        if "LANG" in env:
+            del env["LANG"]
+        ps = subprocess.Popen(["ps", "-E", "-p", str(self.pid)],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              env=env)
+        stdout = ps.communicate()[0]
+        match = re.match(".* SUDO_USER=([^ ]+)", stdout, re.DOTALL)
+        if not match:
+            return None
+
+        return match.group(1)
+
 
 class PxProcessBuilder(object):
     pass

@@ -67,7 +67,16 @@ def print_process_tree(process):
     # Add an owners column to the right of the tree
     tree_width = max(map(lambda lp: len(lp[0]), lines_and_processes))
     lineformat = "{:" + str(tree_width) + "s}  {}"
-    lines = map(lambda lp: lineformat.format(lp[0], lp[1].username), lines_and_processes)
+    lines = []
+    for line_and_process in lines_and_processes:
+        line = line_and_process[0]
+        owner = line_and_process[1].username
+        if line_and_process[1].pid == process.pid:
+            sudo_user = process.get_sudo_user()
+            if sudo_user:
+                owner += ', $SUDO_USER=' + sudo_user
+
+        lines.append(lineformat.format(line, owner))
 
     print('\n'.join(lines))
 

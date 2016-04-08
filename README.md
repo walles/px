@@ -147,3 +147,4 @@ executed rather than the VM.
 * In the details view, list users that were logged in when the process was
 started.
 * In the details tree view, print process owners for each line
+* Print $SUDO_USER value with process details, if set
