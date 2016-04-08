@@ -33,13 +33,15 @@ def print_command_line(process):
         print("  " + parameter)
 
 
-def print_process_subtree(process, indentation):
-    print("  " * indentation + str(process))
+def print_process_subtree(process, indentation, lines):
+    lines.append("  " * indentation + str(process))
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(child, indentation + 1)
 
 
 def print_process_tree(process):
+    lines = []
+
     # List all parents up to the top
     parents = []
     here = process
@@ -50,16 +52,18 @@ def print_process_tree(process):
     # Print all parents
     indentation = 0
     for parent in reversed(parents):
-        print("  " * indentation + str(parent))
+        lines.append("  " * indentation + str(parent))
         indentation += 1
 
     # Print ourselves
-    print("--" * (indentation - 1) + "> " + str(process))
+    lines.append("--" * (indentation - 1) + "> " + str(process))
     indentation += 1
 
     # Print all our child trees
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
-        print_process_subtree(child, indentation)
+        print_process_subtree(child, indentation, lines)
+
+    print('\n'.join(lines))
 
 
 def to_relative_start_string(base, relative):
