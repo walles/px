@@ -36,7 +36,7 @@ def print_command_line(process):
 def print_process_subtree(process, indentation, lines):
     lines.append(("  " * indentation + str(process), process))
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
-        print_process_subtree(child, indentation + 1)
+        print_process_subtree(child, indentation + 1, lines)
 
 
 def print_process_tree(process):
