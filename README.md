@@ -24,13 +24,14 @@ This screenshot shows:
   * Note how the Gradle daemon processes running in Java is listed by class name
   (`GradleDaemon`) rather than the JVM executable name (`java`).
 * The result of searching for "terminal" processes.
-* The output from the details view of PID 699:
+* The output from the details view of PID 70857:
   * The command line has been split with one argument per line. This makes long
   command lines readable.
   * The process tree shows how the Terminal relates to other processes.
   * Details on how long ago Terminal was started, and how much CPU it has been
   using since.
   * A list of other processes started around the same time as Terminal.
+  * A list of users logged in when the Terminal was started.
   * The IPC section shows that the Terminal is talking to `launchd` and
   `syslogd` using
   [Unix domain sockets](https://en.wikipedia.org/wiki/Unix_domain_socket).
