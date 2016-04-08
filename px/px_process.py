@@ -116,7 +116,7 @@ class PxProcess(object):
         env = os.environ.copy()
         if "LANG" in env:
             del env["LANG"]
-        ps = subprocess.Popen(["ps", "-E", "-p", str(self.pid)],
+        ps = subprocess.Popen(["ps", "e", str(self.pid)],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               env=env)
         stdout = ps.communicate()[0]
