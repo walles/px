@@ -34,13 +34,14 @@ def print_command_line(process):
 
 
 def print_process_subtree(process, indentation, lines):
-    lines.append("  " * indentation + str(process))
+    lines.append(("  " * indentation + str(process), process))
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(child, indentation + 1)
 
 
 def print_process_tree(process):
-    lines = []
+    # Contains tuples; the line to print and the process that line is for
+    lines_and_processes = []
 
     # List all parents up to the top
     parents = []
@@ -52,16 +53,21 @@ def print_process_tree(process):
     # Print all parents
     indentation = 0
     for parent in reversed(parents):
-        lines.append("  " * indentation + str(parent))
+        lines_and_processes.append(("  " * indentation + str(parent), parent))
         indentation += 1
 
     # Print ourselves
-    lines.append("--" * (indentation - 1) + "> " + str(process))
+    lines_and_processes.append(("--" * (indentation - 1) + "> " + str(process), process))
     indentation += 1
 
     # Print all our child trees
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
-        print_process_subtree(child, indentation, lines)
+        print_process_subtree(child, indentation, lines_and_processes)
+
+    # Add an owners column to the right of the tree
+    tree_width = max(map(lambda lp: len(lp[0]), lines_and_processes))
+    lineformat = "{:" + str(tree_width) + "s}  {}"
+    lines = map(lambda lp: lineformat.format(lp[0], lp[1].username), lines_and_processes)
 
     print('\n'.join(lines))
 
