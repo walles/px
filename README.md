@@ -40,8 +40,7 @@ This screenshot shows:
 * Go to the [Releases](https://github.com/walles/px/releases) page and download
 `px.pex` from there. That file is the whole distribution and can be run as it
 is on any Python 2.7 equipped system.
-* `sudo install px.pex /usr/local/bin/px`
-* `sudo ln -s /usr/local/bin/px /usr/local/bin/ptop`
+* `sudo ./px.pex --install`
 
 Now, you should be able to run `px`, `px --help` or `ptop` from the command
 line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
