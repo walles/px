@@ -25,6 +25,10 @@ def _install(src, dest):
 
     Throws exception on trouble.
     """
+    if os.path.realpath(src) == os.path.realpath(dest):
+        # Copying a file onto itself is a no-op, never mind
+        return
+
     parent = os.path.dirname(dest)
     if not os.path.isdir(parent):
         raise IOError("Destination parent is not a directory: %s" % parent)
