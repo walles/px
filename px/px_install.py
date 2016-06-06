@@ -30,7 +30,7 @@ def _install(src, dest):
         raise IOError("ERROR: Destination parent is not a directory: %s\n" % parent)
 
     if os.path.isdir(dest):
-        raise IOError("ERROR: Destination is a directory, won't replace that: %s\n" % parent)
+        raise IOError("ERROR: Destination is a directory, won't replace that: %s\n" % dest)
 
     # Make sure nothing's in the way
     try:
