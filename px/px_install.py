@@ -29,5 +29,14 @@ def _install(src, dest):
     if not os.path.isdir(parent):
         raise IOError("ERROR: Destination parent is not a directory: %s\n" % parent)
 
+    if os.path.isdir(dest):
+        raise IOError("ERROR: Destination is a directory, won't replace that: %s\n" % parent)
+
+    # Make sure nothing's in the way
+    try:
+        os.remove(dest)
+    except OSError:
+        pass
+
     shutil.copyfile(src, dest)
     os.chmod(dest, 0755)
