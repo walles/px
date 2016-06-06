@@ -29,6 +29,9 @@ def _install(src, dest):
         # Copying a file onto itself is a no-op, never mind
         return
 
+    if not os.path.isfile(src):
+        raise IOError("Source is not a file: %s" % src)
+
     parent = os.path.dirname(dest)
     if not os.path.isdir(parent):
         raise IOError("Destination parent is not a directory: %s" % parent)
