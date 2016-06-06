@@ -8,6 +8,7 @@ Usage:
   px <filter>
   px <PID>
   px --top
+  px --install
   px --help
   px --version
 
@@ -28,6 +29,7 @@ invoked px, rather than from when each process started. This gives you a picture
 of which processes are most active right now.
 
 --top: Show a continuously refreshed process list
+--install: Install /usr/local/bin/px and /usr/local/bin/ptop
 --help: Print this help
 --version: Print version information
 """
@@ -39,9 +41,21 @@ import zipfile
 import os
 import docopt
 import px_top
+import px_install
 import px_process
 import px_terminal
 import px_processinfo
+
+
+def install():
+    # Find full path to self
+    px_pex = os.path.dirname(__file__)
+    if not os.path.isfile(px_pex):
+        sys.stderr.write("ERROR: Not running from .pex file, can't install\n")
+        return
+
+    px_install.install(px_pex, "/usr/local/bin/px")
+    px_install.install(px_pex, "/usr/local/bin/ptop")
 
 
 def get_version():
@@ -57,6 +71,10 @@ def get_version():
 
 
 def main(args):
+    if args['--install']:
+        install()
+        return
+
     if args['--top']:
         px_top.top()
         return
