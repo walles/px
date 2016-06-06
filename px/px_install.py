@@ -14,7 +14,7 @@ def install(src, dest):
         _install(src, dest)
     except Exception as e:
         sys.stderr.write("Installing {} failed, please retry with sudo\n".format(dest))
-        sys.stderr.write("Error was: {}\n".format(e.message))
+        sys.stderr.write("Error was: {}\n".format(str(e)))
         exit(1)
     print("Created: {}".format(dest))
 
