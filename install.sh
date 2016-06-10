@@ -16,6 +16,7 @@ curl -L -s "$URL" > $TEMPFILE
 chmod a+x $TEMPFILE
 
 echo "Installing the latest release..."
+echo "sudo px --install"
 sudo $TEMPFILE --install
 
 rm -f $TEMPFILE
