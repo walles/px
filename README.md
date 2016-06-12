@@ -39,7 +39,7 @@ This screenshot shows:
 # Installation
 Copy / paste this command line in a terminal:
 ```
-curl -L https://github.com/walles/px/raw/python/install.sh | bash
+curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
 ```
 Now, you should be able to run `px`, `px --help` or `ptop` from the command
 line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
