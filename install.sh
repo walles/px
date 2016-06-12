@@ -1,6 +1,11 @@
 #!/bin/bash -e
 #
 # Download and install the latest release
+
+# Give up on any failure
+set -e
+set -o pipefail
+
 REPO="walles/px"
 
 # This is the download URL for the latest release
