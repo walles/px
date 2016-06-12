@@ -37,13 +37,16 @@ This screenshot shows:
   [Unix domain sockets](https://en.wikipedia.org/wiki/Unix_domain_socket).
 
 # Installation
-* Go to the [Releases](https://github.com/walles/px/releases) page and download
-`px.pex` from there. That file is the whole distribution and can be run as it
-is on any Python 2.7 equipped system.
-* `sudo ./px.pex --install`
-
+Copy / paste this command line in a terminal:
+```
+curl -L https://github.com/walles/px/raw/python/install.sh | bash
+```
 Now, you should be able to run `px`, `px --help` or `ptop` from the command
 line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
+
+To try `px` without installing it, just [download the latest
+`px.pex`](https://github.com/walles/px/releases/latest),
+`chmod a+x px.pex`, then run `./px.pex`.
 
 # Usage
 Just type `px` or `ptop`, that's a good start!
