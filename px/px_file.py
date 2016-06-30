@@ -61,6 +61,15 @@ class PxFile(object):
 
         return number
 
+    def fifo_id(self):
+        if self.name and '/' in self.name:
+            # This FIFO is named with a proper path
+            return self.name
+
+        # If the FIFO doesn't have '/' in its name it's not named. Try
+        # identifying the FIFO by inode instead.
+        return self.inode
+
     def get_endpoints(self):
         """
         Returns a (local,remote) tuple. They represent the local and the remote

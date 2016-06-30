@@ -74,7 +74,7 @@ class IpcMap(object):
         self._name_to_pids = {}
         self._name_to_files = {}
         self._device_number_to_files = {}
-        self._fifo_name_and_access_to_pids = {}
+        self._fifo_id_and_access_to_pids = {}
         self._local_endpoint_to_pid = {}
         for file in self.files:
             if file.device is not None:
@@ -93,8 +93,10 @@ class IpcMap(object):
                 add_arraymapping(self._device_number_to_files, device_number, file)
 
             if file.access is not None and file.type == 'FIFO':
-                add_arraymapping(self._fifo_name_and_access_to_pids,
-                                 file.name + file.access, file.pid)
+                fifo_id = file.fifo_id()
+                if fifo_id:
+                    add_arraymapping(self._fifo_id_and_access_to_pids,
+                                     fifo_id + file.access, file.pid)
 
     def _get_other_end_pids(self, file):
         """Locate the other end of a pipe / domain socket"""
@@ -142,13 +144,13 @@ class IpcMap(object):
                 if candidate.name == file.name:
                     pids.add(candidate.pid)
 
-        # If the fifo doesn't have '/' in its name it's not named
-        if file.access and file.type == 'FIFO' and '/' in file.name:
-            # On Linux, this is how we identify named FIFOs
+        fifo_id = file.fifo_id()
+        if fifo_id and file.access and file.type == 'FIFO':
+            # On Linux, this is how we trace FIFOs
             opposing_access = {'r': 'w', 'w': 'r'}.get(file.access)
             if opposing_access:
-                name_and_opposing_access = file.name + opposing_access
-                matching_pids = self._fifo_name_and_access_to_pids.get(name_and_opposing_access)
+                name_and_opposing_access = fifo_id + opposing_access
+                matching_pids = self._fifo_id_and_access_to_pids.get(name_and_opposing_access)
                 if matching_pids:
                     pids.update(matching_pids)
 
