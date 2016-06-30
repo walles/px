@@ -125,7 +125,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0'],
+    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0i'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
     return lsof.communicate()[0]
@@ -157,6 +157,7 @@ def lsof_to_files(lsof, file_types=None):
             file.pid = pid
             file.type = "??"
             file.device = None
+            file.inode = None
 
             if not files:
                 # No files, just add the new one
@@ -181,6 +182,8 @@ def lsof_to_files(lsof, file_types=None):
             file.device = value
         elif type == 'n':
             file.name = value
+        elif type == 'i':
+            file.inode = value
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))
