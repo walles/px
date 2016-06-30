@@ -142,7 +142,8 @@ class IpcMap(object):
                 if candidate.name == file.name:
                     pids.add(candidate.pid)
 
-        if file.access and file.type == 'FIFO':
+        # If the fifo doesn't have '/' in its name it's not named
+        if file.access and file.type == 'FIFO' and '/' in file.name:
             # On Linux, this is how we identify named FIFOs
             opposing_access = {'r': 'w', 'w': 'r'}.get(file.access)
             if opposing_access:
