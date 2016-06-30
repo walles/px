@@ -37,10 +37,6 @@ class IpcMap(object):
 
         network_connections = set()
         for file in self.files_for_process:
-            if file.name in ['pipe', '(none)']:
-                # These are placeholders, not names, can't do anything with these
-                continue
-
             other_end_pids = self._get_other_end_pids(file)
             if not other_end_pids:
                 if file.type in ['IPv4', 'IPv6']:
