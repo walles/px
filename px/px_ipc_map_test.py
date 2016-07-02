@@ -158,11 +158,8 @@ def test_get_ipc_map():
     with open(os.path.join(my_dir, "lsof-test-output-linux.txt"), "r") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
 
-    ipc_map = testutils.create_ipc_map(1997, files)
-    assert len(ipc_map.keys()) == 2
+    ipc_map = testutils.create_ipc_map(777, files)
+    assert len(ipc_map.keys()) == 1
 
     peer0 = ipc_map.keys()[0]
-    assert len(ipc_map[peer0]) == 1
-
-    peer1 = ipc_map.keys()[1]
-    assert len(ipc_map[peer1]) == 1
+    assert len(ipc_map[peer0]) == 4
