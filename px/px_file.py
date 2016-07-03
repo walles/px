@@ -72,6 +72,11 @@ class PxFile(object):
             # we can't use it to identify a pipe.
             return None
 
+        if self.type == 'PIPE' and self.name == '(none)':
+            # This is just a label that can be shared by several pipes on OS X,
+            # we can't use it to identify a pipe.
+            return None
+
         # On OS X, pipes are presented as PIPEs and lack inodes, but they
         # compensate by having unique names.
         return self.name
