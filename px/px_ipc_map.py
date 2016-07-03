@@ -44,6 +44,10 @@ class IpcMap(object):
                     network_connections.add(file)
                     continue
 
+                if file.type == 'FIFO' and not file.fifo_id():
+                    # FIFO with neither name nor inode info
+                    continue
+
                 self.add_ipc_entry(unknown, file)
                 continue
 
