@@ -62,13 +62,19 @@ class PxFile(object):
         return number
 
     def fifo_id(self):
-        if self.name and '/' in self.name:
-            # This FIFO is named with a proper path
-            return self.name
+        if self.inode is not None:
+            # On Linux, pipes are presented by lsof as FIFOs. They have unique-
+            # per-pipe inodes, so we use them as IDs.
+            return self.inode
 
-        # If the FIFO doesn't have '/' in its name it's not named. Try
-        # identifying the FIFO by inode instead.
-        return self.inode
+        if self.type == 'FIFO' and self.name == 'pipe':
+            # This is just a label that can be shared by several pipes on Linux,
+            # we can't use it to identify a pipe.
+            return None
+
+        # On OS X, pipes are presented as PIPEs and lack inodes, but they
+        # compensate by having unique names.
+        return self.name
 
     def get_endpoints(self):
         """

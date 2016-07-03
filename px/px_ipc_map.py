@@ -45,7 +45,7 @@ class IpcMap(object):
                     continue
 
                 if file.type == 'FIFO' and not file.fifo_id():
-                    # FIFO with neither name nor inode info
+                    # Unidentifiable FIFO, just ignore this
                     continue
 
                 self.add_ipc_entry(unknown, file)
