@@ -37,15 +37,15 @@ class IpcMap(object):
 
         network_connections = set()
         for file in self.files_for_process:
+            if file.type in ['FIFO', 'PIPE'] and not file.fifo_id():
+                # Unidentifiable FIFO, just ignore this
+                continue
+
             other_end_pids = self._get_other_end_pids(file)
             if not other_end_pids:
                 if file.type in ['IPv4', 'IPv6']:
                     # This is a remote connection
                     network_connections.add(file)
-                    continue
-
-                if file.type == 'FIFO' and not file.fifo_id():
-                    # Unidentifiable FIFO, just ignore this
                     continue
 
                 self.add_ipc_entry(unknown, file)
