@@ -61,6 +61,26 @@ class PxFile(object):
 
         return number
 
+    def fifo_id(self):
+        if self.inode is not None:
+            # On Linux, pipes are presented by lsof as FIFOs. They have unique-
+            # per-pipe inodes, so we use them as IDs.
+            return self.inode
+
+        if self.type == 'FIFO' and self.name == 'pipe':
+            # This is just a label that can be shared by several pipes on Linux,
+            # we can't use it to identify a pipe.
+            return None
+
+        if self.type == 'PIPE' and self.name == '(none)':
+            # This is just a label that can be shared by several pipes on OS X,
+            # we can't use it to identify a pipe.
+            return None
+
+        # On OS X, pipes are presented as PIPEs and lack inodes, but they
+        # compensate by having unique names.
+        return self.name
+
     def get_endpoints(self):
         """
         Returns a (local,remote) tuple. They represent the local and the remote
@@ -125,7 +145,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0'],
+    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0i'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
     return lsof.communicate()[0]
@@ -157,6 +177,7 @@ def lsof_to_files(lsof, file_types=None):
             file.pid = pid
             file.type = "??"
             file.device = None
+            file.inode = None
 
             if not files:
                 # No files, just add the new one
@@ -181,6 +202,8 @@ def lsof_to_files(lsof, file_types=None):
             file.device = value
         elif type == 'n':
             file.name = value
+        elif type == 'i':
+            file.inode = value
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))

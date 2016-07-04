@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Benchmark loading the output of "lsof -F fnaptd0" from a big system
+"""Benchmark loading the output of "lsof -F fnaptd0i" from a big system
 
 Usage:
   benchmark_ipcmap.py <FILE>
 
-FILE is a file containing the output of "lsof -F fnaptd0".
+FILE is a file containing the output of "lsof -F fnaptd0i".
 
 This program will parse that output and make an IPC map of the process that has
 the highest number of entries in that file.

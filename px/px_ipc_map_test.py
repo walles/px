@@ -5,7 +5,7 @@ import px_file
 import testutils
 
 
-def create_file(type, name, device, pid, access=None):
+def create_file(type, name, device, pid, access=None, inode=None):
     file = px_file.PxFile()
     file.type = type
 
@@ -13,8 +13,9 @@ def create_file(type, name, device, pid, access=None):
     file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
 
     file.pid = pid
-    file.access = access
     file.device = device
+    file.access = access
+    file.inode = inode
     return file
 
 
@@ -58,6 +59,17 @@ def test_get_other_end_pids_osx_pipe2():
     my_end = create_file("PIPE", "[] ->0x8a8de9", "0xAda", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([25, 26])
+
+
+def test_get_other_end_pids_linux_pipe():
+    files = [
+        create_file("FIFO", "pipe", None, 100, inode="100200", access="r"),
+        create_file("FIFO", "pipe", None, 200, inode="100200", access="w"),
+        create_file("FIFO", "pipe", None, 300, inode="100300", access="w"),
+    ]
+    assert get_other_end_pids(files[0], files) == set([200])
+    assert get_other_end_pids(files[1], files) == set([100])
+    assert get_other_end_pids(files[2], files) == set()
 
 
 def test_get_other_end_pids_fifo1():
@@ -139,11 +151,11 @@ def test_get_other_end_pids_localhost_socket_names():
     assert postgres_file not in postgres_ipc_map.network_connections
 
 
-def test_get_ipc_map():
+def test_get_ipc_map_1():
     """Tyre kick IpcMap with some real world data"""
     files = None
     my_dir = os.path.dirname(__file__)
-    with open(os.path.join(my_dir, "lsof-test-output-linux.txt"), "r") as lsof_output:
+    with open(os.path.join(my_dir, "lsof-test-output-linux-1.txt"), "r") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
 
     ipc_map = testutils.create_ipc_map(1997, files)
@@ -154,3 +166,17 @@ def test_get_ipc_map():
 
     peer1 = ipc_map.keys()[1]
     assert len(ipc_map[peer1]) == 1
+
+
+def test_get_ipc_map_2():
+    """Tyre kick IpcMap with some real world data"""
+    files = None
+    my_dir = os.path.dirname(__file__)
+    with open(os.path.join(my_dir, "lsof-test-output-linux-2.txt"), "r") as lsof_output:
+        files = px_file.lsof_to_files(lsof_output.read())
+
+    ipc_map = testutils.create_ipc_map(777, files)
+    assert len(ipc_map.keys()) == 1
+
+    peer0 = ipc_map.keys()[0]
+    assert len(ipc_map[peer0]) == 4
