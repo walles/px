@@ -16,7 +16,7 @@ URL=$(curl -s https://api.github.com/repos/$REPO/releases \
 
 echo "Downloading the latest release..."
 echo "  $URL"
-TEMPFILE=$(mktemp)
+TEMPFILE=$(mktemp || mktemp -t px-install.XXXXXXXX)
 curl -L -s "$URL" > $TEMPFILE
 chmod a+x $TEMPFILE
 
