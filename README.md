@@ -3,6 +3,18 @@
 
 # Cross Functional Process Explorer
 
+# Installation
+Copy / paste this command line in a terminal:
+```
+curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
+```
+Now, you should be able to run `px`, `px --help` or `ptop` from the command
+line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
+
+To try `px` without installing it, just [download the latest
+`px.pex`](https://github.com/walles/px/releases/latest),
+`chmod a+x px.pex`, then run `./px.pex`.
+
 # Vision
 One utility, supporting at least OS X and Linux, replacing
 * :white_check_mark: `ps`, but with sensible defaults (just do `px`)
@@ -35,18 +47,6 @@ This screenshot shows:
   * The IPC section shows that the Terminal is talking to `launchd` and
   `syslogd` using
   [Unix domain sockets](https://en.wikipedia.org/wiki/Unix_domain_socket).
-
-# Installation
-Copy / paste this command line in a terminal:
-```
-curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
-```
-Now, you should be able to run `px`, `px --help` or `ptop` from the command
-line. Otherwise please verify that `/usr/local/bin` is in your `$PATH`.
-
-To try `px` without installing it, just [download the latest
-`px.pex`](https://github.com/walles/px/releases/latest),
-`chmod a+x px.pex`, then run `./px.pex`.
 
 # Usage
 Just type `px` or `ptop`, that's a good start!
