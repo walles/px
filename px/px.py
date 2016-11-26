@@ -35,8 +35,7 @@ of which processes are most active right now.
 """
 
 import sys
-import json
-import zipfile
+import pkg_resources
 
 import os
 import docopt
@@ -59,15 +58,7 @@ def install():
 
 
 def get_version():
-    """Extract version string from PEX-INFO file"""
-    my_pex_name = os.path.dirname(__file__)
-    if not os.path.isfile(my_pex_name):
-        # This happens if we aren't run from a .pex file
-        return "<unknown>"
-
-    zip = zipfile.ZipFile(my_pex_name)
-    with zip.open("PEX-INFO") as pex_info:
-        return json.load(pex_info)['build_properties']['tag']
+    return pkg_resources.get_distribution("px").version
 
 
 def main():

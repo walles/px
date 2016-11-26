@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import subprocess
+
 from setuptools import setup
 
 setup(
     name='px',
-    version='0.4.3',  # FIXME: Set from git describe --dirty
+    version=subprocess.check_output(['git', 'describe', '--dirty']).strip(),
     description='Cross Functional Process Explorer',
     author='Johan Walles',
     author_email='walles@gmail.com',
