@@ -1,7 +1,6 @@
-/.coverage
-/.pants.d
-/.pants.run
-/.cache
+/env
+/build
 /dist
+*.egg-info
 *.pyc
 __pycache__

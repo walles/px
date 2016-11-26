@@ -70,7 +70,12 @@ def get_version():
         return json.load(pex_info)['build_properties']['tag']
 
 
-def main(args):
+def main():
+    if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
+        sys.argv.append("--top")
+
+    args = docopt.docopt(__doc__, version=get_version())
+
     if args['--install']:
         install()
         return
@@ -101,8 +106,6 @@ def main(args):
     lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns)
     print("\n".join(lines))
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
-        sys.argv.append("--top")
 
-    main(docopt.docopt(__doc__, version=get_version()))
+if __name__ == "__main__":
+    main()
