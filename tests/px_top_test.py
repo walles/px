@@ -1,6 +1,7 @@
-import px_top
+from px import px_top
+from px import px_process
+
 import testutils
-import px_process
 
 
 def test_adjust_cpu_times():

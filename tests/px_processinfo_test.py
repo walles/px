@@ -1,6 +1,7 @@
+from px import px_process
+from px import px_processinfo
+
 import testutils
-import px_process
-import px_processinfo
 
 
 def test_to_relative_start_string():

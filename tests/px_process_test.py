@@ -2,8 +2,9 @@ import getpass
 
 import os
 import pytest
+
+from px import px_process
 import testutils
-import px_process
 
 
 def test_create_process():

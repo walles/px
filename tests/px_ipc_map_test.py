@@ -1,7 +1,7 @@
 import re
 import os.path
 
-import px_file
+from px import px_file
 import testutils
 
 

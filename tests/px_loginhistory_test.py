@@ -2,7 +2,8 @@ import datetime
 
 import pytest
 import dateutil.tz
-import px_loginhistory
+
+from px import px_loginhistory
 
 
 @pytest.yield_fixture

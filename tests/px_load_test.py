@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import px_load
+from px import px_load
 
 
 def test_averages_to_levels():
