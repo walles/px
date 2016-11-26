@@ -8,9 +8,12 @@ os:
 install:
   # The coverage version number must match what the Pants version declared in
   # pants.ini uses.
-  - sudo pip install coverage==3.7.1
-  - sudo pip install coveralls
-  - sudo pip install pex==1.1.15
+  - sudo -H pip install coverage==3.7.1
+  - sudo -H pip install coveralls
+
+  # Setuptools version required by pip, the Linux build fails without this
+  - sudo -H pip install setuptools==20.10.1
+  - sudo -H pip install pex==1.1.15
 
 script: ./ci.sh
 
