@@ -10,6 +10,7 @@ install:
   # pants.ini uses.
   - sudo pip install coverage==3.7.1
   - sudo pip install coveralls
+  - sudo pip install pex==1.1.15
 
 script: ./ci.sh
 
