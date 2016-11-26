@@ -4,15 +4,23 @@ set -o pipefail
 set -e
 set -x
 
-# Run all Python tests
-./pants list | \
-  xargs ./pants filter --filter-type=python_tests | \
-  xargs ./pants test.pytest --coverage=modules:px --options=--durations=5
+# Make a virtualenv
+ENVDIR="$(mktemp -d)"
+function cleanup {
+  rm -rf "${ENVDIR}"
+}
+trap cleanup EXIT
 
-./pants binary px
+virtualenv "${ENVDIR}"
+. "${ENVDIR}"/bin/activate
+
+./setup.py test
+
+./setup.py bdist_egg
+pex -r <(pip freeze | grep -v '^px=') ./dist/px-*.egg -m px.px:main -o px.pex
 
 echo
-if unzip -qq -l dist/px.pex '*.so' ; then
+if unzip -qq -l px.pex '*.so' ; then
   cat << EOF
   ERROR: There are natively compiled dependencies in the .pex, this makes
          distribution a lot harder. Please fix your dependencies.
@@ -21,10 +29,10 @@ EOF
 fi
 
 echo
-./dist/px.pex
+./px.pex
 
 echo
-./dist/px.pex $$
+./px.pex $$
 
 echo
-./dist/px.pex --version
+./px.pex --version
