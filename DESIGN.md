@@ -26,8 +26,8 @@ What does limit it though is availability on various systems and packaging. One
 environment that does fulfill everything in the above list is Python 2.7, which
 is available on all of our target platforms.
 
-And using [Pants](https://pantsbuild.github.io/python-readme.html) we can turn
-Python programs into [platform independent
+And using [Pex](https://github.com/pantsbuild/pex) we can turn Python programs
+into [platform independent
 executables](https://pex.readthedocs.org/en/stable/whatispex.html#whatispex),
 which is excellent for distribution.
 
@@ -45,6 +45,5 @@ Ubuntu 12.4 Precise system. In this case that's because what Github Enterprise
 those
 
 Candidates are:
-* Python 2.7 + build with
-[Pants](https://pantsbuild.github.io/python-readme.html) and parse `ps` output
-manually.
+* Python 2.7 + build with [Pex](https://github.com/pantsbuild/pex) and parse
+`ps` output manually.
