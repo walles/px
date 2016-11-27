@@ -58,11 +58,9 @@ processes.
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
-* Test: `./ci.sh`
-* Build: `./pants binary px`. Your distributable binary is now in `dist/px.pex`.
-* Run: `./dist/px.pex`
-* To run without first doing the build step: `./pants run px`
-* To add dependencies, edit `px/requirements.txt` and `px/BUILD`
+* Build and test: `./ci.sh`
+* Run: `./px.pex`
+* To add dependencies, edit `requirements.txt`
 
 # Releasing a new Version
 1. Consider updating `screenshot.png` and [the Demo section in this
@@ -72,8 +70,7 @@ document](#demo), push those changes.
 text you write for this tag will show up as the release description on Github,
 write something nice! And remember that the first line is the subject line for
 the release.
-4. `./pants binary px && ./dist/px.pex --version`, verify that the version
-number matches what you just set.
+4. `./ci.sh`
 5. `git push --tags`
 6. Go to the [Releases](https://github.com/walles/px/releases) page on GitHub,
 click your new release, click the `Edit tag` button, then attach your `px.pex`
