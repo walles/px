@@ -4,6 +4,12 @@ set -o pipefail
 set -e
 set -x
 
+if [ $# != 1 ] ; then
+  "$0" python3
+  "$0" python2
+  exit
+fi
+
 # Make a virtualenv
 ENVDIR="$(mktemp -d)"
 function cleanup {
@@ -11,7 +17,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-virtualenv "${ENVDIR}"
+virtualenv --python=$1 "${ENVDIR}"
 . "${ENVDIR}"/bin/activate
 
 PYTEST_ADDOPTS=--cov=px ./setup.py test
