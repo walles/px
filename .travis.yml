@@ -6,8 +6,7 @@ os:
   - osx
 
 install:
-  - sudo -H pip install coverage==3.7.1
-  - sudo -H pip install coveralls
+  - sudo -H pip install coveralls coverage
 
 script: ./ci.sh
 
