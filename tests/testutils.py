@@ -1,8 +1,9 @@
 import random
 import datetime
 
-import px_process
-import px_ipc_map
+from px import px_process
+from px import px_ipc_map
+
 import dateutil.tz
 import dateutil.parser
 

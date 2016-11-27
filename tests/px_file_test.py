@@ -1,5 +1,6 @@
 import re
-import px_file
+
+from px import px_file
 
 
 def test_lsof_to_files():

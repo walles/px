@@ -1,4 +1,4 @@
-import px_commandline
+from px import px_commandline
 
 
 def test_get_command_python():
