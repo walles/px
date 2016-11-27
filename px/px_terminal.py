@@ -1,7 +1,7 @@
 import sys
 
 import os
-import px_process
+import px.px_process
 
 
 def get_window_size():

@@ -8,9 +8,9 @@ import termios
 import operator
 
 import os
-import px_load
-import px_process
-import px_terminal
+import px.px_load
+import px.px_process
+import px.px_terminal
 
 
 # Used for informing our getch() function that a window resize has occured

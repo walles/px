@@ -39,11 +39,11 @@ import pkg_resources
 
 import os
 import docopt
-import px_top
-import px_install
-import px_process
-import px_terminal
-import px_processinfo
+import px.px_top
+import px.px_install
+import px.px_process
+import px.px_terminal
+import px.px_processinfo
 
 
 def install():
