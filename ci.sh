@@ -21,6 +21,9 @@ rm -rf dist
 pip install pex==1.1.15
 pex -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
+pip install flake8==3.2.0
+flake8 px tests setup.py
+
 echo
 if unzip -qq -l px.pex '*.so' ; then
   cat << EOF
