@@ -16,8 +16,10 @@ virtualenv "${ENVDIR}"
 
 ./setup.py test
 
+rm -rf dist
 ./setup.py bdist_egg
-pex -r <(pip freeze | grep -v '^px=') ./dist/px-*.egg -m px.px:main -o px.pex
+pip install pex==1.1.15
+pex -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
 echo
 if unzip -qq -l px.pex '*.so' ; then

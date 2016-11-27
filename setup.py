@@ -4,6 +4,10 @@ import subprocess
 
 from setuptools import setup
 
+requirements = None
+with open('requirements.txt') as reqsfile:
+    requirements = reqsfile.readlines()
+
 setup(
     name='px',
     version=subprocess.check_output(['git', 'describe', '--dirty']).strip(),
@@ -15,13 +19,10 @@ setup(
 
     packages=['px'],
 
-    install_requires=[
-        'docopt == 0.6.2',
-        'python-dateutil == 2.5.0',
-        ],
+    install_requires=requirements,
 
     setup_requires=[
-        'pytest-runner'
+        'pytest-runner',
         ],
 
     tests_require=[

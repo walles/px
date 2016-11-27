@@ -11,10 +11,6 @@ install:
   - sudo -H pip install coverage==3.7.1
   - sudo -H pip install coveralls
 
-  # Setuptools version required by pip, the Linux build fails without this
-  - sudo -H pip install setuptools==20.10.1
-  - sudo -H pip install pex==1.1.15
-
 script: ./ci.sh
 
 after_success:
