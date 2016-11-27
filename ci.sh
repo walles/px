@@ -5,6 +5,7 @@ set -e
 set -x
 
 if [ $# != 1 ] ; then
+  # Run this script with two different Python interpreters
   "$0" python3
   "$0" python2
   exit
@@ -17,9 +18,12 @@ function cleanup {
 }
 trap cleanup EXIT
 
+# Expect the first argument to be a Python interpreter
 virtualenv --python=$1 "${ENVDIR}"
 . "${ENVDIR}"/bin/activate
 
+# FIXME: We want to add to the coverage report, not overwrite it. How do we do
+# that?
 PYTEST_ADDOPTS=--cov=px ./setup.py test
 
 rm -rf dist
