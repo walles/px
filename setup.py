@@ -23,6 +23,7 @@ setup(
 
     setup_requires=[
         'pytest-runner',
+        'pytest-cov',
         ],
 
     tests_require=[

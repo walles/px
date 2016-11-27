@@ -2,6 +2,8 @@
 /build
 /dist
 /.eggs
+/.cache
+/.coverage
 
 *.egg-info
 *.pyc

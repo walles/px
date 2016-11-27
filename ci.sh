@@ -14,7 +14,7 @@ trap cleanup EXIT
 virtualenv "${ENVDIR}"
 . "${ENVDIR}"/bin/activate
 
-./setup.py test
+PYTEST_ADDOPTS=--cov=px ./setup.py test
 
 rm -rf dist
 ./setup.py bdist_egg
