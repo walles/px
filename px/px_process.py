@@ -5,7 +5,7 @@ import subprocess
 import os
 import re
 import dateutil.tz
-import px_commandline
+from . import px_commandline
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
@@ -63,6 +63,9 @@ class PxProcess(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __hash__(self):
+        return self.pid
+
     def _recompute_score(self):
         self.score = 0
         if self.memory_percent is None:
@@ -119,7 +122,7 @@ class PxProcess(object):
         ps = subprocess.Popen(["ps", "e", str(self.pid)],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               env=env)
-        stdout = ps.communicate()[0]
+        stdout = ps.communicate()[0].decode()
         match = re.match(".* SUDO_USER=([^ ]+)", stdout, re.DOTALL)
         if not match:
             return None
@@ -133,7 +136,7 @@ class PxProcessBuilder(object):
 
 def call_ps():
     """
-    Call ps and return the result in an array of one output line per process
+    Call ps and return the result in an iterable of one output line per process
     """
     env = os.environ.copy()
     if "LANG" in env:
@@ -141,7 +144,7 @@ def call_ps():
     ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,user,time,%mem,command"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           env=env)
-    return ps.communicate()[0].splitlines()[1:]
+    return ps.communicate()[0].decode().splitlines()[1:]
 
 
 def parse_time(timestring):

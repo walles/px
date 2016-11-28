@@ -20,11 +20,11 @@ class IpcMap(object):
         files = set(files)
 
         # Only deal with IPC related files
-        self.files = filter(lambda f: f.type in FILE_TYPES, files)
+        self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
 
         self.process = process
         self.processes = processes
-        self.files_for_process = filter(lambda f: f.pid == self.process.pid, self.files)
+        self.files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
         self._map = {}
         self._create_mapping()

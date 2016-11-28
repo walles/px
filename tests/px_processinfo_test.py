@@ -86,7 +86,7 @@ def test_get_closest_starts_five_closest():
 def test_print_starttime():
     # Just make sure it doesn't crash
     all = px_process.get_all()
-    process0 = filter(lambda p: p.pid == 0, all)[0]
+    process0 = list(filter(lambda p: p.pid == 0, all))[0]
     px_processinfo.print_start_time(process0)
 
 

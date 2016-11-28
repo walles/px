@@ -49,7 +49,7 @@ def create_ipc_map(pid, all_files):
     if pid not in pid2process:
         pid2process[pid] = create_process(pid=pid)
 
-    processes = pid2process.values()
+    processes = list(pid2process.values())
     random.shuffle(processes)
 
     process = pid2process[pid]

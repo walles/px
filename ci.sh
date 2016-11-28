@@ -4,6 +4,16 @@ set -o pipefail
 set -e
 set -x
 
+if [ $# != 1 ] ; then
+  # Run this script with two different Python interpreters
+  "$0" python3.5
+  "$0" python2
+  echo
+  echo "All tests passed!"
+  echo
+  exit
+fi
+
 # Make a virtualenv
 ENVDIR="$(mktemp -d)"
 function cleanup {
@@ -11,14 +21,24 @@ function cleanup {
 }
 trap cleanup EXIT
 
-virtualenv "${ENVDIR}"
+# Expect the first argument to be a Python interpreter
+virtualenv --python=$1 "${ENVDIR}"
+# shellcheck source=/dev/null
 . "${ENVDIR}"/bin/activate
 
+# Fix tools versions
+pip install pip==8.1.2 setuptools==29.0.1 wheel==0.24.0
+
+# FIXME: We want to add to the coverage report, not overwrite it. How do we do
+# that?
 PYTEST_ADDOPTS=--cov=px ./setup.py test
 
+# Create px egg...
 rm -rf dist
 ./setup.py bdist_egg
+# ... and package everything in px.pex
 pip install pex==1.1.15
+rm -f px.pex
 pex -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
 pip install flake8==3.2.0

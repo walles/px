@@ -48,4 +48,4 @@ def _install(src, dest):
         raise IOError("Can't remove existing entry: %s" % dest)
 
     shutil.copyfile(src, dest)
-    os.chmod(dest, 0755)
+    os.chmod(dest, 0o755)

@@ -16,8 +16,8 @@ import time
 
 import docopt
 import testutils
-import px_file
-import px_ipc_map
+from . import px_file
+from . import px_ipc_map
 
 # For how long should we do the benchmarking run (in seconds)
 DURATION_S = 30

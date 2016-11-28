@@ -30,7 +30,7 @@ def test_create_process():
 
 
 def test_call_ps():
-    lines = px_process.call_ps()
+    lines = list(px_process.call_ps())
 
     # There should be at least 20 processes running on any single system. If
     # there's a counter example, we'll just have to lower the 20 and document
@@ -117,7 +117,7 @@ def _validate_references(processes):
 def _test_get_all():
     all = px_process.get_all()
 
-    pids = map(lambda p: p.pid, all)
+    pids = list(map(lambda p: p.pid, all))
 
     # Finding ourselves is just confusing...
     assert os.getpid() not in pids
@@ -251,7 +251,7 @@ def test_get_command_line_array():
 def test_get_command_line_array_space_in_binary(tmpdir):
     # Create a file name with a space in it
     spaced_path = tmpdir.join("i contain spaces")
-    spaced_path.write_binary("")
+    spaced_path.write_binary(b"")
     spaced_name = str(spaced_path)
 
     # Verify splitting of the spaced file name

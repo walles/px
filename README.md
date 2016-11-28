@@ -92,7 +92,6 @@ resizes.
 usage and present that in one or more columns.
 
 # TODO misc
-* Run CI on both Python 2 and Python 3
 * Details: When no users were found to be logged in at process start,
 automatically detect whether it's because we don't have history that far back or
 whether it seems to be that nobody was actually logged in. Inform the user about
@@ -149,3 +148,4 @@ executed rather than the VM.
 started.
 * In the details tree view, print process owners for each line
 * Print $SUDO_USER value with process details, if set
+* Run CI on both Python 2 and Python 3

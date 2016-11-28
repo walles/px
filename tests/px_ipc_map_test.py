@@ -5,9 +5,9 @@ from px import px_file
 import testutils
 
 
-def create_file(type, name, device, pid, access=None, inode=None):
+def create_file(filetype, name, device, pid, access=None, inode=None):
     file = px_file.PxFile()
-    file.type = type
+    file.type = filetype
 
     # Remove leading [] group from name if any
     file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
@@ -159,12 +159,13 @@ def test_get_ipc_map_1():
         files = px_file.lsof_to_files(lsof_output.read())
 
     ipc_map = testutils.create_ipc_map(1997, files)
-    assert len(ipc_map.keys()) == 2
+    keys = list(ipc_map.keys())
+    assert len(keys) == 2
 
-    peer0 = ipc_map.keys()[0]
+    peer0 = keys[0]
     assert len(ipc_map[peer0]) == 1
 
-    peer1 = ipc_map.keys()[1]
+    peer1 = keys[1]
     assert len(ipc_map[peer1]) == 1
 
 
@@ -176,7 +177,8 @@ def test_get_ipc_map_2():
         files = px_file.lsof_to_files(lsof_output.read())
 
     ipc_map = testutils.create_ipc_map(777, files)
-    assert len(ipc_map.keys()) == 1
+    keys = list(ipc_map.keys())
+    assert len(keys) == 1
 
-    peer0 = ipc_map.keys()[0]
+    peer0 = keys[0]
     assert len(ipc_map[peer0]) == 4
