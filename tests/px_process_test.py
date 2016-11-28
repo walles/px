@@ -30,7 +30,7 @@ def test_create_process():
 
 
 def test_call_ps():
-    lines = px_process.call_ps()
+    lines = list(px_process.call_ps())
 
     # There should be at least 20 processes running on any single system. If
     # there's a counter example, we'll just have to lower the 20 and document
