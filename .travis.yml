@@ -9,8 +9,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python3 ; fi
 
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y python3.5 ; fi
-
 install:
   - sudo -H pip install coveralls coverage
 

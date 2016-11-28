@@ -6,7 +6,7 @@ set -x
 
 if [ $# != 1 ] ; then
   # Run this script with two different Python interpreters
-  "$0" python3
+  "$0" python3.5
   "$0" python2
   echo
   echo "All tests passed!"
