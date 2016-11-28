@@ -26,9 +26,12 @@ virtualenv --python=$1 "${ENVDIR}"
 # that?
 PYTEST_ADDOPTS=--cov=px ./setup.py test
 
+# Create px egg...
 rm -rf dist
 ./setup.py bdist_egg
+# ... and package everything in px.pex
 pip install pex==1.1.15
+rm -f px.pex
 pex -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
 pip install flake8==3.2.0
