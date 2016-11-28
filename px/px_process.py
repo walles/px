@@ -122,7 +122,7 @@ class PxProcess(object):
         ps = subprocess.Popen(["ps", "e", str(self.pid)],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               env=env)
-        stdout = ps.communicate()[0]
+        stdout = ps.communicate()[0].decode()
         match = re.match(".* SUDO_USER=([^ ]+)", stdout, re.DOTALL)
         if not match:
             return None
@@ -144,7 +144,7 @@ def call_ps():
     ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,user,time,%mem,command"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           env=env)
-    return map(lambda b: b.decode(), ps.communicate()[0].splitlines()[1:])
+    return ps.communicate()[0].decode().splitlines()[1:]
 
 
 def parse_time(timestring):
