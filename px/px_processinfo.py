@@ -4,10 +4,10 @@ import datetime
 import operator
 
 import os
-import px.px_file
-import px.px_process
-import px.px_ipc_map
-import px.px_loginhistory
+from . import px_file
+from . import px_process
+from . import px_ipc_map
+from . import px_loginhistory
 
 
 def find_process_by_pid(pid, processes):

@@ -5,7 +5,7 @@ import subprocess
 import os
 import re
 import dateutil.tz
-import px.px_commandline
+from . import px_commandline
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
