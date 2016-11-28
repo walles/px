@@ -20,6 +20,7 @@ trap cleanup EXIT
 
 # Expect the first argument to be a Python interpreter
 virtualenv --python=$1 "${ENVDIR}"
+# shellcheck source=/dev/null
 . "${ENVDIR}"/bin/activate
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
