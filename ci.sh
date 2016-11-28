@@ -8,6 +8,9 @@ if [ $# != 1 ] ; then
   # Run this script with two different Python interpreters
   "$0" python3
   "$0" python2
+  echo
+  echo "All tests passed!"
+  echo
   exit
 fi
 
@@ -22,6 +25,9 @@ trap cleanup EXIT
 virtualenv --python=$1 "${ENVDIR}"
 # shellcheck source=/dev/null
 . "${ENVDIR}"/bin/activate
+
+# Fix tools versions
+pip install pip==8.1.2 setuptools==29.0.1 wheel==0.24.0
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
 # that?
