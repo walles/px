@@ -117,7 +117,7 @@ def _validate_references(processes):
 def _test_get_all():
     all = px_process.get_all()
 
-    pids = map(lambda p: p.pid, all)
+    pids = list(map(lambda p: p.pid, all))
 
     # Finding ourselves is just confusing...
     assert os.getpid() not in pids
