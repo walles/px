@@ -71,8 +71,8 @@ def lsof_to_file(shard_array):
     return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
 
 
-def create_file(type, name):
-    return lsof_to_file(["f6", "au", "t" + type, "d0x42", "n" + name])
+def create_file(filetype, name):
+    return lsof_to_file(["f6", "au", "t" + filetype, "d0x42", "n" + name])
 
 
 def test_listen_name():

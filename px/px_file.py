@@ -152,6 +152,7 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types=None):
+    assert type(lsof).__name__ == 'str'
     pid = None
     file = None
     files = []
@@ -166,12 +167,12 @@ def lsof_to_files(lsof, file_types=None):
             # The output ends with a single newline, which we just stripped away
             break
 
-        type = shard[0]
+        filetype = shard[0]
         value = shard[1:]
 
-        if type == 'p':
+        if filetype == 'p':
             pid = int(value)
-        elif type == 'f':
+        elif filetype == 'f':
             file = PxFile()
             file.fd = value
             file.pid = pid
@@ -190,23 +191,23 @@ def lsof_to_files(lsof, file_types=None):
             else:
                 # Overwrite the last file since it's of the wrong type
                 files[-1] = file
-        elif type == 'a':
+        elif filetype == 'a':
             file.access = {
                 ' ': None,
                 'r': "r",
                 'w': "w",
                 'u': "rw"}[value]
-        elif type == 't':
+        elif filetype == 't':
             file.type = value
-        elif type == 'd':
+        elif filetype == 'd':
             file.device = value
-        elif type == 'n':
+        elif filetype == 'n':
             file.name = value
-        elif type == 'i':
+        elif filetype == 'i':
             file.inode = value
 
         else:
-            raise Exception("Unhandled type <{}> for shard <{}>".format(type, shard))
+            raise Exception("Unhandled type <{}> for shard <{}>".format(filetype, shard))
 
     return files
 

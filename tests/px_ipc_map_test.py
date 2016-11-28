@@ -5,9 +5,9 @@ from px import px_file
 import testutils
 
 
-def create_file(type, name, device, pid, access=None, inode=None):
+def create_file(filetype, name, device, pid, access=None, inode=None):
     file = px_file.PxFile()
-    file.type = type
+    file.type = filetype
 
     # Remove leading [] group from name if any
     file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
