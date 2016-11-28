@@ -152,7 +152,6 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types=None):
-    assert type(lsof).__name__ == 'str'
     pid = None
     file = None
     files = []
