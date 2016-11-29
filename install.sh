@@ -24,9 +24,9 @@ chmod a+x $TEMPFILE
 echo "Installing the latest release..."
 echo
 echo "sudo install px.pex /usr/local/bin/px"
-sudo install $TEMPFILE /usr/local/bin/px
+sudo install $TEMPFILE ${PXPREFIX}/px
 echo "sudo install px.pex /usr/local/bin/ptop"
-sudo install $TEMPFILE /usr/local/bin/ptop
+sudo install $TEMPFILE ${PXPREFIX}/ptop
 
 rm -f $TEMPFILE
 
