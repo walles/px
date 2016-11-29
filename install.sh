@@ -12,8 +12,8 @@ PXPREFIX=${PXPREFIX:-/usr/local/bin}
 # This is the download URL for the latest release
 URL=$(curl -s https://api.github.com/repos/$REPO/releases \
   | grep browser_download_url \
-  | head -n 1 \
-  | cut -d '"' -f 4)
+  | cut -d '"' -f 4 \
+  | head -n 1)
 
 echo "Downloading the latest release..."
 echo "  $URL"
