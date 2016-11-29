@@ -137,7 +137,7 @@ def call_last():
     last = subprocess.Popen("last",
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
-    return last.communicate()[0].decode()
+    return last.communicate()[0].decode('utf-8')
 
 
 def _to_timestamp(string, now):

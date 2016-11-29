@@ -10,7 +10,7 @@ with open('requirements.txt') as reqsfile:
 
 setup(
     name='px',
-    version=subprocess.check_output(['git', 'describe', '--dirty']).decode().strip(),
+    version=subprocess.check_output(['git', 'describe', '--dirty']).decode('utf-8').strip(),
     description='Cross Functional Process Explorer',
     author='Johan Walles',
     author_email='walles@gmail.com',

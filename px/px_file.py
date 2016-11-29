@@ -148,7 +148,7 @@ def call_lsof():
     lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0i'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
-    return lsof.communicate()[0].decode()
+    return lsof.communicate()[0].decode('utf-8')
 
 
 def lsof_to_files(lsof, file_types=None):
