@@ -7,6 +7,7 @@ set -e
 set -o pipefail
 
 REPO="walles/px"
+PXPREFIX=${PXPREFIX:-/usr/local/bin}
 
 # This is the download URL for the latest release
 URL=$(curl -s https://api.github.com/repos/$REPO/releases \
