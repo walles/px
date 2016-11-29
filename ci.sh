@@ -6,10 +6,10 @@ set -x
 
 function test_installer() {
   WORKDIR="$(mktemp -d)"
-  function cleanup {
+  function installer-cleanup {
     rm -rf "${WORKDIR}"
   }
-  trap cleanup EXIT
+  trap installer-cleanup EXIT
 
   # Create a fake no-op sudo...
   SUDO=${WORKDIR}/sudo
@@ -23,6 +23,8 @@ function test_installer() {
   PXPREFIX=${WORKDIR} bash -x ./install.sh
   test -x ${WORKDIR}/px
   test -x ${WORKDIR}/ptop
+
+  rm -rf "${WORKDIR}"
 }
 
 if [ $# != 1 ] ; then
