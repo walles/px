@@ -4,31 +4,8 @@ set -o pipefail
 set -e
 set -x
 
-function test_installer() {
-  WORKDIR="$(mktemp -d)"
-  function installer-cleanup {
-    rm -rf "${WORKDIR}"
-  }
-  trap installer-cleanup EXIT
-
-  # Create a fake no-op sudo...
-  SUDO=${WORKDIR}/sudo
-  echo '#!/bin/bash' > ${SUDO}
-  echo '"$@"' >> ${SUDO}
-  chmod a+x ${SUDO}
-
-  # ... and put it first in the PATH
-  export PATH=${WORKDIR}:$PATH
-
-  PXPREFIX=${WORKDIR} bash -x ./install.sh
-  test -x ${WORKDIR}/px
-  test -x ${WORKDIR}/ptop
-
-  rm -rf "${WORKDIR}"
-}
-
 if [ $# != 1 ] ; then
-  test_installer
+  ./tests/installtest.sh
 
   # Run this script with two different Python interpreters
   "$0" python3.5
