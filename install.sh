@@ -7,12 +7,13 @@ set -e
 set -o pipefail
 
 REPO="walles/px"
+PXPREFIX=${PXPREFIX:-/usr/local/bin}
 
 # This is the download URL for the latest release
 URL=$(curl -s https://api.github.com/repos/$REPO/releases \
   | grep browser_download_url \
-  | head -n 1 \
-  | cut -d '"' -f 4)
+  | cut -d '"' -f 4 \
+  | head -n 1)
 
 echo "Downloading the latest release..."
 echo "  $URL"
@@ -23,9 +24,9 @@ chmod a+x $TEMPFILE
 echo "Installing the latest release..."
 echo
 echo "sudo install px.pex /usr/local/bin/px"
-sudo install $TEMPFILE /usr/local/bin/px
+sudo install $TEMPFILE ${PXPREFIX}/px
 echo "sudo install px.pex /usr/local/bin/ptop"
-sudo install $TEMPFILE /usr/local/bin/ptop
+sudo install $TEMPFILE ${PXPREFIX}/ptop
 
 rm -f $TEMPFILE
 
