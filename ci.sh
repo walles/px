@@ -37,12 +37,12 @@ pip install pip==8.1.2 setuptools==29.0.1 wheel==0.24.0
 PYTEST_ADDOPTS=--cov=px ./setup.py test
 
 # Create px egg...
-rm -rf dist
+rm -rf dist .deps/px-*.egg build/lib/px
 ./setup.py bdist_egg
 # ... and package everything in px.pex
 pip install pex==1.1.15
 rm -f px.pex
-pex -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
+pex --disable-cache -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
 pip install flake8==3.2.0
 flake8 px tests setup.py
