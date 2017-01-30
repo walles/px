@@ -105,7 +105,14 @@ def redraw(baseline, rows, columns):
     # Sort by CPU time used, then most interesting first
     ordered = px_process.order_best_first(adjusted)
     ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
-    lines += px_terminal.to_screen_lines(ordered, columns)
+
+    toplist_table_lines = px_terminal.to_screen_lines(ordered, columns)
+    if toplist_table_lines:
+        heading_line = toplist_table_lines[0]
+        heading_line = px_terminal.get_string_of_length(heading_line, columns)
+        heading_line = px_terminal.inverse_video(heading_line)
+        toplist_table_lines[0] = heading_line
+    lines += toplist_table_lines
 
     # Clear the screen and move cursor to top left corner:
     # https://en.wikipedia.org/wiki/ANSI_escape_code

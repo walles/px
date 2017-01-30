@@ -85,3 +85,22 @@ def to_screen_lines(procs, columns):
         lines.append(line[0:columns])
 
     return lines
+
+
+def inverse_video(string):
+    CSI = "\x1b["
+
+    return CSI + "7m" + string + CSI + "0m"
+
+
+def get_string_of_length(string, length):
+    if not length:
+        return string
+
+    if len(string) < length:
+        return string + (length - len(string)) * ' '
+
+    if len(string) > length:
+        return string[0:length]
+
+    return string
