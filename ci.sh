@@ -8,7 +8,13 @@ if [ $# != 1 ] ; then
   ./tests/installtest.sh
 
   # Run this script with two different Python interpreters
-  "$0" python3
+  if which python3.5 ; then
+    # On Travis / Linux just "python3" gives us Python 3.2, which is too old
+    "$0" python3.5
+  else
+    # On OSX we get a recent Python3 from Homebrew, just go with the latest one
+    "$0" python3
+  fi
   "$0" python2
 
   echo
