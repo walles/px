@@ -8,7 +8,7 @@ if [ $# != 1 ] ; then
   ./tests/installtest.sh
 
   # Run this script with two different Python interpreters
-  "$0" python3.5
+  "$0" python3
   "$0" python2
 
   echo
@@ -40,7 +40,7 @@ PYTEST_ADDOPTS=--cov=px ./setup.py test
 rm -rf dist .deps/px-*.egg build/lib/px
 ./setup.py bdist_egg
 # ... and package everything in px.pex
-pip install pex==1.1.15
+pip install pex==1.2.1
 rm -f px.pex
 pex --disable-cache -r requirements.txt ./dist/px-*.egg -m px.px:main -o px.pex
 
