@@ -4,6 +4,9 @@ set -o pipefail
 set -e
 set -x
 
+# Don't produce a binary if something goes wrong
+trap "rm -f px.pex" ERR
+
 if [ $# != 1 ] ; then
   ./tests/installtest.sh
 
