@@ -13,12 +13,22 @@ if [ $# != 1 ] ; then
   # Run this script with two different Python interpreters
   if which python3.5 ; then
     # On Travis / Linux just "python3" gives us Python 3.2, which is too old
-    "$0" python3.5
+    PY3=python3.5
   else
     # On OSX we get a recent Python3 from Homebrew, just go with the latest one
-    "$0" python3
+    PY3=python3
   fi
-  "$0" python2
+
+  # Run tests on Python 3
+  "$0" $PY3
+
+  PY2=python
+  # Verify that PY2 seems to be a Python 2 binary, will be caught by our ERR
+  # trap if the grep fails
+  $PY2 --version 2>&1 | grep " 2"
+
+  # Run test on Python 2
+  "$0" $PY2
 
   echo
   echo "All tests passed!"
