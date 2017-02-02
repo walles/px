@@ -58,9 +58,10 @@ This screenshot shows:
 
 # Development
 * Clone: `git clone git@github.com:walles/px.git ; cd px`
-* Build and test: `./ci.sh`
+* Build and test: `./test.sh`
 * Run: `./px.pex`
 * To add dependencies, edit `requirements.txt`
+* To run the same testing that CI does: `./ci.sh`
 
 # Releasing a new Version
 1. Consider updating `screenshot.png` and [the Demo section in this
