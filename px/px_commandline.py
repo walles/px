@@ -133,6 +133,10 @@ def get_java_command(commandline):
                 continue
             if component.startswith('-D'):
                 continue
+            if component.startswith('-ea'):
+                continue
+            if component.startswith('-da'):
+                continue
             if component == "-server":
                 continue
             if component == "-cp" or component == "-classpath":

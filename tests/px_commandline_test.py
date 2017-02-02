@@ -50,6 +50,8 @@ def test_get_command_java():
     assert px_commandline.get_command("java -Dwhatever SomeClass") == "SomeClass"
     assert px_commandline.get_command("java -cp /a/b/c SomeClass") == "SomeClass"
     assert px_commandline.get_command("java -classpath /a/b/c SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -eahej SomeClass") == "SomeClass"
+    assert px_commandline.get_command("java -dahej SomeClass") == "SomeClass"
 
     # Tests for invalid command lines
     assert px_commandline.get_command("java -cp /a/b/c") == "java"
