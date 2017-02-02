@@ -5,7 +5,6 @@ import errno
 import signal
 import select
 import termios
-import operator
 
 import os
 from . import px_load
@@ -92,6 +91,23 @@ def getch(timeout_seconds=0):
     return None
 
 
+def get_notnone_cpu_time_seconds(proc):
+    seconds = proc.cpu_time_seconds
+    if seconds is not None:
+        return seconds
+    return 0
+
+
+def get_toplist(baseline):
+    toplist = adjust_cpu_times(px_process.get_all(), baseline)
+
+    # Sort by CPU time used, then most interesting first
+    toplist = px_process.order_best_first(toplist)
+    toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+
+    return toplist
+
+
 def redraw(baseline, rows, columns):
     """
     Refresh display relative to the given baseline.
@@ -100,13 +116,7 @@ def redraw(baseline, rows, columns):
     """
     lines = ["System load: " + px_load.get_load_string(), ""]
 
-    adjusted = adjust_cpu_times(px_process.get_all(), baseline)
-
-    # Sort by CPU time used, then most interesting first
-    ordered = px_process.order_best_first(adjusted)
-    ordered = sorted(ordered, key=operator.attrgetter('cpu_time_seconds'), reverse=True)
-
-    toplist_table_lines = px_terminal.to_screen_lines(ordered, columns)
+    toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline), columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)

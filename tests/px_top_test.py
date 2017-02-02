@@ -32,3 +32,8 @@ def test_adjust_cpu_times():
     ])
 
     assert actual == expected
+
+
+def test_get_toplist():
+    # Just make sure this call doesn't crash
+    px_top.get_toplist(px_process.get_all())
