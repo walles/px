@@ -1,3 +1,5 @@
+import os
+
 from px import px_top
 from px import px_process
 
@@ -37,3 +39,31 @@ def test_adjust_cpu_times():
 def test_get_toplist():
     # Just make sure this call doesn't crash
     px_top.get_toplist(px_process.get_all())
+
+
+def test_getch():
+    pipe = os.pipe()
+    read, write = pipe
+    os.write(write, b'q')
+
+    # We should get unicode responses from getch()
+    assert px_top.getch(timeout_seconds=0, fd=read) == u'q'
+
+
+def test_get_command():
+    pipe = os.pipe()
+    read, write = pipe
+    os.write(write, b'q')
+
+    assert px_top.get_command(timeout_seconds=0, fd=read) == px_top.CMD_QUIT
+
+
+def test_sigwinch_handler():
+    # Args ignored at the time of writing this, fill in better values if needed
+    px_top.sigwinch_handler(None, None)
+
+    # sys.stdin doesn't work when STDIN has been redirected (as during testing),
+    # so we need to explicitly use the STDIN fd here. Try removing it and you'll
+    # see :).
+    STDIN = 0
+    assert px_top.get_command(timeout_seconds=0, fd=STDIN) == px_top.CMD_RESIZE

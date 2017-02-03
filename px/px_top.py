@@ -15,6 +15,13 @@ from . import px_terminal
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
 
+# We'll report window resize as this key having been pressed
+SIGWINCH_KEY = u'r'
+
+CMD_UNKNOWN = -1
+CMD_QUIT = 1
+CMD_RESIZE = 2
+
 
 def adjust_cpu_times(current, baseline):
     """
@@ -73,20 +80,29 @@ def read_select(fds, timeout_seconds):
             raise
 
 
-def getch(timeout_seconds=0):
+def getch(timeout_seconds=0, fd=None):
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
     Returns the character, or None on timeout.
     """
-    can_read_from = (
-        read_select([sys.stdin.fileno(), SIGWINCH_PIPE[0]], timeout_seconds))
+    if fd is None:
+        fd = sys.stdin.fileno()
 
-    if len(can_read_from) > 0:
-        # Read one byte from the first ready-for-read stream. If more than one
-        # stream is ready, we'll catch the second one on the next call to this
-        # function, so just doing the first is fine.
-        return os.read(can_read_from[0], 1)
+    can_read_from = (
+        read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
+
+    # Read one byte from the first ready-for-read stream. If more than one
+    # stream is ready, we'll catch the second one on the next call to this
+    # function, so just doing the first is fine.
+    for stream in can_read_from:
+        return_me = os.read(stream, 1).decode("UTF-8")
+        if len(return_me) > 0:
+            return return_me
+
+        # A zero length response means we get EOF from one of the streams. This
+        # happens (at least) during testing.
+        continue
 
     return None
 
@@ -143,6 +159,22 @@ def redraw(baseline, rows, columns):
     sys.stdout.flush()
 
 
+def get_command(**kwargs):
+    """
+    Call getch() and interpret the results.
+    """
+    char = getch(**kwargs)
+    if char is None:
+        return None
+    assert len(char) > 0
+
+    if char == u'q':
+        return CMD_QUIT
+    if char == SIGWINCH_KEY:
+        return CMD_RESIZE
+    return CMD_UNKNOWN
+
+
 def _top():
     baseline = px_process.get_all()
     while True:
@@ -153,11 +185,11 @@ def _top():
         rows, columns = window_size
         redraw(baseline, rows, columns)
 
-        char = getch(timeout_seconds=1)
+        command = get_command(timeout_seconds=1)
 
         # Handle all keypresses before refreshing the display
-        while char is not None:
-            if char == 'q':
+        while command is not None:
+            if command == CMD_QUIT:
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
@@ -165,7 +197,7 @@ def _top():
                 redraw(baseline, rows - 4, columns)
                 return
 
-            char = getch(timeout_seconds=0)
+            command = get_command(timeout_seconds=0)
 
 
 def sigwinch_handler(signum, frame):
@@ -173,7 +205,7 @@ def sigwinch_handler(signum, frame):
     # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
     # doesn't collide with anything with some meaning other than "please
     # redraw".
-    os.write(SIGWINCH_PIPE[1], 'r')
+    os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("iso-8859-1"))
 
 
 def top():
