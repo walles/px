@@ -20,13 +20,18 @@ function do-tests() {
 
   # Run tests
   ./setup.py test
+
+  deactivate
 }
 
 source ./scripts/set-py2-p3.sh
 do-tests $PY3
 do-tests $PY2
 
-# Note that the most recent virtualenv should still be active here
+ENVDIR=".${PY2}-env"
+# shellcheck source=/dev/null
+. "$ENVDIR"/bin/activate
+
 flake8 px tests setup.py
 
 # Create px wheel...
@@ -34,6 +39,7 @@ rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 ./setup.py bdist_wheel --universal
 # ... and package everything in px.pex
 rm -f px.pex
+
 pex --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
 
 echo
