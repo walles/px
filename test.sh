@@ -7,36 +7,34 @@ set -x
 # Don't produce a binary if something goes wrong
 trap "rm -f px.pex" ERR
 
-if [ ! "$VIRTUAL_ENV" ] ; then
-  # Not already in a Virtualenv...
-  ENVDIR=env
+function do-tests() {
+  PYTHON=$1
+  ENVDIR=".${PYTHON}-env"
 
-  if [ ! -d "$ENVDIR" ] ; then
-    # Virtualenv doesn't exist, create one
-    virtualenv "$ENVDIR"
-  fi
-
+  test -d "$ENVDIR" || virtualenv "$ENVDIR" --python=$PYTHON
   # shellcheck source=/dev/null
-  . "${ENVDIR}"/bin/activate
-fi
+  . "$ENVDIR"/bin/activate
 
-# Fix tools versions
-pip install pip==8.1.2 setuptools==29.0.1 wheel==0.24.0
+  # Fix tools versions
+  pip install -r requirements-dev.txt
 
-# FIXME: We want to add to the coverage report, not overwrite it. How do we do
-# that?
-PYTEST_ADDOPTS=--cov=px ./setup.py test
+  # Run tests
+  ./setup.py test
+}
+
+source ./scripts/set-py2-p3.sh
+do-tests $PY3
+do-tests $PY2
+
+# Note that the most recent virtualenv should still be active here
+flake8 px tests setup.py
 
 # Create px wheel...
 rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 ./setup.py bdist_wheel --universal
 # ... and package everything in px.pex
-pip install pex==1.2.1
 rm -f px.pex
 pex --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
-
-pip install flake8==3.2.0
-flake8 px tests setup.py
 
 echo
 if unzip -qq -l px.pex '*.so' ; then
@@ -49,9 +47,3 @@ fi
 
 echo
 ./px.pex
-
-echo
-./px.pex $$
-
-echo
-./px.pex --version

@@ -5,6 +5,8 @@
 /.cache
 /.coverage
 
+/.*-env/
+
 *.egg-info
 *.pyc
 __pycache__
