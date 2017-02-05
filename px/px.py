@@ -48,8 +48,12 @@ from . import px_processinfo
 
 def install():
     # Find full path to self
-    px_pex = os.path.dirname(__file__)
-    if not os.path.isfile(px_pex):
+    if not sys.argv:
+        sys.stderr.write("ERROR: Can't find myself, can't install\n")
+        return
+
+    px_pex = sys.argv[0]
+    if not px_pex.endswith(".pex"):
         sys.stderr.write("ERROR: Not running from .pex file, can't install\n")
         return
 
