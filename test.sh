@@ -35,11 +35,14 @@ ENVDIR=".${PY2}-env"
 flake8 px tests setup.py
 
 # Create px wheel...
-rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 ./setup.py bdist_wheel --universal
-# ... and package everything in px.pex
-rm -f px.pex
 
+# ... and package everything in px.pex
+#
+# Note that we have to --disable-cache here since otherwise changing the code
+# without changing the "git describe" output won't change the resulting binary.
+# And since that happens all the time during development we can't have that.
+rm -f px.pex
 pex --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
 
 echo
