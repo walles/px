@@ -15,6 +15,14 @@ if [ $# != 1 ] ; then
   "$0" $PY3
   "$0" $PY2
 
+  if ! file px.pex | grep -w python ; then
+    echo
+    echo "ERROR: px.pex should use \"python\" as its interpreter:"
+    file px.pex
+    false
+    exit 1
+  fi
+
   echo
   echo "All tests passed!"
   echo
@@ -43,9 +51,18 @@ PYTEST_ADDOPTS=--cov=px ./setup.py test
 # Create px wheel...
 rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 ./setup.py bdist_wheel --universal
+
 # ... and package everything in px.pex
+#
+# Note that we have to --disable-cache here since otherwise changing the code
+# without changing the "git describe" output won't change the resulting binary.
+# And since that happens all the time during development we can't have that.
+#
+# Also note that we need to specify the --python-shebang to get "python" as an
+# interpreter. Just passing --python (or nothing) defaults to following the
+# "python" symlink and putting "2.7" here.
 rm -f px.pex
-pex --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
+pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
 
 flake8 px tests setup.py
 
