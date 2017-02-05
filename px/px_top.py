@@ -124,6 +124,29 @@ def get_toplist(baseline):
     return toplist
 
 
+def clear_screen():
+    """
+    Clear the screen and move cursor to top left corner:
+    https://en.wikipedia.org/wiki/ANSI_escape_code
+
+    Note that some experimentation was involved in coming up with this
+    exact sequence; if you do first "clear the full screen" then "home"
+    for example, the contents of the previous screen gets added to the
+    scrollback buffer, which isn't what we want. Tread carefully if you
+    intend to change these.
+    """
+
+    CSI = b"\x1b["
+    if sys.version_info.major == 2:
+        sys.stdout.write(CSI + b"1J")
+        sys.stdout.write(CSI + b"H")
+    else:
+        # http://stackoverflow.com/a/908440/473672
+        sys.stdout.buffer.write(CSI + b"1J")
+        sys.stdout.buffer.write(CSI + b"H")
+    sys.stdout.flush()
+
+
 def redraw(baseline, rows, columns):
     """
     Refresh display relative to the given baseline.
@@ -140,19 +163,7 @@ def redraw(baseline, rows, columns):
         toplist_table_lines[0] = heading_line
     lines += toplist_table_lines
 
-    # Clear the screen and move cursor to top left corner:
-    # https://en.wikipedia.org/wiki/ANSI_escape_code
-    #
-    # Note that some experimentation was involved in coming up with this
-    # exact sequence; if you do first "clear the full screen" then "home"
-    # for example, the contents of the previous screen gets added to the
-    # scrollback buffer, which isn't what we want. Tread carefully if you
-    # intend to change these.
-    #
-    # Writing to stderr since stderr is rumored not to be buffered.
-    CSI = "\x1b["
-    sys.stderr.write(CSI + "1J")
-    sys.stderr.write(CSI + "H")
+    clear_screen()
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
     sys.stdout.write("\r\n".join(lines[0:rows]))
