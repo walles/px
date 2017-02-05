@@ -34,6 +34,7 @@ ENVDIR=".${PY2}-env"
 flake8 px tests setup.py
 
 # Create px wheel...
+rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 ./setup.py bdist_wheel --universal
 
 # ... and package everything in px.pex
