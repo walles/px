@@ -58,7 +58,7 @@ EOF
   exit 1
 fi
 
-if ! file px.pex | grep -w python ; then
+if ! head -n1 px.pex | grep -w python ; then
   echo
   echo "ERROR: px.pex should use \"python\" as its interpreter:"
   file px.pex
