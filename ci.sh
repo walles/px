@@ -15,7 +15,7 @@ if [ $# != 1 ] ; then
   "$0" $PY3
   "$0" $PY2
 
-  if ! file px.pex | grep -w python ; then
+  if ! head -n1 px.pex | grep -w python ; then
     echo
     echo "ERROR: px.pex should use \"python\" as its interpreter:"
     file px.pex
