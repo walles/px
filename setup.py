@@ -21,6 +21,9 @@ setup(
 
     install_requires=requirements,
 
+    # See: http://setuptools.readthedocs.io/en/latest/setuptools.html#setting-the-zip-safe-flag
+    zip_safe=True,
+
     setup_requires=[
         'pytest-runner',
         'pytest-cov',
