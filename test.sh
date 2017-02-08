@@ -3,6 +3,11 @@
 set -o pipefail
 set -e
 
+if [ "$VIRTUAL_ENV" ] ; then
+  echo 'ERROR: Already in a virtualenv, do "deactivate" first and try again'
+  exit 1
+fi
+
 # Don't produce a binary if something goes wrong
 trap "rm -f px.pex" ERR
 
