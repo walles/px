@@ -36,6 +36,7 @@ setup(
     entry_points={
         'console_scripts': [
             'px = px.px:main',
+            'ptop = px.px:main'
         ],
     }
 )
