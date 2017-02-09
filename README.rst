@@ -44,6 +44,7 @@ Demo
 This screenshot shows:
 
 * The end of the output from just typing ``px``.
+
   * Note how the newest and the most CPU and memory hungry processes are at the
     end of the list so you can find them without scrolling.
   * Note how the Gradle daemon processes running in Java is listed by class name
@@ -51,6 +52,7 @@ This screenshot shows:
 
 * The result of searching for "terminal" processes.
 * The output from the details view of PID 70857:
+
   * The command line has been split with one argument per line. This makes long
     command lines readable.
   * The process tree shows how the Terminal relates to other processes.
