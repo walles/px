@@ -54,7 +54,7 @@ def get_command(commandline):
     if command == "java":
         return get_java_command(commandline)
 
-    if command in ["bash", "sh", "ruby", "perl"]:
+    if command in ["bash", "sh", "ruby", "perl", "node"]:
         return get_generic_script_command(commandline)
 
     if len(command) < 25:
