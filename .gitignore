@@ -5,6 +5,9 @@
 /.cache
 /.coverage
 
+# See: https://packaging.python.org/distributing/#uploading-your-project-to-pypi
+/.pypirc
+
 /.*-env/
 
 *.egg-info
