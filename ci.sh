@@ -88,3 +88,7 @@ echo
 
 echo
 ./px.pex --version
+
+./setup.py install
+px bash
+px --version

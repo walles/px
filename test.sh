@@ -73,3 +73,8 @@ fi
 
 echo
 ./px.pex bash
+
+# Validate what pip install will give us
+./setup.py install
+px $$
+px --version
