@@ -13,7 +13,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fp:
     LONG_DESCRIPTION = fp.read()
 
 setup(
-    name='px',
+    name='pxpx',
     version=subprocess.check_output(['git', 'describe', '--dirty']).decode('utf-8').strip(),
     description='Cross Functional Process Explorer',
     long_description=LONG_DESCRIPTION,
@@ -54,8 +54,8 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'px = px.px:main',
-            'ptop = px.px:main'
+            'px = pxpx.px:main',
+            'ptop = pxpx.px:main'
         ],
     }
 )

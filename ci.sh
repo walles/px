@@ -67,7 +67,7 @@ rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 # interpreter. Just passing --python (or nothing) defaults to following the
 # "python" symlink and putting "2.7" here.
 rm -f px.pex
-pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/px-*.whl -m px.px:main -o px.pex
+pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o px.pex
 
 flake8 px tests setup.py
 

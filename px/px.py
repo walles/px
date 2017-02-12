@@ -62,7 +62,7 @@ def install():
 
 
 def get_version():
-    return pkg_resources.get_distribution("px").version
+    return pkg_resources.get_distribution("pxpx").version
 
 
 def main():
