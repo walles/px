@@ -5,9 +5,13 @@ Cross Functional Process Explorer
 
 Installation
 ------------
-Copy / paste this command line in a terminal::
+For a standalone install, copy / paste this command into a terminal::
 
   curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
+
+Or you can install from Pypi::
+
+  sudo pip install --upgrade pxpx
 
 Now, you should be able to run ``px``, ``px --help`` or ``ptop`` from the command
 line. Otherwise please verify that ``/usr/local/bin`` is in your ``$PATH``.
@@ -85,6 +89,7 @@ Releasing a new Version
 6. Go to the `Releases`_ page on GitHub,
    click your new release, click the ``Edit tag`` button, then attach your ``px.pex``
    file that you just built to the release.
+7. Upload the new release to `Pypi`_
 
 Performance testing
 -------------------
@@ -174,6 +179,7 @@ DONE
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket)
 .. _Releases: https://github.com/walles/px/releases
+.. _Pypi: https://pypi.python.org/pypi/pxpx
 
 .. |Build Status| image:: https://travis-ci.org/walles/px.svg?branch=python
    :target: https://travis-ci.org/walles/px
