@@ -44,20 +44,41 @@ class PxLoadBar(object):
     def _get_colored_bytes(self, load=None, columns=None):
         "Yields pairs, with each pair containing a color and a byte"
 
-        # FIXME: Set these properly
-        inverse_start = 0.0
-        yellow_start = 0.0
-        red_start = 0.0
-        normal_start = 0.0
+        max_value = 2.0 * self._logical
+        if load > max_value:
+            max_value = 1.0 * load
+
+        UNUSED = max_value + 1
+        if load < self._physical:
+            yellow_start = UNUSED
+            red_start = UNUSED
+            inverse_start = load
+            normal_start = self._physical
+        elif load < self._logical:
+            yellow_start = self._physical
+            red_start = UNUSED
+            inverse_start = UNUSED
+            normal_start = load
+        else:  # load >= self._logical
+            yellow_start = self._physical
+            red_start = self._logical
+            inverse_start = UNUSED
+            normal_start = load
+
+        # Scale the values to the number of columns
+        yellow_start = yellow_start * columns / max_value
+        red_start = red_start * columns / max_value
+        inverse_start = inverse_start * columns / max_value
+        normal_start = normal_start * columns / max_value
 
         for i in range(columns):
             # We always start out green
             color = self.green
 
-            if i >= red_start:
-                color = self.red
             if i >= yellow_start:
                 color = self.yellow
+            if i >= red_start:
+                color = self.red
             if i >= inverse_start:
                 color = self.inverse
             if i >= normal_start:
