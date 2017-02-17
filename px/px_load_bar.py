@@ -43,8 +43,27 @@ class PxLoadBar(object):
 
     def _get_colored_bytes(self, load=None, columns=None):
         "Yields pairs, with each pair containing a color and a byte"
+
+        # FIXME: Set these properly
+        inverse_start = 0.0
+        yellow_start = 0.0
+        red_start = 0.0
+        normal_start = 0.0
+
         for i in range(columns):
-            yield (self.normal, b' ')
+            # We always start out green
+            color = self.green
+
+            if i >= red_start:
+                color = self.red
+            if i >= yellow_start:
+                color = self.yellow
+            if i >= inverse_start:
+                color = self.inverse
+            if i >= normal_start:
+                color = self.normal
+
+            yield (color, b' ')
 
     def get_bar(self, load=None, columns=None):
         if load is None:
@@ -54,7 +73,7 @@ class PxLoadBar(object):
             raise ValueError("Missing required parameter columns=")
 
         return_me = b''
-        color = None
+        color = self.normal
         for color_and_byte in self._get_colored_bytes(load=load, columns=columns):
             if color_and_byte[0] != color:
                 return_me += color_and_byte[0]
