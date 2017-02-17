@@ -23,4 +23,29 @@ class PxLoadBar(object):
     Load up to twice the number of physical cores will go up to the end of the
     string.
     """
-    pass
+
+    def __init__(self, physical=None, logical=None):
+        if physical is None or physical < 1:
+            raise ValueError("Physical must be a positive integer")
+
+        if logical is None or logical < physical:
+            raise ValueError("Logical must be a positive integer >= physical (%r)" % physical)
+
+        self._physical = physical
+        self._logical = logical
+
+        CSI = b"\x1b["
+        self.normal = CSI + b"m"
+        self.inverse = CSI + b"7m"
+        self.red = CSI + b"41m"
+        self.yellow = CSI + b"43m"
+        self.green = CSI + b"42m"
+
+    def get_bar(self, load=None, columns=None):
+        if load is None:
+            raise ValueError("Missing required parameter load=")
+
+        if columns is None:
+            raise ValueError("Missing required parameter columns=")
+
+        return b''
