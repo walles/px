@@ -2,7 +2,7 @@ from px import px_load_bar
 
 
 def get_load_bar(physical=None, logical=None):
-    return_me = px_load_bar.PxLoadBar(1, 1)
+    return_me = px_load_bar.PxLoadBar(physical=physical, logical=logical)
     return_me.normal = b'n'
     return_me.inverse = b'i'
     return_me.red = b'r'
