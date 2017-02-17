@@ -54,12 +54,7 @@ class PxLoadBar(object):
             red_start = UNUSED
             inverse_start = load
             normal_start = self._physical
-        elif load < self._logical:
-            yellow_start = self._physical
-            red_start = UNUSED
-            inverse_start = UNUSED
-            normal_start = load
-        else:  # load >= self._logical
+        else:
             yellow_start = self._physical
             red_start = self._logical
             inverse_start = UNUSED
