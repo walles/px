@@ -44,7 +44,7 @@ class PxLoadBar(object):
     def _get_colored_bytes(self, load=None, columns=None):
         "Yields pairs, with each pair containing a color and a byte"
 
-        max_value = 2.0 * self._logical
+        max_value = 2.0 * self._physical
         if load > max_value:
             max_value = 1.0 * load
 
