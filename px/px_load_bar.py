@@ -48,7 +48,7 @@ class PxLoadBar(object):
         if load > max_value:
             max_value = 1.0 * load
 
-        UNUSED = max_value + 1
+        UNUSED = 1000 * max_value
         if load < self._physical:
             yellow_start = UNUSED
             red_start = UNUSED
@@ -61,10 +61,10 @@ class PxLoadBar(object):
             normal_start = load
 
         # Scale the values to the number of columns
-        yellow_start = yellow_start * columns / max_value
-        red_start = red_start * columns / max_value
-        inverse_start = inverse_start * columns / max_value
-        normal_start = normal_start * columns / max_value
+        yellow_start = yellow_start * columns / max_value - 0.5
+        red_start = red_start * columns / max_value - 0.5
+        inverse_start = inverse_start * columns / max_value - 0.5
+        normal_start = normal_start * columns / max_value - 0.5
 
         for i in range(columns):
             # We always start out green
