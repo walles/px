@@ -38,7 +38,7 @@ def test_dual_core_no_ht():
     assert test_me.get_bar(load=0, columns=10) == b'i     n     '
     assert test_me.get_bar(load=2, columns=10) == b'g     n     '
     assert test_me.get_bar(load=4, columns=10) == b'g     r     n'
-    assert test_me.get_bar(load=6, columns=12) == b'g   r         n'
+    assert test_me.get_bar(load=6, columns=12) == b'g    r        n'
 
 
 def test_rounding():
