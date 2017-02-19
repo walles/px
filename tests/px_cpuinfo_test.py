@@ -18,3 +18,18 @@ def test_get_core_count_from_proc_cpuinfo():
 
     assert physical == FIXME
     assert logical == FIXME
+
+    assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") == None
+
+
+def test_get_core_count_from_sysctl():
+    test_me = px_cpuinfo.get_core_count_from_sysctl()
+    if test_me is None:
+        # We're likely on Linux
+        return
+
+    # Sanity check, since we don't know the answer this is the best we can do
+    physical, logical = test_me
+    assert physical >= 1
+    assert logical >= physical
+    assert logical % physical == 0

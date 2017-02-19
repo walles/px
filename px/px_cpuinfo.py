@@ -10,3 +10,6 @@ def get_core_count():
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
     pass
+
+def get_core_count_from_sysctl():
+    pass
