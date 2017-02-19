@@ -16,8 +16,8 @@ def test_get_core_count_from_proc_cpuinfo():
     physical, logical = px_cpuinfo.get_core_count_from_proc_cpuinfo(
         os.path.join(my_dir, "proc-cpuinfo-sample"))
 
-    assert physical == FIXME
-    assert logical == FIXME
+    assert physical == 2
+    assert logical == 4
 
     assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") is None
 
