@@ -19,7 +19,7 @@ def test_get_core_count_from_proc_cpuinfo():
     assert physical == FIXME
     assert logical == FIXME
 
-    assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") == None
+    assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") is None
 
 
 def test_get_core_count_from_sysctl():

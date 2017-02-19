@@ -10,7 +10,15 @@ def get_core_count():
     Returns a tuple (physical, logical) with counts of physical and logical
     cores.
     """
-    pass
+    return_me = get_core_count_from_proc_cpuinfo()
+    if return_me is not None:
+        return return_me
+
+    return_me = get_core_count_from_sysctl()
+    if return_me is not None:
+        return return_me
+
+    return None
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
