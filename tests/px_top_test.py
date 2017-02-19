@@ -2,6 +2,7 @@ import os
 
 from px import px_top
 from px import px_process
+from px import px_load_bar
 
 import testutils
 
@@ -67,3 +68,10 @@ def test_sigwinch_handler():
     # see :).
     STDIN = 0
     assert px_top.get_command(timeout_seconds=0, fd=STDIN) == px_top.CMD_RESIZE
+
+
+def test_redraw():
+    # Just make sure it doesn't crash
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+    px_top.redraw(loadbar, baseline, 100, 10)
