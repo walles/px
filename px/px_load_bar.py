@@ -26,10 +26,10 @@ class PxLoadBar(object):
 
     def __init__(self, physical=None, logical=None):
         if physical is None or physical < 1:
-            raise ValueError("Physical must be a positive integer")
+            raise ValueError("Physical must be a positive integer, was: %r" % (physical,))
 
         if logical is None or logical < physical:
-            raise ValueError("Logical must be a positive integer >= physical (%r)" % physical)
+            raise ValueError("Logical must be an integer >= physical, was: %r" % (logical,))
 
         self._physical = physical
         self._logical = logical
