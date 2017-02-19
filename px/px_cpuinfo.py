@@ -22,7 +22,30 @@ def get_core_count():
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
-    pass
+    # Note the ending spaces, they must be there for number extraction to work!
+    PROCESSOR_NO_PREFIX = 'processor\t: '
+    CORE_ID_PREFIX = 'core id\t\t: '
+
+    try:
+        with open(proc_cpuinfo) as f:
+            max_core_id = 0
+            max_processor_no = 0
+
+            for line in f:
+                if line.startswith(PROCESSOR_NO_PREFIX):
+                    processor_no = int(line[len(PROCESSOR_NO_PREFIX):])
+                    max_processor_no = max(processor_no, max_processor_no)
+                elif line.startswith(CORE_ID_PREFIX):
+                    core_id = int(line[len(CORE_ID_PREFIX)])
+                    max_core_id = max(core_id, max_core_id)
+
+            return (max_core_id + 1, max_processor_no + 1)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            # /proc/cpuinfo not found, we're probably not on Linux
+            return None
+
+        raise
 
 
 def get_core_count_from_sysctl():
