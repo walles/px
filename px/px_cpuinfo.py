@@ -40,7 +40,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
                     max_core_id = max(core_id, max_core_id)
 
             return (max_core_id + 1, max_processor_no + 1)
-    except OSError as e:
+    except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # /proc/cpuinfo not found, we're probably not on Linux
             return None
@@ -57,7 +57,7 @@ def get_core_count_from_sysctl():
         sysctl = subprocess.Popen(["sysctl", 'hw'],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                   env=env)
-    except OSError as e:
+    except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # sysctl not found, we're probably not on OSX
             return None
