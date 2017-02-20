@@ -79,4 +79,8 @@ def get_core_count_from_sysctl():
         elif line.startswith(LOGICAL_PREFIX):
             logical = int(line[len(LOGICAL_PREFIX)])
 
+    if physical is None or logical is None:
+        # On Linux, sysctl exists but it doesn't contain the values we want
+        return None
+
     return (physical, logical)
