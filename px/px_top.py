@@ -156,7 +156,7 @@ def get_screen_lines(load_bar, baseline, rows, columns):
     loadstring = px_load.get_load_string(load).encode('utf-8')
     loadbar = load_bar.get_bar(load=load[0], columns=40)
     lines = [
-        b"System load: " + loadstring + b" |" + loadbar + b"|",
+        b"System load: " + loadstring + b"  |" + loadbar + b"|",
         b""]
 
     toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline), columns)
