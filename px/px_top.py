@@ -10,6 +10,8 @@ import os
 from . import px_load
 from . import px_process
 from . import px_terminal
+from . import px_load_bar
+from . import px_cpuinfo
 
 
 # Used for informing our getch() function that a window resize has occured
@@ -124,6 +126,14 @@ def get_toplist(baseline):
     return toplist
 
 
+def writebytes(bytestring):
+    if sys.version_info.major == 2:
+        sys.stdout.write(bytestring)
+    else:
+        # http://stackoverflow.com/a/908440/473672
+        sys.stdout.buffer.write(bytestring)
+
+
 def clear_screen():
     """
     Clear the screen and move cursor to top left corner:
@@ -137,23 +147,17 @@ def clear_screen():
     """
 
     CSI = b"\x1b["
-    if sys.version_info.major == 2:
-        sys.stdout.write(CSI + b"1J")
-        sys.stdout.write(CSI + b"H")
-    else:
-        # http://stackoverflow.com/a/908440/473672
-        sys.stdout.buffer.write(CSI + b"1J")
-        sys.stdout.buffer.write(CSI + b"H")
-    sys.stdout.flush()
+    writebytes(CSI + b"1J")
+    writebytes(CSI + b"H")
 
 
-def redraw(baseline, rows, columns):
-    """
-    Refresh display relative to the given baseline.
-
-    The new display will be (at most) rows rows x columns columns.
-    """
-    lines = ["System load: " + px_load.get_load_string(), ""]
+def get_screen_lines(load_bar, baseline, rows, columns):
+    load = px_load.get_load_values()
+    loadstring = px_load.get_load_string(load).encode('utf-8')
+    loadbar = load_bar.get_bar(load=load[0], columns=40)
+    lines = [
+        b"System load: " + loadstring + b"  |" + loadbar + b"|",
+        b""]
 
     toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline), columns)
     if toplist_table_lines:
@@ -161,12 +165,25 @@ def redraw(baseline, rows, columns):
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
         heading_line = px_terminal.inverse_video(heading_line)
         toplist_table_lines[0] = heading_line
+
+    toplist_table_lines = map(lambda s: s.encode('utf-8'), toplist_table_lines)
     lines += toplist_table_lines
 
-    clear_screen()
+    return lines[0:rows]
+
+
+def redraw(load_bar, baseline, rows, columns, clear=True):
+    """
+    Refresh display relative to the given baseline.
+
+    The new display will be (at most) rows rows x columns columns.
+    """
+    lines = get_screen_lines(load_bar, baseline, rows, columns)
+    if clear:
+        clear_screen()
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
-    sys.stdout.write("\r\n".join(lines[0:rows]))
+    writebytes(b"\r\n".join(lines))
     sys.stdout.flush()
 
 
@@ -187,6 +204,8 @@ def get_command(**kwargs):
 
 
 def _top():
+    physical, logical = px_cpuinfo.get_core_count()
+    load_bar = px_load_bar.PxLoadBar(physical, logical)
     baseline = px_process.get_all()
     while True:
         window_size = px_terminal.get_window_size()
@@ -194,7 +213,7 @@ def _top():
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
-        redraw(baseline, rows, columns)
+        redraw(load_bar, baseline, rows, columns)
 
         command = get_command(timeout_seconds=1)
 
@@ -205,7 +224,7 @@ def _top():
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
                 rows, columns = px_terminal.get_window_size()
-                redraw(baseline, rows - 4, columns)
+                redraw(load_bar, baseline, rows - 4, columns)
                 return
 
             command = get_command(timeout_seconds=0)

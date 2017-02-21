@@ -2,6 +2,7 @@ import os
 
 from px import px_top
 from px import px_process
+from px import px_load_bar
 
 import testutils
 
@@ -67,3 +68,35 @@ def test_sigwinch_handler():
     # see :).
     STDIN = 0
     assert px_top.get_command(timeout_seconds=0, fd=STDIN) == px_top.CMD_RESIZE
+
+
+def test_redraw():
+    # Just make sure it doesn't crash
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+    px_top.redraw(loadbar, baseline, 100, 10, clear=False)
+
+
+def test_get_screen_lines():
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+
+    SCREEN_ROWS = 10
+    SCREEN_COLUMNS = 100
+    lines = px_top.get_screen_lines(
+        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+
+    # Top row should contain ANSI escape codes
+    CSI = b"\x1b["
+    assert b'CSI' in lines[0].replace(CSI, b'CSI')
+
+    assert len(lines) == SCREEN_ROWS
+
+    # This is a bit fluffy, but due to ANSI escape codes the line lengths are
+    # difficult to measure. So if at least one line is exactly the right length
+    # then we're probably fine.
+    found_right_length = False
+    for line in lines:
+        if len(line) == SCREEN_COLUMNS:
+            found_right_length = True
+    assert found_right_length

@@ -30,14 +30,14 @@ def _install(src, dest):
         return
 
     if not os.path.isfile(src):
-        raise IOError("Source is not a file: %s" % src)
+        raise IOError("Source is not a file: %s" % (src,))
 
     parent = os.path.dirname(dest)
     if not os.path.isdir(parent):
-        raise IOError("Destination parent is not a directory: %s" % parent)
+        raise IOError("Destination parent is not a directory: %s" % (parent,))
 
     if os.path.isdir(dest):
-        raise IOError("Destination is a directory, won't replace that: %s" % dest)
+        raise IOError("Destination is a directory, won't replace that: %s" % (dest,))
 
     # Make sure nothing's in the way
     try:
@@ -45,7 +45,7 @@ def _install(src, dest):
     except OSError:
         pass
     if os.path.exists(dest):
-        raise IOError("Can't remove existing entry: %s" % dest)
+        raise IOError("Can't remove existing entry: %s" % (dest,))
 
     shutil.copyfile(src, dest)
     os.chmod(dest, 0o755)
