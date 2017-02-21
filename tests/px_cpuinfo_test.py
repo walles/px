@@ -24,6 +24,13 @@ def test_get_core_count_from_proc_cpuinfo():
     assert physical == 1
     assert logical == 1
 
+    # This one is from my cell phone, just to provide a weird corner case example of things
+    # we may have to handle.
+    physical, logical = px_cpuinfo.get_core_count_from_proc_cpuinfo(
+        os.path.join(my_dir, "proc-cpuinfo-8p8l"))
+    assert physical == 8
+    assert logical == 8
+
     assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") is None
 
 

@@ -32,11 +32,10 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
     PROCESSOR_NO_PREFIX = 'processor\t: '
     CORE_ID_PREFIX = 'core id\t\t: '
 
+    core_ids = set()
+    max_processor_no = 0
     try:
         with open(proc_cpuinfo) as f:
-            core_ids = set()
-            max_processor_no = 0
-
             for line in f:
                 if line.startswith(PROCESSOR_NO_PREFIX):
                     processor_no = int(line[len(PROCESSOR_NO_PREFIX):])
@@ -44,14 +43,19 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
                 elif line.startswith(CORE_ID_PREFIX):
                     core_id = int(line[len(CORE_ID_PREFIX)])
                     core_ids.add(core_id)
-
-            return (len(core_ids), max_processor_no + 1)
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # /proc/cpuinfo not found, we're probably not on Linux
             return None
 
         raise
+
+    physical = len(core_ids)
+    logical = max_processor_no + 1
+    if physical == 0:
+        # I get this on my cell phone
+        physical = logical
+    return (physical, logical)
 
 
 def get_core_count_from_sysctl():
