@@ -13,11 +13,16 @@ def test_get_core_count():
 
 def test_get_core_count_from_proc_cpuinfo():
     my_dir = os.path.dirname(__file__)
-    physical, logical = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-sample"))
 
+    physical, logical = px_cpuinfo.get_core_count_from_proc_cpuinfo(
+        os.path.join(my_dir, "proc-cpuinfo-2p4l"))
     assert physical == 2
     assert logical == 4
+
+    physical, logical = px_cpuinfo.get_core_count_from_proc_cpuinfo(
+        os.path.join(my_dir, "proc-cpuinfo-1p1l"))
+    assert physical == 1
+    assert logical == 1
 
     assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") is None
 

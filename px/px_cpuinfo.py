@@ -22,13 +22,19 @@ def get_core_count():
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
+    """
+    Count the number of cores in /proc/cpuinfo.
+
+    Returns a tuple (physical, logical) with counts of physical and logical
+    cores.
+    """
     # Note the ending spaces, they must be there for number extraction to work!
     PROCESSOR_NO_PREFIX = 'processor\t: '
     CORE_ID_PREFIX = 'core id\t\t: '
 
     try:
         with open(proc_cpuinfo) as f:
-            max_core_id = 0
+            core_ids = set()
             max_processor_no = 0
 
             for line in f:
@@ -37,9 +43,9 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
                     max_processor_no = max(processor_no, max_processor_no)
                 elif line.startswith(CORE_ID_PREFIX):
                     core_id = int(line[len(CORE_ID_PREFIX)])
-                    max_core_id = max(core_id, max_core_id)
+                    core_ids.add(core_id)
 
-            return (max_core_id + 1, max_processor_no + 1)
+            return (len(core_ids), max_processor_no + 1)
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # /proc/cpuinfo not found, we're probably not on Linux

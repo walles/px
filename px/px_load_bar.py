@@ -29,7 +29,7 @@ class PxLoadBar(object):
             raise ValueError("Physical must be a positive integer, was: %r" % (physical,))
 
         if logical is None or logical < physical:
-            raise ValueError("Logical must be an integer >= physical, was: %r" % (logical,))
+            raise ValueError("Logical must be >= physical, was: %r (vs %r)" % (logical, physical))
 
         self._physical = physical
         self._logical = logical
