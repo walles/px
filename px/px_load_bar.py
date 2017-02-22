@@ -36,15 +36,22 @@ class PxLoadBar(object):
 
         CSI = b"\x1b["
         self.normal = CSI + b"m"
-        self.inverse = CSI + b"7m"
-        self.red = CSI + b"41m"
-        self.yellow = CSI + b"43m"
-        self.green = CSI + b"42m"
+        self.inverse = CSI + b"0;7m"
+        self.red = CSI + b"27;1;37;41m"
+        self.yellow = CSI + b"27;1;37;43m"
+        self.green = CSI + b"27;1;37;42m"
 
-    def _get_colored_bytes(self, load=None, columns=None):
+    def _get_colored_bytes(self, load=None, columns=None, text=""):
         "Yields pairs, with each pair containing a color and a byte"
 
-        max_value = 2.0 * self._physical
+        maxlength = columns - 2  # Leave room for a starting and an ending space
+        if len(text) > maxlength:
+            text = text[0:(maxlength - 1)]
+        text = text + ' ' * (maxlength - len(text))
+        text = " " + text + " "
+        assert len(text) == columns
+
+        max_value = self._physical
         if load > max_value:
             max_value = 1.0 * load
 
@@ -79,9 +86,9 @@ class PxLoadBar(object):
             if i >= normal_start:
                 color = self.normal
 
-            yield (color, b' ')
+            yield (color, text[i].encode('utf-8'))
 
-    def get_bar(self, load=None, columns=None):
+    def get_bar(self, load=None, columns=None, text=""):
         if load is None:
             raise ValueError("Missing required parameter load=")
 
@@ -90,7 +97,7 @@ class PxLoadBar(object):
 
         return_me = b''
         color = self.normal
-        for color_and_byte in self._get_colored_bytes(load=load, columns=columns):
+        for color_and_byte in self._get_colored_bytes(load=load, columns=columns, text=text):
             if color_and_byte[0] != color:
                 return_me += color_and_byte[0]
                 color = color_and_byte[0]
