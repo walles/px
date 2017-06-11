@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-"""px - A Cross Functional Process Explorer
+"""px - ps and top for Human Beings
      https://github.com/walles/px
 
 Usage:

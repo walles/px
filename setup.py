@@ -15,7 +15,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fp:
 setup(
     name='pxpx',
     version=subprocess.check_output(['git', 'describe', '--dirty']).decode('utf-8').strip(),
-    description='Cross Functional Process Explorer',
+    description='ps and top for Human Beings',
     long_description=LONG_DESCRIPTION,
     author='Johan Walles',
     author_email='walles@gmail.com',

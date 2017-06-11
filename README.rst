@@ -1,7 +1,7 @@
 |Build Status| |Coverage Status|
 
-Cross Functional Process Explorer
-=================================
+``ps`` and ``top`` for Human Beings
+===================================
 
 Installation
 ------------
