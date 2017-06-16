@@ -249,13 +249,15 @@ def get_all():
     all = []
     ps_lines = call_ps()
     now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
+    exclude = set([os.getpid()])
     for ps_line in ps_lines:
         process = ps_line_to_process(ps_line, now)
-        if process.pid == os.getpid():
+        if process.pid in exclude:
             # Finding ourselves is just confusing
             continue
-        if process.ppid == os.getpid():
+        if process.ppid in exclude:
             # Finding the ps we spawned is also confusing
+            exclude.add(process.pid)
             continue
         all.append(process)
 
