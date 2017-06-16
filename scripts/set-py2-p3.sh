@@ -8,7 +8,7 @@ else
   PY3=python3
 fi
 
-PY2=python
+PY2=python2
 # Verify that PY2 seems to be a Python 2 binary, will be caught by our ERR
 # trap if the grep fails
 if ! $PY2 --version 2>&1 | grep " 2" ; then
