@@ -141,6 +141,20 @@ This shows detailed info about PID 80727.
 The IPC data comes from ``lsof``. ``sudo`` helps ``lsof`` get more detailed
 information; the command will work without it but might miss some information.
 
+``ptop``
+--------
+|ptop screenshot|
+
+* Note how the default sort order of CPU-usage-since-``ptop``-started makes the
+  display rather stable.
+* Note the system load bar that correlates the system load with the number of
+  CPU cores in the system. Green is load handled by physical cores, yellow
+  (not shown here) is load handled by hyperthreading cores, and red is load
+  over the number of cores.
+* Note the fifteen minute load history graph in the load bar. On this system the
+  load has been high for the last fifteen minutes. This is a visualization of
+  the numbers you get from ``uptime``.
+
 Development
 -----------
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
@@ -261,3 +275,4 @@ DONE
    :target: https://travis-ci.org/walles/px
 .. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
    :target: https://coveralls.io/github/walles/px?branch=python
+.. |ptop screenshot| image:: ptop-screenshot.gif
