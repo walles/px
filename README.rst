@@ -182,9 +182,8 @@ Releasing a new Version
 6. Go to the `Releases`_ page on GitHub,
    click your new release, click the ``Edit tag`` button, then attach your ``px.pex``
    file that you just built to the release.
-7. Upload ``pxpx.egg-info/PKG-INFO`` to `Pypi`_, just follow the `Edit`_ link on that
-   page.
-8. Click on the "files" link and upload ``dist/pxpx-VERSION-py2.py3-none-any.whl``.
+7. Upload ``pxpx.egg-info/PKG-INFO`` to `the Pypi Package submission page`_.
+8. Go to the `pxpx page on Pypi`_ and click the "files" link. Upload ``dist/pxpx-<version>-py2.py3-none-any.whl`` here.
 
 Performance testing
 -------------------
@@ -274,8 +273,8 @@ DONE
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _Releases: https://github.com/walles/px/releases
-.. _Pypi: https://pypi.python.org/pypi/pxpx
-.. _Edit: https://pypi.python.org/pypi?name=pxpx&:action=submit_form
+.. _the Pypi Package submission page: https://pypi.python.org/pypi?%3Aaction=submit_form
+.. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
 
 .. |Build Status| image:: https://travis-ci.org/walles/px.svg?branch=python
    :target: https://travis-ci.org/walles/px
