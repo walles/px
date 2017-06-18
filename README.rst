@@ -28,45 +28,118 @@ To exit ``ptop``, press "``q``".
 Also try ``px --help`` to see what else ``px`` can do except for just listing all
 processes.
 
-Vision
-------
-One utility, supporting at least OS X and Linux, replacing
+Output
+======
 
-* ✅ ``ps``, but with sensible defaults (just do ``px``)
-* ✅ ``pgrep`` (running ``px root`` lists only root's processes,
-  running ``px java`` lists only java processes)
-* ✅ ``pstree`` (running ``px 1234`` shows PID 1234 in a tree, plus
-  other information about that process)
-* ✅ ``top``, by running ``px --top``, or starting ``px`` through a
-  symlink ending in ``top``. ``ptop`` anyone?
-* Possibly ``iotop``
+``px | tail``
+-------------
+Just ``px`` lists all running processes, with the most interesting ones last.
+Showing only the tail of the output here for brevity.
 
-Demo
-----
-|Screenshot|
+::
 
-This screenshot shows:
+  80365 Google Chrome Helper            johan             36.6s  1% /Applications/Google Chrome.app/Contents/Versions/58.0.3029.110/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=renderer --field-trial-handle=1 --lang=sv --enable-offline-auto-reload --enable-offline-auto-reload-visible-only --blink-settings=disallowFetchForDocWrittenScriptsInMainFrame=false,disallowFetchForDocWrittenScriptsInMainFrameOnSlowConnections=false --enable-pinch --num-raster-threads=2 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --content-image-texture-target=0,0,3553;0,1,3553;0,2,3553;0,3,3553;0,4,3553;0,5,3553;0,6,3553;0,7,3553;0,8,3553;0,9,3553;0,10,34037;0,11,34037;0,12,34037;0,13,3553;0,14,3553;0,15,3553;1,0,3553;1,1,3553;1,2,3553;1,3,3553;1,4,3553;1,5,3553;1,6,3553;1,7,3553;1,8,3553;1,9,3553;1,10,34037;1,11,34037;1,12,34037;1,13,3553;1,14,3553;1,15,3553;2,0,3553;2,1,3553;2,2,3553;2,3,3553;2,4,3553;2,5,3553;2,6,3553;2,7,3553;2,8,3553;2,9,3553;2,10,34037;2,11,34037;2,12,34037;2,13,3553;2,14,3553;2,15,3553;3,0,3553;3,1,3553;3,2,3553;3,3,3553;3,4,3553;3,5,34037;3,6,3553;3,7,3553;3,8,3553;3,9,3553;3,10,3553;3,11,3553;3,12,34037;3,13,3553;3,14,34037;3,15,34037;4,0,3553;4,1,3553;4,2,3553;4,3,3553;4,4,3553;4,5,34037;4,6,3553;4,7,3553;4,8,3553;4,9,3553;4,10,3553;4,11,3553;4,12,34037;4,13,3553;4,14,34037;4,15,34037 --disable-accelerated-video-decode --disable-webrtc-hw-vp8-encoding --renderer-client-id=1295
+  80676 iTerm2                          johan             0.04s  0% /Applications/iTerm.app/Contents/MacOS/iTerm2 --server /usr/bin/login -fpl johan /Applications/iTerm.app/Contents/MacOS/iTerm2 --launch_shell
+  80677 login                           root              0.05s  0% /usr/bin/login -fpl johan /Applications/iTerm.app/Contents/MacOS/iTerm2 --launch_shell
+  80678 -fish                           johan             0.25s  0% -fish
+  80490 Google Chrome Helper            johan            14.76s  1% /Applications/Google Chrome.app/Contents/Versions/58.0.3029.110/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=renderer --field-trial-handle=1 --lang=sv --enable-offline-auto-reload --enable-offline-auto-reload-visible-only --blink-settings=disallowFetchForDocWrittenScriptsInMainFrame=false,disallowFetchForDocWrittenScriptsInMainFrameOnSlowConnections=false --enable-pinch --num-raster-threads=2 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --content-image-texture-target=0,0,3553;0,1,3553;0,2,3553;0,3,3553;0,4,3553;0,5,3553;0,6,3553;0,7,3553;0,8,3553;0,9,3553;0,10,34037;0,11,34037;0,12,34037;0,13,3553;0,14,3553;0,15,3553;1,0,3553;1,1,3553;1,2,3553;1,3,3553;1,4,3553;1,5,3553;1,6,3553;1,7,3553;1,8,3553;1,9,3553;1,10,34037;1,11,34037;1,12,34037;1,13,3553;1,14,3553;1,15,3553;2,0,3553;2,1,3553;2,2,3553;2,3,3553;2,4,3553;2,5,3553;2,6,3553;2,7,3553;2,8,3553;2,9,3553;2,10,34037;2,11,34037;2,12,34037;2,13,3553;2,14,3553;2,15,3553;3,0,3553;3,1,3553;3,2,3553;3,3,3553;3,4,3553;3,5,34037;3,6,3553;3,7,3553;3,8,3553;3,9,3553;3,10,3553;3,11,3553;3,12,34037;3,13,3553;3,14,34037;3,15,34037;4,0,3553;4,1,3553;4,2,3553;4,3,3553;4,4,3553;4,5,34037;4,6,3553;4,7,3553;4,8,3553;4,9,3553;4,10,3553;4,11,3553;4,12,34037;4,13,3553;4,14,34037;4,15,34037 --disable-accelerated-video-decode --disable-webrtc-hw-vp8-encoding --renderer-client-id=1309
+  80729 mdworker                        johan             0.06s  0% /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+  80728 AddressBookSourceSync           johan             0.28s  0% /System/Library/Frameworks/AddressBook.framework/Versions/A/Helpers/AddressBookSourceSync.app/Contents/MacOS/AddressBookSourceSync
+  80755 tail                            johan              0.0s  0% tail
+  80720 GradleWrapperMain               johan              2.6s  1% /usr/bin/java -Xdock:name=Gradle -Xdock:icon=/Users/johan/src/flickr-uploader/FlickrUploaderAndroid/media/gradle.icns -Dorg.gradle.appname=gradlew -classpath /Users/johan/src/flickr-uploader/FlickrUploaderAndroid/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain build
+  80727 GradleDaemon                    johan            25.56s  2% /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java -Xmx1536M -Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp /Users/johan/.gradle/wrapper/dists/gradle-3.5-all/7s64ktr9gh78lhv83n6m1hq9u6/gradle-3.5/lib/gradle-launcher-3.5.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 3.5
 
-* The end of the output from just typing ``px``.
+* To give you the most interesting processes close to your next prompt, ``px``
+  puts last in its output processes that:
+  * Have been started recently
+  * Have used lots of memory
+  * Have used lots of CPU time
 
-  * Note how the newest and the most CPU and memory hungry processes are at the
-    end of the list so you can find them without scrolling.
-  * Note how the Gradle daemon processes running in Java is listed by class name
-    (``GradleDaemon``) rather than the JVM executable name (``java``).
+* Java processes are presented as their main class (``GradleDaemon``) rather
+  than as their executable (``java``)
 
-* The result of searching for "terminal" processes.
-* The output from the details view of PID 70857:
+``px java``
+-----------
+This lists all Java processes. Note how they are presented as their main class
+(``GradleDaemon``) rather than as their executable (``java``).
 
-  * The command line has been split with one argument per line. This makes long
-    command lines readable.
-  * The process tree shows how the Terminal relates to other processes.
-  * Details on how long ago Terminal was started, and how much CPU it has been
-    using since.
-  * A list of other processes started around the same time as Terminal.
-  * A list of users logged in when the Terminal was started.
-  * The IPC section shows that the Terminal is talking to ``launchd`` and
-    ``syslogd`` using
-    `Unix domain sockets`_.
+::
+
+  PID COMMAND      USERNAME        CPU   RAM COMMANDLINE
+  80727 GradleDaemon johan         1m46s  5% /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java -Xmx1536M -Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp /Users/johan/.gradle/wrapper/dists/gradle-3.5-all/7s64ktr9gh78lhv83n6m1hq9u6/gradle-3.5/lib/gradle-launcher-3.5.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 3.5
+  81192 GradleWrapperMain johan    2.57s  1% /usr/bin/java -Xdock:name=Gradle -Xdock:icon=/Users/johan/src/flickr-uploader/FlickrUploaderAndroid/media/gradle.icns -Dorg.gradle.appname=gradlew -classpath /Users/johan/src/flickr-uploader/FlickrUploaderAndroid/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain build
+
+``px _coreaudiod``
+------------------
+This lists all processes owned by the ``_coreaudiod`` user.
+
+::
+
+  PID COMMAND      USERNAME       CPU RAM COMMANDLINE
+  204 DriverHelper _coreaudiod  6.67s  0% /System/Library/Frameworks/CoreAudio.framework/Versions/A/XPCServices/com.apple.audio.DriverHelper.xpc/Contents/MacOS/com.apple.audio.DriverHelper
+  195 coreaudiod   _coreaudiod 43m10s  0% /usr/sbin/coreaudiod
+
+``sudo px 80727``
+-----------------
+This shows detailed info about PID 80727.
+
+::
+
+  /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java
+    -Xmx1536M
+    -Dfile.encoding=UTF-8
+    -Duser.country=SE
+    -Duser.language=sv
+    -Duser.variant
+    -cp
+    /Users/johan/.gradle/wrapper/dists/gradle-3.5-all/7s64ktr9gh78lhv83n6m1hq9u6/gradle-3.5/lib/gradle-launcher-3.5.jar
+    org.gradle.launcher.daemon.bootstrap.GradleDaemon
+    3.5
+
+  kernel(0)                root
+    launchd(1)             root
+  --> GradleDaemon(80727)  johan
+
+  31m33s ago GradleDaemon was started, at 2017-06-18T13:47:53+02:00.
+  7.6% has been its average CPU usage since then, or 2m22s/31m33s
+
+  Other processes started close to GradleDaemon(80727):
+    -fish(80678) was started 9.0s before GradleDaemon(80727)
+    iTerm2(80676) was started 9.0s before GradleDaemon(80727)
+    login(80677) was started 9.0s before GradleDaemon(80727)
+    mdworker(80729) was started just after GradleDaemon(80727)
+    mdworker(80776) was started 21.0s after GradleDaemon(80727)
+
+  Users logged in when GradleDaemon(80727) started:
+    _mbsetupuser
+    johan
+
+  2017-06-18T14:19:26.521988: Now invoking lsof, this can take over a minute on a big system...
+  2017-06-18T14:19:27.070396: lsof done, proceeding.
+
+  Network connections:
+    [IPv6] *:56789 (LISTEN)
+    [IPv6] *:62498 (LISTEN)
+
+  Inter Process Communication:
+    mDNSResponder(201)
+      [unix] ->0xe32cbd7be6021f1f
+
+  For a list of all open files, do "lsof -p 80727", or "watch lsof -p 80727" for a live view.
+
+* The command line has been split with one argument per line. This makes long
+  command lines readable.
+* The process tree shows how the Gradle Daemon relates to other processes.
+* Details on how long ago Gradle Daemon was started, and how much CPU it has been
+  using since.
+* A list of other processes started around the same time as Gradle Daemon.
+* A list of users logged in when the Gradle Daemon was started.
+* A list of network connections the process has open.
+* The IPC section shows that the Gradle Daemon is talking to ``mDNSResponder``
+  using `Unix domain sockets`_.
+
+The IPC data comes from ``lsof``. ``sudo`` helps ``lsof`` get more detailed
+information; the command will work without it but might miss some information.
 
 Development
 -----------
@@ -179,7 +252,7 @@ DONE
 
 .. _the Demo section: #demo
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
-.. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket)
+.. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _Releases: https://github.com/walles/px/releases
 .. _Pypi: https://pypi.python.org/pypi/pxpx
 .. _Edit: https://pypi.python.org/pypi?name=pxpx&:action=submit_form
@@ -188,4 +261,3 @@ DONE
    :target: https://travis-ci.org/walles/px
 .. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
    :target: https://coveralls.io/github/walles/px?branch=python
-.. |Screenshot| image:: https://raw.githubusercontent.com/walles/px/python/screenshot.png
