@@ -154,6 +154,9 @@ information; the command will work without it but might miss some information.
 * Note the fifteen minute load history graph in the load bar. On this system the
   load has been high for the last fifteen minutes. This is a visualization of
   the numbers you get from ``uptime``.
+* Note that after you press ``q`` to quit, the display is retained and some
+  lines at the bottom are removed to prevent the information you want from
+  scrolling out of view.
 
 Development
 -----------
