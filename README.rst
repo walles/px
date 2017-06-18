@@ -51,8 +51,11 @@ Showing only the tail of the output here for brevity.
 
 * To give you the most interesting processes close to your next prompt, ``px``
   puts last in its output processes that:
+
   * Have been started recently
+
   * Have used lots of memory
+
   * Have used lots of CPU time
 
 * Java processes are presented as their main class (``GradleDaemon``) rather
