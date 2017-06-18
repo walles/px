@@ -281,4 +281,4 @@ DONE
    :target: https://travis-ci.org/walles/px
 .. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
    :target: https://coveralls.io/github/walles/px?branch=python
-.. |ptop screenshot| image:: ptop-screenshot.gif
+.. |ptop screenshot| image:: https://github.com/walles/px/raw/8f51e2c0e5341ed7309ade9a5099a1f861922e2b/ptop-screenshot.gif
