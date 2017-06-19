@@ -31,44 +31,46 @@ processes.
 Output
 ======
 
-``px | tail``
+``px``
 -------------
-Just ``px`` lists all running processes, with the most interesting ones last.
-Showing only the tail of the output here for brevity.
+Running just ``px`` lists all running processes, with the most interesting ones last.
+Output truncated for brevity.
 
 ::
 
-  80365 Google Chrome Helper            johan             36.6s  1% /Applications/Google Chrome.app/Contents/Versions/58.0.3029.110/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=renderer --field-trial-handle=1 --lang=sv --enable-offline-auto-reload --enable-offline-auto-reload-visible-only --blink-settings=disallowFetchForDocWrittenScriptsInMainFrame=false,disallowFetchForDocWrittenScriptsInMainFrameOnSlowConnections=false --enable-pinch --num-raster-threads=2 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --content-image-texture-target=0,0,3553;0,1,3553;0,2,3553;0,3,3553;0,4,3553;0,5,3553;0,6,3553;0,7,3553;0,8,3553;0,9,3553;0,10,34037;0,11,34037;0,12,34037;0,13,3553;0,14,3553;0,15,3553;1,0,3553;1,1,3553;1,2,3553;1,3,3553;1,4,3553;1,5,3553;1,6,3553;1,7,3553;1,8,3553;1,9,3553;1,10,34037;1,11,34037;1,12,34037;1,13,3553;1,14,3553;1,15,3553;2,0,3553;2,1,3553;2,2,3553;2,3,3553;2,4,3553;2,5,3553;2,6,3553;2,7,3553;2,8,3553;2,9,3553;2,10,34037;2,11,34037;2,12,34037;2,13,3553;2,14,3553;2,15,3553;3,0,3553;3,1,3553;3,2,3553;3,3,3553;3,4,3553;3,5,34037;3,6,3553;3,7,3553;3,8,3553;3,9,3553;3,10,3553;3,11,3553;3,12,34037;3,13,3553;3,14,34037;3,15,34037;4,0,3553;4,1,3553;4,2,3553;4,3,3553;4,4,3553;4,5,34037;4,6,3553;4,7,3553;4,8,3553;4,9,3553;4,10,3553;4,11,3553;4,12,34037;4,13,3553;4,14,34037;4,15,34037 --disable-accelerated-video-decode --disable-webrtc-hw-vp8-encoding --renderer-client-id=1295
-  80676 iTerm2                          johan             0.04s  0% /Applications/iTerm.app/Contents/MacOS/iTerm2 --server /usr/bin/login -fpl johan /Applications/iTerm.app/Contents/MacOS/iTerm2 --launch_shell
-  80677 login                           root              0.05s  0% /usr/bin/login -fpl johan /Applications/iTerm.app/Contents/MacOS/iTerm2 --launch_shell
+  PID   COMMAND                         USERNAME            CPU RAM COMMANDLINE
+      0 kernel                          root                 --  -- kernel PID 0
+    116 KernelEventAgent                root              0.01s  0% /usr/sbin/KernelEventAgent
+    426 corestoragehelperd              root              0.05s  0% corestoragehelperd
+    808 PluginXPCService                johan             0.05s  0% /System/Library/PrivateFrameworks/StoreXPCServices.framework/Versions/A/XPCServices/com.apple.appsto
+  ...
   80678 -fish                           johan             0.25s  0% -fish
   80490 Google Chrome Helper            johan            14.76s  1% /Applications/Google Chrome.app/Contents/Versions/58.0.3029.110/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=renderer --field-trial-handle=1 --lang=sv --enable-offline-auto-reload --enable-offline-auto-reload-visible-only --blink-settings=disallowFetchForDocWrittenScriptsInMainFrame=false,disallowFetchForDocWrittenScriptsInMainFrameOnSlowConnections=false --enable-pinch --num-raster-threads=2 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --content-image-texture-target=0,0,3553;0,1,3553;0,2,3553;0,3,3553;0,4,3553;0,5,3553;0,6,3553;0,7,3553;0,8,3553;0,9,3553;0,10,34037;0,11,34037;0,12,34037;0,13,3553;0,14,3553;0,15,3553;1,0,3553;1,1,3553;1,2,3553;1,3,3553;1,4,3553;1,5,3553;1,6,3553;1,7,3553;1,8,3553;1,9,3553;1,10,34037;1,11,34037;1,12,34037;1,13,3553;1,14,3553;1,15,3553;2,0,3553;2,1,3553;2,2,3553;2,3,3553;2,4,3553;2,5,3553;2,6,3553;2,7,3553;2,8,3553;2,9,3553;2,10,34037;2,11,34037;2,12,34037;2,13,3553;2,14,3553;2,15,3553;3,0,3553;3,1,3553;3,2,3553;3,3,3553;3,4,3553;3,5,34037;3,6,3553;3,7,3553;3,8,3553;3,9,3553;3,10,3553;3,11,3553;3,12,34037;3,13,3553;3,14,34037;3,15,34037;4,0,3553;4,1,3553;4,2,3553;4,3,3553;4,4,3553;4,5,34037;4,6,3553;4,7,3553;4,8,3553;4,9,3553;4,10,3553;4,11,3553;4,12,34037;4,13,3553;4,14,34037;4,15,34037 --disable-accelerated-video-decode --disable-webrtc-hw-vp8-encoding --renderer-client-id=1309
   80729 mdworker                        johan             0.06s  0% /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
   80728 AddressBookSourceSync           johan             0.28s  0% /System/Library/Frameworks/AddressBook.framework/Versions/A/Helpers/AddressBookSourceSync.app/Contents/MacOS/AddressBookSourceSync
-  80755 tail                            johan              0.0s  0% tail
   80720 GradleWrapperMain               johan              2.6s  1% /usr/bin/java -Xdock:name=Gradle -Xdock:icon=/Users/johan/src/flickr-uploader/FlickrUploaderAndroid/media/gradle.icns -Dorg.gradle.appname=gradlew -classpath /Users/johan/src/flickr-uploader/FlickrUploaderAndroid/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain build
   80727 GradleDaemon                    johan            25.56s  2% /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java -Xmx1536M -Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp /Users/johan/.gradle/wrapper/dists/gradle-3.5-all/7s64ktr9gh78lhv83n6m1hq9u6/gradle-3.5/lib/gradle-launcher-3.5.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 3.5
 
 * To give you the most interesting processes close to your next prompt, ``px``
   puts last in its output processes that:
 
-  * Have been started recently
+  * Have been started recently (can be seen in the list as high PIDs)
 
-  * Have used lots of memory
+  * Are using lots of memory
 
   * Have used lots of CPU time
 
 * Java processes are presented as their main class (``GradleDaemon``) rather
-  than as their executable (``java``)
+  than as their executable (``java``). `This support is available for many VMs`_.
 
 ``px java``
 -----------
 This lists all Java processes. Note how they are presented as their main class
-(``GradleDaemon``) rather than as their executable (``java``).
+(``GradleDaemon``) rather than as their executable (``java``). `This support is available for many VMs`_.
 
 ::
 
-  PID COMMAND      USERNAME        CPU   RAM COMMANDLINE
+  PID   COMMAND      USERNAME        CPU   RAM COMMANDLINE
   80727 GradleDaemon johan         1m46s  5% /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java -Xmx1536M -Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp /Users/johan/.gradle/wrapper/dists/gradle-3.5-all/7s64ktr9gh78lhv83n6m1hq9u6/gradle-3.5/lib/gradle-launcher-3.5.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 3.5
   81192 GradleWrapperMain johan    2.57s  1% /usr/bin/java -Xdock:name=Gradle -Xdock:icon=/Users/johan/src/flickr-uploader/FlickrUploaderAndroid/media/gradle.icns -Dorg.gradle.appname=gradlew -classpath /Users/johan/src/flickr-uploader/FlickrUploaderAndroid/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain build
 
@@ -272,6 +274,7 @@ DONE
 .. _the Output section: #output
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
+.. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
 .. _Releases: https://github.com/walles/px/releases
 .. _the Pypi Package submission page: https://pypi.python.org/pypi?%3Aaction=submit_form
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
