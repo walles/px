@@ -3,6 +3,7 @@ import os
 from px import px_top
 from px import px_process
 from px import px_load_bar
+from px import px_terminal
 
 import testutils
 
@@ -82,7 +83,7 @@ def test_get_screen_lines():
     baseline = px_process.get_all()
 
     SCREEN_ROWS = 10
-    SCREEN_COLUMNS = 100
+    SCREEN_COLUMNS = 70
     lines = px_top.get_screen_lines(
         loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
 
@@ -92,11 +93,12 @@ def test_get_screen_lines():
 
     assert len(lines) == SCREEN_ROWS
 
-    # This is a bit fluffy, but due to ANSI escape codes the line lengths are
-    # difficult to measure. So if at least one line is exactly the right length
-    # then we're probably fine.
-    found_right_length = False
-    for line in lines:
-        if len(line) == SCREEN_COLUMNS:
-            found_right_length = True
-    assert found_right_length
+    # Row three is the heading line, it should span the full width of the screen
+    # and be in inverse video.
+    assert len(lines[2]) == len(px_terminal.inverse_video('x' * SCREEN_COLUMNS))
+
+    # The actual process information starts at line four
+    for line in lines[3:]:
+        # No line can be longer than the screen width; long lines should have
+        # been cut
+        assert len(line) <= SCREEN_COLUMNS
