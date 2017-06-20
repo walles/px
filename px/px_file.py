@@ -125,12 +125,19 @@ def resolve_endpoint(endpoint):
         address = address[1:-1]
 
     port = endpoint[splitindex + 1:]
+    host = None
 
     try:
-        return socket.gethostbyaddr(address)[0] + ":" + port
+        host = socket.gethostbyaddr(address)[0]
     except Exception:
         # Lookup failed for whatever reason, give up
         return endpoint
+
+    if host is "localhost.localdomain":
+        # "localdomain" is just a long word that doesn't add any information
+        host = "localhost"
+
+    return host + ":" + port
 
 
 def call_lsof():
