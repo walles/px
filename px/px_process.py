@@ -244,21 +244,20 @@ def resolve_links(processes, now):
             process.parent = pid2process[process.ppid]
             process.parent.children.add(process)
 
+    # remove own process and all descendants
+    toexclude = [pid2process[os.getpid()]]
+    while toexclude:
+      process = toexclude.pop()
+      processes.remove(process)
+      for child in process.children:
+        toexclude.append(child)
 
 def get_all():
     all = []
     ps_lines = call_ps()
     now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
-    exclude = set([os.getpid()])
     for ps_line in ps_lines:
         process = ps_line_to_process(ps_line, now)
-        if process.pid in exclude:
-            # Finding ourselves is just confusing
-            continue
-        if process.ppid in exclude:
-            # Finding the ps we spawned is also confusing
-            exclude.add(process.pid)
-            continue
         all.append(process)
 
     resolve_links(all, now)
