@@ -15,7 +15,7 @@ function do-tests() {
   PYTHON=$1
   ENVDIR=".${PYTHON}-env"
 
-  test -d "$ENVDIR" || virtualenv "$ENVDIR" --python=$PYTHON
+  test -d "$ENVDIR" || virtualenv "$ENVDIR" --python="$PYTHON"
   # shellcheck source=/dev/null
   . "$ENVDIR"/bin/activate
 
@@ -28,11 +28,11 @@ function do-tests() {
   deactivate
 }
 
-source ./scripts/set-py2-p3.sh
-do-tests $PY3
-do-tests $PY2
+source ./scripts/set-other-python.sh
+do-tests "$OTHER_PYTHON"
+do-tests "python"
 
-ENVDIR=".${PY2}-env"
+ENVDIR=".python-env"
 # shellcheck source=/dev/null
 . "$ENVDIR"/bin/activate
 

@@ -16,9 +16,9 @@ if [ $# != 1 ] ; then
   source ./tests/installtest.sh
 
   # Run this script with two different Python interpreters
-  . ./scripts/set-py2-p3.sh
-  "$0" $PY3
-  "$0" $PY2
+  . ./scripts/set-other-python.sh
+  "$0" "$OTHER_PYTHON"
+  "$0" "python"
 
   if ! head -n1 px.pex | grep -w python ; then
     echo
@@ -42,7 +42,7 @@ function cleanup {
 trap cleanup EXIT
 
 # Expect the first argument to be a Python interpreter
-virtualenv --python=$1 "${ENVDIR}"
+virtualenv --python="$1" "${ENVDIR}"
 # shellcheck source=/dev/null
 . "${ENVDIR}"/bin/activate
 
