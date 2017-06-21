@@ -253,16 +253,16 @@ def resolve_links(processes, now):
         toexclude.append(child)
 
 def get_all():
-    all = []
+    processes = []
     ps_lines = call_ps()
     now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
     for ps_line in ps_lines:
         process = ps_line_to_process(ps_line, now)
-        all.append(process)
+        processes.append(process)
 
-    resolve_links(all, now)
+    resolve_links(processes, now)
 
-    return all
+    return processes
 
 
 def order_best_last(processes):
