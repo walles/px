@@ -222,47 +222,39 @@ def resolve_links(processes, now):
     Also, all processes will have a (possibly empty) "children" field containing
     a set of references to child processes.
     """
-    pid2process = {}
-    for process in processes:
-        # Guard against duplicate PIDs
-        assert process.pid not in pid2process
-
-        pid2process[process.pid] = process
-
+    for process in processes.values():
         process.children = set()
 
-    if 0 not in pid2process:
+    if 0 not in processes:
         kernel_process = create_kernel_process(now)
+        processes[0] = kernel_process
 
-        processes.append(kernel_process)
-        pid2process[0] = kernel_process
-
-    for process in processes:
+    for process in processes.values():
         if process.pid == 0:
             process.parent = None
         else:
-            process.parent = pid2process[process.ppid]
+            process.parent = processes[process.ppid]
             process.parent.children.add(process)
 
     # remove own process and all descendants
-    toexclude = [pid2process[os.getpid()]]
+    toexclude = [processes[os.getpid()]]
     while toexclude:
       process = toexclude.pop()
-      processes.remove(process)
+      del processes[process.pid]
       for child in process.children:
         toexclude.append(child)
 
 def get_all():
-    processes = []
+    processes = {}
     ps_lines = call_ps()
     now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
     for ps_line in ps_lines:
         process = ps_line_to_process(ps_line, now)
-        processes.append(process)
+        processes[process.pid] = process
 
     resolve_links(processes, now)
 
-    return processes
+    return processes.values()
 
 
 def order_best_last(processes):
