@@ -236,7 +236,7 @@ def resolve_links(processes, now):
             process.parent = processes[process.ppid]
             process.parent.children.add(process)
 
-    # remove own process and all descendants
+def remove_own_process_and_descendants(processes):
     toexclude = [processes[os.getpid()]]
     while toexclude:
       process = toexclude.pop()
@@ -253,6 +253,7 @@ def get_all():
         processes[process.pid] = process
 
     resolve_links(processes, now)
+    remove_own_process_and_descendants(processes)
 
     return processes.values()
 
