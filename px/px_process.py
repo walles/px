@@ -238,7 +238,9 @@ def resolve_links(processes, now):
 
 
 def remove_process_and_descendants(processes, pid):
-    toexclude = [processes[pid]]
+    process = processes[pid]
+    process.parent.children.remove(process)
+    toexclude = [process]
     while toexclude:
         process = toexclude.pop()
         del processes[process.pid]
