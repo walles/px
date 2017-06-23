@@ -130,7 +130,7 @@ This shows detailed info about PID 80727.
     mDNSResponder(201)
       [unix] ->0xe32cbd7be6021f1f
 
-  For a list of all open files, do "lsof -p 80727", or "watch lsof -p 80727" for a live view.
+  For a list of all open files, do "sudo lsof -p 80727", or "sudo watch lsof -p 80727" for a live view.
 
 * The command line has been split with one argument per line. This makes long
   command lines readable.

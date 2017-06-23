@@ -174,8 +174,8 @@ def print_fds(process, processes):
             print("    " + channel_name)
 
     print("")
-    print("For a list of all open files, do \"lsof -p {0}\", "
-          "or \"watch lsof -p {0}\" for a live view.".format(process.pid))
+    print("For a list of all open files, do \"sudo lsof -p {0}\", "
+          "or \"sudo watch lsof -p {0}\" for a live view.".format(process.pid))
 
     if os.getuid() != 0:
         print("")
