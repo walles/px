@@ -4,6 +4,7 @@
 /.eggs
 /.cache
 /.coverage
+/.mypy_cache
 
 # See: https://packaging.python.org/distributing/#uploading-your-project-to-pypi
 /.pypirc
