@@ -1,3 +1,10 @@
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from . import px_file       # NOQA
+    from typing import Set      # NOQA
+    from typing import Iterable # NOQA
+
 FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
 
 
@@ -99,6 +106,7 @@ class IpcMap(object):
                                      fifo_id + file.access, file.pid)
 
     def _get_other_end_pids(self, file):
+        # type: (px_file.PxFile) -> Iterable[int]
         """Locate the other end of a pipe / domain socket"""
         if file.type in ['IPv4', 'IPv6']:
             local, remote = file.get_endpoints()
@@ -122,7 +130,7 @@ class IpcMap(object):
         if file.device is not None:
             file_device_with_arrow = "->" + file.device
 
-        pids = set()
+        pids = set()  # type: Set[int]
 
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):

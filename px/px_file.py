@@ -7,6 +7,10 @@ import os
 class PxFile(object):
     def __init__(self):
         self._device_number = None
+        self.name = None
+        self.type = None
+        self.device = None
+        self.access = None
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
