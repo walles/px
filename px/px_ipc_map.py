@@ -4,9 +4,14 @@ if sys.version_info.major >= 3:
     from . import px_file              # NOQA
     from . import px_process           # NOQA
     from typing import Set             # NOQA
+    from typing import List            # NOQA
     from typing import AbstractSet     # NOQA
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
+    from typing import TypeVar         # NOQA
+
+    T = TypeVar('T')
+    S = TypeVar('S')
 
 FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
 
@@ -220,5 +225,6 @@ def create_pid2process(processes):
 
 
 def add_arraymapping(mapping, key, value):
+    # type: (MutableMapping[S, List[T]], S, T) -> None
     array = mapping.setdefault(key, [])
     array.append(value)
