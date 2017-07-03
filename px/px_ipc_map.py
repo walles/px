@@ -51,6 +51,7 @@ class IpcMap(object):
         self._create_mapping()
 
     def _create_mapping(self):
+        # type: () -> None
         self._create_indices()
 
         unknown = create_fake_process(
@@ -86,17 +87,18 @@ class IpcMap(object):
         self.network_connections = network_connections
 
     def _create_indices(self):
+        # type: () -> None
         """
         Creates indices used by _get_other_end_pids()
         """
         self._pid2process = create_pid2process(self.processes)
 
-        self._device_to_pids = {}
-        self._name_to_pids = {}
-        self._name_to_files = {}
-        self._device_number_to_files = {}
-        self._fifo_id_and_access_to_pids = {}
-        self._local_endpoint_to_pid = {}
+        self._device_to_pids = {}  # type: MutableMapping[str, List[int]]
+        self._name_to_pids = {}    # type: MutableMapping[str, List[int]]
+        self._name_to_files = {}   # type: MutableMapping[str, List[px_file.PxFile]]
+        self._device_number_to_files = {}  # type: MutableMapping[int, List[px_file.PxFile]]
+        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[str, List[int]]
+        self._local_endpoint_to_pid = {}   # type: MutableMapping[str, int]
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -214,7 +216,8 @@ def create_fake_process(pid=None, name=None):
 
 
 def create_pid2process(processes):
-    pid2process = {}
+    # type: (Iterable[px_process.PxProcess]) -> MutableMapping[int, px_process.PxProcess]
+    pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
     for process in processes:
         # Guard against duplicate PIDs
         assert process.pid not in pid2process

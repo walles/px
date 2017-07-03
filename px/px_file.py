@@ -3,6 +3,11 @@ import subprocess
 
 import os
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import Tuple  # NOQA
+
 
 class PxFile(object):
     def __init__(self):
@@ -87,6 +92,7 @@ class PxFile(object):
         return self.name
 
     def get_endpoints(self):
+        # type: () -> Tuple[str, str]
         """
         Returns a (local,remote) tuple. They represent the local and the remote
         endpoints of a network connection.
