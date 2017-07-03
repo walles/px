@@ -1,3 +1,18 @@
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from . import px_file              # NOQA
+    from . import px_process           # NOQA
+    from typing import Set             # NOQA
+    from typing import List            # NOQA
+    from typing import AbstractSet     # NOQA
+    from typing import MutableMapping  # NOQA
+    from typing import Iterable        # NOQA
+    from typing import TypeVar         # NOQA
+
+    T = TypeVar('T')
+    S = TypeVar('S')
+
 FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
 
 
@@ -14,7 +29,13 @@ class IpcMap(object):
       px_process
     """
 
-    def __init__(self, process, files, processes):
+    def __init__(self,
+                 process,   # type: px_process.PxProcess
+                 files,     # type: Iterable[px_file.PxFile]
+                 processes  # type: Iterable[px_process.PxProcess]
+                 ):
+        # type: (...) -> None
+
         # On Linux, lsof reports the same open file once per thread of a
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
@@ -26,10 +47,11 @@ class IpcMap(object):
         self.processes = processes
         self.files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
-        self._map = {}
+        self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
 
     def _create_mapping(self):
+        # type: () -> None
         self._create_indices()
 
         unknown = create_fake_process(
@@ -65,17 +87,18 @@ class IpcMap(object):
         self.network_connections = network_connections
 
     def _create_indices(self):
+        # type: () -> None
         """
         Creates indices used by _get_other_end_pids()
         """
         self._pid2process = create_pid2process(self.processes)
 
-        self._device_to_pids = {}
-        self._name_to_pids = {}
-        self._name_to_files = {}
-        self._device_number_to_files = {}
-        self._fifo_id_and_access_to_pids = {}
-        self._local_endpoint_to_pid = {}
+        self._device_to_pids = {}  # type: MutableMapping[str, List[int]]
+        self._name_to_pids = {}    # type: MutableMapping[str, List[int]]
+        self._name_to_files = {}   # type: MutableMapping[str, List[px_file.PxFile]]
+        self._device_number_to_files = {}  # type: MutableMapping[int, List[px_file.PxFile]]
+        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[str, List[int]]
+        self._local_endpoint_to_pid = {}   # type: MutableMapping[str, int]
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -99,6 +122,7 @@ class IpcMap(object):
                                      fifo_id + file.access, file.pid)
 
     def _get_other_end_pids(self, file):
+        # type: (px_file.PxFile) -> Iterable[int]
         """Locate the other end of a pipe / domain socket"""
         if file.type in ['IPv4', 'IPv6']:
             local, remote = file.get_endpoints()
@@ -122,7 +146,7 @@ class IpcMap(object):
         if file.device is not None:
             file_device_with_arrow = "->" + file.device
 
-        pids = set()
+        pids = set()  # type: Set[int]
 
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):
@@ -157,15 +181,18 @@ class IpcMap(object):
         return pids
 
     def add_ipc_entry(self, process, file):
+        # type: (px_process.PxProcess, px_file.PxFile) -> None
         if process not in self._map:
             self._map[process] = set()
 
         self._map[process].add(file)
 
     def keys(self):
+        # type: () -> Iterable[px_process.PxProcess]
         return self._map.keys()
 
     def __getitem__(self, index):
+        # type: (px_process.PxProcess) -> Set[px_file.PxFile]
         return self._map.__getitem__(index)
 
 
@@ -189,7 +216,8 @@ def create_fake_process(pid=None, name=None):
 
 
 def create_pid2process(processes):
-    pid2process = {}
+    # type: (Iterable[px_process.PxProcess]) -> MutableMapping[int, px_process.PxProcess]
+    pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
     for process in processes:
         # Guard against duplicate PIDs
         assert process.pid not in pid2process
@@ -200,5 +228,6 @@ def create_pid2process(processes):
 
 
 def add_arraymapping(mapping, key, value):
+    # type: (MutableMapping[S, List[T]], S, T) -> None
     array = mapping.setdefault(key, [])
     array.append(value)
