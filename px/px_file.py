@@ -12,13 +12,14 @@ if sys.version_info.major >= 3:
 
 class PxFile(object):
     def __init__(self):
+        self.fd = None  # type: int
         self._device_number = None
-        self.pid = None
+        self.pid = None  # type: int
         self.name = None  # type: str
-        self.type = None
+        self.type = None  # type: str
         self.inode = None
         self.device = None
-        self.access = None
+        self.access = None  # type: str
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -174,7 +175,7 @@ def call_lsof():
 def lsof_to_files(lsof, file_types=None):
     pid = None
     file = None
-    files = []  # type: List[px_file.PxFile]
+    files = []  # type: List[PxFile]
     for shard in lsof.split('\0'):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the

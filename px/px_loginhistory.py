@@ -180,11 +180,11 @@ def _to_timestamp(string, now):
 def _to_timedelta(string):
     match = TIMEDELTA_RE.match(string)
 
-    days = match.group(2)
-    if days is None:
+    matched_days = match.group(2)
+    if matched_days is None:
         days = 0
     else:
-        days = int(days)
+        days = int(matched_days)
 
     hours = int(match.group(3))
 

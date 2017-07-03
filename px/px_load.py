@@ -48,7 +48,7 @@ def levels_to_graph(levels):
     unicodify = chr
     try:
         # Python 2
-        unicodify = unichr
+        unicodify = unichr  # type: ignore
     except NameError:
         # Python 3
         pass
