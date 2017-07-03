@@ -6,6 +6,7 @@ import os
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
+    from typing import List   # NOQA
     from typing import Tuple  # NOQA
 
 
@@ -13,8 +14,9 @@ class PxFile(object):
     def __init__(self):
         self._device_number = None
         self.pid = None
-        self.name = None
+        self.name = None  # type: str
         self.type = None
+        self.inode = None
         self.device = None
         self.access = None
 
@@ -172,7 +174,7 @@ def call_lsof():
 def lsof_to_files(lsof, file_types=None):
     pid = None
     file = None
-    files = []
+    files = []  # type: List[px_file.PxFile]
     for shard in lsof.split('\0'):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the

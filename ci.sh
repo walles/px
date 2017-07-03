@@ -53,7 +53,7 @@ if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
   # Python 3, that's why we do this only on Python 3.
   pip install -r requirements-dev-py3.txt
-  mypy --py2 --ignore-missing-imports ./*.py ./*/*.py
+  mypy --py2 --ignore-missing-imports --check-untyped-defs ./*.py ./*/*.py
 fi
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
