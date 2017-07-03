@@ -6,6 +6,11 @@ import pytest
 from px import px_process
 import testutils
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import MutableSet  # NOQA
+
 
 def test_create_process():
     process_builder = px_process.PxProcessBuilder()
@@ -134,7 +139,7 @@ def _test_get_all():
     assert 1 in pids
 
     # Assert that all contains no duplicate PIDs
-    seen_pids = set()
+    seen_pids = set()  # type: MutableSet[int]
     for process in all:
         pid = process.pid
         assert pid not in seen_pids
