@@ -194,7 +194,7 @@ Releasing a new Version
 Performance testing
 -------------------
 * Store the output of ``lsof -F fnaptd0i`` from a big system in lsof.txt.
-* ``./px/benchmark_ipcmap.py lsof.txt``
+* ``./tests/benchmark_ipcmap.py lsof.txt``
 
 Keeping this benchmark performant is important to be able to use ``px`` on big
 systems.
