@@ -7,6 +7,7 @@ import os
 class PxFile(object):
     def __init__(self):
         self._device_number = None
+        self.pid = None
         self.name = None
         self.type = None
         self.device = None

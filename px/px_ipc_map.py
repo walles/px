@@ -1,9 +1,12 @@
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from . import px_file       # NOQA
-    from typing import Set      # NOQA
-    from typing import Iterable # NOQA
+    from . import px_file              # NOQA
+    from . import px_process           # NOQA
+    from typing import Set             # NOQA
+    from typing import AbstractSet     # NOQA
+    from typing import MutableMapping  # NOQA
+    from typing import Iterable        # NOQA
 
 FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
 
@@ -21,7 +24,13 @@ class IpcMap(object):
       px_process
     """
 
-    def __init__(self, process, files, processes):
+    def __init__(self,
+                 process,   # type: px_process.PxProcess
+                 files,     # type: Iterable[px_file.PxFile]
+                 processes  # type: Iterable[px_process.PxProcess]
+                 ):
+        # type: (...) -> None
+
         # On Linux, lsof reports the same open file once per thread of a
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
@@ -33,7 +42,7 @@ class IpcMap(object):
         self.processes = processes
         self.files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
-        self._map = {}
+        self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
 
     def _create_mapping(self):
@@ -165,15 +174,18 @@ class IpcMap(object):
         return pids
 
     def add_ipc_entry(self, process, file):
+        # type: (px_process.PxProcess, px_file.PxFile) -> None
         if process not in self._map:
             self._map[process] = set()
 
         self._map[process].add(file)
 
     def keys(self):
+        # type: () -> Iterable[px_process.PxProcess]
         return self._map.keys()
 
     def __getitem__(self, index):
+        # type: (px_process.PxProcess) -> Set[px_file.PxFile]
         return self._map.__getitem__(index)
 
 
