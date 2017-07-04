@@ -101,26 +101,26 @@ def get_closest_starts(process, all_processes):
     All processes started within 1s of the base process are returned, or the
     five closest if not at least five were that close.
     """
-    closest = set()
     by_temporal_vicinity = sorted(
         all_processes,
         key=lambda p: abs(p.age_seconds - process.age_seconds))
 
+    closest_raw = set()
     for close in by_temporal_vicinity:
         delta_seconds = abs(close.age_seconds - process.age_seconds)
 
         if delta_seconds <= 1:
-            closest.add(close)
+            closest_raw.add(close)
             continue
 
         # "5" is arbitrarily chosen, look at the printouts to see if it needs tuning
-        if len(closest) > 5:
+        if len(closest_raw) > 5:
             break
 
-        closest.add(close)
+        closest_raw.add(close)
 
     # Remove ourselves from the closest processes list
-    closest = filter(lambda p: p is not process, closest)
+    closest = filter(lambda p: p is not process, closest_raw)
 
     # Sort closest processes by age, command and PID in that order
     closest = sorted(closest, key=operator.attrgetter('command', 'pid'))
