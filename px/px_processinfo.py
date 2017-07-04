@@ -10,6 +10,12 @@ from . import px_ipc_map
 from . import px_loginhistory
 
 
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import MutableSet  # NOQA
+    from typing import Iterable    # NOQA
+
+
 def find_process_by_pid(pid, processes):
     for process in processes:
         if process.pid == pid:
@@ -120,7 +126,8 @@ def get_closest_starts(process, all_processes):
         closest_raw.add(close)
 
     # Remove ourselves from the closest processes list
-    closest = filter(lambda p: p is not process, closest_raw)
+    closest = \
+        filter(lambda p: p is not process, closest_raw)  # type: Iterable[px_process.PxProcess]
 
     # Sort closest processes by age, command and PID in that order
     closest = sorted(closest, key=operator.attrgetter('command', 'pid'))
@@ -166,12 +173,12 @@ def print_fds(process, processes):
     print("")
     print("Inter Process Communication:")
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
-        print("  " + str(target))
         channels = ipc_map[target]
-        channel_names = set()
-        channel_names.update(map(lambda c: str(c), channels))
+        channel_names = set()  # type: MutableSet[str]
+        for channel_name in map(lambda c: str(c), channels):
+            channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
-            print("    " + channel_name)
+            print("  {}: {}".format(target, channel_name))
 
     print("")
     print("For a list of all open files, do \"sudo lsof -p {0}\", "
