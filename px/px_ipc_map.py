@@ -189,11 +189,17 @@ class IpcMap(object):
 
     def keys(self):
         # type: () -> Iterable[px_process.PxProcess]
+        """
+        Returns a set of other px_processes this process is connected to
+        """
         return self._map.keys()
 
-    def __getitem__(self, index):
+    def __getitem__(self, process):
         # type: (px_process.PxProcess) -> Set[px_file.PxFile]
-        return self._map.__getitem__(index)
+        """
+        Returns a set of px_files through which we're connected to the px_process
+        """
+        return self._map.__getitem__(process)
 
 
 def create_fake_process(pid=None, name=None):
