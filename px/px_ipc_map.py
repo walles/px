@@ -205,6 +205,11 @@ def create_fake_process(pid=None, name=None):
         name = "PID " + str(pid)
 
     class FakeProcess(object):
+        def __init__(self):
+            self.name = None
+            self.lowercase_command = None
+            self.pid = None
+
         def __repr__(self):
             return self.name
 

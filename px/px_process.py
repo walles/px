@@ -8,6 +8,12 @@ import dateutil.tz
 from . import px_commandline
 
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import MutableSet  # NOQA
+
+
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
 PS_LINE = re.compile(
     " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
@@ -47,6 +53,8 @@ class PxProcess(object):
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(process_builder.cpu_time)
+
+        self.children = None  # type: MutableSet[PxProcess]
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -131,7 +139,14 @@ class PxProcess(object):
 
 
 class PxProcessBuilder(object):
-    pass
+    def __init__(self):
+        self.cmdline = None   # type: str
+        self.pid = None       # type: int
+        self.ppid = None      # type: int
+        self.start_time_string = None  # type: str
+        self.username = None  # type: str
+        self.cpu_time = None  # type: float
+        self.memory_percent = None  # type: float
 
 
 def call_ps():
@@ -148,6 +163,7 @@ def call_ps():
 
 
 def parse_time(timestring):
+    # type: (str) -> float
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)

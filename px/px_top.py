@@ -72,8 +72,8 @@ def read_select(fds, timeout_seconds):
     while True:
         try:
             return select.select(fds, [], [], timeout_seconds)[0]
-        except select.error as ex:
-            if ex[0] == errno.EINTR:
+        except OSError as ex:
+            if ex.errno == errno.EINTR:
                 # EINTR happens when the terminal window is resized by the user,
                 # just try again.
                 continue
@@ -131,7 +131,7 @@ def writebytes(bytestring):
         sys.stdout.write(bytestring)
     else:
         # http://stackoverflow.com/a/908440/473672
-        sys.stdout.buffer.write(bytestring)
+        sys.stdout.buffer.write(bytestring)  # type: ignore
 
 
 def clear_screen():

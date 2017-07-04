@@ -19,12 +19,18 @@ import testutils
 from px import px_file
 from px import px_ipc_map
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import MutableMapping  # NOQA
+
+
 # For how long should we do the benchmarking run (in seconds)
 DURATION_S = 30
 
 
 def get_most_common_pid(files):
-    counts = {}
+    counts = {}  # type: MutableMapping[int, int]
     for file in files:
         pid = file.pid
         if pid not in counts:

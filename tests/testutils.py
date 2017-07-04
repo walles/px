@@ -7,6 +7,13 @@ from px import px_ipc_map
 import dateutil.tz
 import dateutil.parser
 
+
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import MutableMapping  # NOQA
+
+
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar 7 09:33:11 2016"
 TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
@@ -41,7 +48,7 @@ def create_process(pid=47536, ppid=1234,
 
 def create_ipc_map(pid, all_files):
     """Wrapper around IpcMap() so that we can test it"""
-    pid2process = {}
+    pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
     for file in all_files:
         if file.pid in pid2process:
             continue
