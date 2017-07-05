@@ -127,8 +127,7 @@ This shows detailed info about PID 80727.
     [IPv6] *:62498 (LISTEN)
 
   Inter Process Communication:
-    mDNSResponder(201)
-      [unix] ->0xe32cbd7be6021f1f
+    mDNSResponder(201): [unix] ->0xe32cbd7be6021f1f
 
   For a list of all open files, do "sudo lsof -p 80727", or "sudo watch lsof -p 80727" for a live view.
 
