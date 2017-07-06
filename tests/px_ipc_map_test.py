@@ -1,22 +1,7 @@
-import re
 import os.path
 
 from px import px_file
 import testutils
-
-
-def create_file(filetype, name, device, pid, access=None, inode=None):
-    file = px_file.PxFile()
-    file.type = filetype
-
-    # Remove leading [] group from name if any
-    file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
-
-    file.pid = pid
-    file.device = device
-    file.access = access
-    file.inode = inode
-    return file
 
 
 def get_other_end_pids(my_file, all_files):
@@ -26,46 +11,46 @@ def get_other_end_pids(my_file, all_files):
 
 def test_get_other_end_pids_basic():
     PIPE_ID = '0x919E1D'
-    files = [create_file("PIPE", "name", PIPE_ID, 25)]
+    files = [testutils.create_file("PIPE", "name", PIPE_ID, 25)]
 
-    my_end = create_file("PIPE", "[] " + PIPE_ID, "0x1234", 42)
+    my_end = testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([25])
 
-    my_end = create_file("PIPE", "[] ->" + PIPE_ID, "0x1234", 42)
+    my_end = testutils.create_file("PIPE", "[] ->" + PIPE_ID, "0x1234", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([25])
 
-    my_end = create_file("PIPE", "doesn't exist", "0x1234", 42)
+    my_end = testutils.create_file("PIPE", "doesn't exist", "0x1234", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([])
 
 
 def test_get_other_end_pids_osx_pipe1():
     files = [
-        create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
-        create_file("PIPE", "[] ->0x59aee", "0xE0e", 26),
+        testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
+        testutils.create_file("PIPE", "[] ->0x59aee", "0xE0e", 26),
     ]
-    my_end = create_file("PIPE", "[] ->0xE0e", "0x8000", 42)
+    my_end = testutils.create_file("PIPE", "[] ->0xE0e", "0x8000", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([25, 26])
 
 
 def test_get_other_end_pids_osx_pipe2():
     files = [
-        create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
-        create_file("PIPE", "[] ->0xAda", "0x38ee", 26),
+        testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
+        testutils.create_file("PIPE", "[] ->0xAda", "0x38ee", 26),
     ]
-    my_end = create_file("PIPE", "[] ->0x8a8de9", "0xAda", 42)
+    my_end = testutils.create_file("PIPE", "[] ->0x8a8de9", "0xAda", 42)
     found = get_other_end_pids(my_end, files)
     assert found == set([25, 26])
 
 
 def test_get_other_end_pids_linux_pipe():
     files = [
-        create_file("FIFO", "pipe", None, 100, inode="100200", access="r"),
-        create_file("FIFO", "pipe", None, 200, inode="100200", access="w"),
-        create_file("FIFO", "pipe", None, 300, inode="100300", access="w"),
+        testutils.create_file("FIFO", "pipe", None, 100, inode="100200", access="r"),
+        testutils.create_file("FIFO", "pipe", None, 200, inode="100200", access="w"),
+        testutils.create_file("FIFO", "pipe", None, 300, inode="100300", access="w"),
     ]
     assert get_other_end_pids(files[0], files) == set([200])
     assert get_other_end_pids(files[1], files) == set([100])
@@ -73,29 +58,29 @@ def test_get_other_end_pids_linux_pipe():
 
 
 def test_get_other_end_pids_fifo1():
-    files = [create_file("FIFO", "[] /fifo/name", None, 25, "r")]
+    files = [testutils.create_file("FIFO", "[] /fifo/name", None, 25, "r")]
 
-    my_end = create_file("FIFO", "[] /fifo/name", None, 42, "w")
+    my_end = testutils.create_file("FIFO", "[] /fifo/name", None, 42, "w")
     found = get_other_end_pids(my_end, files)
     assert found == set([25])
 
 
 def test_get_other_end_pids_fifo2():
-    files = [create_file("FIFO", "[] /fifo/name", None, 25, "w")]
+    files = [testutils.create_file("FIFO", "[] /fifo/name", None, 25, "w")]
 
-    my_end = create_file("FIFO", "[] /fifo/name", None, 42, "r")
+    my_end = testutils.create_file("FIFO", "[] /fifo/name", None, 42, "r")
     found = get_other_end_pids(my_end, files)
     assert found == set([25])
 
 
 def test_get_other_end_pids_linux_socket():
     files = [
-        create_file("unix", "[] socket", "0xabc123", 25, "u"),
-        create_file("unix", "[] socket", "0xabc123", 26, "u"),
-        create_file("unix", "[] socket", "0xdef456", 27, "u"),
+        testutils.create_file("unix", "[] socket", "0xabc123", 25, "u"),
+        testutils.create_file("unix", "[] socket", "0xabc123", 26, "u"),
+        testutils.create_file("unix", "[] socket", "0xdef456", 27, "u"),
     ]
 
-    my_end = create_file("unix", "[] socket", "0xabc123", 42, "u")
+    my_end = testutils.create_file("unix", "[] socket", "0xabc123", 42, "u")
     found = get_other_end_pids(my_end, files)
     assert found == {25, 26}
 
@@ -107,8 +92,10 @@ def test_get_other_end_pids_linux_socket():
 
 def test_get_other_end_pids_osx_socket():
     """This is from a real world example"""
-    atom_file = create_file("unix", "->0xebb7d964ac3da0b7", "0xebb7d964c20e6947", 1234, "u")
-    python_file = create_file("unix", "->0xebb7d964c20e6947", "0xebb7d964ac3da0b7", 4567, "u")
+    atom_file = testutils.create_file(
+        "unix", "->0xebb7d964ac3da0b7", "0xebb7d964c20e6947", 1234, "u")
+    python_file = testutils.create_file(
+        "unix", "->0xebb7d964c20e6947", "0xebb7d964ac3da0b7", 4567, "u")
     files = [atom_file, python_file]
 
     assert 4567 in get_other_end_pids(atom_file, files)
@@ -117,9 +104,9 @@ def test_get_other_end_pids_osx_socket():
 
 def test_get_other_end_pids_localhost_socket():
     # Real world test data
-    tc_file = create_file(
+    tc_file = testutils.create_file(
         "IPv4", "localhost:33815->localhost:postgresql", "444139298", 33019, "u")
-    postgres_file = create_file(
+    postgres_file = testutils.create_file(
         "IPv4", "localhost:postgresql->localhost:33815", "444206166", 42745, "u")
     files = [tc_file, postgres_file]
 
@@ -136,9 +123,9 @@ def test_get_other_end_pids_localhost_socket_names():
     # lsof usually presents a number of different names for localhost, because
     # of different network interfaces and other reasons. Make sure we identify
     # those and treat them like localhost.
-    tc_file = create_file(
+    tc_file = testutils.create_file(
         "IPv4", "127.0.0.42:33815->localhost:postgresql", "444139298", 33019, "u")
-    postgres_file = create_file(
+    postgres_file = testutils.create_file(
         "IPv4", "localhost:postgresql->127.0.0.42:33815", "444206166", 42745, "u")
     files = [tc_file, postgres_file]
 

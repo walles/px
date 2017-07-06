@@ -110,3 +110,19 @@ def test_print_process_subtree():
         ('' + str(parent_proc), parent_proc),
         ('  ' + str(child_proc), child_proc)
     ]
+
+
+def test_to_ipc_lines():
+    ipcmap = {
+        testutils.create_process(commandline="foo"): [
+            testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
+        ],
+        testutils.create_process(commandline="bar"): [
+            testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
+        ],
+    }
+    lines = px_processinfo.to_ipc_lines(ipcmap)  # type: ignore
+    assert lines == [
+        "bar(47536): [PIPE] ->0xAda",
+        "foo(47536): [PIPE] ->0xAda"
+    ]

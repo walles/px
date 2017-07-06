@@ -152,6 +152,21 @@ def print_users_when_process_started(process):
         print("  " + user)
 
 
+def to_ipc_lines(ipc_map):
+    # type: (px_ipc_map.IpcMap) -> Iterable[str]
+
+    return_me = []
+    for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
+        channels = ipc_map[target]
+        channel_names = set()  # type: MutableSet[str]
+        for channel_name in map(lambda c: str(c), channels):
+            channel_names.add(channel_name)
+        for channel_name in sorted(channel_names):
+            return_me.append("{}: {}".format(target, channel_name))
+
+    return return_me
+
+
 def print_fds(process, processes):
     # It's true, I measured it myself /johan.walles@gmail.com
     print(datetime.datetime.now().isoformat() +
@@ -172,13 +187,8 @@ def print_fds(process, processes):
 
     print("")
     print("Inter Process Communication:")
-    for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
-        channels = ipc_map[target]
-        channel_names = set()  # type: MutableSet[str]
-        for channel_name in map(lambda c: str(c), channels):
-            channel_names.add(channel_name)
-        for channel_name in sorted(channel_names):
-            print("  {}: {}".format(target, channel_name))
+    for line in to_ipc_lines(ipc_map):
+        print("  " + line)
 
     print("")
     print("For a list of all open files, do \"sudo lsof -p {0}\", "

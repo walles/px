@@ -1,6 +1,8 @@
+import re
 import random
 import datetime
 
+from px import px_file
 from px import px_process
 from px import px_ipc_map
 
@@ -44,6 +46,20 @@ def create_process(pid=47536, ppid=1234,
               commandline)
 
     return px_process.ps_line_to_process(psline, now)
+
+
+def create_file(filetype, name, device, pid, access=None, inode=None):
+    file = px_file.PxFile()
+    file.type = filetype
+
+    # Remove leading [] group from name if any
+    file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
+
+    file.pid = pid
+    file.device = device
+    file.access = access
+    file.inode = inode
+    return file
 
 
 def create_ipc_map(pid, all_files):
