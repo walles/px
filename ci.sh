@@ -13,6 +13,10 @@ fi
 trap "rm -f px.pex" ERR
 
 if [ $# != 1 ] ; then
+  if which shellcheck &> /dev/null ; then
+    shellcheck ./*.sh ./*/*.sh
+  fi
+
   source ./tests/installtest.sh
 
   # Run this script with two different Python interpreters

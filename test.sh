@@ -35,6 +35,10 @@ function do-tests() {
   deactivate
 }
 
+if which shellcheck &> /dev/null ; then
+  shellcheck ./*.sh ./*/*.sh
+fi
+
 source ./scripts/set-other-python.sh
 do-tests "$OTHER_PYTHON"
 do-tests "python"
