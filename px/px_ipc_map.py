@@ -45,10 +45,14 @@ class IpcMap(object):
 
         self.process = process
         self.processes = processes
-        self.files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
+        self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
         self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
+
+        self.stdin = None  # type: str
+        self.stdout = None  # type: str
+        self.stderr = None  # type: str
 
     def _create_mapping(self):
         # type: () -> None
@@ -58,7 +62,7 @@ class IpcMap(object):
             name="UNKNOWN destinations: Running with sudo might help find out where these go.")
 
         network_connections = set()
-        for file in self.files_for_process:
+        for file in self.ipc_files_for_process:
             if file.type in ['FIFO', 'PIPE'] and not file.fifo_id():
                 # Unidentifiable FIFO, just ignore this
                 continue

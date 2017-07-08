@@ -13,12 +13,11 @@ if sys.version_info.major >= 3:
 class PxFile(object):
     def __init__(self):
         self.fd = None  # type: int
-        self._device_number = None
         self.pid = None  # type: int
         self.name = None  # type: str
         self.type = None  # type: str
-        self.inode = None
-        self.device = None
+        self.inode = None   # type: str
+        self.device = None  # type: str
         self.access = None  # type: str
 
     def __repr__(self):

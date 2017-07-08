@@ -169,3 +169,54 @@ def test_get_ipc_map_2():
 
     peer0 = keys[0]
     assert len(ipc_map[peer0]) == 4
+
+
+def test_stdfds_base():
+    files = [
+        testutils.create_file("REG", "/wherever/stdin", None, 1234, fd=0),
+        testutils.create_file("REG", "/wherever/stdout", None, 1234, fd=1),
+        testutils.create_file("REG", "/wherever/stderr", None, 1234, fd=2),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files)
+    assert ipc_map.stdin == '/wherever/stdin'
+    assert ipc_map.stdout == '/wherever/stdout'
+    assert ipc_map.stderr == '/wherever/stderr'
+
+
+def test_stdfds_closed():
+    files = [
+        testutils.create_file("REG", "/wherever", None, 1234, fd=3),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files)
+
+    # If we get other fds but not 0-2, we assume 0-2 to have been closed.
+    assert ipc_map.stdin == '<closed>'
+    assert ipc_map.stdout == '<closed>'
+    assert ipc_map.stderr == '<closed>'
+
+
+def test_stdfds_unavailable():
+    ipc_map = testutils.create_ipc_map(1234, [])
+
+    # If we get no fds at all for this process, we assume lack of data
+    assert ipc_map.stdin == '<unavailable, running px as root might help>'
+    assert ipc_map.stdout == '<unavailable, running px as root might help>'
+    assert ipc_map.stderr == '<unavailable, running px as root might help>'
+
+
+def test_stdfds_ipc_and_network():
+    files = [
+        gris
+        # FIXME: Set up stdin to pipe to another process
+        # FIXME: Set up stdout to do a network connection to another local process
+
+        # Set up stderr to do a network connection to 8.8.8.8
+        testutils.create_file("IPv4", "127.0.0.1:9999->8.8.8.8:https", None, 1234, fd=2)
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files)
+    assert ipc_map.stdin == '[PIPE] -> otherproc_1(1001) (0xabc123)'
+    assert ipc_map.stdout == '[IPv4] -> otherproc_2(1002) (1.2.3.4:4711->1.2.3.4:1147)'
+    assert ipc_map.stderr == '[IPv4] 127.0.0.1:9999->google-public-dns-a.google.com:53'
