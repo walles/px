@@ -207,9 +207,12 @@ def test_stdfds_unavailable():
 
 
 def test_stdfds_ipc_and_network():
+    PIPE_ID = '0x919E1D'
+
     files = [
-        gris
-        # FIXME: Set up stdin to pipe to another process
+        # Set up stdin to pipe to another process
+        testutils.create_file("PIPE", "name", PIPE_ID, 1234, fd=0),
+        testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 1001),
 
         # Set up stdout to do a network connection to another local process
         testutils.create_file(
@@ -222,6 +225,6 @@ def test_stdfds_ipc_and_network():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files)
-    assert ipc_map.stdin == '[PIPE] -> otherproc_1(1001) (0xabc123)'
-    assert ipc_map.stdout == '[IPv4] -> otherproc_2(1002) (1.2.3.4:4711->1.2.3.4:1147)'
+    assert ipc_map.stdin == '[PIPE] -> otherproc_1(1001) (' + PIPE_ID + ')'
+    assert ipc_map.stdout == '[IPv4] -> otherproc_2(1002) (localhost:33815->localhost:postgresql)'
     assert ipc_map.stderr == '[IPv4] 127.0.0.1:9999->google-public-dns-a.google.com:53'
