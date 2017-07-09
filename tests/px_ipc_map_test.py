@@ -210,7 +210,12 @@ def test_stdfds_ipc_and_network():
     files = [
         gris
         # FIXME: Set up stdin to pipe to another process
-        # FIXME: Set up stdout to do a network connection to another local process
+
+        # Set up stdout to do a network connection to another local process
+        testutils.create_file(
+            "IPv4", "localhost:33815->localhost:postgresql", "444139298", 1234, "u", fd=1),
+        testutils.create_file(
+            "IPv4", "localhost:postgresql->localhost:33815", "444206166", 1002, "u"),
 
         # Set up stderr to do a network connection to 8.8.8.8
         testutils.create_file("IPv4", "127.0.0.1:9999->8.8.8.8:https", None, 1234, fd=2)
