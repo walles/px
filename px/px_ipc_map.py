@@ -40,6 +40,19 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
+        self._init_standard_fds(process, files)
+
+        # Only deal with IPC related files
+        self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
+
+        self.process = process
+        self.processes = processes
+        self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
+
+        self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
+        self._create_mapping()
+
+    def _init_standard_fds(self, process, files):
         self.stdin = "<closed>"
         self.stdout = "<closed>"
         self.stderr = "<closed>"
@@ -59,16 +72,6 @@ class IpcMap(object):
             self.stdin = "<unavailable, running px as root might help>"
             self.stdout = "<unavailable, running px as root might help>"
             self.stderr = "<unavailable, running px as root might help>"
-
-        # Only deal with IPC related files
-        self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
-
-        self.process = process
-        self.processes = processes
-        self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
-
-        self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
-        self._create_mapping()
 
     def _create_mapping(self):
         # type: () -> None
