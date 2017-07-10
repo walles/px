@@ -40,9 +40,9 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
-        self.stdin = None  # type: str
-        self.stdout = None  # type: str
-        self.stderr = None  # type: str
+        self.stdin = "<closed>"
+        self.stdout = "<closed>"
+        self.stderr = "<closed>"
         for file in files:
             if file.pid != process.pid:
                 continue
