@@ -40,6 +40,19 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
+        self.stdin = None  # type: str
+        self.stdout = None  # type: str
+        self.stderr = None  # type: str
+        for file in files:
+            if file.pid != process.pid:
+                continue
+            if file.fd == 0:
+                self.stdin = str(file)
+            if file.fd == 1:
+                self.stdout = str(file)
+            if file.fd == 2:
+                self.stderr = str(file)
+
         # Only deal with IPC related files
         self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
 
@@ -49,10 +62,6 @@ class IpcMap(object):
 
         self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
-
-        self.stdin = None  # type: str
-        self.stdout = None  # type: str
-        self.stderr = None  # type: str
 
     def _create_mapping(self):
         # type: () -> None
