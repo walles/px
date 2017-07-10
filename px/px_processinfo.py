@@ -179,6 +179,12 @@ def print_fds(process, processes):
     ipc_map = px_ipc_map.IpcMap(process, files, processes)
 
     print("")
+    print("File descriptors:")
+    print("  stdin :  ", ipc_map.stdin)
+    print("  stdout:  ", ipc_map.stdout)
+    print("  stderr:  ", ipc_map.stderr)
+
+    print("")
     print("Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
