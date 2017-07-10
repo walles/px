@@ -43,15 +43,22 @@ class IpcMap(object):
         self.stdin = "<closed>"
         self.stdout = "<closed>"
         self.stderr = "<closed>"
+        has_files = False
         for file in files:
             if file.pid != process.pid:
                 continue
+            has_files = True
             if file.fd == 0:
                 self.stdin = str(file)
             if file.fd == 1:
                 self.stdout = str(file)
             if file.fd == 2:
                 self.stderr = str(file)
+
+        if not has_files:
+            self.stdin = "<unavailable, running px as root might help>"
+            self.stdout = "<unavailable, running px as root might help>"
+            self.stderr = "<unavailable, running px as root might help>"
 
         # Only deal with IPC related files
         self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
