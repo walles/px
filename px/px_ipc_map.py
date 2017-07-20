@@ -65,16 +65,16 @@ class IpcMap(object):
         """
         fds = dict()
 
-        for fd in [0, 1, 2]:
-            fds[fd] = "<closed>"
-        has_files = False
-        for file in self._own_files:
-            has_files = True
-            fds[file.fd] = str(file)
-
-        if not has_files:
+        if not self._own_files:
             for fd in [0, 1, 2]:
                 fds[fd] = "<unavailable, running px as root might help>"
+            return fds
+
+        for fd in [0, 1, 2]:
+            fds[fd] = "<closed>"
+
+        for file in self._own_files:
+            fds[file.fd] = str(file)
 
         return fds
 
