@@ -179,9 +179,9 @@ def test_stdfds_base():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files)
-    assert ipc_map.stdin == '/wherever/stdin'
-    assert ipc_map.stdout == '/wherever/stdout'
-    assert ipc_map.stderr == '/wherever/stderr'
+    assert ipc_map.fds[0] == '/wherever/stdin'
+    assert ipc_map.fds[1] == '/wherever/stdout'
+    assert ipc_map.fds[2] == '/wherever/stderr'
 
 
 def test_stdfds_closed():
@@ -192,18 +192,18 @@ def test_stdfds_closed():
     ipc_map = testutils.create_ipc_map(1234, files)
 
     # If we get other fds but not 0-2, we assume 0-2 to have been closed.
-    assert ipc_map.stdin == '<closed>'
-    assert ipc_map.stdout == '<closed>'
-    assert ipc_map.stderr == '<closed>'
+    assert ipc_map.fds[0] == '<closed>'
+    assert ipc_map.fds[1] == '<closed>'
+    assert ipc_map.fds[2] == '<closed>'
 
 
 def test_stdfds_unavailable():
     ipc_map = testutils.create_ipc_map(1234, [])
 
     # If we get no fds at all for this process, we assume lack of data
-    assert ipc_map.stdin == '<unavailable, running px as root might help>'
-    assert ipc_map.stdout == '<unavailable, running px as root might help>'
-    assert ipc_map.stderr == '<unavailable, running px as root might help>'
+    assert ipc_map.fds[0] == '<unavailable, running px as root might help>'
+    assert ipc_map.fds[1] == '<unavailable, running px as root might help>'
+    assert ipc_map.fds[2] == '<unavailable, running px as root might help>'
 
 
 def test_stdfds_ipc_and_network():
@@ -225,6 +225,6 @@ def test_stdfds_ipc_and_network():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files)
-    assert ipc_map.stdin == '[PIPE] -> otherproc_1(1001) (' + PIPE_ID + ')'
-    assert ipc_map.stdout == '[IPv4] -> otherproc_2(1002) (localhost:33815->localhost:postgresql)'
-    assert ipc_map.stderr == '[IPv4] 127.0.0.1:9999->google-public-dns-a.google.com:53'
+    assert ipc_map.fds[0] == '[PIPE] -> otherproc_1(1001) (' + PIPE_ID + ')'
+    assert ipc_map.fds[1] == '[IPv4] -> otherproc_2(1002) (localhost:33815->localhost:postgresql)'
+    assert ipc_map.fds[2] == '[IPv4] 127.0.0.1:9999->google-public-dns-a.google.com:53'

@@ -5,6 +5,7 @@ if sys.version_info.major >= 3:
     from . import px_process           # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
+    from typing import Dict            # NOQA
     from typing import AbstractSet     # NOQA
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
@@ -40,7 +41,7 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
-        self._init_standard_fds(process, files)
+        self._own_files = list(filter(lambda f: f.pid == process.pid and f.fd is not None, files))
 
         # Only deal with IPC related files
         self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
@@ -52,26 +53,30 @@ class IpcMap(object):
         self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
 
-    def _init_standard_fds(self, process, files):
-        self.stdin = "<closed>"
-        self.stdout = "<closed>"
-        self.stderr = "<closed>"
+        self.fds = self._create_fds()
+
+    def _create_fds(self):
+        # type: () -> Dict[int, str]
+        """
+        Describe all FDs open by this process; the mapping is from FD number to
+        FD description.
+
+        The returned dict will always contain entries for 0, 1 and 2.
+        """
+        fds = dict()
+
+        for fd in [0, 1, 2]:
+            fds[fd] = "<closed>"
         has_files = False
-        for file in files:
-            if file.pid != process.pid:
-                continue
+        for file in self._own_files:
             has_files = True
-            if file.fd == 0:
-                self.stdin = str(file)
-            if file.fd == 1:
-                self.stdout = str(file)
-            if file.fd == 2:
-                self.stderr = str(file)
+            fds[file.fd] = str(file)
 
         if not has_files:
-            self.stdin = "<unavailable, running px as root might help>"
-            self.stdout = "<unavailable, running px as root might help>"
-            self.stderr = "<unavailable, running px as root might help>"
+            for fd in [0, 1, 2]:
+                fds[fd] = "<unavailable, running px as root might help>"
+
+        return fds
 
     def _create_mapping(self):
         # type: () -> None
