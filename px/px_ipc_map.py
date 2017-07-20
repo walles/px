@@ -76,6 +76,21 @@ class IpcMap(object):
         for file in self._own_files:
             fds[file.fd] = str(file)
 
+        # Traverse network connections and update FDs as required
+        for network_connection in self.network_connections:
+            if network_connection.fd is None:
+                continue
+            fds[network_connection.fd] = str(network_connection)
+
+        # Traverse our IPC structure and update FDs as required
+        for target in self.keys():
+            for link in self[target]:
+                if link.fd is None:
+                    # No FD, never mind
+                    continue
+
+                fds[link.fd] = str(target)
+
         return fds
 
     def _create_mapping(self):
@@ -112,7 +127,7 @@ class IpcMap(object):
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
-        self.network_connections = network_connections
+        self.network_connections = network_connections  # type: Set[px_file.PxFile]
 
     def _create_indices(self):
         # type: () -> None
