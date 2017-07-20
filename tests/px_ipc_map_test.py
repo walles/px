@@ -225,6 +225,6 @@ def test_stdfds_ipc_and_network():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files)
-    assert ipc_map.fds[0] == '[IPv4] -> otherproc_2(1002) (localhost:33815->localhost:postgresql)'
+    assert ipc_map.fds[0] == '[IPv4] -> cupsd(1002) (localhost:33815->localhost:postgresql)'
     assert ipc_map.fds[1] == '[IPv4] 127.0.0.1:9999->google-public-dns-a.google.com:53'
-    assert ipc_map.fds[2] == '[PIPE] -> otherproc_1(1001) (' + PIPE_ID + ')'
+    assert ipc_map.fds[2] == '[PIPE] -> cupsd(1001) (' + PIPE_ID + ')'

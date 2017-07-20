@@ -89,7 +89,11 @@ class IpcMap(object):
                     # No FD, never mind
                     continue
 
-                fds[link.fd] = str(target)
+                fds[link.fd] = "[{}] -> {} ({})".format(
+                    link.type,
+                    str(target),
+                    link.name
+                )
 
         return fds
 
