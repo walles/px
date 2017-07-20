@@ -228,3 +228,20 @@ def test_stdfds_ipc_and_network():
     assert ipc_map.fds[0] == '[IPv4] -> cupsd(1002) (localhost:33815->localhost:postgresql)'
     assert ipc_map.fds[1] == '[IPv4] localhost:9999->google-public-dns-a.google.com:https'
     assert ipc_map.fds[2] == '[PIPE] -> cupsd(1001) (' + PIPE_ID + ')'
+
+
+def test_ipc_pipe():
+    PIPE_ID = '0x919E1D'
+
+    f1 = testutils.create_file("PIPE", "name", PIPE_ID, 2222, fd=2)
+    assert f1.fifo_id() is not None
+
+    f2 = testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 1001)
+    assert f2.fifo_id() is not None
+
+    files = [f1, f2]
+
+    ipc_map = testutils.create_ipc_map(2222, files)
+    assert ipc_map._get_other_end_pids(f1) == {1001}
+    assert ipc_map._get_other_end_pids(f2) == {2222}
+    assert len(ipc_map.keys()) == 1
