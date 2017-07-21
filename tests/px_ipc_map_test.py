@@ -240,6 +240,6 @@ def test_ipc_pipe_osx():
     files = [f1, f2]
 
     ipc_map = testutils.create_ipc_map(2222, files)
-    assert ipc_map._get_other_end_pids(f1) == {1001}
-    assert ipc_map._get_other_end_pids(f2) == {2222}
+    assert 1001 in ipc_map._get_other_end_pids(f1)
+    assert 2222 in ipc_map._get_other_end_pids(f2)
     assert len(ipc_map.keys()) == 1
