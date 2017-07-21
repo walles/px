@@ -180,9 +180,9 @@ def print_fds(process, processes):
 
     print("")
     print("File descriptors:")
-    print("  stdin :  ", ipc_map.fds[0])
-    print("  stdout:  ", ipc_map.fds[1])
-    print("  stderr:  ", ipc_map.fds[2])
+    print("  stdin :  " + ipc_map.fds[0])
+    print("  stdout:  " + ipc_map.fds[1])
+    print("  stderr:  " + ipc_map.fds[2])
 
     print("")
     print("Network connections:")
