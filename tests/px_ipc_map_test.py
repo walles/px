@@ -234,10 +234,10 @@ def test_ipc_pipe():
     PIPE_ID = '0x919E1D'
 
     f1 = testutils.create_file("PIPE", "name", PIPE_ID, 2222, fd=2)
-    assert f1.fifo_id() is not None
+    assert f1.fifo_id() == PIPE_ID
 
     f2 = testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 1001)
-    assert f2.fifo_id() is not None
+    assert f2.fifo_id() == PIPE_ID
 
     files = [f1, f2]
 
