@@ -207,30 +207,29 @@ def test_stdfds_unavailable():
 
 
 def test_stdfds_ipc_and_network():
-    PIPE_ID = '0x919E1D'
-
     files = [
         # Set up stdin to do a network connection to another local process
         testutils.create_file(
             "IPv4", "localhost:33815->localhost:postgresql", "444139298", 1234, "u", fd=0),
         testutils.create_file(
-            "IPv4", "localhost:postgresql->localhost:33815", "444206166", 1002, "u"),
+            "IPv4", "localhost:postgresql->localhost:33815", "444206166", 1000, "u"),
 
         # Set up stdout to do a network connection to 8.8.8.8
         testutils.create_file("IPv4", "127.0.0.1:9999->8.8.8.8:https", None, 1234, fd=1),
 
-        # Set up stderr to pipe to another process
-        testutils.create_file("PIPE", "name", PIPE_ID, 1234, fd=2),
-        testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 1001),
+        # Set up stderr to pipe to another process. Pipes are real-world OS X ones.
+        testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 1234, fd=2),
+        testutils.create_file("PIPE", "->0x3922f6866312cb55", "0x3922f6866312c495", 1002),
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files)
-    assert ipc_map.fds[0] == '[IPv4] -> cupsd(1002) (localhost:33815->localhost:postgresql)'
+    assert ipc_map.fds[0] == '[IPv4] -> cupsd(1000) (localhost:33815->localhost:postgresql)'
     assert ipc_map.fds[1] == '[IPv4] localhost:9999->google-public-dns-a.google.com:https'
-    assert ipc_map.fds[2] == '[PIPE] -> cupsd(1001) (' + PIPE_ID + ')'
+    assert ipc_map.fds[2] == '[PIPE] -> cupsd(1002) (->0x3922f6866312c495)'
 
 
 def test_ipc_pipe_osx():
+    # These pipes are real-world OS X ones
     f1 = testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 2222)
     assert f1.fifo_id() == "->0x3922f6866312c495"
 
