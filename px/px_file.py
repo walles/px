@@ -201,7 +201,12 @@ def lsof_to_files(lsof, file_types=None):
             pid = int(value)
         elif filetype == 'f':
             file = PxFile()
-            file.fd = value
+            if value.isdigit():
+                file.fd = int(value)
+            else:
+                # The fd can be things like "cwd", "txt" and "mem", but we just
+                # want the fd number for now.
+                pass
             file.pid = pid
             file.type = "??"
             file.device = None
