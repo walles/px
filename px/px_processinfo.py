@@ -180,9 +180,14 @@ def print_fds(process, processes):
 
     print("")
     print("File descriptors:")
-    print("  stdin :  " + ipc_map.fds[0])
-    print("  stdout:  " + ipc_map.fds[1])
-    print("  stderr:  " + ipc_map.fds[2])
+    print("  stdin : " + ipc_map.fds[0])
+    print("  stdout: " + ipc_map.fds[1])
+    print("  stderr: " + ipc_map.fds[2])
+    for fd in sorted(ipc_map.fds.keys()):
+        if fd <= 2:
+            # Already dealt with, see right before this loop
+            continue
+        print("{:>8}: {}".format(fd, ipc_map.fds[fd]))
 
     print("")
     print("Network connections:")
