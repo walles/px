@@ -6,6 +6,7 @@ import os
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
+    from typing import Set       # NOQA
     from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Iterable  # NOQA
@@ -172,21 +173,22 @@ def call_lsof():
     return lsof.communicate()[0].decode('utf-8')
 
 
-def lsof_to_files(lsof, file_types=None):
-    # type: (str, Iterable[str]) -> List[PxFile]
+def lsof_to_files(lsof, file_types, favorite_pid):
+    # type: (str, Iterable[str], int) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
     If file_types is specified, only files of the given type will be converted,
     other files will be silently ignored.
     """
+
     pid = None
     file = None
     files = []  # type: List[PxFile]
     for shard in lsof.split('\0'):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the
-            # lsof output in less, but makes the parsing code have to deal with
+            # lsof output in moar, but makes the parsing code have to deal with
             # it.
             shard = shard[1:]
 
@@ -220,6 +222,8 @@ def lsof_to_files(lsof, file_types=None):
                 files.append(file)
             elif files[-1].type in file_types:
                 files.append(file)
+            elif files[-1].pid == favorite_pid:
+                files.append(file)
             else:
                 # Overwrite the last file since it's of the wrong type
                 files[-1] = file
@@ -244,11 +248,12 @@ def lsof_to_files(lsof, file_types=None):
     return files
 
 
-def get_all(file_types=None):
+def get_all(favorite_pid, file_types=None):
+    # type: (int, Iterable[str]) -> Set[PxFile]
     """
     Get all files.
 
     If a file_types array is specified, only files of the listed types will be
     returned.
     """
-    return set(lsof_to_files(call_lsof(), file_types))
+    return set(lsof_to_files(call_lsof(), file_types, favorite_pid))
