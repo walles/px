@@ -6,8 +6,9 @@ import os
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List   # NOQA
-    from typing import Tuple  # NOQA
+    from typing import List      # NOQA
+    from typing import Tuple     # NOQA
+    from typing import Iterable  # NOQA
 
 
 class PxFile(object):
@@ -172,6 +173,13 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types=None):
+    # type: (str, Iterable[str]) -> List[PxFile]
+    """
+    Convert lsof output into a files array.
+
+    If file_types is specified, only files of the given type will be converted,
+    other files will be silently ignored.
+    """
     pid = None
     file = None
     files = []  # type: List[PxFile]
