@@ -182,15 +182,12 @@ def print_fds(process, processes):
 
     print("")
     print("File descriptors:")
-    # FIXME: Do we want CWD in this list?
     print("  stdin : " + ipc_map.fds[0])
     print("  stdout: " + ipc_map.fds[1])
     print("  stderr: " + ipc_map.fds[2])
-    for fd in sorted(ipc_map.fds.keys()):
-        if fd <= 2:
-            # Already dealt with, see right before this loop
-            continue
-        print("{:>8}: {}".format(fd, ipc_map.fds[fd]))
+    # Note that we used to list all FDs here, but some processes (like Chrome)
+    # has silly amounts, making the px output unreadable. Users should consult
+    # lsof directly for the full list.
 
     print("")
     print("Network connections:")
