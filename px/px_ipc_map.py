@@ -58,10 +58,15 @@ class IpcMap(object):
     def _create_fds(self):
         # type: () -> Dict[int, str]
         """
-        Describe all FDs open by this process; the mapping is from FD number to
+        Describe standard FDs open by this process; the mapping is from FD number to
         FD description.
 
         The returned dict will always contain entries for 0, 1 and 2.
+
+        In theory this method could easily be modified to go through all fds, not
+        just the standard ones, but that can get us lots more name lookups, and
+        take a lot of time. If you do want to try it, just drop all the "if fd
+        not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
         fds = dict()
 
@@ -74,11 +79,15 @@ class IpcMap(object):
             fds[fd] = "<closed>"
 
         for file in self._own_files:
+            if file.fd not in [0, 1, 2]:
+                continue
             fds[file.fd] = str(file)
 
         # Traverse network connections and update FDs as required
         for network_connection in self.network_connections:
             if network_connection.fd is None:
+                continue
+            if network_connection.fd not in [0, 1, 2]:
                 continue
             fds[network_connection.fd] = str(network_connection)
 
@@ -87,6 +96,8 @@ class IpcMap(object):
             for link in self[target]:
                 if link.fd is None:
                     # No FD, never mind
+                    continue
+                if link.fd not in [0, 1, 2]:
                     continue
 
                 fds[link.fd] = "[{}] -> {} ({})".format(
