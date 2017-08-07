@@ -31,9 +31,10 @@ class IpcMap(object):
     """
 
     def __init__(self,
-                 process,   # type: px_process.PxProcess
-                 files,     # type: Iterable[px_file.PxFile]
-                 processes  # type: Iterable[px_process.PxProcess]
+                 process,    # type: px_process.PxProcess
+                 files,      # type: Iterable[px_file.PxFile]
+                 processes,  # type: Iterable[px_process.PxProcess]
+                 is_root     # type: bool
                  ):
         # type: (...) -> None
 
@@ -53,10 +54,10 @@ class IpcMap(object):
         self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
 
-        self.fds = self._create_fds()
+        self.fds = self._create_fds(is_root)
 
-    def _create_fds(self):
-        # type: () -> Dict[int, str]
+    def _create_fds(self, is_root):
+        # type: (bool) -> Dict[int, str]
         """
         Describe standard FDs open by this process; the mapping is from FD number to
         FD description.
@@ -64,7 +65,7 @@ class IpcMap(object):
         The returned dict will always contain entries for 0, 1 and 2.
 
         In theory this method could easily be modified to go through all fds, not
-        just the standard ones, but that can get us lots more name lookups, and
+        just the standard ones, but that can get us lots more DNS lookups, and
         take a lot of time. If you do want to try it, just drop all the "if fd
         not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
@@ -99,6 +100,9 @@ class IpcMap(object):
                     continue
                 if link.fd not in [0, 1, 2]:
                     continue
+
+                # FIXME: If this is a PIPE/FIFO leading to ourselves we should say that
+                # FIXME: If this is an unconnected PIPE/FIFO, we should say that
 
                 fds[link.fd] = "[{}] -> {} ({})".format(
                     link.type,

@@ -228,6 +228,38 @@ def test_stdfds_ipc_and_network():
     assert ipc_map.fds[2] == '[PIPE] -> cupsd(1002) (->0x3922f6866312c495)'
 
 
+def test_stdfds_pipe_to_self():
+    files = [
+        # Set up stderr to pipe to another fd of our own process. Pipes are real-world OS X ones.
+        testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 1234, fd=2),
+        testutils.create_file("PIPE", "->0x3922f6866312cb55", "0x3922f6866312c495", 1234, fd=7),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files)
+    assert ipc_map.fds[2] == '[PIPE] -> <myself, fd=7> (->0x3922f6866312c495)'
+
+
+def test_stdfds_pipe_to_unknown_not_root():
+    files = [
+        # Set up stderr as an unconnected pipe. The pipes is a real-world OS X one.
+        testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 1234, fd=2),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files, is_root=False)
+    assert ipc_map.fds[2] == \
+        '[PIPE] <destination not found, try running px as root> (->0x3922f6866312c495)'
+
+
+def test_stdfds_pipe_to_unknown_is_root():
+    files = [
+        # Set up stderr as an unconnected pipe. The pipes is a real-world OS X one.
+        testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 1234, fd=2),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files, is_root=True)
+    assert ipc_map.fds[2] == '[PIPE] <not connected> (->0x3922f6866312c495)'
+
+
 def test_ipc_pipe_osx():
     # These pipes are real-world OS X ones
     f1 = testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 2222)

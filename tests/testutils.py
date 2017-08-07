@@ -72,7 +72,7 @@ def create_file(filetype,     # type: str
     return file
 
 
-def create_ipc_map(pid, all_files):
+def create_ipc_map(pid, all_files, is_root=False):
     """Wrapper around IpcMap() so that we can test it"""
     pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
     for file in all_files:
@@ -87,4 +87,4 @@ def create_ipc_map(pid, all_files):
 
     process = pid2process[pid]
 
-    return px_ipc_map.IpcMap(process, all_files, processes)
+    return px_ipc_map.IpcMap(process, all_files, processes, is_root)

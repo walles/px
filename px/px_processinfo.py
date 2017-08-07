@@ -178,7 +178,8 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() +
           ": lsof done, proceeding.")
 
-    ipc_map = px_ipc_map.IpcMap(process, files, processes)
+    is_root = (os.geteuid() == 0)
+    ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
 
     print("")
     print("File descriptors:")
