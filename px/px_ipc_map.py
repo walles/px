@@ -82,7 +82,18 @@ class IpcMap(object):
         for file in self._own_files:
             if file.fd not in [0, 1, 2]:
                 continue
+
             fds[file.fd] = str(file)
+
+            if file.type in FILE_TYPES:
+                excuse = "destination not found, try running px as root"
+                if is_root:
+                    excuse = "not connected"
+                fds[file.fd] = "[{}] <{}> ({})".format(
+                    file.type,
+                    excuse,
+                    file.name,
+                )
 
         # Traverse network connections and update FDs as required
         for network_connection in self.network_connections:
