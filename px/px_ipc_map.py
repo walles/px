@@ -89,10 +89,13 @@ class IpcMap(object):
                 excuse = "destination not found, try running px as root"
                 if is_root:
                     excuse = "not connected"
+                name = file.name
+                if not name:
+                    name = file.device
                 fds[file.fd] = "[{}] <{}> ({})".format(
                     file.type,
                     excuse,
-                    file.name,
+                    name,
                 )
 
         # Traverse network connections and update FDs as required

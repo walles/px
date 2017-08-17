@@ -256,7 +256,7 @@ def test_stdfds_osx_pipe_to_unknown_is_root():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files, is_root=True)
-    assert ipc_map.fds[0] == '[PIPE] <not connected> (->0x3922f6866312cb55)'
+    assert ipc_map.fds[0] == '[PIPE] <not connected> (0x3922f6866312cb55)'
 
 
 def test_ipc_pipe_osx():
