@@ -241,12 +241,22 @@ def test_stdfds_pipe_to_unknown_not_root():
 
 def test_stdfds_pipe_to_unknown_is_root():
     files = [
-        # Set up stderr as an unconnected pipe. The pipes is a real-world OS X one.
+        # Set up stderr as an unconnected pipe. The pipe is a real-world OS X one.
         testutils.create_file("PIPE", "->0x3922f6866312c495", "0x3922f6866312cb55", 1234, fd=2),
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files, is_root=True)
     assert ipc_map.fds[2] == '[PIPE] <not connected> (->0x3922f6866312c495)'
+
+
+def test_stdfds_osx_pipe_to_unknown_is_root():
+    files = [
+        # Set up stdin as an unconnected pipe. The pipe is a real-world OS X one.
+        testutils.create_file("PIPE", "", "0x3922f6866312cb55", 1234, fd=0),
+    ]
+
+    ipc_map = testutils.create_ipc_map(1234, files, is_root=True)
+    assert ipc_map.fds[0] == '[PIPE] <not connected> (->0x3922f6866312cb55)'
 
 
 def test_ipc_pipe_osx():
