@@ -92,6 +92,8 @@ class IpcMap(object):
                 name = file.name
                 if not name:
                     name = file.device
+                if name and name.startswith('->'):
+                    name = name[2:]
                 fds[file.fd] = "[{}] <{}> ({})".format(
                     file.type,
                     excuse,
@@ -118,10 +120,13 @@ class IpcMap(object):
                 # FIXME: If this is a PIPE/FIFO leading to ourselves we should say that
                 # FIXME: If this is an unconnected PIPE/FIFO, we should say that
 
+                name = link.name
+                if name and name.startswith('->'):
+                    name = name[2:]
                 fds[link.fd] = "[{}] -> {} ({})".format(
                     link.type,
                     str(target),
-                    link.name
+                    name
                 )
 
         return fds

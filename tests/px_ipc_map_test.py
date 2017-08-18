@@ -225,7 +225,7 @@ def test_stdfds_ipc_and_network():
     ipc_map = testutils.create_ipc_map(1234, files)
     assert ipc_map.fds[0] == '[IPv4] -> cupsd(1000) (localhost:33815->localhost:postgresql)'
     assert ipc_map.fds[1] == '[IPv4] localhost:9999->google-public-dns-a.google.com:https'
-    assert ipc_map.fds[2] == '[PIPE] -> cupsd(1002) (->0x3922f6866312c495)'
+    assert ipc_map.fds[2] == '[PIPE] -> cupsd(1002) (0x3922f6866312c495)'
 
 
 def test_stdfds_pipe_to_unknown_not_root():
@@ -236,7 +236,7 @@ def test_stdfds_pipe_to_unknown_not_root():
 
     ipc_map = testutils.create_ipc_map(1234, files, is_root=False)
     assert ipc_map.fds[2] == \
-        '[PIPE] <destination not found, try running px as root> (->0x3922f6866312c495)'
+        '[PIPE] <destination not found, try running px as root> (0x3922f6866312c495)'
 
 
 def test_stdfds_pipe_to_unknown_is_root():
@@ -246,7 +246,7 @@ def test_stdfds_pipe_to_unknown_is_root():
     ]
 
     ipc_map = testutils.create_ipc_map(1234, files, is_root=True)
-    assert ipc_map.fds[2] == '[PIPE] <not connected> (->0x3922f6866312c495)'
+    assert ipc_map.fds[2] == '[PIPE] <not connected> (0x3922f6866312c495)'
 
 
 def test_stdfds_osx_pipe_to_unknown_is_root():
