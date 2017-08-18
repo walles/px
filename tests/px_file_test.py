@@ -14,7 +14,7 @@ def test_lsof_to_files():
     lsof += '\0'.join(["f7", "au", "tREG", "n/someotherfile", "\n"])
     lsof += '\0'.join(["f7", "a ", "n(revoked)", "\n"])
 
-    files = px_file.lsof_to_files(lsof)
+    files = px_file.lsof_to_files(lsof, None, None)
 
     assert len(files) == 5
 
@@ -60,7 +60,7 @@ def test_lsof_to_files():
 
 
 def test_get_all():
-    files = px_file.get_all()
+    files = px_file.get_all(None)
 
     # As non-root I get 6000 on my system, 100 should be fine anywhere. And if
     # not, we'll just have to document our finding and lower this value
@@ -68,7 +68,7 @@ def test_get_all():
 
 
 def lsof_to_file(shard_array):
-    return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
+    return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]), None, None)[0]
 
 
 def test_listen_name():

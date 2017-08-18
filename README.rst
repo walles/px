@@ -122,6 +122,11 @@ This shows detailed info about PID 80727.
   2017-06-18T14:19:26.521988: Now invoking lsof, this can take over a minute on a big system...
   2017-06-18T14:19:27.070396: lsof done, proceeding.
 
+  File descriptors:
+    stdin : [PIPE] <not connected> (0x17d7619d3ae04819)
+    stdout: [CHR] /dev/null
+    stderr: [CHR] /dev/null
+
   Network connections:
     [IPv6] *:56789 (LISTEN)
     [IPv6] *:62498 (LISTEN)
@@ -137,6 +142,7 @@ This shows detailed info about PID 80727.
 * Details on how long ago Gradle Daemon was started, and how much CPU it has been
   using since.
 * A list of other processes started around the same time as Gradle Daemon.
+* A section describing where the standard file descriptors of the process go.
 * A list of users logged in when the Gradle Daemon was started.
 * A list of network connections the process has open.
 * The IPC section shows that the Gradle Daemon is talking to ``mDNSResponder``

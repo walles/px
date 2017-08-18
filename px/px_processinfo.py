@@ -168,15 +168,27 @@ def to_ipc_lines(ipc_map):
 
 
 def print_fds(process, processes):
+    # type: (px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
+
     # It's true, I measured it myself /johan.walles@gmail.com
     print(datetime.datetime.now().isoformat() +
           ": Now invoking lsof, this can take over a minute on a big system...")
 
-    files = px_file.get_all(px_ipc_map.FILE_TYPES)
+    files = px_file.get_all(process.pid, px_ipc_map.FILE_TYPES)
     print(datetime.datetime.now().isoformat() +
           ": lsof done, proceeding.")
 
-    ipc_map = px_ipc_map.IpcMap(process, files, processes)
+    is_root = (os.geteuid() == 0)
+    ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
+
+    print("")
+    print("File descriptors:")
+    print("  stdin : " + ipc_map.fds[0])
+    print("  stdout: " + ipc_map.fds[1])
+    print("  stderr: " + ipc_map.fds[2])
+    # Note that we used to list all FDs here, but some processes (like Chrome)
+    # has silly amounts, making the px output unreadable. Users should consult
+    # lsof directly for the full list.
 
     print("")
     print("Network connections:")

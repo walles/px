@@ -5,6 +5,7 @@ if sys.version_info.major >= 3:
     from . import px_process           # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
+    from typing import Dict            # NOQA
     from typing import AbstractSet     # NOQA
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
@@ -30,9 +31,10 @@ class IpcMap(object):
     """
 
     def __init__(self,
-                 process,   # type: px_process.PxProcess
-                 files,     # type: Iterable[px_file.PxFile]
-                 processes  # type: Iterable[px_process.PxProcess]
+                 process,    # type: px_process.PxProcess
+                 files,      # type: Iterable[px_file.PxFile]
+                 processes,  # type: Iterable[px_process.PxProcess]
+                 is_root     # type: bool
                  ):
         # type: (...) -> None
 
@@ -40,15 +42,94 @@ class IpcMap(object):
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
+        self._own_files = list(filter(lambda f: f.pid == process.pid and f.fd is not None, files))
+
         # Only deal with IPC related files
         self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
 
         self.process = process
         self.processes = processes
-        self.files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
+        self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
         self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
         self._create_mapping()
+
+        self.fds = self._create_fds(is_root)
+
+    def _create_fds(self, is_root):
+        # type: (bool) -> Dict[int, str]
+        """
+        Describe standard FDs open by this process; the mapping is from FD number to
+        FD description.
+
+        The returned dict will always contain entries for 0, 1 and 2.
+
+        In theory this method could easily be modified to go through all fds, not
+        just the standard ones, but that can get us lots more DNS lookups, and
+        take a lot of time. If you do want to try it, just drop all the "if fd
+        not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
+        """
+        fds = dict()
+
+        if not self._own_files:
+            for fd in [0, 1, 2]:
+                fds[fd] = "<unavailable, running px as root might help>"
+            return fds
+
+        for fd in [0, 1, 2]:
+            fds[fd] = "<closed>"
+
+        for file in self._own_files:
+            if file.fd not in [0, 1, 2]:
+                continue
+
+            fds[file.fd] = str(file)
+
+            if file.type in FILE_TYPES:
+                excuse = "destination not found, try running px as root"
+                if is_root:
+                    excuse = "not connected"
+                name = file.name
+                if not name:
+                    name = file.device
+                if name and name.startswith('->'):
+                    name = name[2:]
+                fds[file.fd] = "[{}] <{}> ({})".format(
+                    file.type,
+                    excuse,
+                    name,
+                )
+
+        # Traverse network connections and update FDs as required
+        for network_connection in self.network_connections:
+            if network_connection.fd is None:
+                continue
+            if network_connection.fd not in [0, 1, 2]:
+                continue
+            fds[network_connection.fd] = str(network_connection)
+
+        # Traverse our IPC structure and update FDs as required
+        for target in self.keys():
+            for link in self[target]:
+                if link.fd is None:
+                    # No FD, never mind
+                    continue
+                if link.fd not in [0, 1, 2]:
+                    continue
+
+                # FIXME: If this is a PIPE/FIFO leading to ourselves we should say that
+                # FIXME: If this is an unconnected PIPE/FIFO, we should say that
+
+                name = link.name
+                if name and name.startswith('->'):
+                    name = name[2:]
+                fds[link.fd] = "[{}] -> {} ({})".format(
+                    link.type,
+                    str(target),
+                    name
+                )
+
+        return fds
 
     def _create_mapping(self):
         # type: () -> None
@@ -58,7 +139,7 @@ class IpcMap(object):
             name="UNKNOWN destinations: Running with sudo might help find out where these go.")
 
         network_connections = set()
-        for file in self.files_for_process:
+        for file in self.ipc_files_for_process:
             if file.type in ['FIFO', 'PIPE'] and not file.fifo_id():
                 # Unidentifiable FIFO, just ignore this
                 continue
@@ -84,7 +165,7 @@ class IpcMap(object):
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
-        self.network_connections = network_connections
+        self.network_connections = network_connections  # type: Set[px_file.PxFile]
 
     def _create_indices(self):
         # type: () -> None
