@@ -69,11 +69,11 @@ def to_screen_lines(procs, columns):
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     format = (
-        '{:>' + str(pid_width) +
-        '} {:' + str(command_width) +
-        '} {:' + str(username_width) +
-        '} {:>' + str(cpu_width) +
-        '} {:>' + str(mem_width) + '} {}')
+        u'{:>' + str(pid_width) +
+        u'} {:' + str(command_width) +
+        u'} {:' + str(username_width) +
+        u'} {:>' + str(cpu_width) +
+        u'} {:>' + str(mem_width) + u'} {}')
 
     # Print process list using the computed column widths
     lines = []
