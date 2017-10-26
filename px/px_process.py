@@ -140,11 +140,11 @@ class PxProcess(object):
 
 class PxProcessBuilder(object):
     def __init__(self):
-        self.cmdline = None   # type: str
+        self.cmdline = None   # type: unicode
         self.pid = None       # type: int
         self.ppid = None      # type: int
-        self.start_time_string = None  # type: str
-        self.username = None  # type: str
+        self.start_time_string = None  # type: unicode
+        self.username = None  # type: unicode
         self.cpu_time = None  # type: float
         self.memory_percent = None  # type: float
 
@@ -216,10 +216,10 @@ def create_kernel_process(now):
     # FIXME: This should be the system boot timestamp, not the epoch
     process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime("%c")
 
-    process_builder.username = "root"
+    process_builder.username = u"root"
     process_builder.cpu_time = None
     process_builder.memory_percent = None
-    process_builder.cmdline = "kernel PID 0"
+    process_builder.cmdline = u"kernel PID 0"
     process = PxProcess(process_builder, now)
 
     process.children = set()

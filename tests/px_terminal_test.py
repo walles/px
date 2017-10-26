@@ -16,7 +16,7 @@ def test_to_screen_lines_unbounded():
 
 
 def test_to_screen_lines_unicode():
-    procs = [testutils.create_process(commandline="/usr/bin/😀")]
+    procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
     converted = px_terminal.to_screen_lines(procs, None)
     if sys.version_info.major > 3:
         assert converted == [
