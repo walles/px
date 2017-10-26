@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from px import px_commandline
 
 
@@ -130,3 +132,7 @@ def test_get_command_interpreters():
     assert px_commandline.get_command("perl") == "perl"
     assert px_commandline.get_command("perl /some/path/apa.pl") == "apa.pl"
     assert px_commandline.get_command("perl -option /some/path/apa.pl") == "perl"
+
+
+def test_get_command_unicode():
+    assert px_commandline.get_command(u"😀") == u"😀"

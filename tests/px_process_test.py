@@ -1,6 +1,7 @@
 import getpass
 
 import os
+import six
 import pytest
 
 from px import px_process
@@ -48,7 +49,18 @@ def test_call_ps():
         # lower the limit
         assert len(line) > 20
 
+        # We want these lines to be unicode, this is needed if we have unicode
+        # chars in command lines
+        assert isinstance(line, six.text_type)
+
     assert "COMMAND" not in lines[0]
+
+
+def test_ps_line_to_process_unicode():
+    process = testutils.create_process(cputime="2:14.15")
+
+    assert process.username == u"root"
+    assert process.cmdline == u"/usr/sbin/cupsd -l"
 
 
 def test_ps_line_to_process_1():
@@ -161,6 +173,10 @@ def _test_get_all():
         # Processes created in the future = fishy
         assert process.age_seconds >= 0
         assert process.start_time < now
+
+    for process in all:
+        assert isinstance(process.cmdline, six.text_type)
+        assert isinstance(process.username, six.text_type)
 
 
 def test_get_all_swedish():

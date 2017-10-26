@@ -62,7 +62,7 @@ fi
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
 # that?
-PYTEST_ADDOPTS=--cov=px ./setup.py test
+PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
 
 # Create px wheel...
 rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
