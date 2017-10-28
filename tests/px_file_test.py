@@ -64,7 +64,7 @@ def test_lsof_to_files():
 
 
 def test_get_all(tmpdir):
-    utf8filename = os.path.join(tmpdir, "räksmörgås")
+    utf8filename = os.path.join(tmpdir, "😀-xmarker")
     open(utf8filename, 'w').close()
     assert os.path.isfile(utf8filename)
 
@@ -79,6 +79,9 @@ def test_get_all(tmpdir):
     for file in files:
         assert type(file.name) == six.text_type
         assert type(file.describe()) == six.text_type
+        if "xmarker" in file.name:
+            # Help debug unicode problems
+            print(file.name)
         if file.name == utf8filename:
             found_it = True
 
