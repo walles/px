@@ -57,7 +57,7 @@ class IpcMap(object):
         self.fds = self._create_fds(is_root)
 
     def _create_fds(self, is_root):
-        # type: (bool) -> Dict[int, str]
+        # type: (bool) -> Dict[int, unicode]
         """
         Describe standard FDs open by this process; the mapping is from FD number to
         FD description.
@@ -69,7 +69,7 @@ class IpcMap(object):
         take a lot of time. If you do want to try it, just drop all the "if fd
         not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
-        fds = dict()
+        fds = dict()  # type: Dict[int, unicode]
 
         if not self._own_files:
             for fd in [0, 1, 2]:
@@ -174,12 +174,12 @@ class IpcMap(object):
         """
         self._pid2process = create_pid2process(self.processes)
 
-        self._device_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._name_to_pids = {}    # type: MutableMapping[str, List[int]]
-        self._name_to_files = {}   # type: MutableMapping[str, List[px_file.PxFile]]
+        self._device_to_pids = {}  # type: MutableMapping[unicode, List[int]]
+        self._name_to_pids = {}    # type: MutableMapping[unicode, List[int]]
+        self._name_to_files = {}   # type: MutableMapping[unicode, List[px_file.PxFile]]
         self._device_number_to_files = {}  # type: MutableMapping[int, List[px_file.PxFile]]
-        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._local_endpoint_to_pid = {}   # type: MutableMapping[str, int]
+        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[unicode, List[int]]
+        self._local_endpoint_to_pid = {}   # type: MutableMapping[unicode, int]
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -252,7 +252,7 @@ class IpcMap(object):
         fifo_id = file.fifo_id()
         if fifo_id and file.access and file.type == 'FIFO':
             # On Linux, this is how we trace FIFOs
-            opposing_access = {'r': 'w', 'w': 'r'}.get(file.access)
+            opposing_access = {u'r': u'w', u'w': u'r'}.get(file.access)
             if opposing_access:
                 name_and_opposing_access = fifo_id + opposing_access
                 matching_pids = self._fifo_id_and_access_to_pids.get(name_and_opposing_access)

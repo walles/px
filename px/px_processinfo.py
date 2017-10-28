@@ -153,13 +153,13 @@ def print_users_when_process_started(process):
 
 
 def to_ipc_lines(ipc_map):
-    # type: (px_ipc_map.IpcMap) -> Iterable[str]
+    # type: (px_ipc_map.IpcMap) -> Iterable[unicode]
 
     return_me = []
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
         channels = ipc_map[target]
-        channel_names = set()  # type: MutableSet[str]
-        for channel_name in map(lambda c: str(c), channels):
+        channel_names = set()  # type: MutableSet[unicode]
+        for channel_name in map(lambda c: c.describe(), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
             return_me.append("{}: {}".format(target, channel_name))

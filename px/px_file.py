@@ -16,11 +16,11 @@ class PxFile(object):
     def __init__(self):
         self.fd = None  # type: int
         self.pid = None  # type: int
-        self.name = None  # type: str
-        self.type = None  # type: str
-        self.inode = None   # type: str
-        self.device = None  # type: str
-        self.access = None  # type: str
+        self.name = None  # type: unicode
+        self.type = None  # type: unicode
+        self.inode = None   # type: unicode
+        self.device = None  # type: unicode
+        self.access = None  # type: unicode
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -37,6 +37,10 @@ class PxFile(object):
         return hash(frozenset(self.__dict__.items()))
 
     def __str__(self):
+        return self.describe()
+
+    def describe(self):
+        # type: () -> unicode
         if self.type == "REG":
             return self.name
 
@@ -96,7 +100,7 @@ class PxFile(object):
         return self.name
 
     def get_endpoints(self):
-        # type: () -> Tuple[str, str]
+        # type: () -> Tuple[unicode, unicode]
         """
         Returns a (local,remote) tuple. They represent the local and the remote
         endpoints of a network connection.
@@ -174,7 +178,7 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (str, Iterable[str], int) -> List[PxFile]
+    # type: (unicode, Iterable[unicode], int) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
@@ -229,10 +233,10 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 files[-1] = file
         elif filetype == 'a':
             file.access = {
-                ' ': None,
-                'r': "r",
-                'w': "w",
-                'u': "rw"}[value]
+                u' ': None,
+                u'r': u"r",
+                u'w': u"w",
+                u'u': u"rw"}[value]
         elif filetype == 't':
             file.type = value
         elif filetype == 'd':
@@ -249,7 +253,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
 
 
 def get_all(favorite_pid, file_types=None):
-    # type: (int, Iterable[str]) -> Set[PxFile]
+    # type: (int, Iterable[unicode]) -> Set[PxFile]
     """
     Get all files.
 

@@ -96,7 +96,7 @@ def test_print_starttime():
 
 
 def test_print_process_subtree():
-    lines = []  # type: List[str]
+    lines = []  # type: List[unicode]
 
     child_proc = testutils.create_process(pid=2, commandline="child")
     child_proc.children = []

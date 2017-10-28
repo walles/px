@@ -48,12 +48,12 @@ def create_process(pid=47536, ppid=1234,
     return px_process.ps_line_to_process(psline, now)
 
 
-def create_file(filetype,     # type: str
-                name,         # type: str
-                device,       # type: str
+def create_file(filetype,     # type: unicode
+                name,         # type: unicode
+                device,       # type: unicode
                 pid,          # type: int
-                access=None,  # type: str
-                inode=None,   # type: str
+                access=None,  # type: unicode
+                inode=None,   # type: unicode
                 fd=None       # type: int
                 ):
     # type (...) -> px_file.PxFile

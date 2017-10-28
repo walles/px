@@ -17,16 +17,16 @@ if sys.version_info.major >= 3:
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
 PS_LINE = re.compile(
-    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
+    u" *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
 
 # Match + group: "1:02.03"
-CPUTIME_OSX = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
+CPUTIME_OSX = re.compile(u"^([0-9]+):([0-9][0-9]\.[0-9]+)$")
 
 # Match + group: "01:23:45"
-CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
+CPUTIME_LINUX = re.compile(u"^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 # Match + group: "123-01:23:45"
-CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
+CPUTIME_LINUX_DAYS = re.compile(u"^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
 class PxProcess(object):
@@ -164,7 +164,7 @@ def call_ps():
 
 
 def parse_time(timestring):
-    # type: (str) -> float
+    # type: (unicode) -> float
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)

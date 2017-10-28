@@ -1,4 +1,8 @@
+# coding: utf-8
+
+import os
 import re
+import six
 
 from px import px_file
 
@@ -59,12 +63,26 @@ def test_lsof_to_files():
     assert str(files[4]) == "[??] (revoked)"
 
 
-def test_get_all():
-    files = px_file.get_all(None)
+def test_get_all(tmpdir):
+    utf8filename = os.path.join(tmpdir, "räksmörgås")
+    open(utf8filename, 'w').close()
+    assert os.path.isfile(utf8filename)
+
+    with open(utf8filename, "r"):
+        files = px_file.get_all(None)
 
     # As non-root I get 6000 on my system, 100 should be fine anywhere. And if
     # not, we'll just have to document our finding and lower this value
     assert len(files) > 100
+
+    found_it = False
+    for file in files:
+        assert type(file.name) == six.text_type
+        assert type(file.describe()) == six.text_type
+        if file.name == utf8filename:
+            found_it = True
+
+    assert found_it
 
 
 def lsof_to_file(shard_array):
