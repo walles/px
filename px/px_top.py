@@ -131,7 +131,7 @@ def writebytes(bytestring):
         sys.stdout.write(bytestring)
     else:
         # http://stackoverflow.com/a/908440/473672
-        sys.stdout.buffer.write(bytestring)  # type: ignore
+        sys.stdout.buffer.write(bytestring)
 
 
 def clear_screen():
