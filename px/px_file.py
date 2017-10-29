@@ -160,6 +160,7 @@ def resolve_endpoint(endpoint):
 
 
 def call_lsof():
+    # type: () -> bytes
     """
     Call lsof and return the result as one big string
     """
@@ -174,11 +175,11 @@ def call_lsof():
     lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0i'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env)
-    return lsof.communicate()[0].decode('utf-8')
+    return lsof.communicate()[0]
 
 
 def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (unicode, Iterable[unicode], int) -> List[PxFile]
+    # type: (bytes, Iterable[unicode], int) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
@@ -189,8 +190,8 @@ def lsof_to_files(lsof, file_types, favorite_pid):
     pid = None
     file = None
     files = []  # type: List[PxFile]
-    for shard in lsof.split('\0'):
-        if shard[0] == "\n":
+    for shard in lsof.split(b'\0'):
+        if shard[0:1] == b"\n":
             # Some shards start with newlines. Looks pretty when viewing the
             # lsof output in moar, but makes the parsing code have to deal with
             # it.
@@ -200,12 +201,12 @@ def lsof_to_files(lsof, file_types, favorite_pid):
             # The output ends with a single newline, which we just stripped away
             break
 
-        filetype = shard[0]
+        filetype = shard[0:1]
         value = shard[1:]
 
-        if filetype == 'p':
+        if filetype == b'p':
             pid = int(value)
-        elif filetype == 'f':
+        elif filetype == b'f':
             file = PxFile()
             if value.isdigit():
                 file.fd = int(value)
@@ -231,19 +232,20 @@ def lsof_to_files(lsof, file_types, favorite_pid):
             else:
                 # Overwrite the last file since it's of the wrong type
                 files[-1] = file
-        elif filetype == 'a':
+        elif filetype == b'a':
             file.access = {
-                u' ': None,
-                u'r': u"r",
-                u'w': u"w",
-                u'u': u"rw"}[value]
-        elif filetype == 't':
-            file.type = value
-        elif filetype == 'd':
-            file.device = value
-        elif filetype == 'n':
-            file.name = value
-        elif filetype == 'i':
+                b' ': None,
+                b'r': u"r",
+                b'w': u"w",
+                b'u': u"rw"}[value]
+        elif filetype == b't':
+            file.type = value.decode('utf-8')
+        elif filetype == b'd':
+            file.device = value.decode('utf-8')
+        elif filetype == b'n':
+            file.name = value.decode('utf-8')
+
+        elif filetype == b'i':
             file.inode = value
 
         else:

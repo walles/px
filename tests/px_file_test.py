@@ -6,17 +6,22 @@ import six
 
 from px import px_file
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List      # NOQA
+
 
 def test_lsof_to_files():
-    lsof = ""
+    lsof = b""
 
-    lsof += '\0'.join(["p123", "\n"])
-    lsof += '\0'.join(["fcwd", "a ", "tDIR", "n/", "\n"])
-    lsof += '\0'.join(["f5", "ar", "tREG", "ncontains\nnewline", "\n"])
-    lsof += '\0'.join(["f6", "aw", "tREG", "d0x42", "n/somefile", "\n"])
-    lsof += '\0'.join(["p456", "\n"])
-    lsof += '\0'.join(["f7", "au", "tREG", "n/someotherfile", "\n"])
-    lsof += '\0'.join(["f7", "a ", "n(revoked)", "\n"])
+    lsof += b'\0'.join([b"p123", b"\n"])
+    lsof += b'\0'.join([b"fcwd", b"a ", b"tDIR", b"n/", b"\n"])
+    lsof += b'\0'.join([b"f5", b"ar", b"tREG", b"ncontains\nnewline", b"\n"])
+    lsof += b'\0'.join([b"f6", b"aw", b"tREG", b"d0x42", b"n/somefile", b"\n"])
+    lsof += b'\0'.join([b"p456", b"\n"])
+    lsof += b'\0'.join([b"f7", b"au", b"tREG", b"n/someotherfile", b"\n"])
+    lsof += b'\0'.join([b"f7", b"a ", b"n(revoked)", b"\n"])
 
     files = px_file.lsof_to_files(lsof, None, None)
 
@@ -26,45 +31,45 @@ def test_lsof_to_files():
     assert files[0].access is None
     assert files[0].device is None
     assert files[0].device_number() is None
-    assert files[0].type == "DIR"
-    assert files[0].name == "/"
-    assert str(files[0]) == "[DIR] /"
+    assert files[0].type == u"DIR"
+    assert files[0].name == u"/"
+    assert str(files[0]) == u"[DIR] /"
 
     assert files[1].pid == 123
-    assert files[1].access == "r"
+    assert files[1].access == u"r"
     assert files[1].device is None
     assert files[1].device_number() is None
-    assert files[1].type == "REG"
-    assert files[1].name == "contains\nnewline"
-    assert str(files[1]) == "contains\nnewline"
+    assert files[1].type == u"REG"
+    assert files[1].name == u"contains\nnewline"
+    assert str(files[1]) == u"contains\nnewline"
 
     assert files[2].pid == 123
-    assert files[2].access == "w"
-    assert files[2].device == "0x42"
+    assert files[2].access == u"w"
+    assert files[2].device == u"0x42"
     assert files[2].device_number() == 0x42
-    assert files[2].type == "REG"
-    assert files[2].name == "/somefile"
-    assert str(files[2]) == "/somefile"
+    assert files[2].type == u"REG"
+    assert files[2].name == u"/somefile"
+    assert str(files[2]) == u"/somefile"
 
     assert files[3].pid == 456
-    assert files[3].access == "rw"
+    assert files[3].access == u"rw"
     assert files[3].device is None
     assert files[3].device_number() is None
-    assert files[3].type == "REG"
-    assert files[3].name == "/someotherfile"
-    assert str(files[3]) == "/someotherfile"
+    assert files[3].type == u"REG"
+    assert files[3].name == u"/someotherfile"
+    assert str(files[3]) == u"/someotherfile"
 
     assert files[4].pid == 456
     assert files[4].access is None
     assert files[4].device is None
     assert files[4].device_number() is None
-    assert files[4].type == "??"
-    assert files[4].name == "(revoked)"
-    assert str(files[4]) == "[??] (revoked)"
+    assert files[4].type == u"??"
+    assert files[4].name == u"(revoked)"
+    assert str(files[4]) == u"[??] (revoked)"
 
 
 def test_get_all(tmpdir):
-    utf8filename = os.path.join(tmpdir, "😀-xmarker")
+    utf8filename = os.path.join(tmpdir, u"😀-xmarker")
     open(utf8filename, 'w').close()
     assert os.path.isfile(utf8filename)
 
@@ -79,7 +84,7 @@ def test_get_all(tmpdir):
     for file in files:
         assert type(file.name) == six.text_type
         assert type(file.describe()) == six.text_type
-        if "xmarker" in file.name:
+        if u"xmarker" in file.name:
             # Help debug unicode problems
             print(file.name)
         if file.name == utf8filename:
@@ -89,73 +94,74 @@ def test_get_all(tmpdir):
 
 
 def lsof_to_file(shard_array):
-    return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]), None, None)[0]
+    # type: (List[bytes]) -> px_file.PxFile
+    return px_file.lsof_to_files(b'\0'.join(shard_array + [b"\n"]), None, None)[0]
 
 
 def test_listen_name():
-    file = lsof_to_file(["f6", "au", "tIPv4", "d0x42", "nlocalhost:63342"])
-    assert file.name == "localhost:63342"
-    assert str(file) == "[IPv4] localhost:63342 (LISTEN)"
+    file = lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42", b"nlocalhost:63342"])
+    assert file.name == u"localhost:63342"
+    assert str(file) == u"[IPv4] localhost:63342 (LISTEN)"
 
-    file = lsof_to_file(["f6", "au", "tIPv6", "d0x42", "nlocalhost:63342"])
-    assert file.name == "localhost:63342"
-    assert str(file) == "[IPv6] localhost:63342 (LISTEN)"
+    file = lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42", b"nlocalhost:63342"])
+    assert file.name == u"localhost:63342"
+    assert str(file) == u"[IPv6] localhost:63342 (LISTEN)"
 
 
 def test_setability():
     # Can files be stored in sets?
-    a = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
-    b = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
+    a = lsof_to_file([b"f6", b"aw", b"tREG", b"d0x42", b"n/somefile"])
+    b = lsof_to_file([b"f6", b"aw", b"tREG", b"d0x42", b"n/somefile"])
     s = set([a, b])
     assert len(s) == 1
 
 
 def test_local_endpoint():
-    local_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                   "nlocalhost:postgres->localhost:33331"]).get_endpoints()[0]
+    local_endpoint = lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                                   b"nlocalhost:postgres->localhost:33331"]).get_endpoints()[0]
     assert local_endpoint == "localhost:postgres"
 
-    local_endpoint = lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                                   "nlocalhost:39252->localhost:39252"]).get_endpoints()[0]
+    local_endpoint = lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42",
+                                   b"nlocalhost:39252->localhost:39252"]).get_endpoints()[0]
     assert local_endpoint == "localhost:39252"
 
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).get_endpoints()[0] == "localhost:19091"
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:ipp (LISTEN)"]).get_endpoints()[0] == "localhost:ipp"
+    assert lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42",
+                         b"nlocalhost:19091"]).get_endpoints()[0] == "localhost:19091"
+    assert lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                         b"nlocalhost:ipp (LISTEN)"]).get_endpoints()[0] == "localhost:ipp"
 
     # We can't match against endpoint address "*"
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).get_endpoints()[0] is None
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).get_endpoints()[0] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42",
+                         b"n*:57919"]).get_endpoints()[0] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                         b"n*:57919"]).get_endpoints()[0] is None
 
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).get_endpoints()[0] is None
-    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).get_endpoints()[0] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                         b"n*:*"]).get_endpoints()[0] is None
+    assert lsof_to_file([b"f6", b"aw", b"tREG", b"d0x42",
+                         b"n/somefile"]).get_endpoints()[0] is None
 
 
 def test_remote_endpoint():
-    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->localhost:3331"]).get_endpoints()[1]
+    remote_endpoint = lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                                    b"nlocalhost:postgresql->localhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "localhost:3331"
 
-    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->otherhost:3331"]).get_endpoints()[1]
+    remote_endpoint = lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                                    b"nlocalhost:postgresql->otherhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "otherhost:3331"
 
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).get_endpoints()[1] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42",
+                         b"nlocalhost:19091"]).get_endpoints()[1] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv6", b"d0x42",
+                         b"n*:57919"]).get_endpoints()[1] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                         b"n*:57919"]).get_endpoints()[1] is None
 
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).get_endpoints()[1] is None
+    assert lsof_to_file([b"f6", b"au", b"tIPv4", b"d0x42",
+                         b"n*:*"]).get_endpoints()[1] is None
+    assert lsof_to_file([b"f6", b"aw", b"tREG", b"d0x42",
+                         b"n/somefile"]).get_endpoints()[1] is None
 
 
 def test_str_resolve():
