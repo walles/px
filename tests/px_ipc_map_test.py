@@ -142,7 +142,7 @@ def test_get_ipc_map_1():
     """Tyre kick IpcMap with some real world data"""
     files = None
     my_dir = os.path.dirname(__file__)
-    with open(os.path.join(my_dir, "lsof-test-output-linux-1.txt"), "r") as lsof_output:
+    with open(os.path.join(my_dir, "lsof-test-output-linux-1.txt"), "rb") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read(), None, None)
 
     ipc_map = testutils.create_ipc_map(1997, files)
@@ -160,7 +160,7 @@ def test_get_ipc_map_2():
     """Tyre kick IpcMap with some real world data"""
     files = None
     my_dir = os.path.dirname(__file__)
-    with open(os.path.join(my_dir, "lsof-test-output-linux-2.txt"), "r") as lsof_output:
+    with open(os.path.join(my_dir, "lsof-test-output-linux-2.txt"), "rb") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read(), None, None)
 
     ipc_map = testutils.create_ipc_map(777, files)
