@@ -127,11 +127,8 @@ def get_toplist(baseline):
 
 
 def writebytes(bytestring):
-    if sys.version_info.major == 2:
-        sys.stdout.write(bytestring)
-    else:
-        # http://stackoverflow.com/a/908440/473672
-        sys.stdout.buffer.write(bytestring)
+    # type: (bytes) -> None
+    os.write(sys.stdout.fileno(), bytestring)
 
 
 def clear_screen():
