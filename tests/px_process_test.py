@@ -135,6 +135,9 @@ def _validate_references(processes):
 
 def _test_get_all():
     all = px_process.get_all()
+    assert len(all) >= 4  # Expect at least kernel, init, bash and python
+    for process in all:
+        assert process is not None
 
     pids = list(map(lambda p: p.pid, all))
 
