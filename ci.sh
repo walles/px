@@ -58,6 +58,7 @@ if python --version 2>&1 | grep " 3" ; then
   # Python 3, that's why we do this only on Python 3.
   pip install -r requirements-dev-py3.txt
   mypy ./*.py ./*/*.py
+  mypy ./*.py ./*/*.py --python-version=2.7
 fi
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do

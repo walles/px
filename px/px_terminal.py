@@ -19,14 +19,13 @@ def get_window_size():
         # Getting the terminal window width failed, don't truncate
         return None
 
-    rows, columns = result
-    columns = int(columns)
+    columns = int(result[1])
     if columns < 1:
         # This seems to happen during OS X CI runs:
         # https://travis-ci.org/walles/px/jobs/113134994
         return None
 
-    rows = int(rows)
+    rows = int(result[0])
     if rows < 1:
         # Don't know if this actually happens, we just do it for symmetry with
         # the columns check above
