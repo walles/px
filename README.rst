@@ -188,13 +188,13 @@ Releasing a new Version
    text you write for this tag will show up as the release description on Github,
    write something nice! And remember that the first line is the subject line for
    the release.
-4. ``./ci.sh``
+4. ``./release-to-pypi.sh``
 5. ``git push --tags``
 6. Go to the `Releases`_ page on GitHub,
    click your new release, click the ``Edit tag`` button, then attach your ``px.pex``
    file that you just built to the release.
-7. Upload ``pxpx.egg-info/PKG-INFO`` to `the Pypi Package submission page`_.
-8. Go to the `pxpx page on Pypi`_ and click the "files" link. Upload ``dist/pxpx-<version>-py2.py3-none-any.whl`` here.
+
+Your release should now be visible on the `pxpx page on Pypi`_.
 
 Performance testing
 -------------------
@@ -285,7 +285,6 @@ DONE
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
 .. _Releases: https://github.com/walles/px/releases
-.. _the Pypi Package submission page: https://pypi.python.org/pypi?%3Aaction=submit_form
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
 
 .. |Build Status| image:: https://travis-ci.org/walles/px.svg?branch=python
