@@ -47,7 +47,7 @@ def get_timings(file, pid):
     """
     t0 = time.time()
     files = None
-    with open(file, "r") as lsof_output:
+    with open(file, "rb") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read(), px_ipc_map.FILE_TYPES, pid)
     t1 = time.time()
     dt_load = t1 - t0
@@ -73,7 +73,7 @@ def main(args):
 
     print("Finding most popular PID...")
     files = None
-    with open(lsof_file, "r") as lsof_output:
+    with open(lsof_file, "rb") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read(), px_ipc_map.FILE_TYPES, None)
     pid = get_most_common_pid(files)
     print("Most popular PID: {}".format(pid))

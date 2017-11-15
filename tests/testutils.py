@@ -13,6 +13,7 @@ import dateutil.parser
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
+    from typing import Text            # NOQA
     from typing import MutableMapping  # NOQA
 
 
@@ -48,12 +49,12 @@ def create_process(pid=47536, ppid=1234,
     return px_process.ps_line_to_process(psline, now)
 
 
-def create_file(filetype,     # type: unicode
-                name,         # type: unicode
-                device,       # type: unicode
+def create_file(filetype,     # type: Text
+                name,         # type: Text
+                device,       # type: Text
                 pid,          # type: int
-                access=None,  # type: unicode
-                inode=None,   # type: unicode
+                access=None,  # type: Text
+                inode=None,   # type: Text
                 fd=None       # type: int
                 ):
     # type (...) -> px_file.PxFile

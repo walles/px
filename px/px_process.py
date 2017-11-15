@@ -164,7 +164,7 @@ def call_ps():
 
 
 def parse_time(timestring):
-    # type: (unicode) -> float
+    # type: (Text) -> float
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)

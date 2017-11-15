@@ -12,8 +12,9 @@ from . import px_loginhistory
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import MutableSet  # NOQA
+    from typing import Text        # NOQA
     from typing import Iterable    # NOQA
+    from typing import MutableSet  # NOQA
 
 
 def find_process_by_pid(pid, processes):
@@ -153,12 +154,12 @@ def print_users_when_process_started(process):
 
 
 def to_ipc_lines(ipc_map):
-    # type: (px_ipc_map.IpcMap) -> Iterable[unicode]
+    # type: (px_ipc_map.IpcMap) -> Iterable[Text]
 
     return_me = []
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
         channels = ipc_map[target]
-        channel_names = set()  # type: MutableSet[unicode]
+        channel_names = set()  # type: MutableSet[Text]
         for channel_name in map(lambda c: c.describe(), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):

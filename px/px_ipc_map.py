@@ -6,6 +6,7 @@ if sys.version_info.major >= 3:
     from typing import Set             # NOQA
     from typing import List            # NOQA
     from typing import Dict            # NOQA
+    from typing import Text            # NOQA
     from typing import AbstractSet     # NOQA
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
@@ -57,7 +58,7 @@ class IpcMap(object):
         self.fds = self._create_fds(is_root)
 
     def _create_fds(self, is_root):
-        # type: (bool) -> Dict[int, unicode]
+        # type: (bool) -> Dict[int, Text]
         """
         Describe standard FDs open by this process; the mapping is from FD number to
         FD description.
@@ -69,7 +70,7 @@ class IpcMap(object):
         take a lot of time. If you do want to try it, just drop all the "if fd
         not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
-        fds = dict()  # type: Dict[int, unicode]
+        fds = dict()  # type: Dict[int, Text]
 
         if not self._own_files:
             for fd in [0, 1, 2]:
@@ -174,12 +175,12 @@ class IpcMap(object):
         """
         self._pid2process = create_pid2process(self.processes)
 
-        self._device_to_pids = {}  # type: MutableMapping[unicode, List[int]]
-        self._name_to_pids = {}    # type: MutableMapping[unicode, List[int]]
-        self._name_to_files = {}   # type: MutableMapping[unicode, List[px_file.PxFile]]
+        self._device_to_pids = {}  # type: MutableMapping[Text, List[int]]
+        self._name_to_pids = {}    # type: MutableMapping[Text, List[int]]
+        self._name_to_files = {}   # type: MutableMapping[Text, List[px_file.PxFile]]
         self._device_number_to_files = {}  # type: MutableMapping[int, List[px_file.PxFile]]
-        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[unicode, List[int]]
-        self._local_endpoint_to_pid = {}   # type: MutableMapping[unicode, int]
+        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[Text, List[int]]
+        self._local_endpoint_to_pid = {}   # type: MutableMapping[Text, int]
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)

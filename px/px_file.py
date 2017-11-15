@@ -8,6 +8,7 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import Set       # NOQA
     from typing import List      # NOQA
+    from typing import Text      # NOQA
     from typing import Tuple     # NOQA
     from typing import Iterable  # NOQA
 
@@ -16,11 +17,11 @@ class PxFile(object):
     def __init__(self):
         self.fd = None  # type: int
         self.pid = None  # type: int
-        self.name = None  # type: unicode
-        self.type = None  # type: unicode
-        self.inode = None   # type: unicode
-        self.device = None  # type: unicode
-        self.access = None  # type: unicode
+        self.name = None  # type: Text
+        self.type = None  # type: Text
+        self.inode = None   # type: Text
+        self.device = None  # type: Text
+        self.access = None  # type: Text
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -40,7 +41,7 @@ class PxFile(object):
         return self.describe()
 
     def describe(self):
-        # type: () -> unicode
+        # type: () -> Text
         if self.type == "REG":
             return self.name
 
@@ -100,7 +101,7 @@ class PxFile(object):
         return self.name
 
     def get_endpoints(self):
-        # type: () -> Tuple[unicode, unicode]
+        # type: () -> Tuple[Text, Text]
         """
         Returns a (local,remote) tuple. They represent the local and the remote
         endpoints of a network connection.
@@ -179,7 +180,7 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (bytes, Iterable[unicode], int) -> List[PxFile]
+    # type: (bytes, Iterable[Text], int) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
@@ -246,7 +247,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
             file.name = value.decode('utf-8')
 
         elif filetype == b'i':
-            file.inode = value
+            file.inode = value.decode('utf-8')
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(filetype, shard))
@@ -255,7 +256,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
 
 
 def get_all(favorite_pid, file_types=None):
-    # type: (int, Iterable[unicode]) -> Set[PxFile]
+    # type: (int, Iterable[Text]) -> Set[PxFile]
     """
     Get all files.
 
