@@ -69,11 +69,24 @@ def adjust_cpu_times(current, baseline):
 
 def read_select(fds, timeout_seconds):
     """Select on any of the fds becoming ready for read, retry on EINTR"""
+
+    # NOTE: If you change this method, you must test running "px --top" and
+    # resize the window in both Python 2 and Python 3.
     while True:
         try:
             return select.select(fds, [], [], timeout_seconds)[0]
-        except OSError as ex:
-            if ex.errno == errno.EINTR:
+        except OSError as ose:
+            # Python 3
+            if ose.errno == errno.EINTR:
+                # EINTR happens when the terminal window is resized by the user,
+                # just try again.
+                continue
+
+            # Non-EINTR exceptions are unexpected, help!
+            raise
+        except select.error as se:
+            # Python 2
+            if se.args[0] == errno.EINTR:
                 # EINTR happens when the terminal window is resized by the user,
                 # just try again.
                 continue
