@@ -5,7 +5,7 @@ from px import px_process
 from px import px_load_bar
 from px import px_terminal
 
-import testutils
+from . import testutils
 
 
 def test_adjust_cpu_times():

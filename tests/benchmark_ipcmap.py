@@ -15,7 +15,7 @@ the highest number of entries in that file.
 import time
 
 import docopt
-import testutils
+from . import testutils
 from px import px_file
 from px import px_ipc_map
 

@@ -4,7 +4,7 @@ import sys
 
 from px import px_terminal
 
-import testutils
+from . import testutils
 
 
 def test_to_screen_lines_unbounded():

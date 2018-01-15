@@ -1,7 +1,7 @@
 from px import px_process
 from px import px_processinfo
 
-import testutils
+from . import testutils
 
 import sys
 if sys.version_info.major >= 3:

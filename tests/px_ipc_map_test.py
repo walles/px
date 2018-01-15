@@ -1,7 +1,7 @@
 import os.path
 
 from px import px_file
-import testutils
+from . import testutils
 
 
 def get_other_end_pids(my_file, all_files):

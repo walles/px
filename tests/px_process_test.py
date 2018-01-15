@@ -5,7 +5,7 @@ import six
 import pytest
 
 from px import px_process
-import testutils
+from . import testutils
 
 import sys
 if sys.version_info.major >= 3:
