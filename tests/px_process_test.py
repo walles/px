@@ -97,7 +97,7 @@ def test_ps_line_to_process_3():
         "  5328"
         "   4432"
         " Thu Feb 25 07:42:36 2016"
-        " mysql"
+        " " + str(os.getuid()) +
         "    1-19:31:31"
         " 19.7"
         " /usr/sbin/mysqld"
@@ -109,7 +109,7 @@ def test_ps_line_to_process_3():
         " --pid-file=/var/run/mysqld/mysqld.pid"
         " --socket=/var/run/mysqld/mysqld.sock"
         " --port=3306", testutils.now())
-    assert process.username == "mysql"
+    assert process.username == getpass.getuser()
     assert process.memory_percent_s == "20%"
     assert process.cpu_time_s == "1d19h"
     assert process.command == "mysqld"
@@ -231,7 +231,7 @@ def test_order_best_first():
 
 
 def test_match():
-    p = testutils.create_process(username="root", commandline="/usr/libexec/AirPlayXPCHelper")
+    p = testutils.create_process(uid=0, commandline="/usr/libexec/AirPlayXPCHelper")
 
     assert p.match(None)
 
@@ -321,3 +321,13 @@ def test_command_in_parentheses():
     # Observed on OS X
     p = testutils.create_process(commandline="(python2.7)")
     assert p.command == "(python2.7)"
+
+
+def test_uid_to_username():
+    username = px_process.uid_to_username(os.getuid())
+    assert username == getpass.getuser()
+    assert isinstance(username, six.text_type)
+
+    username = px_process.uid_to_username(456789)
+    assert username == "456789"
+    assert isinstance(username, six.text_type)

@@ -31,7 +31,7 @@ def now():
 
 def create_process(pid=47536, ppid=1234,
                    timestring=TIMESTRING,
-                   username="root",
+                   uid=0,
                    cputime="0:00.03", mempercent="0.0",
                    commandline="/usr/sbin/cupsd -l",
                    now=now()):
@@ -40,7 +40,7 @@ def create_process(pid=47536, ppid=1234,
               str(pid) + spaces() +
               str(ppid) + spaces() +
               timestring + spaces() +
-              username + spaces() +
+              str(uid) + spaces() +
               cputime + spaces() +
               mempercent + spaces() +
               commandline)

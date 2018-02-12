@@ -4,6 +4,8 @@ import subprocess
 
 import os
 import re
+import pwd
+import six
 import dateutil.tz
 from . import px_commandline
 
@@ -157,7 +159,7 @@ def call_ps():
     env = os.environ.copy()
     if "LANG" in env:
         del env["LANG"]
-    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,user,time,%mem,command"],
+    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,uid,time,%mem,command"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           env=env)
     return ps.communicate()[0].decode('utf-8').splitlines()[1:]
@@ -191,6 +193,14 @@ def parse_time(timestring):
     raise ValueError("Unparsable timestamp: <" + timestring + ">")
 
 
+def uid_to_username(uid):
+    # type: (int)->Text
+    try:
+        return six.text_type(pwd.getpwuid(uid).pw_name)
+    except KeyError:
+        return six.text_type(uid)
+
+
 def ps_line_to_process(ps_line, now):
     match = PS_LINE.match(ps_line)
     assert match is not None
@@ -199,7 +209,7 @@ def ps_line_to_process(ps_line, now):
     process_builder.pid = int(match.group(1))
     process_builder.ppid = int(match.group(2))
     process_builder.start_time_string = match.group(3)
-    process_builder.username = match.group(4)
+    process_builder.username = uid_to_username(int(match.group(4)))
     process_builder.cpu_time = parse_time(match.group(5))
     process_builder.memory_percent = float(match.group(6))
     process_builder.cmdline = match.group(7)
