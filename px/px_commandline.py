@@ -137,7 +137,13 @@ def get_java_command(commandline):
                 continue
             if component.startswith('-da'):
                 continue
+            if component.startswith('-agentlib:'):
+                continue
+            if component.startswith('-javaagent:'):
+                continue
             if component == "-server":
+                continue
+            if component == "-noverify":
                 continue
             if component == "-cp" or component == "-classpath":
                 state = "skip next"

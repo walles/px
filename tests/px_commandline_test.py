@@ -110,6 +110,35 @@ def test_get_command_java_logstash():
     assert px_commandline.get_command(commandline) == "jruby.Main"
 
 
+def test_get_command_java_gradleworkermain():
+    commandline = (
+        "/some/path/bin/java "
+        "-Djava.awt.headless=true "
+        "-Djava.security.manager="
+        + "worker.org.gradle.process.internal.worker.child.BootstrapSecurityManager "
+        "-Dorg.gradle.native=false "
+        "-Drobolectric.accessibility.enablechecks=true "
+        "-Drobolectric.logging=stderr "
+        "-Drobolectric.logging.enabled=true "
+        "-agentlib:jdwp=transport=dt_socket,server=y,address=,suspend=n "
+        "-noverify "
+        "-javaagent:gen_build/.../jacocoagent.jar="
+        + "destfile=gen_build/jacoco/testDebugUnitTest.exec,"
+        + "append=true,dumponexit=true,output=file,jmx=false "
+        "-Xmx2400m "
+        "-Dfile.encoding=UTF-8 "
+        "-Duser.country=SE "
+        "-Duser.language=sv "
+        "-Duser.variant "
+        "-ea "
+        "-cp "
+        "/Users/walles/.gradle/caches/4.2.1/workerMain/gradle-worker.jar "
+        "worker.org.gradle.process.internal.worker.GradleWorkerMain "
+        "'Gradle Test Executor 16'"
+    )
+    assert px_commandline.get_command(commandline) == "GradleWorkerMain"
+
+
 def test_get_command_resque():
     # These command names are from a real-world system
     assert px_commandline.get_command("resque-1.20.0: x y z") == "resque-1.20.0:"
