@@ -5,11 +5,12 @@
 
 Installation
 ------------
-For a standalone install, copy / paste this command into a terminal::
+To install into ``/usr/local/bin``, copy / paste this command into a terminal::
 
   curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
 
-Or you can install from Pypi::
+Or you can install from Pypi. At least on macOS this can be problematic however,
+so the install script above is still preferred::
 
   sudo pip install --upgrade pxpx
 
