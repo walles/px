@@ -210,7 +210,6 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 # The fd can be things like "cwd", "txt" and "mem", but we just
                 # want the fd number for now.
                 pass
-            assert pid is not None
             file.pid = pid
             file.type = "??"
             file.device = None
@@ -236,7 +235,6 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 'r': "r",
                 'w': "w",
                 'u': "rw"}[value]
-            assert access is not None
             file.access = access
         elif filetype == 't':
             assert file is not None
