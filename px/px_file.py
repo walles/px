@@ -15,13 +15,13 @@ if sys.version_info.major >= 3:
 
 class PxFile(object):
     def __init__(self):
-        self.fd = None  # type: int
+        self.fd = None  # type: Optional[int]
         self.pid = None  # type: int
         self.name = None  # type: str
         self.type = None  # type: str
         self.inode = None   # type: Optional[str]
         self.device = None  # type: Optional[str]
-        self.access = None  # type: str
+        self.access = None  # type: Optional[str]
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -175,7 +175,7 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (str, Optional[Iterable[str]], int) -> List[PxFile]
+    # type: (str, Optional[Iterable[str]], Optional[int]) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
@@ -258,7 +258,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
 
 
 def get_all(favorite_pid, file_types=None):
-    # type: (int, Iterable[str]) -> Set[PxFile]
+    # type: (Optional[int], Iterable[str]) -> Set[PxFile]
     """
     Get all files.
 

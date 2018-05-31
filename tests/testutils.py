@@ -9,12 +9,11 @@ from px import px_ipc_map
 import dateutil.tz
 import dateutil.parser
 
-
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableMapping  # NOQA
-
+    from typing import Optional        # NOQA
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar 7 09:33:11 2016"
@@ -50,7 +49,7 @@ def create_process(pid=47536, ppid=1234,
 
 def create_file(filetype,     # type: str
                 name,         # type: str
-                device,       # type: str
+                device,       # type: Optional[str]
                 pid,          # type: int
                 access=None,  # type: str
                 inode=None,   # type: str
@@ -62,7 +61,9 @@ def create_file(filetype,     # type: str
     file.type = filetype
 
     # Remove leading [] group from name if any
-    file.name = re.match('(\[[^]]*\] )?(.*)', name).group(2)
+    match = re.match('(\[[^]]*\] )?(.*)', name)
+    assert match
+    file.name = match.group(2)
 
     file.pid = pid
     file.device = device
