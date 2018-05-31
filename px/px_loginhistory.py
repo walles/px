@@ -178,7 +178,9 @@ def _to_timestamp(string, now):
 
 
 def _to_timedelta(string):
+    # type: (str) -> datetime.timedelta
     match = TIMEDELTA_RE.match(string)
+    assert match is not None
 
     matched_days = match.group(2)
     if matched_days is None:

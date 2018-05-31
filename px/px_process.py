@@ -15,6 +15,7 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableSet  # NOQA
     from typing import Text        # NOQA
+    from typing import Optional    # NOQA
 
 
 # Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
@@ -145,11 +146,11 @@ class PxProcessBuilder(object):
     def __init__(self):
         self.cmdline = None   # type: Text
         self.pid = None       # type: int
-        self.ppid = None      # type: int
+        self.ppid = None      # type: Optional[int]
         self.start_time_string = None  # type: Text
         self.username = None  # type: Text
-        self.cpu_time = None  # type: float
-        self.memory_percent = None  # type: float
+        self.cpu_time = None  # type: Optional[float]
+        self.memory_percent = None  # type: Optional[float]
 
 
 def call_ps():
