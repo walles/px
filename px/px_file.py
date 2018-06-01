@@ -10,17 +10,18 @@ if sys.version_info.major >= 3:
     from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Iterable  # NOQA
+    from typing import Optional  # NOQA
 
 
 class PxFile(object):
     def __init__(self):
-        self.fd = None  # type: int
+        self.fd = None  # type: Optional[int]
         self.pid = None  # type: int
         self.name = None  # type: str
         self.type = None  # type: str
-        self.inode = None   # type: str
-        self.device = None  # type: str
-        self.access = None  # type: str
+        self.inode = None   # type: Optional[str]
+        self.device = None  # type: Optional[str]
+        self.access = None  # type: Optional[str]
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -96,7 +97,7 @@ class PxFile(object):
         return self.name
 
     def get_endpoints(self):
-        # type: () -> Tuple[str, str]
+        # type: () -> Tuple[Optional[str], Optional[str]]
         """
         Returns a (local,remote) tuple. They represent the local and the remote
         endpoints of a network connection.
@@ -174,7 +175,7 @@ def call_lsof():
 
 
 def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (str, Iterable[str], int) -> List[PxFile]
+    # type: (str, Optional[Iterable[str]], Optional[int]) -> List[PxFile]
     """
     Convert lsof output into a files array.
 
@@ -209,6 +210,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 # The fd can be things like "cwd", "txt" and "mem", but we just
                 # want the fd number for now.
                 pass
+            assert pid is not None
             file.pid = pid
             file.type = "??"
             file.device = None
@@ -228,18 +230,24 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 # Overwrite the last file since it's of the wrong type
                 files[-1] = file
         elif filetype == 'a':
-            file.access = {
+            assert file is not None
+            access = {
                 ' ': None,
                 'r': "r",
                 'w': "w",
                 'u': "rw"}[value]
+            file.access = access
         elif filetype == 't':
+            assert file is not None
             file.type = value
         elif filetype == 'd':
+            assert file is not None
             file.device = value
         elif filetype == 'n':
+            assert file is not None
             file.name = value
         elif filetype == 'i':
+            assert file is not None
             file.inode = value
 
         else:
@@ -249,7 +257,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
 
 
 def get_all(favorite_pid, file_types=None):
-    # type: (int, Iterable[str]) -> Set[PxFile]
+    # type: (Optional[int], Iterable[str]) -> Set[PxFile]
     """
     Get all files.
 

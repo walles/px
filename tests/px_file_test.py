@@ -72,68 +72,68 @@ def lsof_to_file(shard_array):
 
 
 def test_listen_name():
-    file = lsof_to_file(["f6", "au", "tIPv4", "d0x42", "nlocalhost:63342"])
+    file = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42", "nlocalhost:63342"])
     assert file.name == "localhost:63342"
     assert str(file) == "[IPv4] localhost:63342 (LISTEN)"
 
-    file = lsof_to_file(["f6", "au", "tIPv6", "d0x42", "nlocalhost:63342"])
+    file = lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42", "nlocalhost:63342"])
     assert file.name == "localhost:63342"
     assert str(file) == "[IPv6] localhost:63342 (LISTEN)"
 
 
 def test_setability():
     # Can files be stored in sets?
-    a = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
-    b = lsof_to_file(["f6", "aw", "tREG", "d0x42", "n/somefile"])
+    a = lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"])
+    b = lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"])
     s = set([a, b])
     assert len(s) == 1
 
 
 def test_local_endpoint():
-    local_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    local_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                                    "nlocalhost:postgres->localhost:33331"]).get_endpoints()[0]
     assert local_endpoint == "localhost:postgres"
 
-    local_endpoint = lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+    local_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
                                    "nlocalhost:39252->localhost:39252"]).get_endpoints()[0]
     assert local_endpoint == "localhost:39252"
 
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
                          "nlocalhost:19091"]).get_endpoints()[0] == "localhost:19091"
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                          "nlocalhost:ipp (LISTEN)"]).get_endpoints()[0] == "localhost:ipp"
 
     # We can't match against endpoint address "*"
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
                          "n*:57919"]).get_endpoints()[0] is None
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                          "n*:57919"]).get_endpoints()[0] is None
 
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                          "n*:*"]).get_endpoints()[0] is None
-    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
+    assert lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42",
                          "n/somefile"]).get_endpoints()[0] is None
 
 
 def test_remote_endpoint():
-    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    remote_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                                     "nlocalhost:postgresql->localhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "localhost:3331"
 
-    remote_endpoint = lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    remote_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                                     "nlocalhost:postgresql->otherhost:3331"]).get_endpoints()[1]
     assert remote_endpoint == "otherhost:3331"
 
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
                          "nlocalhost:19091"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "au", "tIPv6", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
                          "n*:57919"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                          "n*:57919"]).get_endpoints()[1] is None
 
-    assert lsof_to_file(["f6", "au", "tIPv4", "d0x42",
+    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
                          "n*:*"]).get_endpoints()[1] is None
-    assert lsof_to_file(["f6", "aw", "tREG", "d0x42",
+    assert lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42",
                          "n/somefile"]).get_endpoints()[1] is None
 
 
@@ -153,7 +153,9 @@ def test_str_resolve():
     test_me.type = "IPv6"
     test_me.name = "[::1]:17600"
 
-    resolution = re.match("^\[IPv6\] (.*):17600 \(LISTEN\)$", str(test_me)).group(1)
+    match = re.match("^\[IPv6\] (.*):17600 \(LISTEN\)$", str(test_me))
+    assert match
+    resolution = match.group(1)
     assert resolution == "[::1]" or "localhost" in resolution
 
     test_me = px_file.PxFile()

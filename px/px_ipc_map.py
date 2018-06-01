@@ -1,8 +1,10 @@
 import sys
+
+from . import px_process
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from . import px_file              # NOQA
-    from . import px_process           # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
     from typing import Dict            # NOQA
@@ -10,6 +12,7 @@ if sys.version_info.major >= 3:
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
     from typing import TypeVar         # NOQA
+    from typing import Optional        # NOQA
 
     T = TypeVar('T')
     S = TypeVar('S')
@@ -89,7 +92,7 @@ class IpcMap(object):
                 excuse = "destination not found, try running px as root"
                 if is_root:
                     excuse = "not connected"
-                name = file.name
+                name = file.name  # type: Optional[str]
                 if not name:
                     name = file.device
                 if name and name.startswith('->'):
@@ -283,22 +286,27 @@ class IpcMap(object):
         return self._map.__getitem__(process)
 
 
+class FakeProcess(px_process.PxProcess):
+    def __init__(self):
+        self.name = None               # type: str
+        self.lowercase_command = None  # type: str
+        self.pid = None                # type: Optional[int]
+
+    def __repr__(self):
+        return self.name
+
+    def __hash__(self):
+        return self.name.__hash__()
+
+
 def create_fake_process(pid=None, name=None):
+    # type: (Optional[int], Optional[str]) -> FakeProcess
     """Fake a process with a useable name"""
     if pid is None and name is None:
         raise ValueError("At least one of pid and name must be set")
 
     if name is None:
         name = "PID " + str(pid)
-
-    class FakeProcess(object):
-        def __init__(self):
-            self.name = None
-            self.lowercase_command = None
-            self.pid = None
-
-        def __repr__(self):
-            return self.name
 
     process = FakeProcess()
     process.name = name
