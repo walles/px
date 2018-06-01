@@ -296,10 +296,7 @@ class FakeProcess(px_process.PxProcess):
         return self.name
 
     def __hash__(self):
-        if self.pid is not None:
-            return self.pid
-        else:
-            return self.lowercase_command.__hash__()
+        return self.name.__hash__()
 
 
 def create_fake_process(pid=None, name=None):
