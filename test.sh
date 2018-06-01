@@ -36,7 +36,7 @@ function do-tests() {
   deactivate
 }
 
-if which shellcheck &> /dev/null ; then
+if command -v shellcheck &> /dev/null ; then
   shellcheck ./*.sh ./*/*.sh
 fi
 

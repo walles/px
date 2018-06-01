@@ -3,7 +3,7 @@
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, just use "python2" as the other one
   OTHER_PYTHON="python2"
-elif which python3.5 ; then
+elif command -v python3.5 ; then
   # On Travis / Linux just "python3" gives us Python 3.2, which is too old
   OTHER_PYTHON="python3.5"
 else
