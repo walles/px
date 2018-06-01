@@ -13,7 +13,7 @@ fi
 trap "rm -f px.pex" ERR
 
 if [ $# != 1 ] ; then
-  if which shellcheck &> /dev/null ; then
+  if command -v shellcheck &> /dev/null ; then
     shellcheck ./*.sh ./*/*.sh
   fi
 
