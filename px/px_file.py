@@ -16,7 +16,7 @@ if sys.version_info.major >= 3:
 class PxFile(object):
     def __init__(self):
         self.fd = None  # type: Optional[int]
-        self.pid = None  # type: Optional[int]
+        self.pid = None  # type: int
         self.name = None  # type: str
         self.type = None  # type: str
         self.inode = None   # type: Optional[str]
@@ -210,6 +210,7 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 # The fd can be things like "cwd", "txt" and "mem", but we just
                 # want the fd number for now.
                 pass
+            assert pid is not None
             file.pid = pid
             file.type = "??"
             file.device = None
