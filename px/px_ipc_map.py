@@ -1,8 +1,10 @@
 import sys
+
+from . import px_process
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from . import px_file              # NOQA
-    from . import px_process           # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
     from typing import Dict            # NOQA
@@ -292,6 +294,12 @@ class FakeProcess(px_process.PxProcess):
 
     def __repr__(self):
         return self.name
+
+    def __hash__(self):
+        if self.pid is not None:
+            return self.pid
+        else:
+            return self.lowercase_command.__hash__()
 
 
 def create_fake_process(pid=None, name=None):
