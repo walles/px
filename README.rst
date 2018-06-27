@@ -176,10 +176,9 @@ that works on both Python 2 and Python 3, and on "all" machines with Python
 interpreters (tested on Linux and OS X).
 
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
-* Build and test: ``./test.sh``
+* Build and test: ``./ci.sh``
 * Run: ``./px.pex``
-* To add dependencies, edit ``requirements.txt``
-* To run the same testing that CI does: ``./ci.sh``
+* To add dependencies, edit ``//requirements.txt`` and ``/BUILD``
 
 Releasing a new Version
 -----------------------
