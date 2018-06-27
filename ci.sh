@@ -9,98 +9,35 @@ if [ "$VIRTUAL_ENV" ] ; then
   exit 1
 fi
 
-# Don't produce a binary if something goes wrong
-trap "rm -f px.pex" ERR
+PX_PEX='bazel-bin/px'
 
-if [ $# != 1 ] ; then
-  if command -v shellcheck &> /dev/null ; then
-    shellcheck ./*.sh ./*/*.sh
-  fi
+# The "suffix" needs to be different for caching to work properly
+# FIXME: Use scripts/set-other-python.sh to identify two different Pythons
+bazel test --test_output=errors --python_path=/usr/local/bin/python2 --platform_suffix=py2 unittests
+bazel test --test_output=errors --python_path=/usr/local/bin/python3 --platform_suffix=py3 unittests
+# FIXME: Make bazel run shellcheck ./*.sh ./*/*.sh
+# FIXME: Make bazel run installtest.sh
+# FIXME: Make bazel run flake8
+# FIXME: On Python 3, make bazel run mypy in both Python2 and Python3 mode
+# FIXME: Make bazel run: "px", "px $$", "px --version", "px bazel"
+# FIXME: Collect coverage data from unit test runs
 
-  source ./tests/installtest.sh
+# FIXME: Make bazel run setup.py to create a py2.py3 wheel
+# FIXME: Make bazel test px from the wheel using: "px", "px $$", "px --version", "px bazel"
 
-  # Run this script with two different Python interpreters
-  . ./scripts/set-other-python.sh
-  "$0" "$OTHER_PYTHON"
-  "$0" "python"
+bazel build --build_python_zip px
 
-  if ! head -n1 px.pex | grep -w python ; then
-    echo
-    echo "ERROR: px.pex should use \"python\" as its interpreter:"
-    file px.pex
-    false
-    exit 1
-  fi
-
-  echo
-  echo "All tests passed!"
-  echo
-  exit
-fi
-
-# Make a virtualenv
-ENVDIR="$(mktemp -d)"
-function cleanup {
-  rm -rf "${ENVDIR}"
-}
-trap cleanup EXIT
-
-# Expect the first argument to be a Python interpreter
-virtualenv --python="$1" "${ENVDIR}"
-# shellcheck source=/dev/null
-. "${ENVDIR}"/bin/activate
-
-# Fix tools versions
-pip install -r requirements-dev.txt
-
-if python --version 2>&1 | grep " 3" ; then
-  # Verson of "python" binary is 3, do static type analysis. Mypy requires
-  # Python 3, that's why we do this only on Python 3.
-  pip install -r requirements-dev-py3.txt
-  mypy ./*.py ./*/*.py
-  mypy ./*.py ./*/*.py --python-version=2.7
-fi
-
-# FIXME: We want to add to the coverage report, not overwrite it. How do we do
-# that?
-PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
-
-# Create px wheel...
-rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
-./setup.py bdist_wheel --universal
-
-# ... and package everything in px.pex
-#
-# Note that we have to --disable-cache here since otherwise changing the code
-# without changing the "git describe" output won't change the resulting binary.
-# And since that happens all the time during development we can't have that.
-#
-# Also note that we need to specify the --python-shebang to get "python" as an
-# interpreter. Just passing --python (or nothing) defaults to following the
-# "python" symlink and putting "2.7" here.
-rm -f px.pex
-pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o px.pex
-
-flake8 px tests setup.py
-
-echo
-if unzip -qq -l px.pex '*.so' ; then
+if unzip -qq -l "${PX_PEX}" '*.so' ; then
   cat << EOF
-  ERROR: There are natively compiled dependencies in the .pex, this makes
-         distribution a lot harder. Please fix your dependencies.
+  ERROR: px contains natively compiled dependencies, this makes
+         distribution a lot harder. Please fix the dependencies.
 EOF
   exit 1
 fi
 
-echo
-./px.pex
-
-echo
-./px.pex $$
-
-echo
-./px.pex --version
-
-./setup.py install
-px bash
-px --version
+if ! head -n1 "${PX_PEX}" | grep -w python ; then
+  echo
+  echo "ERROR: px should use \"python\" as its interpreter:"
+  file "${PX_PEX}"
+  exit 1
+fi
