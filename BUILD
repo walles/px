@@ -2,29 +2,25 @@ package(default_visibility = ["//visibility:public"])
 
 load("@my_deps//:requirements.bzl", "requirement")
 
-py_library(
-    name = "lib",
-    srcs = ["src/lib.py"],
-)
-
 py_binary(
-    name = "bin",
-    srcs = ["src/bin.py"],
+    name = "px",
+    srcs = glob(["px/**/*.py"]),
     deps = [
-        ":lib",
-
         # The name in quotes here must match an entry in requirements.txt
-        requirement("crontab")
+        requirement("docopt"),
+        requirement("python-dateutil")
         ],
 )
 
 py_test(
     name = "unittests",
 
-    srcs = glob(["tests/**/*.py"]),
+    srcs = glob(["tests/**/*.py"]) + glob(["px/**/*.py"]),
     main = "tests/run-tests.py",
 
     deps = [
-        ":lib",
-    ]
+        # The name in quotes here must match an entry in requirements.txt
+        requirement("docopt"),
+        requirement("python-dateutil")
+        ],
 )

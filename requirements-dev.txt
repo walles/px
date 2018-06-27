@@ -1,5 +1,0 @@
-pex == 1.2.8
-pip == 9.0.1
-flake8 == 3.3.0
-wheel == 0.30.0a0
-setuptools == 36.2.0

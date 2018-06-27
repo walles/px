@@ -4,6 +4,7 @@
 /.cache
 /.coverage
 /.mypy_cache
+/bazel-*
 
 # See: https://packaging.python.org/distributing/#uploading-your-project-to-pypi
 /.pypirc
@@ -13,5 +14,3 @@
 *.egg-info
 *.pyc
 __pycache__
-
-px.pex
