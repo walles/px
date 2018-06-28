@@ -6,7 +6,7 @@ py_binary(
     name = "px",
     srcs = glob(["px/**/*.py"]),
     deps = [
-        # The name in quotes here must match an entry in requirements.txt
+        # Names in quotes here must match entries in requirements.txt
         requirement("docopt"),
         requirement("python-dateutil")
         ],
@@ -19,8 +19,10 @@ py_test(
     main = "tests/run-tests.py",
 
     deps = [
-        # The name in quotes here must match an entry in requirements.txt
+        # Names in quotes here must match entries in requirements.txt
         requirement("docopt"),
-        requirement("python-dateutil")
+        requirement("python-dateutil"),
+
+        requirement("pytest")
         ],
 )
