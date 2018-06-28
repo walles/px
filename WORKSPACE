@@ -1,4 +1,4 @@
-workspace(name="johan")
+workspace(name="px")
 
 git_repository(
     name = "io_bazel_rules_python",
