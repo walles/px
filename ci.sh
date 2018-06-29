@@ -116,6 +116,10 @@ echo
 echo
 ./px.pex --version
 
-./setup.py install
+if pip list --format=legacy | grep '^pxpx ' > /dev/null ; then
+  # Uninstall px before doing install testing
+  pip uninstall --yes pxpx
+fi
+pip install ./dist/pxpx-*.whl
 px bash
 px --version
