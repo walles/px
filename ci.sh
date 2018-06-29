@@ -44,7 +44,7 @@ PYTHONBIN="$1"
 
 # Prepare for making a virtualenv
 ENVDIR="${MYDIR}/.${PYTHONBIN}-env"
-for DEP in "${PYTHON}" requirements*.txt ; do
+for DEP in "$(command -v virtualenv)" "${PYTHON}" requirements*.txt ; do
   if [ "$DEP" -nt "${ENVDIR}" ] ; then
     # Drop our virtualenv, it's older than one of its dependencies
     rm -rf "$ENVDIR"
