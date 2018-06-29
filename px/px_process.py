@@ -7,7 +7,7 @@ import re
 import pwd
 import six
 import dateutil.tz
-from . import px_commandline
+import px_commandline
 
 
 import sys

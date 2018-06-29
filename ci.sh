@@ -11,6 +11,10 @@ fi
 
 PX_PEX='bazel-bin/px'
 
+# FIXME: Once this works, just remove it since it will be done further down
+# anyway, after linting and testing.
+bazel build --build_python_zip px && "${PX_PEX}"
+
 # The "suffix" needs to be different for caching to work properly
 # FIXME: Use scripts/set-other-python.sh to identify two different Pythons
 bazel test --test_output=errors --python_path=/usr/local/bin/python2 --platform_suffix=py2 unittests

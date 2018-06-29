@@ -4,10 +4,10 @@ import datetime
 import operator
 
 import os
-from . import px_file
-from . import px_process
-from . import px_ipc_map
-from . import px_loginhistory
+import px_file
+import px_process
+import px_ipc_map
+import px_loginhistory
 
 
 if sys.version_info.major >= 3:

@@ -7,11 +7,11 @@ import select
 import termios
 
 import os
-from . import px_load
-from . import px_process
-from . import px_terminal
-from . import px_load_bar
-from . import px_cpuinfo
+import px_load
+import px_process
+import px_terminal
+import px_load_bar
+import px_cpuinfo
 
 
 # Used for informing our getch() function that a window resize has occured

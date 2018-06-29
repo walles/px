@@ -1,10 +1,10 @@
 import sys
 
-from . import px_process
+import px_process
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from . import px_file              # NOQA
+    import px_file              # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
     from typing import Dict            # NOQA

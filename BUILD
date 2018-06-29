@@ -8,7 +8,8 @@ py_binary(
     deps = [
         # Names in quotes here must match entries in requirements.txt
         requirement("docopt"),
-        requirement("python-dateutil")
+        requirement("python-dateutil"),
+        requirement("setuptools"),
         ],
 )
 
@@ -22,7 +23,8 @@ py_test(
         # Names in quotes here must match entries in requirements.txt
         requirement("docopt"),
         requirement("python-dateutil"),
+        requirement("setuptools"),
 
-        requirement("pytest")
+        requirement("pytest"),
         ],
 )
