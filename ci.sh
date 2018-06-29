@@ -4,7 +4,7 @@ set -o pipefail
 set -e
 set -x
 
-MYDIR=$(cd "$0" ; pwd)
+MYDIR=$(cd "$(dirname "$0")" ; pwd)
 
 if [ "$VIRTUAL_ENV" ] ; then
   echo 'ERROR: Already in a virtualenv, do "deactivate" first and try again'
@@ -54,6 +54,8 @@ done
 if [ ! -d "${ENVDIR}" ]; then
   # No virtualenv, set it up
   virtualenv --python="${PYTHONBIN}" "${ENVDIR}"
+  # shellcheck source=/dev/null
+  . "${ENVDIR}"/bin/activate
 
   # Fix tools versions
   pip install -r requirements-dev.txt
@@ -61,10 +63,11 @@ if [ ! -d "${ENVDIR}" ]; then
   if python --version 2>&1 | grep " 3" ; then
     pip install -r requirements-dev-py3.txt
   fi
+else
+  # Just activate the existing virtualenv
+  # shellcheck source=/dev/null
+  . "${ENVDIR}"/bin/activate
 fi
-
-# shellcheck source=/dev/null
-. "${ENVDIR}"/bin/activate
 
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
