@@ -4,6 +4,8 @@ set -o pipefail
 set -e
 set -x
 
+MYDIR=$(cd "$(dirname "$0")" ; pwd)
+
 if [ "$VIRTUAL_ENV" ] ; then
   echo 'ERROR: Already in a virtualenv, do "deactivate" first and try again'
   exit 1
@@ -38,25 +40,38 @@ if [ $# != 1 ] ; then
   exit
 fi
 
-# Make a virtualenv
-ENVDIR="$(mktemp -d)"
-function cleanup {
-  rm -rf "${ENVDIR}"
-}
-trap cleanup EXIT
+PYTHONBIN="$1"
 
-# Expect the first argument to be a Python interpreter
-virtualenv --python="$1" "${ENVDIR}"
-# shellcheck source=/dev/null
-. "${ENVDIR}"/bin/activate
+# Prepare for making a virtualenv
+ENVDIR="${MYDIR}/.${PYTHONBIN}-env"
+for DEP in "$(command -v virtualenv)" "${PYTHON}" requirements*.txt ; do
+  if [ "$DEP" -nt "${ENVDIR}" ] ; then
+    # Drop our virtualenv, it's older than one of its dependencies
+    rm -rf "$ENVDIR"
+  fi
+done
 
-# Fix tools versions
-pip install -r requirements-dev.txt
+if [ ! -d "${ENVDIR}" ]; then
+  # No virtualenv, set it up
+  virtualenv --python="${PYTHONBIN}" "${ENVDIR}"
+  # shellcheck source=/dev/null
+  . "${ENVDIR}"/bin/activate
+
+  # Fix tools versions
+  pip install -r requirements-dev.txt
+
+  if python --version 2>&1 | grep " 3" ; then
+    pip install -r requirements-dev-py3.txt
+  fi
+else
+  # Just activate the existing virtualenv
+  # shellcheck source=/dev/null
+  . "${ENVDIR}"/bin/activate
+fi
 
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
   # Python 3, that's why we do this only on Python 3.
-  pip install -r requirements-dev-py3.txt
   mypy ./*.py ./*/*.py
   mypy ./*.py ./*/*.py --python-version=2.7
 fi
@@ -101,6 +116,10 @@ echo
 echo
 ./px.pex --version
 
-./setup.py install
+if pip list --format=legacy | grep '^pxpx ' > /dev/null ; then
+  # Uninstall px before doing install testing
+  pip uninstall --yes pxpx
+fi
+pip install ./dist/pxpx-*.whl
 px bash
 px --version
