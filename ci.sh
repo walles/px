@@ -97,7 +97,7 @@ PX_PEX="${ENVDIR}/px.pex"
 rm -f "${PX_PEX}"
 pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o "${PX_PEX}"
 
-flake8 px tests setup.py
+flake8 px tests scripts setup.py
 
 echo
 if unzip -qq -l "${PX_PEX}" '*.so' ; then
