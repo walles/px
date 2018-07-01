@@ -37,6 +37,8 @@ class WrappedProcess:
         # FIXME: Trick wrapped process that it's writing to a terminal. Possible
         # source of inspiration:
         # http://man7.org/tlpi/code/online/dist/pty/unbuffer.c.html
+        #
+        # FIXME: Pass window size to the wrapped process
 
         # FIXME: Set stdin to pipe in from nowhere
         self.process = subprocess.Popen(
