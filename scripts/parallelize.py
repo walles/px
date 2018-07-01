@@ -15,7 +15,7 @@ in the background and pretend we never started them.
 import subprocess
 import tempfile
 import atexit
-import shutil
+import time
 import sys
 
 
@@ -46,6 +46,25 @@ class WrappedProcess:
         # This implicitly deletes the temp file
         self.output.close()
 
+    def tail_and_wait(self):
+        """Like process.wait(), but dumps process output to stdout while waiting"""
+        with open(self.output.name, mode='rt') as follow_me:
+            while self.process.poll() is None:
+                line = follow_me.readline()
+                if line:
+                    sys.stdout.write(line)
+                else:
+                    time.sleep(0.5)
+
+            while True:
+                # Print the rest of the file if needed
+                line = follow_me.readline()
+                if not line:
+                    break
+                sys.stdout.write(line)
+
+        return self.process.returncode
+
 
 commands = sys.argv[1:]
 processes = []
@@ -54,10 +73,7 @@ for command in commands:
     processes.append(WrappedProcess(command))
 
 for process in processes:
-    returncode = process.process.wait()
-
-    with open(process.output.name, 'r') as output:
-        shutil.copyfileobj(output, sys.stdout)
+    returncode = process.tail_and_wait()
 
     if returncode != 0:
         # Terminate the rest of the processes now that this one failed
