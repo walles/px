@@ -12,6 +12,7 @@ in the background and pretend we never started them.
 
 import subprocess
 import tempfile
+import atexit
 import shutil
 import sys
 
@@ -26,8 +27,8 @@ if len(sys.argv) < 2:
 
 class WrappedProcess:
     def __init__(self, cmdline):
-        # FIXME: Remove the tempfile before exiting
         self.output = tempfile.NamedTemporaryFile()
+        atexit.register(self.cleanup)
 
         # FIXME: Trick wrapped process that it's writing to a terminal. Possible
         # source of inspiration:
@@ -36,6 +37,10 @@ class WrappedProcess:
         # FIXME: Set stdin to pipe in from nowhere
         self.process = subprocess.Popen(
             cmdline, bufsize=-1, stdout=self.output, stderr=self.output, shell=True)
+
+    def cleanup(self):
+        # This implicitly deletes the temp file
+        self.output.close()
 
 
 commands = sys.argv[1:]
@@ -53,5 +58,3 @@ for process in processes:
     # FIXME: Terminate the rest of the processes if this one failed
 
     # FIXME: Exit with this process' exit code if it failed
-
-# FIXME: Clean up the tempfiles
