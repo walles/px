@@ -82,7 +82,7 @@ for process in processes:
                 # Already dead
                 continue
 
-            print("Terminating remaining process: {}".format(killme.commandline))
+            sys.stderr.write("Terminating remaining process: {}\n".format(killme.commandline))
             killme.process.terminate()
             killme.process.wait()
 
