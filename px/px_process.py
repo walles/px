@@ -13,6 +13,7 @@ from . import px_commandline
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
+    from typing import Dict        # NOQA
     from typing import MutableSet  # NOQA
     from typing import Text        # NOQA
     from typing import Optional    # NOQA
@@ -59,6 +60,7 @@ class PxProcess(object):
         self.set_cpu_time_seconds(process_builder.cpu_time)
 
         self.children = None  # type: MutableSet[PxProcess]
+        self.parent = None  # type: Optional[PxProcess]
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -70,6 +72,8 @@ class PxProcess(object):
         return self.command + "(" + str(self.pid) + ")"
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.__dict__ == other.__dict__
 
     def __ne__(self, other):
@@ -240,6 +244,7 @@ def create_kernel_process(now):
 
 
 def resolve_links(processes, now):
+    # type: (Dict[int, PxProcess], datetime.datetime) -> None
     """
     On entry, this function assumes that all processes have a "ppid" field
     containing the PID of their parent process.
