@@ -4,6 +4,8 @@
 
 Syntax: parallelize.py <command line> ...
 
+Example: parallelize.py "runtests1.sh" "runtests2.sh"
+
 This scripts runs multiple command lines in parallel, but presents the result as
 if they were run in sequence. So if the first one fails, then we will exit with
 the exit code of that first command line, and just terminate the following ones
@@ -26,7 +28,9 @@ if len(sys.argv) < 2:
 
 
 class WrappedProcess:
-    def __init__(self, cmdline):
+    def __init__(self, commandline):
+        self.commandline = commandline
+
         self.output = tempfile.NamedTemporaryFile()
         atexit.register(self.cleanup)
 
@@ -36,7 +40,7 @@ class WrappedProcess:
 
         # FIXME: Set stdin to pipe in from nowhere
         self.process = subprocess.Popen(
-            cmdline, bufsize=-1, stdout=self.output, stderr=self.output, shell=True)
+            commandline, bufsize=-1, stdout=self.output, stderr=self.output, shell=True)
 
     def cleanup(self):
         # This implicitly deletes the temp file
@@ -56,6 +60,14 @@ for process in processes:
         shutil.copyfileobj(output, sys.stdout)
 
     if returncode != 0:
-        # FIXME: Terminate the rest of the processes now that this one failed
+        # Terminate the rest of the processes now that this one failed
+        for killme in processes:
+            if killme.process.returncode is not None:
+                # Already dead
+                continue
+
+            print("Terminating remaining process: {}".format(killme.commandline))
+            killme.process.terminate()
+            killme.process.wait()
 
         sys.exit(returncode)
