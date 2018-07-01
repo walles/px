@@ -50,11 +50,12 @@ for command in commands:
     processes.append(WrappedProcess(command))
 
 for process in processes:
-    process.process.wait()
+    returncode = process.process.wait()
 
     with open(process.output.name, 'r') as output:
         shutil.copyfileobj(output, sys.stdout)
 
-    # FIXME: Terminate the rest of the processes if this one failed
+    if returncode != 0:
+        # FIXME: Terminate the rest of the processes now that this one failed
 
-    # FIXME: Exit with this process' exit code if it failed
+        sys.exit(returncode)
