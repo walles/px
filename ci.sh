@@ -24,6 +24,7 @@ if [ $# != 1 ] ; then
   # Run this script with two different Python interpreters
   . ./scripts/set-other-python.sh
   "${MYDIR}/scripts/parallelize.py" "$0 $OTHER_PYTHON" "$0 python"
+  cp .python-env/px.pex "${MYDIR}"
 
   if ! head -n1 px.pex | grep -w python ; then
     echo
@@ -92,13 +93,14 @@ rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 # Also note that we need to specify the --python-shebang to get "python" as an
 # interpreter. Just passing --python (or nothing) defaults to following the
 # "python" symlink and putting "2.7" here.
-rm -f px.pex
-pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o px.pex
+PX_PEX="${ENVDIR}/px.pex"
+rm -f "${PX_PEX}"
+pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o "${PX_PEX}"
 
 flake8 px tests setup.py
 
 echo
-if unzip -qq -l px.pex '*.so' ; then
+if unzip -qq -l "${PX_PEX}" '*.so' ; then
   cat << EOF
   ERROR: There are natively compiled dependencies in the .pex, this makes
          distribution a lot harder. Please fix your dependencies.
@@ -107,13 +109,13 @@ EOF
 fi
 
 echo
-./px.pex
+"${PX_PEX}"
 
 echo
-./px.pex $$
+"${PX_PEX}" $$
 
 echo
-./px.pex --version
+"${PX_PEX}" --version
 
 if pip list | grep '^pxpx ' > /dev/null ; then
   # Uninstall px before doing install testing
