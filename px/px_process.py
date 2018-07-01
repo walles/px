@@ -70,6 +70,8 @@ class PxProcess(object):
         return self.command + "(" + str(self.pid) + ")"
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.__dict__ == other.__dict__
 
     def __ne__(self, other):
