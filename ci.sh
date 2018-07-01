@@ -23,8 +23,7 @@ if [ $# != 1 ] ; then
 
   # Run this script with two different Python interpreters
   . ./scripts/set-other-python.sh
-  "$0" "$OTHER_PYTHON"
-  "$0" "python"
+  "${MYDIR}/scripts/parallelize.py" "$0 $OTHER_PYTHON" "$0 python"
 
   if ! head -n1 px.pex | grep -w python ; then
     echo
