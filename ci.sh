@@ -116,7 +116,7 @@ echo
 echo
 ./px.pex --version
 
-if pip list --format=legacy | grep '^pxpx ' > /dev/null ; then
+if pip list | grep '^pxpx ' > /dev/null ; then
   # Uninstall px before doing install testing
   pip uninstall --yes pxpx
 fi
