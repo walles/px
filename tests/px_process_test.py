@@ -126,6 +126,7 @@ def _validate_references(processes):
         assert type(process.children) is set
         if process.parent:
             assert process.parent in processes
+            assert process.parent.pid == process.ppid
             assert process in process.parent.children
 
         for child in process.children:
