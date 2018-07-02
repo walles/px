@@ -197,6 +197,17 @@ def test_get_all_defaultlocale():
     _test_get_all()
 
 
+def test_process_eq():
+    """Compare two mostly identical processes, where one has a parent and the other one not"""
+    process_a = testutils.create_process()
+
+    process_b = testutils.create_process()
+    parent = px_process.create_kernel_process(testutils.now())
+    process_b.parent = parent
+
+    assert process_a != process_b
+
+
 def test_parse_time():
     assert px_process.parse_time("0:00.03") == 0.03
     assert px_process.parse_time("1:02.03") == 62.03
