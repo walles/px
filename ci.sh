@@ -81,8 +81,8 @@ fi
 PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
 
 # Create px wheel...
-rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
-./setup.py bdist_wheel --universal
+rm -rf dist .deps/px-*.egg .deps/px-*.whl "${ENVDIR}"/px-*.whl build/lib/px
+./setup.py bdist_wheel --universal --dist-dir="${ENVDIR}"
 
 # ... and package everything in px.pex
 #
@@ -95,7 +95,7 @@ rm -rf dist .deps/px-*.egg .deps/px-*.whl build/lib/px
 # "python" symlink and putting "2.7" here.
 PX_PEX="${ENVDIR}/px.pex"
 rm -f "${PX_PEX}"
-pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt ./dist/pxpx-*.whl -m px.px -o "${PX_PEX}"
+pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt "${ENVDIR}"/pxpx-*.whl -m px.px -o "${PX_PEX}"
 
 flake8 px tests scripts setup.py
 
@@ -121,6 +121,6 @@ if pip list | grep '^pxpx ' > /dev/null ; then
   # Uninstall px before doing install testing
   pip uninstall --yes pxpx
 fi
-pip install ./dist/pxpx-*.whl
+pip install "${ENVDIR}"/pxpx-*.whl
 px bash
 px --version
