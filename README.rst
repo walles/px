@@ -288,8 +288,8 @@ DONE
 .. _Releases: https://github.com/walles/px/releases
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
 
-.. |Build Status| image:: https://travis-ci.org/walles/px.svg?branch=python
-   :target: https://travis-ci.org/walles/px
+.. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
+   :target: https://travis-ci.com/walles/px
 .. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
    :target: https://coveralls.io/github/walles/px?branch=python
 .. |ptop screenshot| image:: https://github.com/walles/px/raw/python/ptop-screenshot.gif
