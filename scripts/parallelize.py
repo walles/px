@@ -25,7 +25,9 @@ import os
 
 
 try:
-    from typing import Dict  # NOQA
+    from typing import Dict      # NOQA
+    from typing import List      # NOQA
+    from typing import Optional  # NOQA
 except Exception:
     pass
 
@@ -73,9 +75,8 @@ class WrappedProcess:
         self.output.close()
 
 
-def pump(processes, current_index, timeout_seconds=0.2):
-    current_process = processes[current_index]
-
+def pump(processes, current_process, timeout_seconds=0.2):
+    # type: (List[WrappedProcess], Optional[WrappedProcess], float) -> None
     fd_to_wrapper = {}  # type: Dict[int, WrappedProcess]
     for process in processes:
         fd_to_wrapper[process.pty_out] = process
@@ -99,23 +100,25 @@ for command in commands:
 process_index = 0
 # Only enter this loop if we have processes to process
 while processes:
-    pump(processes, process_index)
+    current_process = processes[process_index]
+    pump(processes, current_process)
 
-    exitcode = processes[process_index].process.poll()
+    exitcode = current_process.process.poll()
     if exitcode is None:
         continue
 
     # Our process died, make sure we got all its output
-    pump(processes, process_index, timeout_seconds=0)
+    pump(processes, current_process, timeout_seconds=0)
 
     if exitcode == 0:
         process_index += 1
         if process_index >= len(processes):
             break
+        current_process = processes[process_index]
 
         # Dump the new process_index process' tempfile to stdout
-        processes[process_index].output.flush()
-        with open(processes[process_index].output.name, "r") as f:
+        current_process.output.flush()
+        with open(current_process.output.name, "r") as f:
             shutil.copyfileobj(f, sys.stdout)
 
         continue
@@ -129,8 +132,10 @@ while processes:
         sys.stderr.write("Terminating remaining process: {}\n".format(killme.commandline))
         killme.process.terminate()
 
-        # FIXME: Do we need to pump here so that processes aren't PIPE frozen
-        # while we're waiting for them to shut down?
-        killme.process.wait()
+    for waitme in processes:
+        # If we don't keep the pipes empty processes might freeze, and I don't
+        # know whether they would ever shut down in that case.
+        while waitme.process.poll() is None:
+            pump(processes, None)
 
     sys.exit(exitcode)
