@@ -1,0 +1,45 @@
+.Dd August 24, 2018
+.Dt PX 1
+.Os
+.Sh NAME
+.Nm px
+.Nd list running processes
+.Sh SYNOPSIS
+.\" FIXME: Other man pages don't need to use \p to break lines here,
+.\" and use the Nm macro for the command name. Why can't we?
+.Ic px \p
+.Ic px Ar filter\p
+.Ic px Ar PID
+.Sh DESCRIPTION
+The
+.Nm
+utility lists processes running on the system, to the standard
+output.
+If stdout is a terminal, output will be truncated at
+terminal window width.
+.Pp
+Without any arguments,
+.Nm
+lists all processes on the system.
+.Pp
+If you specify a
+.Ar filter
+the output will contain only processes matching that filter.
+.Pp
+The
+.Ar filter
+can be a user name or part of a command line. For example,
+.Ql px java
+will list all Java processes, and
+.Ql px root
+will list all of root's processes.
+.Pp
+FIXME rewrite everything from here and down
+.Pp
+FIXME
+.Pp
+FIXME
+.Ar user
+FIXME
+.Sh SEE ALSO
+.Xr ptop 1
