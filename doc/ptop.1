@@ -12,23 +12,42 @@
 .Nm
 periodically displays a sorted list of system processes.
 Processes are sorted with the highest CPU users at the top.
-To stabilize the list, CPU usage is measured from when
+CPU usage is measured from when
 .Nm
-was started.
+was started, to make the list stabilize over time.
+.Pp
+The top screen line shows you the system load.
+The number tells you how many processes want to run right now, check
+.Xr getloadavg 3
+for details.
+.Pp
+The histogram shows you how system load has evolved over the last
+fifteen minutes.
+The current system load is at the right of the histogram.
+.Pp
+The green / yellow / red bar shows you the current system load in
+relation to the number of cores on the system.
+Green means load on physical cores, yellow means load on logical
+cores, and red means that the system load is higher than the number
+of cores available on the system.
+.Pp
+To exit
+.Nm ,
+press
+.Ql q .
 .Sh PROCESS NAMING
 .Nm
 tries to be helpful about naming processes, and avoid printing names
 of various VMs.
 .Pp
 For example, if you do
-.Ql java -jar foo.jar
-,
+.Ql java -jar foo.jar ,
 .Nm
 will show this process as
 .Ql foo.jar
 rather than
-.Ql java
-\&.
+.Ql java .
+.Pp
 .Nm
 parses command lines from:
 .Bl -bullet
