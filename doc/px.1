@@ -55,5 +55,35 @@ Network connections
 IPC connections (sockets, pipes and local network connections) and
 which processes are at the other end of those
 .El
+.Sh PROCESS NAMING
+.Nm
+tries to be helpful about naming processes, and avoid printing names
+of various VMs.
+.Pp
+For example, if you do
+.Ql java -jar foo.jar
+,
+.Nm
+will show this process as
+.Ql foo.jar
+rather than
+.Ql java
+\&.
+.Nm
+parses command lines from:
+.Bl -bullet
+.It
+Java
+.It
+Python
+.It
+Node
+.It
+Ruby
+.It
+Various shells
+.It
+Perl
+.El
 .Sh SEE ALSO
 .Xr ptop 1
