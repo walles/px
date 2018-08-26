@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm px
-.Nd list running processes
+.Nd list running processes and show process metadata
 .Sh SYNOPSIS
 .\" FIXME: Other man pages don't need to use \p to break lines here,
 .\" and use the Nm macro for the command name. Why can't we?
@@ -34,12 +34,26 @@ will list all Java processes, and
 .Ql px root
 will list all of root's processes.
 .Pp
-FIXME rewrite everything from here and down
-.Pp
-FIXME
-.Pp
-FIXME
-.Ar user
-FIXME
+Running
+.Nm
+.Ar PID
+will show you information about a given process:
+.Bl -bullet
+.It
+The process tree; parents and children
+.It
+Start time, run time and CPU usage
+.It
+List of other processes started around the same time as this one
+.It
+List of users logged in when the process was started
+.It
+Where stdin, stdout and stderr is pointing
+.It
+Network connections
+.It
+IPC connections (sockets, pipes and local network connections) and
+which processes are at the other end of those
+.El
 .Sh SEE ALSO
 .Xr ptop 1
