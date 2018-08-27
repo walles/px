@@ -18,7 +18,7 @@ setup(
     description='ps and top for Human Beings',
     long_description=LONG_DESCRIPTION,
     author='Johan Walles',
-    author_email='walles@gmail.com',
+    author_email='johan.walles@gmail.com',
     url='https://github.com/walles/px',
     license='MIT',
 
@@ -46,11 +46,11 @@ setup(
     setup_requires=[
         'pytest-runner',
         'pytest-cov',
-        ],
+    ],
 
     tests_require=[
         'pytest',
-        ],
+    ],
 
     entry_points={
         'console_scripts': [
