@@ -58,4 +58,15 @@ setup(
             'ptop = px.px:main'
         ],
     }
+
+    # Note that we're by design *not* installing man pages here.
+    # Using "data_files=" only puts the man pages in the egg file,
+    # and installing that egg doesn't put them on the destination
+    # system.
+    #
+    # After trying to figure this out for a bit, my conclusion is
+    # that "pip install" simply isn't meant for installing any man
+    # pages.
+    #
+    #   /johan.walles@gmail.com 2018aug27
 )

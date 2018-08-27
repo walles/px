@@ -1,0 +1,72 @@
+.Dd August 26, 2018
+.Dt PTOP 1
+.Os
+.Sh NAME
+.Nm ptop
+.Nd display and update sorted information about processes
+.Sh SYNOPSIS
+.\" FIXME: Other man pages don't need to use \p to break lines here,
+.\" and use the Nm macro for the command name. Why can't we?
+.Ic Nm
+.Sh DESCRIPTION
+.Nm
+periodically displays a sorted list of system processes.
+Processes are sorted with the highest CPU users at the top.
+CPU usage is measured from when
+.Nm
+was started, to make the list stabilize over time.
+.Pp
+The top screen line shows you the system load.
+The number tells you how many processes want to run right now, check
+.Xr getloadavg 3
+for details.
+.Pp
+The histogram shows you how system load has evolved over the last
+fifteen minutes.
+The current system load is at the right of the histogram.
+.Pp
+The green / yellow / red bar shows you the current system load in
+relation to the number of cores on the system.
+Green means load on physical cores, yellow means load on logical
+cores, and red means that the system load is higher than the number
+of cores available on the system.
+.Pp
+To exit
+.Nm ,
+press
+.Ql q .
+.Sh PROCESS NAMING
+.Nm
+tries to be helpful about naming processes, and avoid printing names
+of various VMs.
+.Pp
+For example, if you do
+.Ql java -jar foo.jar ,
+.Nm
+will show this process as
+.Ql foo.jar
+rather than
+.Ql java .
+.Pp
+.Nm
+parses command lines from:
+.Bl -bullet
+.It
+Java
+.It
+Python
+.It
+Node
+.It
+Ruby
+.It
+Various shells
+.It
+Perl
+.El
+.Sh SEE ALSO
+.Xr px 1 ,
+.Xr top 1
+.Sh HOMEPAGE
+.Nm
+lives at http://github.com/walles/px
