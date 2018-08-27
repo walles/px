@@ -8,7 +8,7 @@ set -e
 set -x
 
 cd "$(dirname "$0")"
-rm -rf dist
+find . -name 'px*.whl' -delete
 
 # Build the release
 ./ci.sh
@@ -33,4 +33,8 @@ pip install "twine == 1.9.1"
 
 # Upload!
 echo
-twine upload --repository pypi dist/pxpx-*-py2.py3-none-any.whl
+# Note that we take the wheel file from one of our virtualenvs where
+# it was built. When testing this for the 1.12 release, both wheel
+# files (created with Python 2 or Python 3) were identical, so the
+# choice of "python3" here is arbitrary.
+twine upload --repository pypi .python3-env/pxpx-*-py2.py3-none-any.whl
