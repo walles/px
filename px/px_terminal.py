@@ -50,7 +50,7 @@ def to_screen_lines(procs, columns):
     headings.command = "COMMAND"
     headings.username = "USERNAME"
     headings.cpu_percent_s = "CPU"
-    headings.cpu_time_s = "CPU TIME"
+    headings.cpu_time_s = "CPUTIME"
     headings.memory_percent_s = "RAM"
     headings.cmdline = "COMMANDLINE"
     procs = [headings] + procs
