@@ -81,7 +81,7 @@ fi
 PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
 
 # Create px wheel...
-rm -rf dist .deps/px-*.egg .deps/px-*.whl "${ENVDIR}"/px-*.whl build/lib/px
+rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
 ./setup.py bdist_wheel --universal --dist-dir="${ENVDIR}"
 
 # ... and package everything in px.pex
