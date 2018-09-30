@@ -49,7 +49,7 @@ def to_screen_lines(procs, columns):
     headings.pid = "PID"
     headings.command = "COMMAND"
     headings.username = "USERNAME"
-    headings.cpu_usage_s = "CPU"
+    headings.cpu_percent_s = "CPU"
     headings.cpu_time_s = "CPU TIME"
     headings.memory_percent_s = "RAM"
     headings.cmdline = "COMMANDLINE"
@@ -66,8 +66,8 @@ def to_screen_lines(procs, columns):
         pid_width = max(pid_width, len(str(proc.pid)))
         command_width = max(command_width, len(proc.command))
         username_width = max(username_width, len(proc.username))
-        cpu_width = max(cpu_width, len(proc.cpu_usage_s))
-        cputime_width = max(cpu_width, len(proc.cpu_time_s))
+        cpu_width = max(cpu_width, len(proc.cpu_percent_s))
+        cputime_width = max(cputime_width, len(proc.cpu_time_s))
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     format = (
@@ -83,7 +83,7 @@ def to_screen_lines(procs, columns):
     for proc in procs:
         line = format.format(
             proc.pid, proc.command, proc.username,
-            proc.cpu_usage_s, proc.cpu_time_s,
+            proc.cpu_percent_s, proc.cpu_time_s,
             proc.memory_percent_s, proc.cmdline)
         lines.append(line[0:columns])
 
