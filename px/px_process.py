@@ -19,9 +19,9 @@ if sys.version_info.major >= 3:
     from typing import Optional    # NOQA
 
 
-# Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios    0:00.08  0.0 /usr/sbin/netbiosd hej"
+# Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
 PS_LINE = re.compile(
-    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
+    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
 
 # Match + group: "1:02.03"
 CPUTIME_OSX = re.compile("^([0-9]+):([0-9][0-9]\.[0-9]+)$")
@@ -55,6 +55,12 @@ class PxProcess(object):
         if self.memory_percent is not None:
             self.memory_percent_s = (
                 "{:.0f}%".format(process_builder.memory_percent))
+
+        self.cpu_percent = process_builder.cpu_percent
+        self.cpu_percent_s = "--"
+        if self.cpu_percent is not None:
+            self.cpu_percent_s = (
+                "{:.0f}%".format(process_builder.cpu_percent))
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(process_builder.cpu_time)
@@ -153,6 +159,7 @@ class PxProcessBuilder(object):
         self.ppid = None      # type: Optional[int]
         self.start_time_string = None  # type: Text
         self.username = None  # type: Text
+        self.cpu_percent = None  # type: Optional[float]
         self.cpu_time = None  # type: Optional[float]
         self.memory_percent = None  # type: Optional[float]
 
@@ -164,7 +171,7 @@ def call_ps():
     env = os.environ.copy()
     if "LANG" in env:
         del env["LANG"]
-    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,uid,time,%mem,command"],
+    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,uid,pcpu,time,%mem,command"],
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           env=env)
     return ps.communicate()[0].decode('utf-8').splitlines()[1:]
@@ -215,9 +222,10 @@ def ps_line_to_process(ps_line, now):
     process_builder.ppid = int(match.group(2))
     process_builder.start_time_string = match.group(3)
     process_builder.username = uid_to_username(int(match.group(4)))
-    process_builder.cpu_time = parse_time(match.group(5))
-    process_builder.memory_percent = float(match.group(6))
-    process_builder.cmdline = match.group(7)
+    process_builder.cpu_percent = float(match.group(5))
+    process_builder.cpu_time = parse_time(match.group(6))
+    process_builder.memory_percent = float(match.group(7))
+    process_builder.cmdline = match.group(8)
 
     return PxProcess(process_builder, now)
 
