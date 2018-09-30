@@ -56,11 +56,11 @@ class PxProcess(object):
             self.memory_percent_s = (
                 "{:.0f}%".format(process_builder.memory_percent))
 
-        self.cpu_usage = process_builder.cpu_usage
-        self.cpu_usage_s = "--"
-        if self.cpu_usage is not None:
-            self.cpu_usage_s = (
-                "{:.0f}%".format(process_builder.cpu_usage))
+        self.cpu_percent = process_builder.cpu_percent
+        self.cpu_percent_s = "--"
+        if self.cpu_percent is not None:
+            self.cpu_percent_s = (
+                "{:.0f}%".format(process_builder.cpu_percent))
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(process_builder.cpu_time)
@@ -159,7 +159,7 @@ class PxProcessBuilder(object):
         self.ppid = None      # type: Optional[int]
         self.start_time_string = None  # type: Text
         self.username = None  # type: Text
-        self.cpu_usage = None  # type: Optional[float]
+        self.cpu_percent = None  # type: Optional[float]
         self.cpu_time = None  # type: Optional[float]
         self.memory_percent = None  # type: Optional[float]
 
@@ -222,7 +222,7 @@ def ps_line_to_process(ps_line, now):
     process_builder.ppid = int(match.group(2))
     process_builder.start_time_string = match.group(3)
     process_builder.username = uid_to_username(int(match.group(4)))
-    process_builder.cpu_usage = float(match.group(5))
+    process_builder.cpu_percent = float(match.group(5))
     process_builder.cpu_time = parse_time(match.group(6))
     process_builder.memory_percent = float(match.group(7))
     process_builder.cmdline = match.group(8)

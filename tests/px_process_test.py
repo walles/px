@@ -111,7 +111,7 @@ def test_ps_line_to_process_3():
         " --socket=/var/run/mysqld/mysqld.sock"
         " --port=3306", testutils.now())
     assert process.username == getpass.getuser()
-    assert process.cpu_usage_s == "6%"
+    assert process.cpu_percent_s == "6%"
     assert process.memory_percent_s == "20%"
     assert process.cpu_time_s == "1d19h"
     assert process.command == "mysqld"
