@@ -19,7 +19,7 @@ if sys.version_info.major >= 3:
     from typing import Optional    # NOQA
 
 
-# Match + group: " 77082 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hej"
+# Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
 PS_LINE = re.compile(
     " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
 
@@ -159,7 +159,7 @@ class PxProcessBuilder(object):
         self.ppid = None      # type: Optional[int]
         self.start_time_string = None  # type: Text
         self.username = None  # type: Text
-        self.cpu_usage = None # type: Optional[float]
+        self.cpu_usage = None  # type: Optional[float]
         self.cpu_time = None  # type: Optional[float]
         self.memory_percent = None  # type: Optional[float]
 
