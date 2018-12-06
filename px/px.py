@@ -35,7 +35,6 @@ of which processes are most active right now.
 """
 
 import sys
-import pkg_resources
 
 import os
 import docopt
@@ -44,6 +43,7 @@ from . import px_install
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
+from . import version
 
 
 def install():
@@ -61,15 +61,11 @@ def install():
     px_install.install(px_pex, "/usr/local/bin/ptop")
 
 
-def get_version():
-    return pkg_resources.get_distribution("pxpx").version
-
-
 def main():
     if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
         sys.argv.append("--top")
 
-    args = docopt.docopt(__doc__, version=get_version())
+    args = docopt.docopt(__doc__, version=version.VERSION)
 
     if args['--install']:
         install()
