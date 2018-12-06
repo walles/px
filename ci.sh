@@ -115,7 +115,7 @@ echo
 "${PX_PEX}" $$
 
 echo
-"${PX_PEX}" --version
+test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"
 
 if pip list | grep '^pxpx ' > /dev/null ; then
   # Uninstall px before doing install testing
@@ -123,4 +123,4 @@ if pip list | grep '^pxpx ' > /dev/null ; then
 fi
 pip install "${ENVDIR}"/pxpx-*.whl
 px bash
-px --version
+test "$(px --version)" = "$(git describe --dirty)"
