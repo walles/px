@@ -289,3 +289,14 @@ def test_to_timedelta(check_output):
     assert px_loginhistory._to_timedelta("01:29") == datetime.timedelta(0, hours=1, minutes=29)
     assert px_loginhistory._to_timedelta("4+01:29") == datetime.timedelta(4, hours=1, minutes=29)
     assert px_loginhistory._to_timedelta("34+01:29") == datetime.timedelta(34, hours=1, minutes=29)
+
+
+def test_realworld_debian(check_output):
+    """
+    Regression test for https://github.com/walles/px/issues/48
+    """
+    now = datetime.datetime(2016, 12, 6, 9, 21, tzinfo=dateutil.tz.tzlocal())
+    testtime = datetime.datetime(2016, 10, 24, 15, 34, tzinfo=dateutil.tz.tzlocal())
+    lastline = "norbert  pts/3        mosh [29846]     Wed Oct 24 15:33 - 15:34  (00:01)"
+
+    assert set(["norbert from mosh"]) == get_users_at(lastline, now, testtime)
