@@ -11,24 +11,26 @@ import dateutil.tz
 LAST_USERNAME = "([^ ]+)"
 LAST_DEVICE = "([^ ]+)"
 LAST_ADDRESS = "([^ ]+)?"
+LAST_PID = "( \[[0-9]+\])?"
 LAST_FROM = "(... ... .. ..:..)"
 LAST_DASH = " [- ] "
 LAST_TO = "[^(]*"
 LAST_DURATION = "([0-9+:]+)"
 
 LAST_RE = re.compile(
-  LAST_USERNAME +
-  " +" +
-  LAST_DEVICE +
-  " +" +
-  LAST_ADDRESS +
-  " +" +
-  LAST_FROM +
-  LAST_DASH +
-  LAST_TO +
-  " *(\(" +
-  LAST_DURATION +
-  "\))?"
+    LAST_USERNAME +
+    " +" +
+    LAST_DEVICE +
+    " +" +
+    LAST_ADDRESS +
+    LAST_PID +
+    " +" +
+    LAST_FROM +
+    LAST_DASH +
+    LAST_TO +
+    " *(\(" +
+    LAST_DURATION +
+    "\))?"
 )
 
 TIMEDELTA_RE = re.compile("(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
@@ -89,8 +91,8 @@ def get_users_at(timestamp, last_output=None, now=None):
 
         username = match.group(1)
         address = match.group(3)
-        from_s = match.group(4)
-        duration_s = match.group(6)
+        from_s = match.group(5)
+        duration_s = match.group(7)
 
         if address:
             username += " from " + address
