@@ -69,6 +69,10 @@ else
   . "${ENVDIR}"/bin/activate
 fi
 
+# Call setup.py here to ensure version.py has been generated before we do anything
+# else.
+./setup.py check
+
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
   # Python 3, that's why we do this only on Python 3.
