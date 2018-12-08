@@ -5,7 +5,12 @@
 
 Installation
 ------------
-To install into ``/usr/local/bin``, copy / paste this command into a terminal::
+On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install using::
+
+  sudo apt-get install px
+
+On other systems (macOs, other Linux distros, ...), install into ``/usr/local/bin`` by
+copy / pasting this command into a terminal::
 
   curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
 
@@ -282,6 +287,8 @@ DONE
 * Run CI on both Python 2 and Python 3
 
 .. _the Output section: #output
+.. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
+.. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
