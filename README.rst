@@ -176,6 +176,9 @@ information; the command will work without it but might miss some information.
 
 Development
 ===========
+Note that before editing any code, you need to run ``ci.sh`` first to create
+the ``px/version.py`` file.
+
 Note that the build infrastructure here is designed to create a ``px.pex`` file
 that works on both Python 2 and Python 3, and on "all" machines with Python
 interpreters (tested on Linux and OS X).

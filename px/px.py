@@ -43,6 +43,8 @@ from . import px_install
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
+
+# If this fails, run "ci.sh" once and the "version.py" file will be created for you.
 from . import version
 
 
