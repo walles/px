@@ -69,6 +69,10 @@ else
   . "${ENVDIR}"/bin/activate
 fi
 
+# Call setup.py here to ensure version.py has been generated before we do anything
+# else.
+./setup.py check
+
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
   # Python 3, that's why we do this only on Python 3.
@@ -115,7 +119,7 @@ echo
 "${PX_PEX}" $$
 
 echo
-"${PX_PEX}" --version
+test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"
 
 if pip list | grep '^pxpx ' > /dev/null ; then
   # Uninstall px before doing install testing
@@ -123,4 +127,4 @@ if pip list | grep '^pxpx ' > /dev/null ; then
 fi
 pip install "${ENVDIR}"/pxpx-*.whl
 px bash
-px --version
+test "$(px --version)" = "$(git describe --dirty)"
