@@ -266,6 +266,9 @@ class IpcMap(object):
 
     def add_ipc_entry(self, process, file):
         # type: (px_process.PxProcess, px_file.PxFile) -> None
+        """
+        Note that we're connected to process via file
+        """
         if process not in self._map:
             self._map[process] = set()
 
