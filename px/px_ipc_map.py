@@ -139,7 +139,7 @@ class IpcMap(object):
         self._create_indices()
 
         unknown = create_fake_process(
-            name="UNKNOWN destinations: Running with sudo might help find out where these go.")
+            name="UNKNOWN destinations: Running with sudo might help find out where these go")
 
         network_connections = set()
         for file in self.ipc_files_for_process:
@@ -300,6 +300,11 @@ class FakeProcess(px_process.PxProcess):
 
     def __hash__(self):
         return self.name.__hash__()
+
+    def __str__(self):
+        if self.name:
+            return self.name
+        return "PID " + str(self.pid)
 
 
 def create_fake_process(pid=None, name=None):
