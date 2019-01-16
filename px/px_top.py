@@ -245,7 +245,7 @@ def sigwinch_handler(signum, frame):
     # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
     # doesn't collide with anything with some meaning other than "please
     # redraw".
-    os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("iso-8859-1"))
+    os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("utf-8"))
 
 
 def top():
