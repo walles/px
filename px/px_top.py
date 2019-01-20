@@ -161,7 +161,7 @@ def clear_screen():
     writebytes(CSI + b"H")
 
 
-def get_screen_lines(load_bar, baseline, rows, columns):
+def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
@@ -176,19 +176,33 @@ def get_screen_lines(load_bar, baseline, rows, columns):
         heading_line = px_terminal.inverse_video(heading_line)
         toplist_table_lines[0] = heading_line
 
+    # Ensure that we cover the whole screen, even if it's higher than the
+    # number of processes
+    toplist_table_lines += rows * ['']
+
     toplist_table_lines = map(lambda s: s.encode('utf-8'), toplist_table_lines)
     lines += toplist_table_lines
 
-    return lines[0:rows]
+    if include_footer:
+        footer_line = u"  q - Quit"
+        footer_line = px_terminal.get_string_of_length(footer_line, columns)
+        footer_line = px_terminal.inverse_video(footer_line)
+
+        lines = lines[0:rows - 1]
+        lines.append(footer_line.encode('utf-8'))
+    else:
+        lines = lines[0:rows]
+
+    return lines
 
 
-def redraw(load_bar, baseline, rows, columns, clear=True):
+def redraw(load_bar, baseline, rows, columns, clear=True, include_footer=True):
     """
     Refresh display relative to the given baseline.
 
-    The new display will be (at most) rows rows x columns columns.
+    The new display will be rows rows x columns columns.
     """
-    lines = get_screen_lines(load_bar, baseline, rows, columns)
+    lines = get_screen_lines(load_bar, baseline, rows, columns, include_footer)
     if clear:
         clear_screen()
 
@@ -234,7 +248,7 @@ def _top():
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
                 rows, columns = px_terminal.get_window_size()
-                redraw(load_bar, baseline, rows - 4, columns)
+                redraw(load_bar, baseline, rows - 4, columns, include_footer=False)
                 return
 
             command = get_command(timeout_seconds=0)

@@ -97,8 +97,23 @@ def test_get_screen_lines():
     # and be in inverse video.
     assert len(lines[2]) == len(px_terminal.inverse_video('x' * SCREEN_COLUMNS))
 
-    # The actual process information starts at line four
-    for line in lines[3:]:
+    # The actual process information starts at line four and goes to the next-to-last line
+    for line in lines[3:-1]:
         # No line can be longer than the screen width; long lines should have
         # been cut
         assert len(line) <= SCREEN_COLUMNS
+
+    # Footer line should contain ANSI escape codes
+    assert b'CSI' in lines[-1].replace(CSI, b'CSI')
+
+
+def test_get_screen_lines_returns_enough_lines():
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+
+    SCREEN_ROWS = 100000
+    SCREEN_COLUMNS = 70
+    lines = px_top.get_screen_lines(
+        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+
+    assert len(lines) == SCREEN_ROWS
