@@ -96,6 +96,12 @@ def inverse_video(string):
     return CSI + "7m" + string + CSI + "0m"
 
 
+def underline_bold(string):
+    CSI = "\x1b["
+
+    return CSI + "1;4m" + string + CSI + "0m"
+
+
 def get_string_of_length(string, length):
     if not length:
         return string

@@ -95,7 +95,7 @@ def test_get_screen_lines():
 
     # Row three is the heading line, it should span the full width of the screen
     # and be in inverse video.
-    assert len(lines[2]) == len(px_terminal.inverse_video('x' * SCREEN_COLUMNS))
+    assert len(lines[2]) == len(px_terminal.underline_bold('x' * SCREEN_COLUMNS))
 
     # The actual process information starts at line four and goes to the next-to-last line
     for line in lines[3:-1]:

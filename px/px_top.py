@@ -173,7 +173,7 @@ def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
-        heading_line = px_terminal.inverse_video(heading_line)
+        heading_line = px_terminal.underline_bold(heading_line)
         toplist_table_lines[0] = heading_line
 
     # Ensure that we cover the whole screen, even if it's higher than the
