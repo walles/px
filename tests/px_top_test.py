@@ -3,7 +3,6 @@ import os
 from px import px_top
 from px import px_process
 from px import px_load_bar
-from px import px_terminal
 
 from . import testutils
 
@@ -93,18 +92,9 @@ def test_get_screen_lines():
 
     assert len(lines) == SCREEN_ROWS
 
-    # Row three is the heading line, it should span the full width of the screen
-    # and be in inverse video.
-    assert len(lines[2]) == len(px_terminal.underline_bold('x' * SCREEN_COLUMNS))
-
-    # The actual process information starts at line four and goes to the next-to-last line
-    for line in lines[3:-1]:
-        # No line can be longer than the screen width; long lines should have
-        # been cut
-        assert len(line) <= SCREEN_COLUMNS
-
-    # Footer line should contain ANSI escape codes
-    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
+    # Lines should either be at most screen width long, or contain ANSI escapes
+    for line in lines:
+        assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
 
 
 def test_get_screen_lines_returns_enough_lines():
