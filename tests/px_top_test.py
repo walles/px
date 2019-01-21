@@ -88,8 +88,8 @@ def test_get_screen_lines():
         loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
 
     # Top row should contain ANSI escape codes
-    CSI = b"\x1b["
-    assert b'CSI' in lines[0].replace(CSI, b'CSI')
+    CSI = u"\x1b["
+    assert u'CSI' in lines[0].replace(CSI, u'CSI')
 
     assert len(lines) == SCREEN_ROWS
 
@@ -104,7 +104,7 @@ def test_get_screen_lines():
         assert len(line) <= SCREEN_COLUMNS
 
     # Footer line should contain ANSI escape codes
-    assert b'CSI' in lines[-1].replace(CSI, b'CSI')
+    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
 
 
 def test_get_screen_lines_returns_enough_lines():
