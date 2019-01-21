@@ -13,6 +13,9 @@ from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
 
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List            # NOQA
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -162,6 +165,7 @@ def clear_screen():
 
 
 def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
+    # type: (px_load_bar.PxLoadBar, List[px_process.PxProcess], int, int, bool) -> List[bytes]
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
