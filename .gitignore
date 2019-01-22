@@ -20,3 +20,7 @@ __pycache__/
 /px/version.py
 
 px.pex
+
+# For regenerating the animated-gif ptop screenshot
+/node_modules/
+/package-lock.json
