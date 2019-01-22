@@ -15,14 +15,14 @@ npm install asciicast2gif
 
 # Record!
 RECORDING=$(mktemp || mktemp -t ptop-ascii-recording.XXXXXXXX)
-echo Recording into: $RECORDING...
-asciinema rec --stdin --command="./px.pex --top" --overwrite $RECORDING
-echo Recording saved into $RECORDING
+echo Recording into: "$RECORDING"...
+asciinema rec --stdin --command="./px.pex --top" --overwrite "$RECORDING"
+echo Recording saved into "$RECORDING"
 
 # Convert the recording to a gif
-./node_modules/.bin/asciicast2gif $RECORDING doc/ptop-screenshot.gif
+./node_modules/.bin/asciicast2gif "$RECORDING" doc/ptop-screenshot.gif
 
-rm $RECORDING
+rm "$RECORDING"
 
 # Demo what we captured
 open -a 'Google Chrome' doc/ptop-screenshot.gif
