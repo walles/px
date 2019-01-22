@@ -13,6 +13,10 @@ from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
 
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List    # NOQA
+    from six import text_type  # NOQA
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -162,25 +166,25 @@ def clear_screen():
 
 
 def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
+    # type: (px_load_bar.PxLoadBar, List[px_process.PxProcess], int, int, bool) -> List[text_type]
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
     lines = [
-        b"System load: " + loadbar,
-        b""]
+        u"System load: " + loadbar,
+        u""]
 
     toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline), columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
-        heading_line = px_terminal.inverse_video(heading_line)
+        heading_line = px_terminal.underline_bold(heading_line)
         toplist_table_lines[0] = heading_line
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
     toplist_table_lines += rows * ['']
 
-    toplist_table_lines = map(lambda s: s.encode('utf-8'), toplist_table_lines)
     lines += toplist_table_lines
 
     if include_footer:
@@ -188,8 +192,7 @@ def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
-        lines = lines[0:rows - 1]
-        lines.append(footer_line.encode('utf-8'))
+        lines = lines[0:rows - 1] + [footer_line]
     else:
         lines = lines[0:rows]
 
@@ -207,7 +210,7 @@ def redraw(load_bar, baseline, rows, columns, clear=True, include_footer=True):
         clear_screen()
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
-    writebytes(b"\r\n".join(lines))
+    writebytes(u"\r\n".join(lines).encode('utf-8'))
     sys.stdout.flush()
 
 

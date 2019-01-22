@@ -1,3 +1,11 @@
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from six import text_type    # NOQA
+    from typing import Iterable  # NOQA
+    from typing import Tuple     # NOQA
+
+
 class PxLoadBar(object):
     """
     Visualizes system load in a horizontal bar.
@@ -34,14 +42,15 @@ class PxLoadBar(object):
         self._physical = physical
         self._logical = logical
 
-        CSI = b"\x1b["
-        self.normal = CSI + b"m"
-        self.inverse = CSI + b"0;7m"
-        self.red = CSI + b"27;1;37;41m"
-        self.yellow = CSI + b"27;1;37;43m"
-        self.green = CSI + b"27;1;37;42m"
+        CSI = u"\x1b["
+        self.normal = CSI + u"m"
+        self.inverse = CSI + u"0;7m"
+        self.red = CSI + u"27;1;37;41m"
+        self.yellow = CSI + u"27;1;37;43m"
+        self.green = CSI + u"27;1;37;42m"
 
-    def _get_colored_bytes(self, load=None, columns=None, text=""):
+    def _get_colored_bytes(self, load, columns, text=u""):
+        # type: (float, int, text_type) -> Iterable[Tuple[text_type, text_type]]
         "Yields pairs, with each pair containing a color and a byte"
 
         maxlength = columns - 2  # Leave room for a starting and an ending space
@@ -86,18 +95,13 @@ class PxLoadBar(object):
             if i >= normal_start:
                 color = self.normal
 
-            yield (color, text[i].encode('utf-8'))
+            yield (color, text[i])
 
-    def get_bar(self, load=None, columns=None, text=""):
-        if load is None:
-            raise ValueError("Missing required parameter load=")
-
-        if columns is None:
-            raise ValueError("Missing required parameter columns=")
-
-        return_me = b''
+    def get_bar(self, load, columns, text=u""):
+        # type: (float, int, text_type) -> text_type
+        return_me = u''
         color = self.normal
-        for color_and_byte in self._get_colored_bytes(load=load, columns=columns, text=text):
+        for color_and_byte in self._get_colored_bytes(load, columns, text=text):
             if color_and_byte[0] != color:
                 return_me += color_and_byte[0]
                 color = color_and_byte[0]

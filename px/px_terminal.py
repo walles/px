@@ -1,7 +1,11 @@
+import os
 import sys
 
-import os
 from . import px_process
+
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from six import text_type  # NOQA
 
 
 def get_window_size():
@@ -91,9 +95,17 @@ def to_screen_lines(procs, columns):
 
 
 def inverse_video(string):
+    # type: (text_type) -> text_type
     CSI = "\x1b["
 
     return CSI + "7m" + string + CSI + "0m"
+
+
+def underline_bold(string):
+    # type: (text_type) -> text_type
+    CSI = "\x1b["
+
+    return CSI + "1;4m" + string + CSI + "0m"
 
 
 def get_string_of_length(string, length):

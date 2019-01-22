@@ -6,6 +6,11 @@ The one you probably want to call is get_load_string().
 
 import os
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import Tuple  # NOQA
+
 
 def average_to_level(average, peak):
     level = 3 * (average / peak)
@@ -68,6 +73,7 @@ def levels_to_graph(levels):
 
 
 def get_load_values():
+    # type: () -> Tuple[float, float, float]
     """
     Returns three system load numbers:
     * The first is the average system load over the last 0m-1m
