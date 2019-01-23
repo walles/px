@@ -25,7 +25,7 @@ echo Recording saved into "$RECORDING"
 rm "$RECORDING"
 
 # Demo what we captured compared to what we had
-for SCREENSHOT in doc/ptop-screenshot*.gif; do
+for SCREENSHOT in doc/ptop-screenshot.gif doc/ptop-screenshot-new.gif; do
     echo
     ls -l "$SCREENSHOT"
     file "$SCREENSHOT"
