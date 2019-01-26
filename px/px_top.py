@@ -134,9 +134,9 @@ def get_notnone_cpu_time_seconds(proc):
     return 0
 
 
-def get_toplist(baseline):
-    # type: (List[px_process.PxProcess]) -> List[px_process.PxProcess]
-    toplist = adjust_cpu_times(px_process.get_all(), baseline)
+def get_toplist(baseline, current):
+    # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
+    toplist = adjust_cpu_times(current, baseline)
 
     # Sort by CPU time used, then most interesting first
     toplist = px_process.order_best_first(toplist)
@@ -167,8 +167,15 @@ def clear_screen():
     writebytes(CSI + b"H")
 
 
-def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
-    # type: (px_load_bar.PxLoadBar, List[px_process.PxProcess], int, int, bool) -> List[text_type]
+def get_screen_lines(
+    load_bar,  # type: px_load_bar.PxLoadBar
+    baseline,  # type: List[px_process.PxProcess]
+    current,   # type: List[px_process.PxProcess]
+    rows,      # type: int
+    columns,   # type: int
+    include_footer=True  # type: bool
+):
+    # type: (...) -> List[text_type]
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
@@ -176,7 +183,7 @@ def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
         u"System load: " + loadbar,
         u""]
 
-    toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline), columns)
+    toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline, current), columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
@@ -201,14 +208,22 @@ def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
     return lines
 
 
-def redraw(load_bar, baseline, rows, columns, clear=True, include_footer=True):
-    # type: (px_load_bar.PxLoadBar, List[px_process.PxProcess], int, int, bool, bool) -> None
+def redraw(
+    load_bar,  # type: px_load_bar.PxLoadBar
+    baseline,  # type: List[px_process.PxProcess]
+    current,   # type: List[px_process.PxProcess]
+    rows,      # type: int
+    columns,   # type: int
+    clear=True,  # type: bool
+    include_footer=True  # type: bool
+):
+    # type: (...) -> None
     """
     Refresh display relative to the given baseline.
 
     The new display will be rows rows x columns columns.
     """
-    lines = get_screen_lines(load_bar, baseline, rows, columns, include_footer)
+    lines = get_screen_lines(load_bar, baseline, current, rows, columns, include_footer)
     if clear:
         clear_screen()
 
@@ -237,13 +252,14 @@ def _top():
     physical, logical = px_cpuinfo.get_core_count()
     load_bar = px_load_bar.PxLoadBar(physical, logical)
     baseline = px_process.get_all()
+    current = baseline
     while True:
         window_size = px_terminal.get_window_size()
         if window_size is None:
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
-        redraw(load_bar, baseline, rows, columns)
+        redraw(load_bar, baseline, current, rows, columns)
 
         command = get_command(timeout_seconds=1)
 
@@ -254,10 +270,12 @@ def _top():
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
                 rows, columns = px_terminal.get_window_size()
-                redraw(load_bar, baseline, rows - 4, columns, include_footer=False)
+                redraw(load_bar, baseline, current, rows - 4, columns, include_footer=False)
                 return
 
             command = get_command(timeout_seconds=0)
+
+        current = px_process.get_all()
 
 
 def sigwinch_handler(signum, frame):
