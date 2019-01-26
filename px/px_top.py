@@ -30,6 +30,7 @@ CMD_RESIZE = 2
 
 
 def adjust_cpu_times(current, baseline):
+    # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
     """
     Identify processes in current that are also in baseline.
 
@@ -68,7 +69,7 @@ def adjust_cpu_times(current, baseline):
             current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds)
         pid2proc[current_proc.pid] = current_proc
 
-    return pid2proc.values()
+    return list(pid2proc.values())
 
 
 def read_select(fds, timeout_seconds):
@@ -134,6 +135,7 @@ def get_notnone_cpu_time_seconds(proc):
 
 
 def get_toplist(baseline):
+    # type: (List[px_process.PxProcess]) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(px_process.get_all(), baseline)
 
     # Sort by CPU time used, then most interesting first
