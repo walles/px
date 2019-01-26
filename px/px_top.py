@@ -200,6 +200,7 @@ def get_screen_lines(load_bar, baseline, rows, columns, include_footer=True):
 
 
 def redraw(load_bar, baseline, rows, columns, clear=True, include_footer=True):
+    # type: (px_load_bar.PxLoadBar, List[px_process.PxProcess], int, int, bool, bool) -> None
     """
     Refresh display relative to the given baseline.
 

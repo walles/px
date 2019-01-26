@@ -87,8 +87,7 @@ def main():
             # It's a search filter and not a PID, keep moving
             pass
 
-    procs = px_process.get_all()
-    procs = filter(lambda p: p.match(filterstring), procs)
+    procs = filter(lambda p: p.match(filterstring), px_process.get_all())
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.

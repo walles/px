@@ -17,6 +17,7 @@ if sys.version_info.major >= 3:
     from typing import MutableSet  # NOQA
     from typing import Text        # NOQA
     from typing import Optional    # NOQA
+    from typing import List        # NOQA
 
 
 # Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
@@ -290,6 +291,7 @@ def remove_process_and_descendants(processes, pid):
 
 
 def get_all():
+    # type: () -> List[PxProcess]
     processes = {}
     ps_lines = call_ps()
     now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
@@ -300,7 +302,7 @@ def get_all():
     resolve_links(processes, now)
     remove_process_and_descendants(processes, os.getpid())
 
-    return processes.values()
+    return list(processes.values())
 
 
 def order_best_last(processes):
