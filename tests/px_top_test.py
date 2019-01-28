@@ -25,7 +25,7 @@ def test_adjust_cpu_times():
         testutils.create_process(pid=400, cputime="0:03.00", commandline="only in baseline"),
     ]
 
-    actual = px_process.order_best_last(px_top.adjust_cpu_times(current, baseline))
+    actual = px_process.order_best_last(px_top.adjust_cpu_times(baseline, current))
     expected = px_process.order_best_last([
         px_process.create_kernel_process(now),
         testutils.create_process(pid=100, cputime="0:10.00", commandline="only in current"),

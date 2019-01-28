@@ -29,7 +29,7 @@ CMD_QUIT = 1
 CMD_RESIZE = 2
 
 
-def adjust_cpu_times(current, baseline):
+def adjust_cpu_times(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
     """
     Identify processes in current that are also in baseline.
@@ -136,7 +136,7 @@ def get_notnone_cpu_time_seconds(proc):
 
 def get_toplist(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
-    toplist = adjust_cpu_times(current, baseline)
+    toplist = adjust_cpu_times(baseline, current)
 
     # Sort by CPU time used, then most interesting first
     toplist = px_process.order_best_first(toplist)
