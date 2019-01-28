@@ -74,7 +74,7 @@ def test_redraw():
     # Just make sure it doesn't crash
     loadbar = px_load_bar.PxLoadBar(1, 1)
     baseline = px_process.get_all()
-    px_top.redraw(loadbar, baseline, baseline, 100, 10, clear=False)
+    px_top.redraw(loadbar, baseline, 100, 10, clear=False)
 
 
 def test_get_screen_lines():
@@ -84,7 +84,7 @@ def test_get_screen_lines():
     SCREEN_ROWS = 10
     SCREEN_COLUMNS = 70
     lines = px_top.get_screen_lines(
-        loadbar, baseline, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -104,6 +104,6 @@ def test_get_screen_lines_returns_enough_lines():
     SCREEN_ROWS = 100000
     SCREEN_COLUMNS = 70
     lines = px_top.get_screen_lines(
-        loadbar, baseline, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
 
     assert len(lines) == SCREEN_ROWS

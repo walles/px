@@ -169,8 +169,7 @@ def clear_screen():
 
 def get_screen_lines(
     load_bar,  # type: px_load_bar.PxLoadBar
-    baseline,  # type: List[px_process.PxProcess]
-    current,   # type: List[px_process.PxProcess]
+    toplist,   # type: List[px_process.PxProcess]
     rows,      # type: int
     columns,   # type: int
     include_footer=True  # type: bool
@@ -183,7 +182,7 @@ def get_screen_lines(
         u"System load: " + loadbar,
         u""]
 
-    toplist_table_lines = px_terminal.to_screen_lines(get_toplist(baseline, current), columns)
+    toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
@@ -210,8 +209,7 @@ def get_screen_lines(
 
 def redraw(
     load_bar,  # type: px_load_bar.PxLoadBar
-    baseline,  # type: List[px_process.PxProcess]
-    current,   # type: List[px_process.PxProcess]
+    toplist,   # type: List[px_process.PxProcess]
     rows,      # type: int
     columns,   # type: int
     clear=True,  # type: bool
@@ -219,11 +217,11 @@ def redraw(
 ):
     # type: (...) -> None
     """
-    Refresh display relative to the given baseline.
+    Refresh display.
 
     The new display will be rows rows x columns columns.
     """
-    lines = get_screen_lines(load_bar, baseline, current, rows, columns, include_footer)
+    lines = get_screen_lines(load_bar, toplist, rows, columns, include_footer)
     if clear:
         clear_screen()
 
@@ -259,7 +257,8 @@ def _top():
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
-        redraw(load_bar, baseline, current, rows, columns)
+        toplist = get_toplist(baseline, current)
+        redraw(load_bar, toplist, rows, columns)
 
         command = get_command(timeout_seconds=1)
 
@@ -270,7 +269,7 @@ def _top():
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
                 rows, columns = px_terminal.get_window_size()
-                redraw(load_bar, baseline, current, rows - 4, columns, include_footer=False)
+                redraw(load_bar, toplist, rows - 4, columns, include_footer=False)
                 return
 
             command = get_command(timeout_seconds=0)
