@@ -80,6 +80,8 @@ if python --version 2>&1 | grep " 3" ; then
   mypy ./*.py ./*/*.py --python-version=2.7
 fi
 
+flake8 px tests scripts setup.py
+
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
 # that?
 PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
@@ -100,8 +102,6 @@ rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
 PX_PEX="${ENVDIR}/px.pex"
 rm -f "${PX_PEX}"
 pex --python-shebang="#!/usr/bin/env $1" --disable-cache -r requirements.txt "${ENVDIR}"/pxpx-*.whl -m px.px -o "${PX_PEX}"
-
-flake8 px tests scripts setup.py
 
 echo
 if unzip -qq -l "${PX_PEX}" '*.so' ; then
