@@ -175,6 +175,14 @@ def get_screen_lines(
     include_footer=True  # type: bool
 ):
     # type: (...) -> List[text_type]
+
+    # Hand out different amount of lines to the different sections
+    header_height = 2
+    footer_height = 0
+    if include_footer:
+        footer_height = 1
+    cputop_height = rows - header_height - footer_height
+
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
@@ -193,16 +201,14 @@ def get_screen_lines(
     # number of processes
     toplist_table_lines += rows * ['']
 
-    lines += toplist_table_lines
+    lines += toplist_table_lines[0:cputop_height]
 
     if include_footer:
         footer_line = u"  q - Quit"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
-        lines = lines[0:rows - 1] + [footer_line]
-    else:
-        lines = lines[0:rows]
+        lines += [footer_line]
 
     return lines
 
