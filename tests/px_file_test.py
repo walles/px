@@ -1,5 +1,7 @@
 import re
 
+import pytest
+
 from px import px_file
 
 
@@ -162,3 +164,7 @@ def test_str_resolve():
     test_me.type = "IPv4"
     test_me.name = "this:is:garbage:17600"
     assert str(test_me) == "[IPv4] this:is:garbage:17600 (LISTEN)"
+
+
+if __name__ == "__main__":
+    pytest.main()

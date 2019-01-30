@@ -1,17 +1,14 @@
+# FIXME: Consider this:
+# https://groups.google.com/forum/#!topic/bazel-discuss/d1RKUmyve_Q
+#
+# Should we have one of these rules per test file?
+
+# FIXME: Generate targets for the other tests as well, based on file system contents
 py_test(
-    name = "px_tests",
+    name = "px_file_test",
+
     srcs = [
-        'px_commandline_test.py',
-        'px_cpuinfo_test.py',
         'px_file_test.py',
-        'px_ipc_map_test.py',
-        'px_load_bar_test.py',
-        'px_load_test.py',
-        'px_loginhistory_test.py',
-        'px_process_test.py',
-        'px_processinfo_test.py',
-        'px_terminal_test.py',
-        'px_top_test.py',
         'testutils.py',
     ],
 
@@ -19,3 +16,5 @@ py_test(
         "//px",
     ],
 )
+
+# FIXME: Generate an umbrella rule that depends on all generated test rules
