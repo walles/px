@@ -1,9 +1,10 @@
+load("@my_deps//:requirements.bzl", "all_requirements")
 py_binary(
     name='px',
 
     # FIXME: Auto generate the sources list
     # FIXME: Handle auto-generated version.py special?
-    srcs=[
+    srcs = [
         '__init__.py',
         'px.py',
         'px_commandline.py',
@@ -18,5 +19,10 @@ py_binary(
         'px_processinfo.py',
         'px_terminal.py',
         'px_top.py',
-        'version.py',    ],
+        'version.py',
+    ],
+
+    deps = [
+
+    ] + all_requirements,
 )
