@@ -25,4 +25,9 @@ py_binary(
     deps = [
 
     ] + all_requirements,
+
+    # Required for being able to "bazel test tests/px_tests"
+    visibility = [
+        "//visibility:public",
+    ]
 )
