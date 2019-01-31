@@ -1,1 +1,8 @@
-../requirements.txt
+docopt == 0.6.2
+python-dateutil == 2.7.5
+pex == 1.4.4
+pip == 10.0.1
+flake8 == 3.5.0
+wheel == 0.31.1
+setuptools == 39.2.0
+pytest == 4.2.0

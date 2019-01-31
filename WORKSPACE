@@ -15,6 +15,11 @@ load("@io_bazel_rules_python//python:pip.bzl", "pip_import")
 # FIXME: This rule looks in "external/requirements.txt", how to get it to
 # look in the workspace root? After fixing this, remove the "external" symlink
 # from the top of the repo.
+#
+# FIXME: external/requirements.txt is a concatenation of requirements.txt and
+# requirements-dev.txt. We should load them separately:
+# * https://stackoverflow.com/questions/50255144/bazel-combine-multiple-rules-in-macro
+# * https://github.com/bazelbuild/rules_python/issues/137
 pip_import(name="my_deps", requirements=":requirements.txt")
 
 # Execute the generated requirements file

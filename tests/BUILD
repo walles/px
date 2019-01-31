@@ -1,3 +1,6 @@
+# FIXME: Load only the test requirements
+load("@my_deps//:requirements.bzl", "all_requirements")
+
 # FIXME: Consider this:
 # https://groups.google.com/forum/#!topic/bazel-discuss/d1RKUmyve_Q
 #
@@ -14,7 +17,7 @@ py_test(
 
     deps = [
         "//px",
-    ],
+    ] + all_requirements,
 )
 
 # FIXME: Generate an umbrella rule that depends on all generated test rules

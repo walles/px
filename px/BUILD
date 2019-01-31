@@ -1,3 +1,4 @@
+# FIXME: Load only the production requirements
 load("@my_deps//:requirements.bzl", "all_requirements")
 py_binary(
     name='px',
