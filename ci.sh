@@ -84,7 +84,7 @@ flake8 px tests scripts setup.py
 
 # FIXME: We want to add to the coverage report, not overwrite it. How do we do
 # that?
-PYTEST_ADDOPTS="--cov=px -v" ./setup.py test
+PYTEST_ADDOPTS="--cov=px -v --durations=10" ./setup.py test
 
 # Create px wheel...
 rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
