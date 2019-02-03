@@ -28,6 +28,20 @@ def mkdir_p(path):
             raise
 
 
+def get_depsfile_name(test_file, test_name):
+    # Dependencies file naming scheme:
+    # .pytest-avoidance/<VM-identifier>/<path to .py file>/testname.deps
+
+    # FIXME: Ensure test_file path doesn't start with "/", or CACHEROOT and VM_IDENTIFIER
+    # will be dropped by os.path.join()
+    cachedir = os.path.join(CACHEROOT, VM_IDENTIFIER, test_file)
+
+    print ("Cachedir name: " + cachedir)
+    mkdir_p(cachedir)
+    depsfile_name = os.path.join(cachedir, test_name + ".deps")
+    print ("Depsfile name: " + depsfile_name)
+
+
 def run_test(test_file, test_name):
     # FIXME: Check with cache, do we really need to run this?
 
@@ -42,21 +56,7 @@ def run_test(test_file, test_name):
     cov.stop()
     coverage_data = cov.get_data()
 
-    # Store the file-timestamps list into a file
-    #
-    # File naming scheme:
-    # .pytest-avoidance/<VM-identifier>/<path to .py file>/testname.deps
-
-    # FIXME: Ensure test_file path doesn't start with "/", or CACHEROOT and VM_IDENTIFIER
-    # will be dropped by os.path.join()
-    cachedir = os.path.join(CACHEROOT, VM_IDENTIFIER, test_file)
-
-    print ("Cachedir name: " + cachedir)
-    mkdir_p(cachedir)
-    depsfile_name = os.path.join(cachedir, test_name + ".deps")
-    print ("Depsfile name: " + depsfile_name)
-    # Now write our stuff into depsfile
-    with open(depsfile_name, "w") as depsfile:
+    with open(get_depsfile_name(test_file, test_name), "w") as depsfile:
         for file in coverage_data.measured_files():
             epoch_timestamp = os.path.getmtime(file)
             datetime_timestamp = datetime.datetime.fromtimestamp(epoch_timestamp, dateutil.tz.tzlocal())
