@@ -8,8 +8,6 @@ import os
 import errno
 import pytest
 import coverage
-import datetime
-import dateutil.tz
 
 CACHEROOT = '.pytest-avoidance'
 
@@ -41,6 +39,8 @@ def get_depsfile_name(test_file, test_name):
     depsfile_name = os.path.join(cachedir, test_name + ".deps")
     print ("Depsfile name: " + depsfile_name)
 
+    return depsfile_name
+
 
 def run_test(test_file, test_name):
     # FIXME: Check with cache, do we really need to run this?
@@ -57,11 +57,46 @@ def run_test(test_file, test_name):
     coverage_data = cov.get_data()
 
     with open(get_depsfile_name(test_file, test_name), "w") as depsfile:
-        for file in coverage_data.measured_files():
-            epoch_timestamp = os.path.getmtime(file)
-            datetime_timestamp = datetime.datetime.fromtimestamp(epoch_timestamp, dateutil.tz.tzlocal())
-            depsfile.write("%s %s\n" % (datetime_timestamp.isoformat(), file))
+        for filename in coverage_data.measured_files():
+            depsfile.write("%s\n" % (filename,))
+
+
+def has_cached_success(test_file, test_name):
+    depsfile_name = get_depsfile_name(test_file, test_name)
+    if not os.path.isfile(depsfile_name):
+        # Nothing cached for this test
+        print("Cache entry doesn't exist, no hit: " + depsfile_name)
+        return False
+
+    cache_timestamp = os.path.getmtime(depsfile_name)
+    with open(depsfile_name, 'r') as depsfile:
+        for depsline in depsfile:
+            filename = depsline.rstrip()
+            if not os.path.isfile(filename):
+                # Dependency is gone
+                # FIXME: Remove this cache entry here?
+                print("Dependency gone, no hit: " + filename)
+                return False
+
+            file_timestamp = os.path.getmtime(filename)
+
+            # FIXME: Is some wiggle room needed in this comparison?
+            if file_timestamp > cache_timestamp:
+                # Dependency has changed
+                # FIXME: Remove this cache entry here?
+                print("Dependency timestamp mismatch, no hit: " + filename)
+                return False
+
+    # No mismatch found for this test, it's a cache hit!
+    return True
+
+
+def maybe_run_test(test_file, test_name):
+    if has_cached_success(test_file, test_name):
+        print("[CACHED]: SUCCESS: %s::%s" % (test_file, test_name))
+    else:
+        run_test("tests/px_file_test.py", "test_listen_name")
 
 
 # FIXME: Discover these like pytest does
-run_test("tests/px_file_test.py", "test_listen_name")
+maybe_run_test("tests/px_file_test.py", "test_listen_name")
