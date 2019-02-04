@@ -43,20 +43,27 @@ def get_depsfile_name(test_file, test_name):
 
 
 def run_test(test_file, test_name):
-    # Run test and collect coverage data
+    """
+    Run test and collect coverage data.
+
+    Returns 0 on success and other numbers on failure.
+    """
     cov = coverage.Coverage()
     cov.start()
-    exitcode = pytest.main(args=[test_file + "::" + test_name])
-    if exitcode is not 0:
-        # FIXME: Remove any cached data for this test and run the next one instead
-        pass
-
-    cov.stop()
+    try:
+        exitcode = pytest.main(args=[test_file + "::" + test_name])
+        if exitcode is not 0:
+            # We don't cache failures
+            return exitcode
+    finally:
+        cov.stop()
     coverage_data = cov.get_data()
 
     with open(get_depsfile_name(test_file, test_name), "w") as depsfile:
         for filename in coverage_data.measured_files():
             depsfile.write("%s\n" % (filename,))
+
+    return 0
 
 
 def has_cached_success(test_file, test_name):
@@ -72,16 +79,14 @@ def has_cached_success(test_file, test_name):
             filename = depsline.rstrip()
             if not os.path.isfile(filename):
                 # Dependency is gone
-                # FIXME: Remove this cache entry here?
                 print("Dependency gone, no hit: " + filename)
                 return False
 
             file_timestamp = os.path.getmtime(filename)
 
             if file_timestamp > cache_timestamp:
-                # Dependency has changed
-                # FIXME: Remove this cache entry here?
-                print("Dependency timestamp mismatch, no hit: " + filename)
+                # Dependency updated
+                print("Dependency updated, no hit: " + filename)
                 return False
 
     # No mismatch found for this test, it's a cache hit!
@@ -89,10 +94,16 @@ def has_cached_success(test_file, test_name):
 
 
 def maybe_run_test(test_file, test_name):
+    """
+    Produce test result, from cache or from real run.
+
+    Returns 0 on success and other numbers on failure.
+    """
     if has_cached_success(test_file, test_name):
         print("[CACHED]: SUCCESS: %s::%s" % (test_file, test_name))
+        return 0
     else:
-        run_test("tests/px_file_test.py", "test_listen_name")
+        return run_test("tests/px_file_test.py", "test_listen_name")
 
 
 # FIXME: Discover these like pytest does
