@@ -4,6 +4,7 @@ Run tests using pytest but only ones that need rerunning
 """
 
 import os
+import sys
 
 import errno
 import pytest
@@ -11,8 +12,15 @@ import coverage
 
 CACHEROOT = '.pytest-avoidance'
 
-# FIXME: This should be python-<version>-<hash-of-the-python-binary>
-VM_IDENTIFIER = 'python-1.2.3'
+
+def get_vm_identifier():
+    (major, minor, micro, *_) = sys.version_info
+
+    # FIXME: This should be python-<version>-<hash-of-the-python-binary-and-its-path>
+    return "python-{}.{}.{}".format(major, minor, micro)
+
+
+VM_IDENTIFIER = get_vm_identifier()
 
 
 # From: https://stackoverflow.com/a/600612/473672
