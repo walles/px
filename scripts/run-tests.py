@@ -5,8 +5,9 @@ Run tests using pytest but only ones that need rerunning
 
 import os
 import sys
-
 import errno
+import hashlib
+
 import pytest
 import coverage
 
@@ -14,10 +15,22 @@ CACHEROOT = '.pytest-avoidance'
 
 
 def get_vm_identifier():
-    (major, minor, micro, *_) = sys.version_info
+    """
+    Returns a Python VM identifier "python-1.2.3-HASH", where the
+    HASH is a hash of the VM contents and its location on disk.
+    """
 
-    # FIXME: This should be python-<version>-<hash-of-the-python-binary-and-its-path>
-    return "python-{}.{}.{}".format(major, minor, micro)
+    (major, minor, micro, releaselevel, serial) = sys.version_info
+
+    # From: https://stackoverflow.com/a/3431838/473672
+    hash_md5 = hashlib.md5()
+    with open(sys.executable, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    hash_md5.update(sys.executable.encode('utf-8'))
+    hash = hash_md5.hexdigest()
+
+    return "python-{}.{}.{}-{}".format(major, minor, micro, hash)
 
 
 VM_IDENTIFIER = get_vm_identifier()
@@ -27,7 +40,7 @@ VM_IDENTIFIER = get_vm_identifier()
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc:  # Python >2.5
+    except OSError as exc:
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
         else:
@@ -42,10 +55,10 @@ def get_depsfile_name(test_file, test_name):
     # will be dropped by os.path.join()
     cachedir = os.path.join(CACHEROOT, VM_IDENTIFIER, test_file)
 
-    print ("Cachedir name: " + cachedir)
+    print("Cachedir name: " + cachedir)
     mkdir_p(cachedir)
     depsfile_name = os.path.join(cachedir, test_name + ".deps")
-    print ("Depsfile name: " + depsfile_name)
+    print("Depsfile name: " + depsfile_name)
 
     return depsfile_name
 
