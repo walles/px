@@ -43,8 +43,6 @@ def get_depsfile_name(test_file, test_name):
 
 
 def run_test(test_file, test_name):
-    # FIXME: Check with cache, do we really need to run this?
-
     # Run test and collect coverage data
     cov = coverage.Coverage()
     cov.start()
@@ -80,7 +78,6 @@ def has_cached_success(test_file, test_name):
 
             file_timestamp = os.path.getmtime(filename)
 
-            # FIXME: Is some wiggle room needed in this comparison?
             if file_timestamp > cache_timestamp:
                 # Dependency has changed
                 # FIXME: Remove this cache entry here?
