@@ -51,8 +51,14 @@ def get_depsfile_name(test_file, test_name):
     # Dependencies file naming scheme:
     # .pytest-avoidance/<VM-identifier>/<path to .py file>/testname.deps
 
-    # FIXME: Ensure test_file path doesn't start with "/", or CACHEROOT and VM_IDENTIFIER
-    # will be dropped by os.path.join()
+    test_file = os.path.abspath(test_file)
+    if test_file[1] == ':':
+        # Somebody on a Windows box, please test this
+        test_file = test_file.replace(':', '/', 1)
+    if test_file[0] == '/':
+        # Starting the path with '/' would mess up os.path.join()
+        test_file = test_file[1:]
+
     cachedir = os.path.join(CACHEROOT, VM_IDENTIFIER, test_file)
 
     print("Cachedir name: " + cachedir)
@@ -128,4 +134,5 @@ def maybe_run_test(test_file, test_name):
 
 
 # FIXME: Discover these like pytest does
-maybe_run_test("tests/px_file_test.py", "test_listen_name")
+exitcode = maybe_run_test("tests/px_file_test.py", "test_listen_name")
+sys.exit(exitcode)
