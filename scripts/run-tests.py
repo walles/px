@@ -4,7 +4,9 @@ Run tests using pytest but only ones that need rerunning
 """
 
 import os
+import re
 import sys
+import glob
 import errno
 import hashlib
 
@@ -130,9 +132,25 @@ def maybe_run_test(test_file, test_name):
         print("[CACHED]: SUCCESS: %s::%s" % (test_file, test_name))
         return 0
     else:
-        return run_test("tests/px_file_test.py", "test_listen_name")
+        return run_test(test_file, test_name)
 
 
 # FIXME: Discover these like pytest does
-exitcode = maybe_run_test("tests/px_file_test.py", "test_listen_name")
-sys.exit(exitcode)
+something_failed = False
+TEST_FUNCTION = re.compile("^def (test_[^)]+)\(")
+for testfile_name in glob.glob("tests/*_test.py"):
+    with open(testfile_name, 'r') as testfile:
+        for line in testfile:
+            matches = TEST_FUNCTION.match(line.rstrip())
+            if not matches:
+                continue
+            test_name = matches.group(1)
+            print(test_name)
+            exitcode = maybe_run_test(testfile_name, test_name)
+            if exitcode != 0:
+                something_failed = True
+
+if something_failed:
+    sys.exit(1)
+else:
+    sys.exit(0)
