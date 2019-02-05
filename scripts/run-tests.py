@@ -63,10 +63,8 @@ def get_depsfile_name(test_file, test_name):
 
     cachedir = os.path.join(CACHEROOT, VM_IDENTIFIER, test_file)
 
-    print("Cachedir name: " + cachedir)
     mkdir_p(cachedir)
     depsfile_name = os.path.join(cachedir, test_name + ".deps")
-    print("Depsfile name: " + depsfile_name)
 
     return depsfile_name
 
@@ -145,7 +143,6 @@ for testfile_name in glob.glob("tests/*_test.py"):
             if not matches:
                 continue
             test_name = matches.group(1)
-            print(test_name)
             exitcode = maybe_run_test(testfile_name, test_name)
             if exitcode != 0:
                 something_failed = True
