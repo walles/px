@@ -135,7 +135,7 @@ def maybe_run_test(test_file, test_name):
         return run_test(test_file, test_name)
 
 
-# FIXME: Discover these like pytest does
+# Discover these like pytest does
 something_failed = False
 TEST_FUNCTION = re.compile("^def (test_[^)]+)\(")
 for testfile_name in glob.glob("tests/*_test.py"):
@@ -150,7 +150,10 @@ for testfile_name in glob.glob("tests/*_test.py"):
             if exitcode != 0:
                 something_failed = True
 
+print("")
 if something_failed:
+    print("There were failures!")
     sys.exit(1)
 else:
+    print("All tests passed!")
     sys.exit(0)
