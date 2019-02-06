@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import glob
+import time
 import errno
 import hashlib
 
@@ -134,7 +135,9 @@ def maybe_run_test(test_file, test_name):
 
 
 # Discover these like pytest does
-something_failed = False
+passcount = 0
+failcount = 0
+t0 = time.time()
 TEST_FUNCTION = re.compile("^def (test_[^)]+)\(")
 for testfile_name in glob.glob("tests/*_test.py"):
     with open(testfile_name, 'r') as testfile:
@@ -144,11 +147,20 @@ for testfile_name in glob.glob("tests/*_test.py"):
                 continue
             test_name = matches.group(1)
             exitcode = maybe_run_test(testfile_name, test_name)
-            if exitcode != 0:
-                something_failed = True
+            if exitcode is 0:
+                passcount += 1
+            else:
+                failcount += 1
+t1 = time.time()
+dt = t1 - t0
 
 print("")
-if something_failed:
+print("{} tests run in {}s".format(passcount + failcount, int(dt)))
+print("PASS: {}".format(passcount))
+print("FAIL: {}".format(failcount))
+
+print("")
+if failcount > 0:
     print("There were failures!")
     sys.exit(1)
 else:
