@@ -57,6 +57,8 @@ if [ ! -d "${ENVDIR}" ]; then
   # shellcheck source=/dev/null
   . "${ENVDIR}"/bin/activate
 
+  pip install -r requirements.txt
+
   # Fix tools versions
   pip install -r requirements-dev.txt
 
@@ -82,9 +84,7 @@ fi
 
 flake8 px tests scripts setup.py
 
-# FIXME: We want to add to the coverage report, not overwrite it. How do we do
-# that?
-PYTEST_ADDOPTS="--cov=px -v --durations=10" ./setup.py test
+./scripts/run-tests.py
 
 # Create px wheel...
 rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
