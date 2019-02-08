@@ -87,7 +87,7 @@ flake8 px tests scripts setup.py
 # We're getting DeprecationWarnings from pytest 4.2.0, which is the latest
 # version at the time of writing this comment.
 # FIXME: Go for just -Werror as soon as possible
-python -Werror -Wdefault::DeprecationWarning ./scripts/run-tests.py
+python -Werror -Wdefault::DeprecationWarning -Wdefault::PendingDeprecationWarning ./scripts/run-tests.py
 
 # Create px wheel...
 rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
@@ -116,10 +116,14 @@ EOF
 fi
 
 echo
-"${PX_PEX}"
+# FIXME: We can't do -Werror until a new Docopt release, and Docopt seems dead:
+# https://github.com/docopt/docopt/pull/435
+python -Wdefault "${PX_PEX}"
 
 echo
-"${PX_PEX}" $$
+# FIXME: We can't do -Werror until a new Docopt release, and Docopt seems dead:
+# https://github.com/docopt/docopt/pull/435
+python -Wdefault "${PX_PEX}" $$
 
 echo
 test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"

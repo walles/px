@@ -1,7 +1,7 @@
-pex == 1.4.4
+pex == 1.6.1
 pip == 10.0.1
 flake8 == 3.5.0
 wheel == 0.31.1
-setuptools == 39.2.0
+setuptools == 40.6.2
 pytest == 4.2.0
 coverage == 4.5.2

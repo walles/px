@@ -1,3 +1,6 @@
 six == 1.12.0
-docopt == 0.6.2
 python-dateutil == 2.7.5
+
+# FIXME: When replacing Docopt (it's dead) with Click (for example),
+# remedy the Docopt FIXMEs in ci.sh as well.
+docopt == 0.6.2
