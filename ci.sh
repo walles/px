@@ -116,14 +116,10 @@ EOF
 fi
 
 echo
-# FIXME: We can't do -Werror until a new Docopt release, and Docopt seems dead:
-# https://github.com/docopt/docopt/pull/435
-python -Wdefault "${PX_PEX}"
+python -Werror -Wdefault:'the imp module' "${PX_PEX}"
 
 echo
-# FIXME: We can't do -Werror until a new Docopt release, and Docopt seems dead:
-# https://github.com/docopt/docopt/pull/435
-python -Wdefault "${PX_PEX}" $$
+python -Werror -Wdefault:'the imp module' "${PX_PEX}" $$
 
 echo
 test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"

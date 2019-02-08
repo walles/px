@@ -37,7 +37,6 @@ of which processes are most active right now.
 import sys
 
 import os
-import docopt
 from . import px_top
 from . import px_install
 from . import px_process
@@ -67,27 +66,42 @@ def main():
     if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
         sys.argv.append("--top")
 
-    args = docopt.docopt(__doc__, version=version.VERSION)
+    if len(sys.argv) == 1:
+        # This is an empty filterstring
+        sys.argv.append("")
 
-    if args['--install']:
+    if len(sys.argv) > 2:
+        sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
+        print(__doc__)
+        sys.exit(1)
+
+    arg = sys.argv[1]
+
+    if arg == '--install':
         install()
         return
 
-    if args['--top']:
+    if arg == '--top':
         px_top.top()
         return
 
-    filterstring = args['<filter>']
-    if filterstring:
-        try:
-            pid = int(filterstring)
-            px_processinfo.print_process_info(pid)
-            return
-        except ValueError:
-            # It's a search filter and not a PID, keep moving
-            pass
+    if arg == '--help':
+        print(__doc__)
+        return
 
-    procs = filter(lambda p: p.match(filterstring), px_process.get_all())
+    if arg == '--version':
+        print(version.VERSION)
+        return
+
+    try:
+        pid = int(arg)
+        px_processinfo.print_process_info(pid)
+        return
+    except ValueError:
+        # It's a search filter and not a PID, keep moving
+        pass
+
+    procs = filter(lambda p: p.match(arg), px_process.get_all())
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
