@@ -116,10 +116,12 @@ EOF
 fi
 
 echo
-python -Werror -Wdefault:'the imp module' "${PX_PEX}"
+# FIXME: The SyntaxError thing is from Docopt 0.6.2
+python -Werror -Wdefault:'the imp module' -Wdefault::SyntaxError "${PX_PEX}"
 
 echo
-python -Werror -Wdefault:'the imp module' "${PX_PEX}" $$
+# FIXME: The SyntaxError thing is from Docopt 0.6.2
+python -Werror -Wdefault:'the imp module' -Wdefault::SyntaxError "${PX_PEX}" $$
 
 echo
 test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"
