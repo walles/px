@@ -201,7 +201,8 @@ def get_screen_lines(
     # number of processes
     toplist_table_lines += rows * ['']
 
-    lines += toplist_table_lines[0:cputop_height]
+    lines += [px_terminal.bold("Top CPU using processes")]
+    lines += toplist_table_lines[0:cputop_height - 1]
 
     if include_footer:
         footer_line = u"  q - Quit"
