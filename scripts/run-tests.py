@@ -138,7 +138,7 @@ def maybe_run_test(test_file, test_name):
 passcount = 0
 failcount = 0
 t0 = time.time()
-TEST_FUNCTION = re.compile("^def (test_[^)]+)\(")
+TEST_FUNCTION = re.compile("^def (test_[^)]+)\\(")
 for testfile_name in glob.glob("tests/*_test.py"):
     with open(testfile_name, 'r') as testfile:
         for line in testfile:

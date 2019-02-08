@@ -84,7 +84,10 @@ fi
 
 flake8 px tests scripts setup.py
 
-./scripts/run-tests.py
+# We're getting DeprecationWarnings from pytest 4.2.0, which is the latest
+# version at the time of writing this comment.
+# FIXME: Go for just -Werror as soon as possible
+python -Werror -Wdefault::DeprecationWarning ./scripts/run-tests.py
 
 # Create px wheel...
 rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
