@@ -18,7 +18,9 @@ def get_window_size():
         # We shouldn't truncate lines when piping
         return None
 
-    result = os.popen('stty size', 'r').read().split()
+    result = None
+    with os.popen('stty size', 'r') as stty_size:
+        result = stty_size.read().split()
     if len(result) < 2:
         # Getting the terminal window width failed, don't truncate
         return None
