@@ -14,7 +14,6 @@ the highest number of entries in that file.
 
 import time
 
-import docopt
 from . import testutils
 from px import px_file
 from px import px_ipc_map
@@ -68,9 +67,7 @@ def print_statistics(name, values):
     print("{} is {:.2f}s±{:.2f}s".format(name, middle, radius))
 
 
-def main(args):
-    lsof_file = args['<FILE>']
-
+def main(lsof_file):
     print("Finding most popular PID...")
     files = None
     with open(lsof_file, "r") as lsof_output:
@@ -97,4 +94,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(docopt.docopt(__doc__))
+    main(sys.argv[1])
