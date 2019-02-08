@@ -5,10 +5,13 @@ from . import px_process
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
+    from six import text_type    # NOQA
+    from typing import Tuple     # NOQA
+    from typing import Optional  # NOQA
 
 
 def get_window_size():
+    # type: () -> Optional[Tuple[int, int]]
     """
     Return the terminal window size as tuple (rows, columns) if available, or
     None if not.

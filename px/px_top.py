@@ -274,7 +274,6 @@ def _top():
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
-                rows, columns = px_terminal.get_window_size()
                 redraw(load_bar, toplist, rows - 4, columns, include_footer=False)
                 return
 
