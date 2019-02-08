@@ -116,10 +116,10 @@ EOF
 fi
 
 echo
-"${PX_PEX}"
+python -Werror -Wdefault:'the imp module' "${PX_PEX}"
 
 echo
-"${PX_PEX}" $$
+python -Werror -Wdefault:'the imp module' "${PX_PEX}" $$
 
 echo
 test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"

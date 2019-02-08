@@ -11,7 +11,7 @@ import dateutil.tz
 LAST_USERNAME = "([^ ]+)"
 LAST_DEVICE = "([^ ]+)"
 LAST_ADDRESS = "([^ ]+)?"
-LAST_PID = "( \[[0-9]+\])?"
+LAST_PID = "( \\[[0-9]+\\])?"
 LAST_FROM = "(... ... .. ..:..)"
 LAST_DASH = " [- ] "
 LAST_TO = "[^(]*"
@@ -28,12 +28,12 @@ LAST_RE = re.compile(
     LAST_FROM +
     LAST_DASH +
     LAST_TO +
-    " *(\(" +
+    " *(\\(" +
     LAST_DURATION +
-    "\))?"
+    "\\))?"
 )
 
-TIMEDELTA_RE = re.compile("(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
+TIMEDELTA_RE = re.compile("(([0-9]+)\\+)?([0-9][0-9]):([0-9][0-9])")
 
 # Month names in English locale
 MONTHS = {

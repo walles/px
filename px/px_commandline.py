@@ -5,10 +5,10 @@ import os.path
 
 
 # Match "[kworker/0:0H]", no grouping
-LINUX_KERNEL_PROC = re.compile("^\[[^/ ]+/?[^/ ]+\]$")
+LINUX_KERNEL_PROC = re.compile("^\\[[^/ ]+/?[^/ ]+\\]$")
 
 # Match "(python2.7)", no grouping
-OSX_PARENTHESIZED_PROC = re.compile("^\([^()]+\)$")
+OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 
 
 def to_array(commandline):
