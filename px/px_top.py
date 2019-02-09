@@ -12,6 +12,7 @@ from . import px_process
 from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
+from . import px_launchcounter
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -170,6 +171,7 @@ def clear_screen():
 def get_screen_lines(
     load_bar,  # type: px_load_bar.PxLoadBar
     toplist,   # type: List[px_process.PxProcess]
+    launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
     columns,   # type: int
     include_footer=True  # type: bool
@@ -218,11 +220,11 @@ def get_screen_lines(
 
     if top_launched_height > 0:
         lines += ['', px_terminal.bold("Most commonly launched binaries")]
-        lines += ["FIXME"] * (top_launched_height - 2)
+        lines += launchcounter.get_launched_screen_lines(top_launched_height - 2, columns)
 
     if top_launchers_height > 0:
         lines += ['', px_terminal.bold("These processes launch the most binaries")]
-        lines += ["FIXME"] * (top_launchers_height - 2)
+        lines += launchcounter.get_launchers_screen_lines(top_launchers_height - 2, columns)
 
     if include_footer:
         footer_line = u"  q - Quit"
@@ -237,6 +239,7 @@ def get_screen_lines(
 def redraw(
     load_bar,  # type: px_load_bar.PxLoadBar
     toplist,   # type: List[px_process.PxProcess]
+    launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
     columns,   # type: int
     clear=True,  # type: bool
@@ -248,7 +251,8 @@ def redraw(
 
     The new display will be rows rows x columns columns.
     """
-    lines = get_screen_lines(load_bar, toplist, rows, columns, include_footer)
+    lines = get_screen_lines(
+        load_bar, toplist, launchcounter, rows, columns, include_footer)
     if clear:
         clear_screen()
 
@@ -278,14 +282,16 @@ def _top():
     load_bar = px_load_bar.PxLoadBar(physical, logical)
     baseline = px_process.get_all()
     current = baseline
+    launchcounter = px_launchcounter.Launchcounter()
     while True:
+        launchcounter.update(current)
         window_size = px_terminal.get_window_size()
         if window_size is None:
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
         toplist = get_toplist(baseline, current)
-        redraw(load_bar, toplist, rows, columns)
+        redraw(load_bar, toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
 
@@ -295,7 +301,7 @@ def _top():
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
-                redraw(load_bar, toplist, rows - 4, columns, include_footer=False)
+                redraw(load_bar, toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
 
             command = get_command(timeout_seconds=0)
