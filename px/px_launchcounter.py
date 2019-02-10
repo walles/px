@@ -50,12 +50,12 @@ class Launchcounter(object):
 
         new_procs = []  # List[px_process.PxProcess]
         for new_proc in after:
-            if old_proc.pid not in pid2oldProc:
+            if new_proc.pid not in pid2oldProc:
                 # This is a new process
                 new_procs.append(new_proc)
                 continue
 
-            old_proc = pid2oldProc[old_proc.pid]
+            old_proc = pid2oldProc[new_proc.pid]
             if old_proc.start_time != new_proc.start_time:
                 # This is a new process, PID has been reused
                 new_procs.append(new_proc)
