@@ -17,6 +17,7 @@ from . import px_launchcounter
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List    # NOQA
+    from typing import Dict    # NOQA
     from six import text_type  # NOQA
 
 # Used for informing our getch() function that a window resize has occured
@@ -43,7 +44,7 @@ def adjust_cpu_times(baseline, current):
 
     Neither current nor baseline are changed by this function.
     """
-    pid2proc = {}
+    pid2proc = {}  # type: Dict[int,px_process.PxProcess]
     for proc in current:
         pid2proc[proc.pid] = proc
 
