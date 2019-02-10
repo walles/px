@@ -44,7 +44,17 @@ class Launchcounter(object):
                 else:
                     self._launchers[parent_binary] = [1, 0]
 
-            # FIXME: Update self._launchers as well
+                # Update indirect launch counts
+                indirect_parent = new_process.parent.parent
+                while indirect_parent is not None:
+                    indirect_binary = indirect_parent.command
+                    if indirect_binary in self._launchers:
+                        counts = self._launchers[indirect_binary]
+                        counts[1] += 1
+                    else:
+                        self._launchers[indirect_binary] = [0, 1]
+
+                    indirect_parent = indirect_parent.parent
 
     def _list_new_launches(
         self,
