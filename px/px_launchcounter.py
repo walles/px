@@ -79,12 +79,12 @@ class Launchcounter(object):
         # type: (int, int) -> List[text_type]
 
         lines = []  # type: List[text_type]
-        for entry in sorted(self._binaries.items(), key=operator.itemgetter(1)):
+        for entry in sorted(self._binaries.items(), key=operator.itemgetter(1), reverse=True):
             binary = entry[0]
+            count = entry[1]
 
             # FIXME: Truncate at columns columns
-            # FIXME: Get the count in here as well
-            lines.append(binary)
+            lines.append('{:>5} {}'.format(count, binary))
             if len(lines) >= rows:
                 break
 
