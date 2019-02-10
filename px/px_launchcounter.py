@@ -97,7 +97,8 @@ class Launchcounter(object):
     def get_launched_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        heading = u'{:>5}  {}'.format('Count', 'Binary')
+        COLUMNS = u'{:>5}  {}'
+        heading = COLUMNS.format('Count', 'Binary')
         heading = px_terminal.get_string_of_length(heading, columns)
         heading = px_terminal.underline_bold(heading)
         lines = [heading]
@@ -106,7 +107,7 @@ class Launchcounter(object):
             count = entry[1]
 
             # FIXME: Truncate at columns columns
-            lines.append('{:>5}  {}'.format(count, binary))
+            lines.append(COLUMNS.format(count, binary))
             if len(lines) >= rows:
                 break
 
@@ -118,13 +119,17 @@ class Launchcounter(object):
     def get_launchers_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        lines = []  # type: List[text_type]
+        COLUMNS = u'{:>6}  {:>8}  {}'
+        heading = COLUMNS.format('Direct', 'Indirect', "Launcher")
+        heading = px_terminal.get_string_of_length(heading, columns)
+        heading = px_terminal.underline_bold(heading)
+        lines = [heading]
         for entry in sorted(self._launchers.items(), key=operator.itemgetter(1), reverse=True):
             binary = entry[0]
             counts = entry[1]
 
             # FIXME: Truncate at columns columns
-            lines.append('{:>5}  {:>5}  {}'.format(counts[0], counts[1], binary))
+            lines.append(COLUMNS.format(counts[0], counts[1], binary))
             if len(lines) >= rows:
                 break
 
