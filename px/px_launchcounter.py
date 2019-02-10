@@ -84,7 +84,7 @@ class Launchcounter(object):
             count = entry[1]
 
             # FIXME: Truncate at columns columns
-            lines.append('{:>5} {}'.format(count, binary))
+            lines.append('{:>5}  {}'.format(count, binary))
             if len(lines) >= rows:
                 break
 
