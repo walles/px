@@ -7,7 +7,6 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List    # NOQA
     from typing import Dict    # NOQA
-    from typing import Tuple   # NOQA
     from typing import Optional  # NOQA
     from six import text_type  # NOQA
 
@@ -16,11 +15,11 @@ class Launchcounter(object):
     def __init__(self):
         self._binaries = {}  # type: Dict[text_type,int]
 
-        # This is a mapping of processes into direct and indirect
-        # launch counts. The direct one is updated if this process
-        # launches a process by itself. The indirect one is updated
-        # when a (grand)child of this process launches something.
-        self._launchers = {}  # type: Dict[px_process.PxProcess, Tuple[int, int]]
+        # This is a mapping of binaries into direct and indirect launch counts.
+        # The direct one is updated if this process launches a process by
+        # itself. The indirect one is updated when a (grand)child of this
+        # process launches something.
+        self._launchers = {}  # type: Dict[text_type, List[int]]
 
         # Most recent process snapshot
         self._last_processlist = None  # type: Optional[List[px_process.PxProcess]]
@@ -35,6 +34,15 @@ class Launchcounter(object):
                 launch_count = self._binaries[binary]
             launch_count += 1
             self._binaries[binary] = launch_count
+
+            if new_process.parent:
+                # Update direct launch count for the parent
+                parent_binary = new_process.parent.command
+                if parent_binary in self._launchers:
+                    counts = self._launchers[parent_binary]
+                    counts[0] += 1
+                else:
+                    self._launchers[parent_binary] = [1, 0]
 
             # FIXME: Update self._launchers as well
 
