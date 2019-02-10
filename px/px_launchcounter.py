@@ -27,9 +27,15 @@ class Launchcounter(object):
     def _register_launches(self, new_processes):
         # type: (List[px_process.PxProcess]) -> None
 
-        # FIXME: Collect stats here
+        for new_process in new_processes:
+            binary = new_process.command
+            launch_count = 0
+            if binary in self._binaries:
+                launch_count = self._binaries[binary]
+            launch_count += 1
+            self._binaries[binary] = launch_count
 
-        pass
+            # FIXME: Update self._launchers as well
 
     def _list_new_launches(
         self,
