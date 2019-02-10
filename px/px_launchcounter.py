@@ -1,4 +1,5 @@
 import sys
+import operator
 
 from . import px_process   # NOQA
 
@@ -76,7 +77,21 @@ class Launchcounter(object):
 
     def get_launched_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
-        return ["FIXME"] * rows
+
+        lines = []  # type: List[text_type]
+        for entry in sorted(self._binaries.items(), key=operator.itemgetter(1)):
+            binary = entry[0]
+
+            # FIXME: Truncate at columns columns
+            # FIXME: Get the count in here as well
+            lines.append(binary)
+            if len(lines) >= rows:
+                break
+
+        if len(lines) < rows:
+            lines += [''] * (rows - len(lines))
+
+        return lines
 
     def get_launchers_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
