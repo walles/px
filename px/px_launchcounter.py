@@ -1,14 +1,15 @@
 import sys
 import operator
 
-from . import px_process   # NOQA
+from . import px_terminal
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
+    from . import px_process   # NOQA
+    from six import text_type  # NOQA
     from typing import List    # NOQA
     from typing import Dict    # NOQA
     from typing import Optional  # NOQA
-    from six import text_type  # NOQA
 
 
 class Launchcounter(object):
@@ -96,7 +97,10 @@ class Launchcounter(object):
     def get_launched_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        lines = []  # type: List[text_type]
+        heading = u'{:>5}  {}'.format('Count', 'Binary')
+        heading = px_terminal.get_string_of_length(heading, columns)
+        heading = px_terminal.underline_bold(heading)
+        lines = [heading]
         for entry in sorted(self._binaries.items(), key=operator.itemgetter(1), reverse=True):
             binary = entry[0]
             count = entry[1]
