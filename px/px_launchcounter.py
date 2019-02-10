@@ -103,4 +103,18 @@ class Launchcounter(object):
 
     def get_launchers_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
-        return ["FIXME"] * rows
+
+        lines = []  # type: List[text_type]
+        for entry in sorted(self._launchers.items(), key=operator.itemgetter(1), reverse=True):
+            binary = entry[0]
+            counts = entry[1]
+
+            # FIXME: Truncate at columns columns
+            lines.append('{:>5}  {:>5}  {}'.format(counts[0], counts[1], binary))
+            if len(lines) >= rows:
+                break
+
+        if len(lines) < rows:
+            lines += [''] * (rows - len(lines))
+
+        return lines
