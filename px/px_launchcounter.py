@@ -24,12 +24,37 @@ class Launchcounter(object):
         # Most recent process snapshot
         self._last_processlist = None  # type: Optional[List[px_process.PxProcess]]
 
-    def _register_launch(self, new_process):
-        # type: (px_process.PxProcess) -> None
+    def _register_launches(self, new_processes):
+        # type: (List[px_process.PxProcess]) -> None
 
         # FIXME: Collect stats here
 
         pass
+
+    def _list_new_launches(
+        self,
+        before,  # type: List[px_process.PxProcess]
+        after    # type: List[px_process.PxProcess]
+    ):
+        # type: (...) -> List[px_process.PxProcess]
+        pid2oldProc = {}  # type: Dict[int,px_process.PxProcess]
+        for old_proc in before:
+            pid2oldProc[old_proc.pid] = old_proc
+
+        new_procs = []  # List[px_process.PxProcess]
+        for new_proc in after:
+            if old_proc.pid not in pid2oldProc:
+                # This is a new process
+                new_procs.append(new_proc)
+                continue
+
+            old_proc = pid2oldProc[old_proc.pid]
+            if old_proc.start_time != new_proc.start_time:
+                # This is a new process, PID has been reused
+                new_procs.append(new_proc)
+                continue
+
+        return new_procs
 
     def update(self, procs_snapshot):
         # type: (List[px_process.PxProcess]) -> None
@@ -38,22 +63,8 @@ class Launchcounter(object):
             self._last_processlist = procs_snapshot
             return
 
-        # Look for newly launched binaries
-        pid2oldProc = {}  # type: Dict[int,px_process.PxProcess]
-        for old_proc in self._last_processlist:
-            pid2oldProc[old_proc.pid] = old_proc
-
-        for new_proc in procs_snapshot:
-            if old_proc.pid not in pid2oldProc:
-                # This is a new process
-                self._register_launch(new_proc)
-                continue
-
-            old_proc = pid2oldProc[new_proc.pid]
-            if old_proc.start_time != new_proc.start_time:
-                # This is a new process, PID has been reused
-                self._register_launch(new_proc)
-                continue
+        new_processes = self._list_new_launches(self._last_processlist, procs_snapshot)
+        self._register_launches(new_processes)
 
         self._last_processlist = procs_snapshot
 
