@@ -37,7 +37,6 @@ of which processes are most active right now.
 import sys
 
 import os
-from . import px_top
 from . import px_install
 from . import px_process
 from . import px_terminal
@@ -84,6 +83,8 @@ def _main(argv):
         return
 
     if arg == '--top':
+        # Pulling px_top in on demand like this improves test result caching
+        from . import px_top
         px_top.top()
         return
 

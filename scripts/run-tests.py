@@ -98,7 +98,7 @@ def has_cached_success(test_file, test_name):
     depsfile_name = get_depsfile_name(test_file, test_name)
     if not os.path.isfile(depsfile_name):
         # Nothing cached for this test
-        print("Cache entry doesn't exist, no hit: " + depsfile_name)
+        print("Cache entry doesn't exist, this is a cache miss: " + depsfile_name)
         return False
 
     cache_timestamp = os.path.getmtime(depsfile_name)
@@ -107,14 +107,14 @@ def has_cached_success(test_file, test_name):
             filename = depsline.rstrip()
             if not os.path.isfile(filename):
                 # Dependency is gone
-                print("Dependency gone, no hit: " + filename)
+                print("Dependency gone, this is a cache miss: " + filename)
                 return False
 
             file_timestamp = os.path.getmtime(filename)
 
             if file_timestamp > cache_timestamp:
                 # Dependency updated
-                print("Dependency updated, no hit: " + filename)
+                print("Dependency updated, this is a cache miss: " + filename)
                 return False
 
     # No mismatch found for this test, it's a cache hit!
