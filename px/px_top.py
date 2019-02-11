@@ -219,7 +219,11 @@ def get_screen_lines(
 
     if launches_height > 0:
         lines += ['', px_terminal.bold("Launched binaries")]
-        lines += launchcounter.get_screen_lines(launches_height - 2, columns)
+        launchlines = launchcounter.get_screen_lines(launches_height - 2, columns)
+        if len(launchlines) < launches_height - 2:
+            # Fill up if we get too few lines
+            launchlines += [''] * (launches_height - 2 - len(launchlines))
+        lines += launchlines
 
     if include_footer:
         footer_line = u"  q - Quit"
