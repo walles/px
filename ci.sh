@@ -119,9 +119,6 @@ echo
 python -Werror -Wdefault:'the imp module' "${PX_PEX}"
 
 echo
-python -Werror -Wdefault:'the imp module' "${PX_PEX}" $$
-
-echo
 test "$("${PX_PEX}" --version)" = "$(git describe --dirty)"
 
 if pip list | grep '^pxpx ' > /dev/null ; then

@@ -47,13 +47,13 @@ from . import px_processinfo
 from . import version
 
 
-def install():
+def install(argv):
     # Find full path to self
-    if not sys.argv:
+    if not argv:
         sys.stderr.write("ERROR: Can't find myself, can't install\n")
         return
 
-    px_pex = sys.argv[0]
+    px_pex = argv[0]
     if not px_pex.endswith(".pex"):
         sys.stderr.write("ERROR: Not running from .pex file, can't install\n")
         return
@@ -62,23 +62,28 @@ def install():
     px_install.install(px_pex, "/usr/local/bin/ptop")
 
 
+# This is the setup.py entry point
 def main():
-    if len(sys.argv) == 1 and os.path.basename(sys.argv[0]).endswith("top"):
-        sys.argv.append("--top")
+    _main(sys.argv)
 
-    if len(sys.argv) == 1:
+
+def _main(argv):
+    if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
+        argv.append("--top")
+
+    if len(argv) == 1:
         # This is an empty filterstring
-        sys.argv.append("")
+        argv.append("")
 
-    if len(sys.argv) > 2:
+    if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
         print(__doc__)
         sys.exit(1)
 
-    arg = sys.argv[1]
+    arg = argv[1]
 
     if arg == '--install':
-        install()
+        install(argv)
         return
 
     if arg == '--top':
