@@ -85,7 +85,6 @@ class Launchcounter(object):
         # FIXME: How to handle rows?
         lines = []  # type: List[text_type]
         for row in sorted(self._hierarchies.keys()):
-            count = self._hierarchies[row]
-            lines.append('{}: {}'.format(str(row), count))
+            lines.append(str(row))
 
         return lines
