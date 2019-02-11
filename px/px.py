@@ -43,9 +43,6 @@ from . import px_process
 from . import px_terminal
 from . import px_processinfo
 
-# If this fails, run "ci.sh" once and the "version.py" file will be created for you.
-from . import version
-
 
 def install(argv):
     # Find full path to self
@@ -95,6 +92,13 @@ def _main(argv):
         return
 
     if arg == '--version':
+        # If this fails, run "ci.sh" once and the "version.py" file will be created for you.
+        #
+        # NOTE: If we "import version" at the top of this file, we will depend on it even if
+        # we don't use it. And this will make test avoidance fail to avoid px.py tests every
+        # time you make a new commit (because committing recreates version.py).
+        from . import version
+
         print(version.VERSION)
         return
 
