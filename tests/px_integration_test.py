@@ -4,7 +4,7 @@ import sys
 from px import px
 
 
-def test_run_on_pid():
+def test_run_on_pid(capfd):
     """
     Just run px on a PID.
 
@@ -18,4 +18,8 @@ def test_run_on_pid():
         # parent PID in this test.
         str(os.getppid())
     ]
-    px._main(argv)
+
+    # Enable manual inspection of the output:
+    # https://docs.pytest.org/en/latest/capture.html
+    with capfd.disabled():
+        px._main(argv)
