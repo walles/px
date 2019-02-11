@@ -182,21 +182,19 @@ def get_screen_lines(
     # Hand out different amount of lines to the different sections
     header_height = 2
     footer_height = 0
-    top_launchers_height = 7
-    top_launched_height = 7
+    launches_height = 7
     if include_footer:
         footer_height = 1
     cputop_height = \
-        rows - header_height - top_launchers_height - top_launched_height - footer_height
+        rows - header_height - launches_height - footer_height
 
     if (cputop_height < 10):
-        # Disable the top launchers and top launched displays
-        top_launchers_height = 0
-        top_launched_height = 0
+        # Disable the launches section
+        launches_height = 0
         if include_footer:
             footer_height = 1
         cputop_height = \
-            rows - header_height - top_launchers_height - top_launched_height - footer_height
+            rows - header_height - launches_height - footer_height
 
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
@@ -219,13 +217,9 @@ def get_screen_lines(
     lines += [px_terminal.bold("Top CPU using processes")]
     lines += toplist_table_lines[0:cputop_height - 1]
 
-    if top_launched_height > 0:
-        lines += ['', px_terminal.bold("Most commonly launched binaries")]
-        lines += launchcounter.get_launched_screen_lines(top_launched_height - 2, columns)
-
-    if top_launchers_height > 0:
-        lines += ['', px_terminal.bold("These processes launch the most binaries")]
-        lines += launchcounter.get_launchers_screen_lines(top_launchers_height - 2, columns)
+    if launches_height > 0:
+        lines += ['', px_terminal.bold("Launched binaries")]
+        lines += launchcounter.get_screen_lines(launches_height - 2, columns)
 
     if include_footer:
         footer_line = u"  q - Quit"

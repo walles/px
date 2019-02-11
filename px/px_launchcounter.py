@@ -1,61 +1,43 @@
 import sys
-import operator
-
-from . import px_terminal
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from . import px_process   # NOQA
     from six import text_type  # NOQA
     from typing import List    # NOQA
+    from typing import Tuple   # NOQA
     from typing import Dict    # NOQA
     from typing import Optional  # NOQA
 
 
 class Launchcounter(object):
     def __init__(self):
-        self._binaries = {}  # type: Dict[text_type,int]
-
-        # This is a mapping of binaries into direct and indirect launch counts.
-        # The direct one is updated if this process launches a process by
-        # itself. The indirect one is updated when a (grand)child of this
-        # process launches something.
-        self._launchers = {}  # type: Dict[text_type, List[int]]
+        self._hierarchies = {}  # type: Dict[Tuple[text_type, ...], int]
 
         # Most recent process snapshot
         self._last_processlist = None  # type: Optional[List[px_process.PxProcess]]
+
+    def _callchain(self, process):
+        # type: (px_process.PxProcess) -> Tuple[text_type, ...]
+
+        reverse_callchain = []  # type: List[text_type]
+
+        current = process  # type: Optional[px_process.PxProcess]
+        while current is not None:
+            reverse_callchain.append(current.command)
+            current = current.parent
+
+        return tuple(reversed(reverse_callchain))
 
     def _register_launches(self, new_processes):
         # type: (List[px_process.PxProcess]) -> None
 
         for new_process in new_processes:
-            binary = new_process.command
-            launch_count = 0
-            if binary in self._binaries:
-                launch_count = self._binaries[binary]
-            launch_count += 1
-            self._binaries[binary] = launch_count
-
-            if new_process.parent:
-                # Update direct launch count for the parent
-                parent_binary = new_process.parent.command
-                if parent_binary in self._launchers:
-                    counts = self._launchers[parent_binary]
-                    counts[0] += 1
-                else:
-                    self._launchers[parent_binary] = [1, 0]
-
-                # Update indirect launch counts
-                indirect_parent = new_process.parent.parent
-                while indirect_parent is not None:
-                    indirect_binary = indirect_parent.command
-                    if indirect_binary in self._launchers:
-                        counts = self._launchers[indirect_binary]
-                        counts[1] += 1
-                    else:
-                        self._launchers[indirect_binary] = [0, 1]
-
-                    indirect_parent = indirect_parent.parent
+            callchain = self._callchain(new_process)
+            if callchain in self._hierarchies:
+                self._hierarchies[callchain] += 1
+            else:
+                self._hierarchies[callchain] = 1
 
     def _list_new_launches(
         self,
@@ -94,46 +76,16 @@ class Launchcounter(object):
 
         self._last_processlist = procs_snapshot
 
-    def get_launched_screen_lines(self, rows, columns):
+    def get_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        COLUMNS = u'{:>5}  {}'
-        heading = COLUMNS.format('Count', 'Binary')
-        heading = px_terminal.get_string_of_length(heading, columns)
-        heading = px_terminal.underline_bold(heading)
-        lines = [heading]
-        for entry in sorted(self._binaries.items(), key=operator.itemgetter(1), reverse=True):
-            binary = entry[0]
-            count = entry[1]
-
-            # FIXME: Truncate at columns columns
-            lines.append(COLUMNS.format(count, binary))
-            if len(lines) >= rows:
-                break
-
-        if len(lines) < rows:
-            lines += [''] * (rows - len(lines))
-
-        return lines
-
-    def get_launchers_screen_lines(self, rows, columns):
-        # type: (int, int) -> List[text_type]
-
-        COLUMNS = u'{:>6}  {:>8}  {}'
-        heading = COLUMNS.format('Direct', 'Indirect', "Launcher")
-        heading = px_terminal.get_string_of_length(heading, columns)
-        heading = px_terminal.underline_bold(heading)
-        lines = [heading]
-        for entry in sorted(self._launchers.items(), key=operator.itemgetter(1), reverse=True):
-            binary = entry[0]
-            counts = entry[1]
-
-            # FIXME: Truncate at columns columns
-            lines.append(COLUMNS.format(counts[0], counts[1], binary))
-            if len(lines) >= rows:
-                break
-
-        if len(lines) < rows:
-            lines += [''] * (rows - len(lines))
+        # FIXME: Render this as a tree, not a list
+        # FIXME: Should we sort the tree somehow?
+        # FIXME: Should we print counts somewhere?
+        # FIXME: How to handle rows?
+        lines = []  # type: List[text_type]
+        for row in sorted(self._hierarchies.keys()):
+            count = self._hierarchies[row]
+            lines.append('{}: {}'.format(str(row), count))
 
         return lines
