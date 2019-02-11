@@ -224,7 +224,9 @@ def get_screen_lines(
             # Fill up if we get too few lines
             # FIXME: Or should we just make this section lower?
             launchlines += [''] * (launches_height - 2 - len(launchlines))
-        lines += launchlines
+
+        # Cut if we got too many lines
+        lines += launchlines[0:(launches_height - 2)]
 
     if include_footer:
         footer_line = u"  q - Quit"
