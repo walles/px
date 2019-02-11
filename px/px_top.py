@@ -222,6 +222,7 @@ def get_screen_lines(
         launchlines = launchcounter.get_screen_lines(launches_height - 2, columns)
         if len(launchlines) < launches_height - 2:
             # Fill up if we get too few lines
+            # FIXME: Or should we just make this section lower?
             launchlines += [''] * (launches_height - 2 - len(launchlines))
         lines += launchlines
 

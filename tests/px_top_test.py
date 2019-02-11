@@ -99,6 +99,9 @@ def test_get_screen_lines_low_screen():
     for line in lines:
         assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
 
+    # Last line should be decorated
+    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
+
 
 def test_get_screen_lines_high_screen():
     loadbar = px_load_bar.PxLoadBar(1, 1)
@@ -119,6 +122,9 @@ def test_get_screen_lines_high_screen():
     # Lines should either be at most screen width long, or contain ANSI escapes
     for line in lines:
         assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
+
+    # Last line should be decorated
+    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
 
 
 def test_get_screen_lines_returns_enough_lines():
