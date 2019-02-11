@@ -13,10 +13,13 @@ from . import px_loginhistory
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableSet  # NOQA
+    from typing import Optional    # NOQA
     from typing import Iterable    # NOQA
+    from typing import List        # NOQA
 
 
 def find_process_by_pid(pid, processes):
+    # type: (int, List[px_process.PxProcess]) -> Optional[px_process.PxProcess]
     for process in processes:
         if process.pid == pid:
             return process
@@ -229,6 +232,7 @@ def print_start_time(process):
 
 
 def print_process_info(pid):
+    # type: (int) -> None
     processes = px_process.get_all()
 
     process = find_process_by_pid(pid, processes)
