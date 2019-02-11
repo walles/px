@@ -20,3 +20,24 @@ def test_list_new_launches():
 
     # We should get unicode responses from getch()
     assert new_processes == [process_other_pid, process_other_starttime]
+
+
+def test_coalesce_launches():
+    # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
+    # they should be reported as just "init"->"iTerm"->"fish".
+    launchcounter = px_launchcounter.Launchcounter()
+    launchcounter._register_launches([
+        testutils.fake_callchain('init', 'iTerm'),
+        testutils.fake_callchain('init', 'iTerm', 'fish'),
+    ])
+    lines = launchcounter.get_screen_lines(20, 100)
+    assert lines == ["('init', 'iTerm', 'fish')"]
+
+    # Then the same thing backwards
+    launchcounter = px_launchcounter.Launchcounter()
+    launchcounter._register_launches([
+        testutils.fake_callchain('init', 'iTerm', 'fish'),
+        testutils.fake_callchain('init', 'iTerm'),
+    ])
+    lines = launchcounter.get_screen_lines(20, 100)
+    assert lines == ["('init', 'iTerm', 'fish')"]

@@ -127,26 +127,13 @@ def test_get_screen_lines_high_screen():
     assert u'CSI' in lines[-1].replace(CSI, u'CSI')
 
 
-def fake_callchain(*args):
-    procs = []
-    for arg in args:
-        procs.append(testutils.create_process(commandline=arg))
-
-    parent = None
-    for proc in procs:
-        proc.parent = parent
-        parent = proc
-
-    return proc
-
-
 def test_get_screen_lines_with_many_launches():
     loadbar = px_load_bar.PxLoadBar(1, 1)
     baseline = px_process.get_all()
     launchcounter = px_launchcounter.Launchcounter()
 
     for i in range(1, 100):
-        launchcounter._register_launches([fake_callchain('init', 'a' + str(i))])
+        launchcounter._register_launches([testutils.fake_callchain('init', 'a' + str(i))])
 
     SCREEN_ROWS = 100
     SCREEN_COLUMNS = 70
