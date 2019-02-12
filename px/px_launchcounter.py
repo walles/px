@@ -79,10 +79,10 @@ class Launchcounter(object):
     def get_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        # FIXME: Render this as a tree, not a list
-        # FIXME: Should we sort the tree somehow?
-        # FIXME: Should we print counts somewhere?
+        # FIXME: Print counts next to each node that has been launched
+        # FIXME: Sort lines according to the highest launch count on each line
         # FIXME: How to handle rows?
+        # FIXME: Remove "kernel" nodes from the launch lines
 
         coalesced = []  # type: List[Tuple[text_type, ...]]
         for row in sorted(self._hierarchies.keys()):
