@@ -31,7 +31,7 @@ def test_coalesce_launches():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
     lines = launchcounter.get_screen_lines(20, 100)
-    assert lines == ["('init', 'iTerm', 'fish')"]
+    assert lines == ['init -> iTerm -> fish']
 
     # Then the same thing backwards
     launchcounter = px_launchcounter.Launchcounter()
@@ -40,4 +40,4 @@ def test_coalesce_launches():
         testutils.fake_callchain('init', 'iTerm'),
     ])
     lines = launchcounter.get_screen_lines(20, 100)
-    assert lines == ["('init', 'iTerm', 'fish')"]
+    assert lines == ['init -> iTerm -> fish']

@@ -83,8 +83,23 @@ class Launchcounter(object):
         # FIXME: Should we sort the tree somehow?
         # FIXME: Should we print counts somewhere?
         # FIXME: How to handle rows?
-        lines = []  # type: List[text_type]
+
+        coalesced = []  # type: List[Tuple[text_type, ...]]
         for row in sorted(self._hierarchies.keys()):
-            lines.append(str(row))
+            if len(coalesced) == 0:
+                coalesced.append(row)
+                continue
+
+            last = coalesced[-1]
+            if row[:len(last)] == last:
+                # Last element is a prefix of current, coalesce!
+                coalesced[-1] = row
+                continue
+
+            coalesced.append(row)
+
+        lines = []  # type: List[text_type]
+        for row in coalesced:
+            lines.append(u' -> '.join(row))
 
         return lines
