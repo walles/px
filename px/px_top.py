@@ -182,26 +182,36 @@ def get_screen_lines(
     # Hand out different amount of lines to the different sections
     header_height = 2
     footer_height = 0
-    launches_height = 7
+    cputop_minheight = 10
     if include_footer:
         footer_height = 1
-    cputop_height = \
-        rows - header_height - launches_height - footer_height
 
-    if (cputop_height < 10):
-        # Disable the launches section
-        launches_height = 0
-        if include_footer:
-            footer_height = 1
-        cputop_height = \
-            rows - header_height - launches_height - footer_height
-
+    # Print header
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
     lines = [
         u"System load: " + loadbar,
         u""]
+
+    # Create a launchers section
+    launches_maxheight = rows - header_height - cputop_minheight - footer_height
+    launchlines = []  # type: List[text_type]
+    if launches_maxheight >= 3:
+        launchlines = launchcounter.get_screen_lines(columns)
+        if len(launchlines) > 0:
+            # Add a section header
+            launchlines = [
+                '',
+                px_terminal.bold(
+                    "Launched binaries, launch counts in (parentheses)")
+            ] + launchlines
+
+            # Cut if we got too many lines
+            launchlines = launchlines[0:launches_maxheight]
+
+    # Compute cputop height now that we know how many launchlines we have
+    cputop_height = rows - header_height - len(launchlines) - footer_height
 
     toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
     if toplist_table_lines:
@@ -217,16 +227,7 @@ def get_screen_lines(
     lines += [px_terminal.bold("Top CPU using processes")]
     lines += toplist_table_lines[0:cputop_height - 1]
 
-    if launches_height > 0:
-        lines += ['', px_terminal.bold("Launched binaries")]
-        launchlines = launchcounter.get_screen_lines(columns)
-        if len(launchlines) < launches_height - 2:
-            # Fill up if we get too few lines
-            # FIXME: Or should we just make this section lower?
-            launchlines += [''] * (launches_height - 2 - len(launchlines))
-
-        # Cut if we got too many lines
-        lines += launchlines[0:(launches_height - 2)]
+    lines += launchlines
 
     if include_footer:
         footer_line = u"  q - Quit"
