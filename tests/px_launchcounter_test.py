@@ -22,7 +22,7 @@ def test_list_new_launches():
     assert new_processes == [process_other_pid, process_other_starttime]
 
 
-def test_coalesce_launches():
+def test_get_screen_lines_coalesces():
     # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
     # they should be reported as just "init"->"iTerm"->"fish".
     launchcounter = px_launchcounter.Launchcounter()
@@ -54,3 +54,24 @@ def test_print_launch_counts():
     ])
     lines = launchcounter.get_screen_lines(20, 100)
     assert lines == ['init -> iTerm (3) -> fish (2)']
+
+
+def test_to_tuple_list():
+    launchcounter = px_launchcounter.Launchcounter()
+    assert \
+        launchcounter._to_tuple_list(("a", "b", "c"), 5) == \
+        [("a", 0), ("b", 0), ("c", 5)]
+
+    assert launchcounter._to_tuple_list(("a",), 5) == [("a", 5)]
+
+
+def test_merge_tuple_lists():
+    launchcounter = px_launchcounter.Launchcounter()
+    l1 = [(u"a", 0), (u"b", 2), (u"c", 5)]
+    l2 = [(u"a", 0), (u"b", 4)]
+    l3 = [(u"a", 0), (u"e", 4)]
+
+    assert launchcounter._merge_tuple_lists(l1, l2) == \
+        [(u"a", 0), (u"b", 6), (u"c", 5)]
+
+    assert launchcounter._merge_tuple_lists(l1, l3) is None

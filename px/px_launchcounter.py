@@ -76,6 +76,62 @@ class Launchcounter(object):
 
         self._last_processlist = procs_snapshot
 
+    def _to_tuple_list(self, launcher_list, count):
+        # type: (Tuple[text_type, ...], int) -> List[Tuple[text_type, int]]
+        """
+        Converts from: (("a", "b", "c"), 5)
+                 to  : [("a", 0), ("b", 0), ("c", 5)]
+        """
+        tuple_list = []  # type: List[Tuple[text_type, int]]
+        for launcher in launcher_list:
+            tuple_list.append((launcher, 0))
+        tuple_list[-1] = (launcher_list[-1], count)
+        return tuple_list
+
+    def _merge_tuple_lists(
+        self,
+        tl1,  # type: List[Tuple[text_type, int]]
+        tl2   # type: List[Tuple[text_type, int]]
+    ):
+        # type: (...) -> Optional[List[Tuple[text_type, int]]]
+        if len(tl1) > len(tl2):
+            longer = tl1
+            shorter = tl2
+        else:
+            longer = tl2
+            shorter = tl1
+
+        merged = longer[:]
+        for i in range(0, len(shorter)):
+            t1 = shorter[i]
+            t2 = longer[i]
+            if t1[0] != t2[0]:
+                # Mismatch, we can't merge these
+                return None
+            merged[i] = (t1[0], t1[1] + t2[1])
+
+        return merged
+
+    def _coalesce_launchers(self):
+        # type: () -> List[List[Tuple[text_type, int]]]
+        coalesced = []  # type: List[List[Tuple[text_type, int]]]
+
+        for launcher_list in sorted(self._hierarchies.keys()):
+            count = self._hierarchies[launcher_list]
+
+            new_tuple_list = self._to_tuple_list(launcher_list, count)
+            if len(coalesced) == 0:
+                coalesced.append(new_tuple_list)
+                continue
+
+            merged = self._merge_tuple_lists(coalesced[-1], new_tuple_list)
+            if merged:
+                coalesced[-1] = merged
+            else:
+                coalesced.append(new_tuple_list)
+
+        return coalesced
+
     def get_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
