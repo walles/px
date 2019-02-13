@@ -20,6 +20,19 @@ def render_launch_tuple(launch_tuple):
         return binary + " (" + str(count) + ")"
 
 
+def _get_minus_max_score(tuples_list):
+    # type: (List[Tuple[text_type, int]]) -> int
+    max_score = 0
+    for tuple in tuples_list:
+        max_score = max(max_score, tuple[1])
+    return -max_score
+
+
+def sort_launchers_list(launchers_list):
+    # type: (List[List[Tuple[text_type, int]]]) -> List[List[Tuple[text_type, int]]]
+    return sorted(launchers_list, key=_get_minus_max_score)
+
+
 class Launchcounter(object):
     def __init__(self):
         self._hierarchies = {}  # type: Dict[Tuple[text_type, ...], int]
@@ -145,12 +158,14 @@ class Launchcounter(object):
     def get_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        # FIXME: Sort lines according to the highest launch count on each line
         # FIXME: How to handle rows?
-        # FIXME: Remove "kernel" nodes from the launch lines
+
+        launchers_list = self._coalesce_launchers()
+        launchers_list = sort_launchers_list(launchers_list)
 
         lines = []  # type: List[text_type]
-        for row in self._coalesce_launchers():
+        for row in launchers_list:
+            # FIXME: Truncate lines at column width
             lines.append(u' -> '.join(map(render_launch_tuple, row)))
 
         return lines
