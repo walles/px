@@ -30,7 +30,7 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm'),
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
-    lines = launchcounter.get_screen_lines(20, 100)
+    lines = launchcounter.get_screen_lines(100)
     assert lines == ['init -> iTerm (1) -> fish (1)']
 
     # Then the same thing backwards
@@ -39,7 +39,7 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
         testutils.fake_callchain('init', 'iTerm'),
     ])
-    lines = launchcounter.get_screen_lines(20, 100)
+    lines = launchcounter.get_screen_lines(100)
     assert lines == ['init -> iTerm (1) -> fish (1)']
 
 
@@ -52,7 +52,7 @@ def test_print_launch_counts():
         testutils.fake_callchain('init', 'iTerm'),
         testutils.fake_callchain('init', 'iTerm'),
     ])
-    lines = launchcounter.get_screen_lines(20, 100)
+    lines = launchcounter.get_screen_lines(100)
     assert lines == ['init -> iTerm (3) -> fish (2)']
 
 
@@ -94,5 +94,5 @@ def test_get_screen_lines_column_cutoff():
         testutils.fake_callchain('init', 'iTerm'),
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
-    lines = launchcounter.get_screen_lines(20, 10)
+    lines = launchcounter.get_screen_lines(10)
     assert lines == ['init -> iT']

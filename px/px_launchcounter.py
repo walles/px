@@ -155,10 +155,8 @@ class Launchcounter(object):
 
         return coalesced
 
-    def get_screen_lines(self, rows, columns):
-        # type: (int, int) -> List[text_type]
-
-        # FIXME: How to handle rows?
+    def get_screen_lines(self, columns):
+        # type: (int) -> List[text_type]
 
         launchers_list = self._coalesce_launchers()
         launchers_list = sort_launchers_list(launchers_list)
