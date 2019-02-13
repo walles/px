@@ -165,7 +165,6 @@ class Launchcounter(object):
 
         lines = []  # type: List[text_type]
         for row in launchers_list:
-            # FIXME: Truncate lines at column width
-            lines.append(u' -> '.join(map(render_launch_tuple, row)))
+            lines.append(u' -> '.join(map(render_launch_tuple, row))[:columns])
 
         return lines

@@ -84,3 +84,15 @@ def test_sort_launchers_lists():
     # List with highest individual number should come first
     assert px_launchcounter.sort_launchers_list([l1, l2]) == [l2, l1]
     assert px_launchcounter.sort_launchers_list([l2, l1]) == [l2, l1]
+
+
+def test_get_screen_lines_column_cutoff():
+    # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
+    # they should be reported as just "init"->"iTerm"->"fish".
+    launchcounter = px_launchcounter.Launchcounter()
+    launchcounter._register_launches([
+        testutils.fake_callchain('init', 'iTerm'),
+        testutils.fake_callchain('init', 'iTerm', 'fish'),
+    ])
+    lines = launchcounter.get_screen_lines(20, 10)
+    assert lines == ['init -> iT']
