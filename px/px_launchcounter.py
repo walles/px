@@ -10,6 +10,16 @@ if sys.version_info.major >= 3:
     from typing import Optional  # NOQA
 
 
+def render_launch_tuple(launch_tuple):
+    # type: (Tuple[text_type, int]) -> text_type
+    binary = launch_tuple[0]
+    count = launch_tuple[1]
+    if count == 0:
+        return binary
+    else:
+        return binary + " (" + str(count) + ")"
+
+
 class Launchcounter(object):
     def __init__(self):
         self._hierarchies = {}  # type: Dict[Tuple[text_type, ...], int]
@@ -135,27 +145,12 @@ class Launchcounter(object):
     def get_screen_lines(self, rows, columns):
         # type: (int, int) -> List[text_type]
 
-        # FIXME: Print counts next to each node that has been launched
         # FIXME: Sort lines according to the highest launch count on each line
         # FIXME: How to handle rows?
         # FIXME: Remove "kernel" nodes from the launch lines
 
-        coalesced = []  # type: List[Tuple[text_type, ...]]
-        for row in sorted(self._hierarchies.keys()):
-            if len(coalesced) == 0:
-                coalesced.append(row)
-                continue
-
-            last = coalesced[-1]
-            if row[:len(last)] == last:
-                # Last element is a prefix of current, coalesce!
-                coalesced[-1] = row
-                continue
-
-            coalesced.append(row)
-
         lines = []  # type: List[text_type]
-        for row in coalesced:
-            lines.append(u' -> '.join(row))
+        for row in self._coalesce_launchers():
+            lines.append(u' -> '.join(map(render_launch_tuple, row)))
 
         return lines
