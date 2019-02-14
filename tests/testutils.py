@@ -91,3 +91,16 @@ def create_ipc_map(pid, all_files, is_root=False):
     process = pid2process[pid]
 
     return px_ipc_map.IpcMap(process, all_files, processes, is_root)
+
+
+def fake_callchain(*args):
+    procs = []
+    for arg in args:
+        procs.append(create_process(commandline=arg))
+
+    parent = None
+    for proc in procs:
+        proc.parent = parent
+        parent = proc
+
+    return proc

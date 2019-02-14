@@ -113,6 +113,13 @@ def underline_bold(string):
     return CSI + "1;4m" + string + CSI + "0m"
 
 
+def bold(string):
+    # type: (text_type) -> text_type
+    CSI = "\x1b["
+
+    return CSI + "1m" + string + CSI + "0m"
+
+
 def get_string_of_length(string, length):
     if not length:
         return string

@@ -3,6 +3,7 @@ import os
 from px import px_top
 from px import px_process
 from px import px_load_bar
+from px import px_launchcounter
 
 from . import testutils
 
@@ -74,17 +75,19 @@ def test_redraw():
     # Just make sure it doesn't crash
     loadbar = px_load_bar.PxLoadBar(1, 1)
     baseline = px_process.get_all()
-    px_top.redraw(loadbar, baseline, 100, 10, clear=False)
+    launchcounter = px_launchcounter.Launchcounter()
+    px_top.redraw(loadbar, baseline, launchcounter, 100, 10, clear=False)
 
 
-def test_get_screen_lines():
+def test_get_screen_lines_low_screen():
     loadbar = px_load_bar.PxLoadBar(1, 1)
     baseline = px_process.get_all()
+    launchcounter = px_launchcounter.Launchcounter()
 
     SCREEN_ROWS = 10
     SCREEN_COLUMNS = 70
     lines = px_top.get_screen_lines(
-        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+        loadbar, baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -96,14 +99,58 @@ def test_get_screen_lines():
     for line in lines:
         assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
 
+    # Last line should be decorated
+    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
+
+
+def test_get_screen_lines_high_screen():
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+    launchcounter = px_launchcounter.Launchcounter()
+
+    SCREEN_ROWS = 100
+    SCREEN_COLUMNS = 70
+    lines = px_top.get_screen_lines(
+        loadbar, baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+
+    # Top row should contain ANSI escape codes
+    CSI = u"\x1b["
+    assert u'CSI' in lines[0].replace(CSI, u'CSI')
+
+    assert len(lines) == SCREEN_ROWS
+
+    # Lines should either be at most screen width long, or contain ANSI escapes
+    for line in lines:
+        assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
+
+    # Last line should be decorated
+    assert u'CSI' in lines[-1].replace(CSI, u'CSI')
+
+
+def test_get_screen_lines_with_many_launches():
+    loadbar = px_load_bar.PxLoadBar(1, 1)
+    baseline = px_process.get_all()
+    launchcounter = px_launchcounter.Launchcounter()
+
+    for i in range(1, 100):
+        launchcounter._register_launches([testutils.fake_callchain('init', 'a' + str(i))])
+
+    SCREEN_ROWS = 100
+    SCREEN_COLUMNS = 70
+    lines = px_top.get_screen_lines(
+        loadbar, baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+
+    assert len(lines) == SCREEN_ROWS
+
 
 def test_get_screen_lines_returns_enough_lines():
     loadbar = px_load_bar.PxLoadBar(1, 1)
     baseline = px_process.get_all()
+    launchcounter = px_launchcounter.Launchcounter()
 
     SCREEN_ROWS = 100000
     SCREEN_COLUMNS = 70
     lines = px_top.get_screen_lines(
-        loadbar, baseline, SCREEN_ROWS, SCREEN_COLUMNS)
+        loadbar, baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
 
     assert len(lines) == SCREEN_ROWS
