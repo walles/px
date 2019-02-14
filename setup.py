@@ -74,6 +74,14 @@ setup(
     # See: http://setuptools.readthedocs.io/en/latest/setuptools.html#setting-the-zip-safe-flag
     zip_safe=True,
 
+    setup_requires=[
+        'pytest-runner',
+    ],
+
+    tests_require=[
+        'pytest',
+    ],
+
     entry_points={
         'console_scripts': [
             'px = px.px:main',
