@@ -6,9 +6,32 @@ set -eu -o pipefail
 # FIXME: Prompt user to set a good window size to begin with, 90x24 for example
 
 # FIXME: Get these some other way on Linux?
-brew install asciinema giflossy imagemagick
+# FIXME: One brew command for making these installed and up-to-date
+for PACKAGE in asciinema giflossy imagemagick leiningen ; do
+    brew install "$PACKAGE" || brew outdated "$PACKAGE" || brew upgrade "$PACKAGE"
+done
 
-npm install asciicast2gif
+# FIXME: Just "npm install asciicast2gif" after this PR has been merged:
+# https://github.com/asciinema/asciicast2gif/pull/59
+#
+# And remove "leiningen" from the brew installs above
+if [ ! -e ./node_modules/.bin/asciicast2gif ] ; then
+    WORKDIR="node_modules/johan"
+    mkdir -p "$WORKDIR"
+    export WORKDIR
+    (
+        set -ex
+        cd "$WORKDIR"
+        git clone --recursive -b patch-1 git@github.com:walles/asciicast2gif.git
+        cd asciicast2gif
+
+        # From: https://github.com/asciinema/asciicast2gif#building-from-source
+        npm install
+        lein cljsbuild once main
+        lein cljsbuild once page
+    )
+    npm install "$WORKDIR/asciicast2gif"
+fi
 
 # Make sure we have the latest build before recording
 ./ci.sh
