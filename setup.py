@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import filecmp
 import tempfile
 import subprocess
@@ -37,6 +38,10 @@ with open('requirements.txt') as reqsfile:
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fp:
     LONG_DESCRIPTION = fp.read()
+
+if not re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', git_version):
+    # Setuptools wants nice version numbers
+    git_version = "0.0.0"
 
 setup(
     name='pxpx',
