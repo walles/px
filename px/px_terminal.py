@@ -8,6 +8,9 @@ if sys.version_info.major >= 3:
     from six import text_type    # NOQA
     from typing import Tuple     # NOQA
     from typing import Optional  # NOQA
+    from typing import Iterable  # NOQA
+
+CSI = "\x1b["
 
 
 def get_window_size():
@@ -134,6 +137,45 @@ def get_string_of_length(string, length):
     return string
 
 
+def _tokenize(string):
+    # type: (text_type) -> Iterable[text_type]
+    """
+    Tokenizes string into chars and ANSI sequences.
+    """
+    i = 0
+    while i < len(string):
+        try:
+            char = string[i]
+            if char == CSI[0]:
+                c0 = i
+                while string[i] != 'm':
+                    i += 1
+                yield string[c0:i + 1]
+                continue
+
+            yield string[i]
+        finally:
+            i += 1
+
+
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
-    return string[0:length]
+    result = u""
+    char_count = 0
+    csi_count = 0
+
+    reset_sequence = u""
+
+    for token in _tokenize(string):
+        if char_count == length:
+            return result + reset_sequence
+
+        if len(token) == 1:
+            char_count += 1
+        else:
+            csi_count += 1
+            reset_sequence = CSI + '0m'
+
+        result += token
+
+    return result + reset_sequence
