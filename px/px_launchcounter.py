@@ -1,5 +1,7 @@
 import sys
 
+from . import px_terminal
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from . import px_process   # NOQA
@@ -17,7 +19,7 @@ def render_launch_tuple(launch_tuple):
     if count == 0:
         return binary
     else:
-        return binary + " (" + str(count) + ")"
+        return px_terminal.bold(binary) + "(" + str(count) + ")"
 
 
 def _get_minus_max_score(tuples_list):
@@ -163,6 +165,7 @@ class Launchcounter(object):
 
         lines = []  # type: List[text_type]
         for row in launchers_list:
-            lines.append(u' -> '.join(map(render_launch_tuple, row))[:columns])
+            line = u' -> '.join(map(render_launch_tuple, row))
+            lines.append(px_terminal.crop_ansi_string_at_length(line, columns))
 
         return lines

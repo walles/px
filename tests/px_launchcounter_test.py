@@ -1,3 +1,4 @@
+from px import px_terminal
 from px import px_launchcounter
 
 from . import testutils
@@ -31,7 +32,11 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
     lines = launchcounter.get_screen_lines(100)
-    assert lines == ['init -> iTerm (1) -> fish (1)']
+    assert lines == [
+        'init -> ' +
+        px_terminal.bold('iTerm') + '(1) -> ' +
+        px_terminal.bold('fish') + '(1)'
+    ]
 
     # Then the same thing backwards
     launchcounter = px_launchcounter.Launchcounter()
@@ -40,7 +45,11 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm'),
     ])
     lines = launchcounter.get_screen_lines(100)
-    assert lines == ['init -> iTerm (1) -> fish (1)']
+    assert lines == [
+        'init -> ' +
+        px_terminal.bold('iTerm') + '(1) -> ' +
+        px_terminal.bold('fish') + '(1)'
+    ]
 
 
 def test_print_launch_counts():
@@ -53,7 +62,11 @@ def test_print_launch_counts():
         testutils.fake_callchain('init', 'iTerm'),
     ])
     lines = launchcounter.get_screen_lines(100)
-    assert lines == ['init -> iTerm (3) -> fish (2)']
+    assert lines == [
+        'init -> ' +
+        px_terminal.bold('iTerm') + '(3) -> ' +
+        px_terminal.bold('fish') + '(2)'
+    ]
 
 
 def test_to_tuple_list():
@@ -95,4 +108,4 @@ def test_get_screen_lines_column_cutoff():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
     lines = launchcounter.get_screen_lines(10)
-    assert lines == ['init -> iT']
+    assert lines == ['init -> ' + px_terminal.bold('iT')]
