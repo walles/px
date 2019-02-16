@@ -121,7 +121,8 @@ def bold(string):
 
 
 def get_string_of_length(string, length):
-    if not length:
+    # type: (text_type, Optional[int]) -> text_type
+    if length is None:
         return string
 
     if len(string) < length:
@@ -131,3 +132,8 @@ def get_string_of_length(string, length):
         return string[0:length]
 
     return string
+
+
+def crop_ansi_string_at_length(string, length):
+    # type: (text_type, int) -> text_type
+    return string[0:length]
