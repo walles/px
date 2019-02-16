@@ -172,9 +172,9 @@ information; the command will work without it but might miss some information.
   the numbers you get from ``uptime``.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
-* Note that after you press ``q`` to quit, the display is retained and some
-  lines at the bottom are removed to prevent the information you want from
-  scrolling out of view.
+* After you press ``q`` to quit, the display is retained and some lines at the
+  bottom are removed to prevent the information you want from scrolling out of
+  view.
 
 Development
 ===========
@@ -192,11 +192,8 @@ interpreters (tested on Linux and OS X).
 
 Releasing a new Version
 -----------------------
-1. Consider updating `the Output section`_, push those changes. To update the
-   animated ``ptop`` screenshot gif, scale your window to 90x24 and run
-   ``./update-ptop-screenshot-gif.sh``. Press ``q`` to quit after about 20
-   seconds. New ``gif`` will be stored next to the old one, replace the old
-   one if you're happy with the new.
+1. Consider updating `the Output section`_, push those changes. Consider updating
+   the ``ptop`` screenshot, scale your window to 90x24 before shooting it.
 2. Do ``git tag | cat`` and think about what the next version number should be.
 3. Do ``git tag --annotate 1.2.3`` to set the next version number. The
    text you write for this tag will show up as the release description on Github,
@@ -308,4 +305,4 @@ DONE
    :target: https://travis-ci.com/walles/px
 .. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
    :target: https://coveralls.io/github/walles/px?branch=python
-.. |ptop screenshot| image:: doc/ptop-screenshot.gif
+.. |ptop screenshot| image:: doc/ptop-screenshot.png
