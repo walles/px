@@ -162,7 +162,6 @@ def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
     result = u""
     char_count = 0
-    csi_count = 0
 
     reset_sequence = u""
 
@@ -173,8 +172,10 @@ def crop_ansi_string_at_length(string, length):
         if len(token) == 1:
             char_count += 1
         else:
-            csi_count += 1
             reset_sequence = CSI + '0m'
+            if token == reset_sequence:
+                # Already reset
+                reset_sequence = ""
 
         result += token
 

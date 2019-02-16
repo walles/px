@@ -62,3 +62,5 @@ def test_crop_ansi_string_at_length():
     bold_middle = u"123" + px_terminal.bold("456") + u"789"
     assert px_terminal.crop_ansi_string_at_length(bold_middle, 6) == \
         u"123[1m456[0m".replace('[', CSI)
+    assert px_terminal.crop_ansi_string_at_length(bold_middle, 7) == \
+        u"123[1m456[0m7".replace('[', CSI)
