@@ -1,17 +1,24 @@
 """Extract information from command lines"""
 
 import re
+import sys
 import os.path
+
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from six import text_type  # NOQA
+    from typing import List    # NOQA
 
 
 # Match "[kworker/0:0H]", no grouping
-LINUX_KERNEL_PROC = re.compile(r"^\[[^/ ]+/?[^/ ]+\]$")
+LINUX_KERNEL_PROC = re.compile(u"^\\[[^/ ]+/?[^/ ]+\\]$")
 
 # Match "(python2.7)", no grouping
-OSX_PARENTHESIZED_PROC = re.compile(r"^\([^()]+\)$")
+OSX_PARENTHESIZED_PROC = re.compile(u"^\\([^()]+\\)$")
 
 
 def to_array(commandline):
+    # type: (text_type) -> List[text_type]
     """Splits a command line string into components"""
     base_split = commandline.split(" ")
     if len(base_split) == 1:
@@ -31,6 +38,7 @@ def to_array(commandline):
 
 
 def get_command(commandline):
+    # type: (text_type) -> text_type
     """
     Extracts the command from the command line.
 
@@ -75,6 +83,7 @@ def get_command(commandline):
 
 
 def get_python_command(commandline):
+    # type: (text_type) -> text_type
     array = to_array(commandline)
     array = list(filter(lambda s: s, array))
     python = os.path.basename(array[0])
@@ -92,6 +101,7 @@ def get_python_command(commandline):
 
 
 def prettify_fully_qualified_java_class(class_name):
+    # type: (text_type) -> text_type
     split = class_name.split('.')
     if len(split) == 1:
         return split[-1]
@@ -104,6 +114,7 @@ def prettify_fully_qualified_java_class(class_name):
 
 
 def get_java_command(commandline):
+    # type: (text_type) -> text_type
     array = to_array(commandline)
     java = os.path.basename(array[0])
     if len(array) == 1:
@@ -163,6 +174,7 @@ def get_java_command(commandline):
 
 
 def get_generic_script_command(commandline):
+    # type: (text_type) -> text_type
     array = to_array(commandline)
     vm = os.path.basename(array[0])
     if len(array) == 1:
