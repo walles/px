@@ -86,6 +86,28 @@ def get_python_command(commandline):
     # type: (text_type) -> text_type
     array = to_array(commandline)
     array = list(filter(lambda s: s, array))
+
+    # Ignore some switches, list inspired by 'python2.7 --help'
+    IGNORE_SWITCHES = [
+        '-b', '-bb',
+        '-B',
+        '-d',
+        '-E',
+        '-i',
+        '-O',
+        '-OO',
+        '-R',
+        '-s',
+        '-S',
+        '-t', '-tt',
+        '-u',
+        '-v',
+        '-x',
+        '-3'
+    ]
+    while len(array) > 1 and array[1] in IGNORE_SWITCHES:
+        del array[1]
+
     python = os.path.basename(array[0])
     if len(array) == 1:
         return python

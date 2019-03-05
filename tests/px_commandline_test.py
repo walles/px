@@ -19,10 +19,13 @@ def test_get_command_python():
     assert px_commandline.get_command("python -m mod --hej gris --frukt") == "mod"
     assert px_commandline.get_command("Python -") == "Python"
 
-    # To begin with, any switches other than -c -m or - and we give up. Room for
-    # future improvement.
+    # Ignoring switches
+    assert px_commandline.get_command("python -E apa.py") == "apa.py"
+    assert px_commandline.get_command("python3 -E") == "python3"
+    assert px_commandline.get_command("python -u -t -m mod") == "mod"
+
+    # -W switches unsupported for now, room for future improvement
     assert px_commandline.get_command("python -W warning:spec apa.py") == "python"
-    assert px_commandline.get_command("python -u -t -m mod") == "python"
 
     # Invalid command lines
     assert px_commandline.get_command("python -W") == "python"
