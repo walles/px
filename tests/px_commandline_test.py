@@ -168,3 +168,8 @@ def test_get_command_interpreters():
 
 def test_get_command_unicode():
     assert px_commandline.get_command(u"😀") == u"😀"
+
+
+def test_get_command_ruby_switches():
+    assert px_commandline.get_command(
+        "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust") == "brew.rb"

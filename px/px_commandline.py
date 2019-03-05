@@ -62,7 +62,26 @@ def get_command(commandline):
     if command == "java":
         return get_java_command(commandline)
 
-    if command in ["bash", "sh", "ruby", "perl", "node"]:
+    if command == "ruby":
+        # Switches list inspired by ruby 2.3.7p456 --help output
+        return get_generic_script_command(commandline, [
+            '-a',
+            '-d',
+            '--debug',
+            '-l',
+            '-n',
+            '-p',
+            '-s',
+            '-S',
+            '-v',
+            '--verbose',
+            '-w',
+            '-W0',
+            '-W1',
+            '-W2'
+        ])
+
+    if command in ["bash", "sh", "perl", "node"]:
         return get_generic_script_command(commandline)
 
     if len(command) < 25:
@@ -195,9 +214,13 @@ def get_java_command(commandline):
     return java
 
 
-def get_generic_script_command(commandline):
-    # type: (text_type) -> text_type
+def get_generic_script_command(commandline, ignore_switches=[]):
+    # type: (text_type, List[text_type]) -> text_type
     array = to_array(commandline)
+
+    while len(array) > 1 and array[1] in ignore_switches:
+        del array[1]
+
     vm = os.path.basename(array[0])
     if len(array) == 1:
         return vm
