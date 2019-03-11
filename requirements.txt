@@ -1,2 +1,15 @@
-six == 1.12.0
-python-dateutil == 2.7.5
+# These are runtime dependencies, we want them weak to improve
+# co-existence with other packages if installed globally using
+# pip.
+#
+# Fox exact versions that we like, check requirements-dev.txt.
+#
+# If making changes here make sure they don't clash!
+
+# We're only using text_type from six, any version works
+six
+
+# 2.6.1 is what we started out using, older is probably fine
+# as well but I don't know *how* old. If anybody wants older,
+# let me know and we'll see. /johan.walles@gmail.com 2019mar11
+python-dateutil >= 2.6.1

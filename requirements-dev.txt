@@ -5,3 +5,11 @@ wheel == 0.31.1
 setuptools == 40.6.2
 pytest == 4.2.0
 pytest-avoidance == 0.2.0
+
+# Buildtime requirements for runtime dependencies
+#
+# Note that these are specified more loosely in requirements.txt.
+#
+# If making changes here make sure they don't clash!
+six == 1.12.0
+python-dateutil == 2.7.5
