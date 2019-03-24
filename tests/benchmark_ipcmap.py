@@ -16,7 +16,6 @@ import time
 
 from . import testutils
 from px import px_file
-from px import px_ipc_map
 
 import sys
 if sys.version_info.major >= 3:
@@ -47,7 +46,7 @@ def get_timings(file, pid):
     t0 = time.time()
     files = None
     with open(file, "r") as lsof_output:
-        files = px_file.lsof_to_files(lsof_output.read(), px_ipc_map.FILE_TYPES, pid)
+        files = px_file.lsof_to_files(lsof_output.read())
     t1 = time.time()
     dt_load = t1 - t0
 
@@ -71,7 +70,7 @@ def main(lsof_file):
     print("Finding most popular PID...")
     files = None
     with open(lsof_file, "r") as lsof_output:
-        files = px_file.lsof_to_files(lsof_output.read(), px_ipc_map.FILE_TYPES, None)
+        files = px_file.lsof_to_files(lsof_output.read())
     pid = get_most_common_pid(files)
     print("Most popular PID: {}".format(pid))
 

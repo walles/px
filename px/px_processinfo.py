@@ -177,9 +177,8 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() +
           ": Now invoking lsof, this can take over a minute on a big system...")
 
-    files = px_file.get_all(process.pid, px_ipc_map.FILE_TYPES)
-    print(datetime.datetime.now().isoformat() +
-          ": lsof done, proceeding.")
+    files = px_file.get_all()
+    print(datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
 
     is_root = (os.geteuid() == 0)
     ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
