@@ -7,6 +7,7 @@ import os
 from . import px_file
 from . import px_process
 from . import px_ipc_map
+from . import px_cwdfriends
 from . import px_loginhistory
 
 
@@ -170,6 +171,20 @@ def to_ipc_lines(ipc_map):
     return return_me
 
 
+def print_cwd_friends(process, all_files):
+    friends = px_cwdfriends.PxCwdFriends(process.pid, all_files)
+
+    # Print current process' cwd
+    print("Others sharing this process' working directory: " + friends.cwd)
+
+    if friends.cwd == '/':
+        print("  Working directory too common, never mind")
+        return
+
+    for friend in friends.friends:
+        print("  " + str(friend))
+
+
 def print_fds(process, processes):
     # type: (px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
 
@@ -179,6 +194,9 @@ def print_fds(process, processes):
 
     files = px_file.get_all()
     print(datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
+
+    print("")
+    print_cwd_friends(process, files)
 
     is_root = (os.geteuid() == 0)
     ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
