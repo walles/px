@@ -23,6 +23,9 @@ class PxFile(object):
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
 
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype = None  # type: Optional[str]
+
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
         # more readable.
@@ -194,19 +197,18 @@ def lsof_to_files(lsof):
             # The output ends with a single newline, which we just stripped away
             break
 
-        filetype = shard[0]
+        infotype = shard[0]
         value = shard[1:]
 
-        if filetype == 'p':
+        if infotype == 'p':
             pid = int(value)
-        elif filetype == 'f':
+        elif infotype == 'f':
             file = PxFile()
             if value.isdigit():
                 file.fd = int(value)
             else:
-                # The fd can be things like "cwd", "txt" and "mem", but we just
-                # want the fd number for now.
-                pass
+                # Words like "cwd", "txt" and probably others as well
+                file.fdtype = value
             assert pid is not None
             file.pid = pid
             file.type = "??"
@@ -214,7 +216,7 @@ def lsof_to_files(lsof):
             file.inode = None
 
             files.append(file)
-        elif filetype == 'a':
+        elif infotype == 'a':
             assert file is not None
             access = {
                 ' ': None,
@@ -222,21 +224,21 @@ def lsof_to_files(lsof):
                 'w': "w",
                 'u': "rw"}[value]
             file.access = access
-        elif filetype == 't':
+        elif infotype == 't':
             assert file is not None
             file.type = value
-        elif filetype == 'd':
+        elif infotype == 'd':
             assert file is not None
             file.device = value
-        elif filetype == 'n':
+        elif infotype == 'n':
             assert file is not None
             file.name = value
-        elif filetype == 'i':
+        elif infotype == 'i':
             assert file is not None
             file.inode = value
 
         else:
-            raise Exception("Unhandled type <{}> for shard <{}>".format(filetype, shard))
+            raise Exception("Unhandled type <{}> for shard <{}>".format(infotype, shard))
 
     return files
 
