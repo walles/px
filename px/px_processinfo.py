@@ -171,8 +171,8 @@ def to_ipc_lines(ipc_map):
     return return_me
 
 
-def print_cwd_friends(process, all_files):
-    friends = px_cwdfriends.PxCwdFriends(process.pid, all_files)
+def print_cwd_friends(process, all_processes, all_files):
+    friends = px_cwdfriends.PxCwdFriends(process.pid, all_processes, all_files)
 
     # Print current process' cwd
     print("Others sharing this process' working directory: " + friends.cwd)
@@ -196,7 +196,7 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
 
     print("")
-    print_cwd_friends(process, files)
+    print_cwd_friends(process, processes, files)
 
     is_root = (os.geteuid() == 0)
     ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
