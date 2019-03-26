@@ -18,6 +18,7 @@ if sys.version_info.major >= 3:
     from typing import Text        # NOQA
     from typing import Optional    # NOQA
     from typing import List        # NOQA
+    from six import text_type      # NOQA
 
 
 # Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
@@ -37,28 +38,28 @@ CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9]
 class PxProcess(object):
     def __init__(self, process_builder, now):
         self.pid = process_builder.pid
-        self.ppid = process_builder.ppid
+        self.ppid = process_builder.ppid  # type: int
 
-        self.cmdline = process_builder.cmdline
-        self.command = self._get_command()
-        self.lowercase_command = self.command.lower()
+        self.cmdline = process_builder.cmdline  # type: text_type
+        self.command = self._get_command()  # type: text_type
+        self.lowercase_command = self.command.lower()  # type: text_type
 
         time = datetime.datetime.strptime(process_builder.start_time_string.strip(), "%c")
-        self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())
-        self.age_seconds = (now - self.start_time).total_seconds()
+        self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())  # type: datetime.datetime
+        self.age_seconds = (now - self.start_time).total_seconds()  # type: int
         assert self.age_seconds >= 0
-        self.age_s = seconds_to_str(self.age_seconds)
+        self.age_s = seconds_to_str(self.age_seconds)  # type: text_type
 
-        self.username = process_builder.username
+        self.username = process_builder.username  # type: text_type
 
-        self.memory_percent = process_builder.memory_percent
-        self.memory_percent_s = "--"
+        self.memory_percent = process_builder.memory_percent  # type: int
+        self.memory_percent_s = "--"  # type: text_type
         if self.memory_percent is not None:
             self.memory_percent_s = (
                 "{:.0f}%".format(process_builder.memory_percent))
 
-        self.cpu_percent = process_builder.cpu_percent
-        self.cpu_percent_s = "--"
+        self.cpu_percent = process_builder.cpu_percent  # type: int
+        self.cpu_percent_s = "--"  # type: text_type
         if self.cpu_percent is not None:
             self.cpu_percent_s = (
                 "{:.0f}%".format(process_builder.cpu_percent))

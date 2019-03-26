@@ -7,6 +7,7 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List    # NOQA
     from px import px_process  # NOQA
+    from six import text_type  # NOQA
 
 
 def test_current_cwd_unknown():
@@ -53,7 +54,7 @@ def test_find_friends():
 
 
 def _get_friends_in_order(*args):
-    # type: (str) -> List[str]
+    # type: (text_type) -> List[text_type]
     procs = []
     files = []
     for index, arg in enumerate(args):
