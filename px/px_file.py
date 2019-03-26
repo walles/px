@@ -23,6 +23,9 @@ class PxFile(object):
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
 
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype = None  # type: Optional[str]
+
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
         # more readable.
@@ -174,13 +177,10 @@ def call_lsof():
     return lsof.communicate()[0].decode('utf-8')
 
 
-def lsof_to_files(lsof, file_types, favorite_pid):
-    # type: (str, Optional[Iterable[str]], Optional[int]) -> List[PxFile]
+def lsof_to_files(lsof):
+    # type: (str) -> List[PxFile]
     """
     Convert lsof output into a files array.
-
-    If file_types is specified, only files of the given type will be converted,
-    other files will be silently ignored.
     """
 
     pid = None
@@ -197,39 +197,26 @@ def lsof_to_files(lsof, file_types, favorite_pid):
             # The output ends with a single newline, which we just stripped away
             break
 
-        filetype = shard[0]
+        infotype = shard[0]
         value = shard[1:]
 
-        if filetype == 'p':
+        if infotype == 'p':
             pid = int(value)
-        elif filetype == 'f':
+        elif infotype == 'f':
             file = PxFile()
             if value.isdigit():
                 file.fd = int(value)
             else:
-                # The fd can be things like "cwd", "txt" and "mem", but we just
-                # want the fd number for now.
-                pass
+                # Words like "cwd", "txt" and probably others as well
+                file.fdtype = value
             assert pid is not None
             file.pid = pid
             file.type = "??"
             file.device = None
             file.inode = None
 
-            if not files:
-                # No files, just add the new one
-                files.append(file)
-            elif not file_types:
-                # No filter specified
-                files.append(file)
-            elif files[-1].type in file_types:
-                files.append(file)
-            elif files[-1].pid == favorite_pid:
-                files.append(file)
-            else:
-                # Overwrite the last file since it's of the wrong type
-                files[-1] = file
-        elif filetype == 'a':
+            files.append(file)
+        elif infotype == 'a':
             assert file is not None
             access = {
                 ' ': None,
@@ -237,31 +224,31 @@ def lsof_to_files(lsof, file_types, favorite_pid):
                 'w': "w",
                 'u': "rw"}[value]
             file.access = access
-        elif filetype == 't':
+        elif infotype == 't':
             assert file is not None
             file.type = value
-        elif filetype == 'd':
+        elif infotype == 'd':
             assert file is not None
             file.device = value
-        elif filetype == 'n':
+        elif infotype == 'n':
             assert file is not None
             file.name = value
-        elif filetype == 'i':
+        elif infotype == 'i':
             assert file is not None
             file.inode = value
 
         else:
-            raise Exception("Unhandled type <{}> for shard <{}>".format(filetype, shard))
+            raise Exception("Unhandled type <{}> for shard <{}>".format(infotype, shard))
 
     return files
 
 
-def get_all(favorite_pid, file_types=None):
-    # type: (Optional[int], Iterable[str]) -> Set[PxFile]
+def get_all():
+    # type: () -> Set[PxFile]
     """
     Get all files.
 
     If a file_types array is specified, only files of the listed types will be
     returned.
     """
-    return set(lsof_to_files(call_lsof(), file_types, favorite_pid))
+    return set(lsof_to_files(call_lsof()))

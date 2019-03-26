@@ -144,7 +144,7 @@ def test_get_ipc_map_1():
     files = None
     my_dir = os.path.dirname(__file__)
     with open(os.path.join(my_dir, "lsof-test-output-linux-1.txt"), "r") as lsof_output:
-        files = px_file.lsof_to_files(lsof_output.read(), None, None)
+        files = px_file.lsof_to_files(lsof_output.read())
 
     ipc_map = testutils.create_ipc_map(1997, files)
     keys = list(ipc_map.keys())
@@ -162,7 +162,7 @@ def test_get_ipc_map_2():
     files = None
     my_dir = os.path.dirname(__file__)
     with open(os.path.join(my_dir, "lsof-test-output-linux-2.txt"), "r") as lsof_output:
-        files = px_file.lsof_to_files(lsof_output.read(), None, None)
+        files = px_file.lsof_to_files(lsof_output.read())
 
     ipc_map = testutils.create_ipc_map(777, files)
     keys = list(ipc_map.keys())
