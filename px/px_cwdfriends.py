@@ -18,7 +18,9 @@ class PxCwdFriends(object):
         for p in all_processes:
             pid_to_process[p.pid] = p
 
-        cwd = None
+        # Cwd can be None if lsof and process listing are out of sync
+        self.cwd = None  # type: Optional[text_type]
+
         cwd_to_processes = {}  # type: Dict[text_type, List[px_process.PxProcess]]
         for current_file in all_files:
             if current_file.type != 'cwd':
@@ -29,7 +31,7 @@ class PxCwdFriends(object):
                 continue
 
             if current_file.pid == pid:
-                cwd = current_file.name
+                self.cwd = current_file.name
 
             processes = cwd_to_processes.get(current_file.name)
             if processes is None:
@@ -42,12 +44,10 @@ class PxCwdFriends(object):
                 processes.append(process)
                 cwd_to_processes[current_file.name] = processes
 
-        # Cwd can be None if lsof and process listing are out of sync
-        self.cwd = cwd  # type: Optional[text_type]
-        if cwd is None:
+        if self.cwd is None:
             friends = []  # type: List[px_process.PxProcess]
-        elif cwd in cwd_to_processes:
-            friends = cwd_to_processes[cwd]
+        elif self.cwd in cwd_to_processes:
+            friends = cwd_to_processes[self.cwd]
         else:
             friends = []
 
