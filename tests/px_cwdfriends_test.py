@@ -2,6 +2,12 @@ from . import testutils
 
 from px import px_cwdfriends
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List    # NOQA
+    from px import px_process  # NOQA
+
 
 def test_current_cwd_unknown():
     process = testutils.create_process()
@@ -44,3 +50,54 @@ def test_find_friends():
 
     assert test_me.cwd == '/notroot'
     assert test_me.friends == [friend]
+
+
+def _get_friends_in_order(*args):
+    # type: (str) -> List[str]
+    procs = []
+    files = []
+    for index, arg in enumerate(args):
+        procs.append(testutils.create_process(pid=index, commandline=arg))
+        files.append(testutils.create_file("xxx", "yyy", None, index, fdtype="cwd"))
+
+    me = testutils.create_process(pid=1234, commandline="base-process")
+    procs.append(me)
+    files.append(testutils.create_file("xxx", "yyy", None, me.pid, fdtype="cwd"))
+
+    return_me = []
+    for friend in px_cwdfriends.PxCwdFriends(me, procs, files).friends:
+        return_me.append(friend.cmdline)
+
+    return return_me
+
+
+def _get_friend_processes_in_order(*args):
+    # type: (px_process.PxProcess) -> List[px_process.PxProcess]
+    files = []
+    procs = list(args)
+    for index, arg in enumerate(procs):
+        files.append(testutils.create_file("xxx", "yyy", None, index, fdtype="cwd"))
+
+    me = testutils.create_process(pid=1234, commandline="base-process")
+    procs.append(me)
+    files.append(testutils.create_file("xxx", "yyy", None, me.pid, fdtype="cwd"))
+
+    return px_cwdfriends.PxCwdFriends(me, procs, files).friends
+
+
+def test_friend_ordering():
+    # Test alphabetic order
+    assert _get_friends_in_order("a", "b") == ["a", "b"]
+    assert _get_friends_in_order("b", "a") == ["a", "b"]
+
+    # Test ignoring initial -
+    assert _get_friends_in_order("a", "-b", "c") == ["a", "-b", "c"]
+
+    # Test ignore case
+    assert _get_friends_in_order("c", "B", "a") == ["a", "B", "c"]
+
+    # Test PID as secondary key
+    p1 = testutils.create_process(pid=1, commandline="a")
+    p2 = testutils.create_process(pid=2, commandline="a")
+    assert _get_friend_processes_in_order(p1, p2) == [p1, p2]
+    assert _get_friend_processes_in_order(p2, p1) == [p1, p2]
