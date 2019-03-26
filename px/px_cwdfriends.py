@@ -26,12 +26,12 @@ class PxCwdFriends(object):
             if current_file.type != 'cwd':
                 continue
 
+            if current_file.pid == pid:
+                self.cwd = current_file.name
+
             if current_file.name == '/':
                 # This is too common, no point in doing this one
                 continue
-
-            if current_file.pid == pid:
-                self.cwd = current_file.name
 
             processes = cwd_to_processes.get(current_file.name)
             if processes is None:
