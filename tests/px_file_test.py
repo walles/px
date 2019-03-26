@@ -66,6 +66,12 @@ def test_get_all():
     # not, we'll just have to document our finding and lower this value
     assert len(files) > 100
 
+    cwd_count = 0
+    for file in files:
+        if file.type == 'cwd':
+            cwd_count += 1
+    assert cwd_count > 0
+
 
 def lsof_to_file(shard_array):
     return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
