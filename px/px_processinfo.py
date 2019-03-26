@@ -174,8 +174,13 @@ def to_ipc_lines(ipc_map):
 def print_cwd_friends(process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process.pid, all_processes, all_files)
 
-    # Print current process' cwd
-    print("Others sharing this process' working directory: " + friends.cwd)
+    print("Others sharing this process' working directory: " +
+          (friends.cwd or "<UNKNOWN>"))
+    if not friends.cwd:
+        print('  Working directory unknown, try again or try "sudo px ' +
+              str(process.pid) +
+              '"')
+        return
 
     if friends.cwd == '/':
         print("  Working directory too common, never mind")
