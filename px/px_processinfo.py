@@ -172,7 +172,7 @@ def to_ipc_lines(ipc_map):
 
 
 def print_cwd_friends(process, all_processes, all_files):
-    friends = px_cwdfriends.PxCwdFriends(process.pid, all_processes, all_files)
+    friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
     print("Others sharing this process' working directory: " +
           (friends.cwd or "<UNKNOWN>"))

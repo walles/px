@@ -11,8 +11,8 @@ if sys.version_info.major >= 3:
 
 
 class PxCwdFriends(object):
-    def __init__(self, pid, all_processes, all_files):
-        # type: (int, List[px_process.PxProcess], List[px_file.PxFile]) -> None
+    def __init__(self, process, all_processes, all_files):
+        # type: (px_process.PxProcess, List[px_process.PxProcess], List[px_file.PxFile]) -> None
 
         pid_to_process = {}  # type: Dict[int, px_process.PxProcess]
         for p in all_processes:
@@ -26,23 +26,23 @@ class PxCwdFriends(object):
             if current_file.type != 'cwd':
                 continue
 
-            if current_file.pid == pid:
+            if current_file.pid == process.pid:
                 self.cwd = current_file.name
 
             if current_file.name == '/':
                 # This is too common, no point in doing this one
                 continue
 
-            processes = cwd_to_processes.get(current_file.name)
-            if processes is None:
-                processes = []
+            file_processes = cwd_to_processes.get(current_file.name)
+            if file_processes is None:
+                file_processes = []
 
-            process = pid_to_process.get(current_file.pid)
-            if process is not None:
+            file_process = pid_to_process.get(current_file.pid)
+            if file_process is not None:
                 # Process could be None because there's no way for uss to get a process listing
                 # a file listing that can be guaranteed to be in sync
-                processes.append(process)
-                cwd_to_processes[current_file.name] = processes
+                file_processes.append(file_process)
+                cwd_to_processes[current_file.name] = file_processes
 
         if self.cwd is None:
             friends = []  # type: List[px_process.PxProcess]
@@ -50,5 +50,8 @@ class PxCwdFriends(object):
             friends = cwd_to_processes[self.cwd]
         else:
             friends = []
+
+        if process in friends:
+            friends.remove(process)
 
         self.friends = friends  # type: List[px_process.PxProcess]
