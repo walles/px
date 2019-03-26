@@ -68,7 +68,7 @@ def test_get_all():
 
     cwd_count = 0
     for file in files:
-        if file.type == 'cwd':
+        if file.fdtype == 'cwd':
             cwd_count += 1
     assert cwd_count > 0
 

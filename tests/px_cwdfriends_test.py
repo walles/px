@@ -12,7 +12,7 @@ def test_current_cwd_unknown():
 
 def test_current_cwd_root():
     process = testutils.create_process(pid=123)
-    cwd_file = testutils.create_file("cwd", "/", None, 123)
+    cwd_file = testutils.create_file("xxx", "/", None, 123, fdtype="cwd")
     test_me = px_cwdfriends.PxCwdFriends(process, [process], [cwd_file])
     assert test_me.cwd == '/'
     assert test_me.friends == []
@@ -20,7 +20,7 @@ def test_current_cwd_root():
 
 def test_current_cwd_notroot():
     process = testutils.create_process(pid=123)
-    cwd_file = testutils.create_file("cwd", "/notroot", None, 123)
+    cwd_file = testutils.create_file("xxx", "/notroot", None, 123, fdtype="cwd")
     test_me = px_cwdfriends.PxCwdFriends(process, [process], [cwd_file])
     assert test_me.cwd == '/notroot'
     assert test_me.friends == []
@@ -32,9 +32,9 @@ def test_find_friends():
     notfriend1 = testutils.create_process(pid=666)
     notfriend2 = testutils.create_process(pid=667)
 
-    cwd_file = testutils.create_file("cwd", "/notroot", None, 123)
-    friend_cwd = testutils.create_file("cwd", "/notroot", None, 234)
-    notfriend_cwd = testutils.create_file("cwd", "/somewhereelse", None, 666)
+    cwd_file = testutils.create_file("xxx", "/notroot", None, 123, fdtype="cwd")
+    friend_cwd = testutils.create_file("xxx", "/notroot", None, 234, fdtype="cwd")
+    notfriend_cwd = testutils.create_file("xxx", "/somewhereelse", None, 666, fdtype="cwd")
     # notfriend2 cwd intentionally left blank for the sake of this test
 
     test_me = px_cwdfriends.PxCwdFriends(

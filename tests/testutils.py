@@ -55,7 +55,8 @@ def create_file(filetype,     # type: str
                 pid,          # type: int
                 access=None,  # type: str
                 inode=None,   # type: str
-                fd=None       # type: int
+                fd=None,      # type: int
+                fdtype=None,  # type: Optional[str]
                 ):
     # type (...) -> px_file.PxFile
 
@@ -72,6 +73,7 @@ def create_file(filetype,     # type: str
     file.access = access
     file.inode = inode
     file.fd = fd
+    file.fdtype = fdtype
     return file
 
 
