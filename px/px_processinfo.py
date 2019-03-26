@@ -184,11 +184,11 @@ def print_cwd_friends(process, all_processes, all_files):
         return
 
     if friends.cwd == '/':
-        print("  Working directory too common, never mind")
+        print("  Working directory too common, never mind.")
         return
 
     if len(friends.friends) == 0:
-        print("  Nobody else shares this working directory")
+        print("  Nobody else shares this working directory.")
         return
 
     for friend in friends.friends:
