@@ -10,10 +10,9 @@ if sys.version_info.major >= 3:
     from six import text_type    # NOQA
 
 
-def _sortkey(process):
+def _strip_leading_dash(process):
     # type: (px_process.PxProcess) -> text_type
     key = process.command
-    key = key.lower()
     if key.startswith("-"):
         key = key[1:]
     return key
@@ -65,5 +64,5 @@ class PxCwdFriends(object):
 
         # Sort primarily by command and secondarily by PID
         friends = sorted(friends, key=lambda friend: friend.pid)
-        friends = sorted(friends, key=_sortkey)
+        friends = sorted(friends, key=_strip_leading_dash)
         self.friends = friends  # type: List[px_process.PxProcess]

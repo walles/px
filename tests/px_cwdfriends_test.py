@@ -94,9 +94,6 @@ def test_friend_ordering():
     # Test ignoring initial -
     assert _get_friends_in_order("a", "-b", "c") == ["a", "-b", "c"]
 
-    # Test ignore case
-    assert _get_friends_in_order("c", "B", "a") == ["a", "B", "c"]
-
     # Test PID as secondary key
     p1 = testutils.create_process(pid=1, commandline="a")
     p2 = testutils.create_process(pid=2, commandline="a")
