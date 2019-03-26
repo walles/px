@@ -10,6 +10,15 @@ if sys.version_info.major >= 3:
     from six import text_type    # NOQA
 
 
+def _sortkey(process):
+    # type: (px_process.PxProcess) -> text_type
+    key = process.command
+    key = key.lower()
+    if key.startswith("-"):
+        key = key[1:]
+    return key
+
+
 class PxCwdFriends(object):
     def __init__(self, process, all_processes, all_files):
         # type: (px_process.PxProcess, List[px_process.PxProcess], List[px_file.PxFile]) -> None
@@ -54,4 +63,7 @@ class PxCwdFriends(object):
         if process in friends:
             friends.remove(process)
 
+        # Sort primarily by command and secondarily by PID
+        friends = sorted(friends, key=lambda friend: friend.pid)
+        friends = sorted(friends, key=_sortkey)
         self.friends = friends  # type: List[px_process.PxProcess]

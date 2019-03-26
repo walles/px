@@ -76,8 +76,8 @@ def _get_friend_processes_in_order(*args):
     # type: (px_process.PxProcess) -> List[px_process.PxProcess]
     files = []
     procs = list(args)
-    for index, arg in enumerate(procs):
-        files.append(testutils.create_file("xxx", "yyy", None, index, fdtype="cwd"))
+    for proc in procs:
+        files.append(testutils.create_file("xxx", "yyy", None, proc.pid, fdtype="cwd"))
 
     me = testutils.create_process(pid=1234, commandline="base-process")
     procs.append(me)
