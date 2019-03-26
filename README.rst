@@ -241,8 +241,6 @@ TODO misc
   the outcome.
 * In the px / top views, in the process owner column, maybe print other non-root
   process owners of parent processes inside parentheses?
-* In the details report, if the current process has a working directory that
-  isn't ``/``, list all other processes that have the same working directory.
 * Ignore -E switch on Python command lines
 
 
@@ -259,6 +257,7 @@ DONE
 * Add a section about installation instructions to this document.
 * Add making-a-release instructions to this document
 * Add a ``.travis.yml`` config to the project that:
+
   * OK: Runs ``flake8`` on the code
   * OK: Tests the code on OS X
   * OK: Tests the code on Linux
@@ -271,6 +270,7 @@ DONE
   would replace ``pstree``.
 * If we get something looking like a PID as a command line argument, for that
   PID show:
+
   * A list of all open files, pipes and sockets
   * For each pipe / domain socket, print the process at the other end
   * For each socket, print where it's going
@@ -295,6 +295,8 @@ DONE
 * In the details tree view, print process owners for each line
 * Print ``$SUDO_USER`` value with process details, if set
 * Run CI on both Python 2 and Python 3
+* In the details report, if the current process has a working directory that
+  isn't ``/``, list all other processes that have the same working directory.
 
 .. _the Output section: #output
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
