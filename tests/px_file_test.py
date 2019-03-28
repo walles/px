@@ -148,7 +148,10 @@ def test_str_resolve():
     test_me = px_file.PxFile()
     test_me.type = "IPv4"
     test_me.name = "127.0.0.1:51786->8.8.8.8:https"
-    assert str(test_me) == "[IPv4] localhost:51786->google-public-dns-a.google.com:https"
+    assert str(test_me) in [
+        "[IPv4] localhost:51786->google-public-dns-a.google.com:https",
+        "[IPv4] localhost:51786->dns.google:https",
+    ]
 
     test_me = px_file.PxFile()
     test_me.type = "IPv4"
