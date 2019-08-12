@@ -16,9 +16,10 @@ from . import px_launchcounter
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List    # NOQA
-    from typing import Dict    # NOQA
-    from six import text_type  # NOQA
+    from typing import List      # NOQA
+    from typing import Dict      # NOQA
+    from typing import Optional  # NOQA
+    from six import text_type    # NOQA
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -175,7 +176,8 @@ def get_screen_lines(
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
     columns,   # type: int
-    include_footer=True  # type: bool
+    include_footer=True,  # type: bool
+    search_string=None,  # type: Optional[text_type]
 ):
     # type: (...) -> List[text_type]
 
@@ -225,7 +227,11 @@ def get_screen_lines(
     toplist_table_lines += rows * ['']
 
     lines += [px_terminal.bold("Top CPU using processes")]
-    lines += toplist_table_lines[0:cputop_height - 1]
+    max_process_count = cputop_height - 1
+    if search_string is not None:
+        lines += [px_terminal.bold("Search: ") + search_string + px_terminal.inverse_video(" ")]
+        max_process_count += 1
+    lines += toplist_table_lines[0:max_process_count]
 
     lines += launchlines
 
@@ -255,7 +261,7 @@ def redraw(
     The new display will be rows rows x columns columns.
     """
     lines = get_screen_lines(
-        load_bar, toplist, launchcounter, rows, columns, include_footer)
+        load_bar, toplist, launchcounter, rows, columns, include_footer, search_string="Johan")
     if clear:
         clear_screen()
 
