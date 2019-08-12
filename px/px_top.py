@@ -25,13 +25,17 @@ if sys.version_info.major >= 3:
 SIGWINCH_PIPE = os.pipe()
 
 # We'll report window resize as this key having been pressed
+# FIXME: Test resizing the window while searching
 SIGWINCH_KEY = u'r'
 
 CMD_UNKNOWN = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
+CMD_SEARCH_KEY_HANDLED = 3
 
 KEY_ESC = "\x1b"
+KEY_BACKSPACE = "\x08"
+KEY_DELETE = "\x7f"
 
 SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
@@ -115,6 +119,7 @@ def read_select(fds, timeout_seconds):
 
 
 def getch(timeout_seconds=0, fd=None):
+    # type: (int, int) -> Optional[text_type]
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
@@ -289,20 +294,23 @@ def handle_search_keypress(keypress):
     # type: (text_type) -> None
     global search_string
 
+    # If this triggers our top_mode state machine is broken
+    assert search_string is not None
+
     if keypress == KEY_ESC:
         # Exit search mode
+        # FIXME: This triggers if the user just presses Delete
         global top_mode
         top_mode = MODE_BASE
         search_string = None
         return
 
-    if keypress == "FIXME: UNPRINTABLE, starting with ESC, etc":
+    if keypress in [KEY_BACKSPACE, KEY_DELETE]:
+        search_string = search_string[:-1]
         return
 
-    # FIXME: On backspace or delete, remove the last char if any
-
-    # If this triggers our top_mode state machine is broken
-    assert search_string is not None
+    if keypress == "FIXME: UNPRINTABLE, starting with ESC, etc":
+        return
 
     search_string += keypress
 
@@ -319,7 +327,7 @@ def get_command(**kwargs):
     global top_mode
     if top_mode == MODE_SEARCH:
         handle_search_keypress(char)
-        return None
+        return CMD_SEARCH_KEY_HANDLED
 
     if char == u'/':
         global search_string
