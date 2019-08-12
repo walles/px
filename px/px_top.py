@@ -290,12 +290,21 @@ def handle_search_keypress(keypress):
     global search_string
 
     if keypress == KEY_ESC:
+        # Exit search mode
         global top_mode
         top_mode = MODE_BASE
         search_string = None
         return
 
-    # FIXME: Modify the search string, or exit search mode or something
+    if keypress == "FIXME: UNPRINTABLE, starting with ESC, etc":
+        return
+
+    # FIXME: On backspace or delete, remove the last char if any
+
+    # If this triggers our top_mode state machine is broken
+    assert search_string is not None
+
+    search_string += keypress
 
 
 def get_command(**kwargs):
