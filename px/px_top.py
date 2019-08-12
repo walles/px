@@ -34,7 +34,7 @@ CMD_RESIZE = 2
 CMD_SEARCH_KEY_HANDLED = 3
 
 KEY_ESC = "\x1b"
-KEY_BACKSPACE = "\x08"
+KEY_BACKSPACE = "\x1b[3~"
 KEY_DELETE = "\x7f"
 
 SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
@@ -131,11 +131,11 @@ def getch(timeout_seconds=0, fd=None):
     can_read_from = (
         read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
 
-    # Read one byte from the first ready-for-read stream. If more than one
+    # Read all(ish) bytes from the first ready-for-read stream. If more than one
     # stream is ready, we'll catch the second one on the next call to this
     # function, so just doing the first is fine.
     for stream in can_read_from:
-        return_me = os.read(stream, 1).decode("UTF-8")
+        return_me = os.read(stream, 1234).decode("UTF-8")
         if len(return_me) > 0:
             return return_me
 
@@ -290,29 +290,31 @@ def redraw(
     sys.stdout.flush()
 
 
-def handle_search_keypress(keypress):
+def handle_search_keypress(key_sequence):
     # type: (text_type) -> None
     global search_string
 
     # If this triggers our top_mode state machine is broken
     assert search_string is not None
 
-    if keypress == KEY_ESC:
+    if key_sequence == KEY_ESC:
         # Exit search mode
-        # FIXME: This triggers if the user just presses Delete
         global top_mode
         top_mode = MODE_BASE
         search_string = None
         return
 
-    if keypress in [KEY_BACKSPACE, KEY_DELETE]:
+    if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
         search_string = search_string[:-1]
         return
 
-    if keypress == "FIXME: UNPRINTABLE, starting with ESC, etc":
+    if key_sequence == "FIXME: UNPRINTABLE, starting with ESC, etc":
         return
 
-    search_string += keypress
+    search_string += key_sequence
+
+    # NOTE: Uncomment to debug input characters
+    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
 
 
 def get_command(**kwargs):
