@@ -31,6 +31,17 @@ CMD_UNKNOWN = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
 
+KEY_ESC = "\x1b"
+
+SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
+SEARCH_CURSOR = px_terminal.inverse_video(" ")
+
+MODE_BASE = 0
+MODE_SEARCH = 1
+
+top_mode = MODE_BASE  # type: int
+search_string = None  # type: Optional[text_type]
+
 
 def adjust_cpu_times(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
@@ -123,7 +134,7 @@ def getch(timeout_seconds=0, fd=None):
         if len(return_me) > 0:
             return return_me
 
-        # A zero length response means we get EOF from one of the streams. This
+        # A zero length response means we got EOF from one of the streams. This
         # happens (at least) during testing.
         continue
 
@@ -229,14 +240,16 @@ def get_screen_lines(
     lines += [px_terminal.bold("Top CPU using processes")]
     max_process_count = cputop_height - 1
     if search_string is not None:
-        lines += [px_terminal.bold("Search: ") + search_string + px_terminal.inverse_video(" ")]
-        max_process_count += 1
+        lines += [SEARCH_PROMPT + search_string + SEARCH_CURSOR]
+        max_process_count -= 1
+
+    # FIXME: Actually filter these if we're searching
     lines += toplist_table_lines[0:max_process_count]
 
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit"
+        footer_line = u"  q - Quit  / - Search"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
@@ -260,14 +273,29 @@ def redraw(
 
     The new display will be rows rows x columns columns.
     """
+    global search_string
     lines = get_screen_lines(
-        load_bar, toplist, launchcounter, rows, columns, include_footer, search_string="Johan")
+        load_bar, toplist, launchcounter, rows, columns, include_footer,
+        search_string=search_string)
     if clear:
         clear_screen()
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
     writebytes(u"\r\n".join(lines).encode('utf-8'))
     sys.stdout.flush()
+
+
+def handle_search_keypress(keypress):
+    # type: (text_type) -> None
+    global search_string
+
+    if keypress == KEY_ESC:
+        global top_mode
+        top_mode = MODE_BASE
+        search_string = None
+        return
+
+    # FIXME: Modify the search string, or exit search mode or something
 
 
 def get_command(**kwargs):
@@ -279,10 +307,23 @@ def get_command(**kwargs):
         return None
     assert len(char) > 0
 
+    global top_mode
+    if top_mode == MODE_SEARCH:
+        handle_search_keypress(char)
+        return None
+
+    if char == u'/':
+        global search_string
+        top_mode = MODE_SEARCH
+        search_string = ""
+        return None
+
     if char == u'q':
         return CMD_QUIT
+
     if char == SIGWINCH_KEY:
         return CMD_RESIZE
+
     return CMD_UNKNOWN
 
 
