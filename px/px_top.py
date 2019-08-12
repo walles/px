@@ -5,6 +5,7 @@ import errno
 import signal
 import select
 import termios
+import unicodedata
 
 import os
 from . import px_load
@@ -308,7 +309,16 @@ def handle_search_keypress(key_sequence):
         search_string = search_string[:-1]
         return
 
-    if key_sequence == "FIXME: UNPRINTABLE, starting with ESC, etc":
+    if KEY_ESC in key_sequence:
+        # Some special key, unprintable, unhandled, never mind
+        return
+
+    try:
+        if unicodedata.category(key_sequence).startswith("C"):
+            # Non-printable character, see: http://www.unicode.org/reports/tr44/#GC_Values_Table
+            return
+    except TypeError:
+        # Unable to type check this, let's not add it, just to be safe
         return
 
     search_string += key_sequence
