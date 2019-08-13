@@ -318,9 +318,11 @@ def handle_search_keypress(key_sequence):
         return
 
     try:
-        if unicodedata.category(key_sequence).startswith("C"):
-            # Non-printable character, see: http://www.unicode.org/reports/tr44/#GC_Values_Table
-            return
+        for char in key_sequence:
+            if unicodedata.category(char).startswith("C"):
+                # Non-printable character, see:
+                # http://www.unicode.org/reports/tr44/#GC_Values_Table
+                return
     except TypeError:
         # Unable to type check this, let's not add it, just to be safe
         return
