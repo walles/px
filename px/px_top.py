@@ -5,6 +5,7 @@ import errno
 import signal
 import select
 import termios
+import unicodedata
 
 import os
 from . import px_load
@@ -16,19 +17,36 @@ from . import px_launchcounter
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List    # NOQA
-    from typing import Dict    # NOQA
-    from six import text_type  # NOQA
+    from typing import List      # NOQA
+    from typing import Dict      # NOQA
+    from typing import Optional  # NOQA
+    from six import text_type    # NOQA
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
 
-# We'll report window resize as this key having been pressed
-SIGWINCH_KEY = u'r'
+# We'll report window resize as this key having been pressed.
+#
+# NOTE: This must be detected as non-printable by handle_search_keypress().
+SIGWINCH_KEY = u'\x00'
 
 CMD_UNKNOWN = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
+CMD_SEARCH_KEY_HANDLED = 3
+
+KEY_ESC = "\x1b"
+KEY_BACKSPACE = "\x1b[3~"
+KEY_DELETE = "\x7f"
+
+SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
+SEARCH_CURSOR = px_terminal.inverse_video(" ")
+
+MODE_BASE = 0
+MODE_SEARCH = 1
+
+top_mode = MODE_BASE  # type: int
+search_string = None  # type: Optional[text_type]
 
 
 def adjust_cpu_times(baseline, current):
@@ -103,6 +121,7 @@ def read_select(fds, timeout_seconds):
 
 
 def getch(timeout_seconds=0, fd=None):
+    # type: (int, int) -> Optional[text_type]
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
@@ -114,15 +133,15 @@ def getch(timeout_seconds=0, fd=None):
     can_read_from = (
         read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
 
-    # Read one byte from the first ready-for-read stream. If more than one
+    # Read all(ish) bytes from the first ready-for-read stream. If more than one
     # stream is ready, we'll catch the second one on the next call to this
     # function, so just doing the first is fine.
     for stream in can_read_from:
-        return_me = os.read(stream, 1).decode("UTF-8")
+        return_me = os.read(stream, 1234).decode("UTF-8")
         if len(return_me) > 0:
             return return_me
 
-        # A zero length response means we get EOF from one of the streams. This
+        # A zero length response means we got EOF from one of the streams. This
         # happens (at least) during testing.
         continue
 
@@ -175,9 +194,15 @@ def get_screen_lines(
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
     columns,   # type: int
-    include_footer=True  # type: bool
+    include_footer=True,  # type: bool
+    search=None,  # type: Optional[text_type]
 ):
     # type: (...) -> List[text_type]
+
+    if search is not None:
+        # Note that we accept partial user name match, otherwise incrementally typing
+        # a username becomes weird for the ptop user
+        toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
 
     # Hand out different amount of lines to the different sections
     header_height = 2
@@ -225,12 +250,17 @@ def get_screen_lines(
     toplist_table_lines += rows * ['']
 
     lines += [px_terminal.bold("Top CPU using processes")]
-    lines += toplist_table_lines[0:cputop_height - 1]
+    max_process_count = cputop_height - 1
+    if search is not None:
+        lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
+        max_process_count -= 1
+
+    lines += toplist_table_lines[0:max_process_count]
 
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit"
+        footer_line = u"  q - Quit  / - Search"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
@@ -254,14 +284,56 @@ def redraw(
 
     The new display will be rows rows x columns columns.
     """
+    global search_string
     lines = get_screen_lines(
-        load_bar, toplist, launchcounter, rows, columns, include_footer)
+        load_bar, toplist, launchcounter, rows, columns, include_footer,
+        search=search_string)
     if clear:
         clear_screen()
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
     writebytes(u"\r\n".join(lines).encode('utf-8'))
     sys.stdout.flush()
+
+
+def handle_search_keypress(key_sequence):
+    # type: (text_type) -> None
+    global search_string
+
+    # If this triggers our top_mode state machine is broken
+    assert search_string is not None
+
+    if key_sequence == KEY_ESC:
+        # Exit search mode
+        global top_mode
+        top_mode = MODE_BASE
+        search_string = None
+        return
+
+    # FIXME: If we get multiple backspace keys, handle all of them. Try
+    # holding down backspace and you'll see that nothing gets deleted.
+    if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
+        search_string = search_string[:-1]
+        return
+
+    if KEY_ESC in key_sequence:
+        # Some special key, unprintable, unhandled, never mind
+        return
+
+    try:
+        for char in key_sequence:
+            if unicodedata.category(char).startswith("C"):
+                # Non-printable character, see:
+                # http://www.unicode.org/reports/tr44/#GC_Values_Table
+                return
+    except TypeError:
+        # Unable to type check this, let's not add it, just to be safe
+        return
+
+    search_string += key_sequence
+
+    # NOTE: Uncomment to debug input characters
+    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
 
 
 def get_command(**kwargs):
@@ -273,10 +345,23 @@ def get_command(**kwargs):
         return None
     assert len(char) > 0
 
+    global top_mode
+    if top_mode == MODE_SEARCH:
+        handle_search_keypress(char)
+        return CMD_SEARCH_KEY_HANDLED
+
+    if char == u'/':
+        global search_string
+        top_mode = MODE_SEARCH
+        search_string = ""
+        return None
+
     if char == u'q':
         return CMD_QUIT
+
     if char == SIGWINCH_KEY:
         return CMD_RESIZE
+
     return CMD_UNKNOWN
 
 
