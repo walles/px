@@ -25,9 +25,10 @@ if sys.version_info.major >= 3:
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
 
-# We'll report window resize as this key having been pressed
-# FIXME: Test resizing the window while searching
-SIGWINCH_KEY = u'r'
+# We'll report window resize as this key having been pressed.
+#
+# NOTE: This must be detected as non-printable by handle_search_keypress().
+SIGWINCH_KEY = u'\x00'
 
 CMD_UNKNOWN = -1
 CMD_QUIT = 1
@@ -309,6 +310,8 @@ def handle_search_keypress(key_sequence):
         search_string = None
         return
 
+    # FIXME: If we get multiple backspace keys, handle all of them. Try
+    # holding down backspace and you'll see that nothing gets deleted.
     if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
         search_string = search_string[:-1]
         return
