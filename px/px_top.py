@@ -198,6 +198,11 @@ def get_screen_lines(
 ):
     # type: (...) -> List[text_type]
 
+    if search_string is not None:
+        # FIXME: Should match partial user name, otherwise typing
+        # a username becomes weird for the ptop user
+        toplist = list(filter(lambda p: p.match(search_string), toplist))
+
     # Hand out different amount of lines to the different sections
     header_height = 2
     footer_height = 0
@@ -249,7 +254,6 @@ def get_screen_lines(
         lines += [SEARCH_PROMPT + search_string + SEARCH_CURSOR]
         max_process_count -= 1
 
-    # FIXME: Actually filter these if we're searching
     lines += toplist_table_lines[0:max_process_count]
 
     lines += launchlines
