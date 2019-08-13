@@ -110,7 +110,7 @@ class PxProcess(object):
 
         self._recompute_score()
 
-    def match(self, string):
+    def match(self, string, require_exact_user=True):
         """
         Returns True if this process matches the string.
 
@@ -122,6 +122,10 @@ class PxProcess(object):
 
         if self.username == string:
             return True
+
+        if not require_exact_user:
+            if self.username.startswith(string):
+                return True
 
         if string in self.cmdline:
             return True

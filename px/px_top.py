@@ -194,14 +194,14 @@ def get_screen_lines(
     rows,      # type: int
     columns,   # type: int
     include_footer=True,  # type: bool
-    search_string=None,  # type: Optional[text_type]
+    search=None,  # type: Optional[text_type]
 ):
     # type: (...) -> List[text_type]
 
-    if search_string is not None:
-        # FIXME: Should match partial user name, otherwise typing
+    if search is not None:
+        # Note that we accept partial user name match, otherwise incrementally typing
         # a username becomes weird for the ptop user
-        toplist = list(filter(lambda p: p.match(search_string), toplist))
+        toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
 
     # Hand out different amount of lines to the different sections
     header_height = 2
@@ -250,8 +250,8 @@ def get_screen_lines(
 
     lines += [px_terminal.bold("Top CPU using processes")]
     max_process_count = cputop_height - 1
-    if search_string is not None:
-        lines += [SEARCH_PROMPT + search_string + SEARCH_CURSOR]
+    if search is not None:
+        lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
         max_process_count -= 1
 
     lines += toplist_table_lines[0:max_process_count]
@@ -286,7 +286,7 @@ def redraw(
     global search_string
     lines = get_screen_lines(
         load_bar, toplist, launchcounter, rows, columns, include_footer,
-        search_string=search_string)
+        search=search_string)
     if clear:
         clear_screen()
 
