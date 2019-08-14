@@ -58,6 +58,8 @@ last_highlighted_pid = None  # type: Optional[int]
 # we can't use last_pid.
 last_highlighted_row = 0  # type: int
 
+highlight_has_moved = False  # type: bool
+
 
 def adjust_cpu_times(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
@@ -202,6 +204,7 @@ def get_line_to_highlight(toplist, max_process_count):
     # type: (List[px_process.PxProcess], int) -> Optional[int]
     global last_highlighted_pid
     global last_highlighted_row
+    global highlight_has_moved
 
     if not toplist:
         # Toplist is empty or None
@@ -232,7 +235,13 @@ def get_line_to_highlight(toplist, max_process_count):
     if last_highlighted_row < 0:
         last_highlighted_row = 0
 
-    last_highlighted_pid = toplist[last_highlighted_row].pid
+    if last_highlighted_row > 0:
+        highlight_has_moved = True
+
+    # Stay on the top line unless the user has explicitly moved the highlight
+    if highlight_has_moved:
+        last_highlighted_pid = toplist[last_highlighted_row].pid
+
     return last_highlighted_row
 
 
