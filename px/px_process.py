@@ -37,7 +37,7 @@ CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9]
 
 class PxProcess(object):
     def __init__(self, process_builder, now):
-        self.pid = process_builder.pid
+        self.pid = process_builder.pid  # type: int
         self.ppid = process_builder.ppid  # type: int
 
         self.cmdline = process_builder.cmdline  # type: text_type

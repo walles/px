@@ -1,14 +1,14 @@
 import os
 import sys
 
-from . import px_process
-
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
+    from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Optional  # NOQA
     from typing import Iterable  # NOQA
+    from . import px_process     # NOQA
 
 CSI = "\x1b["
 
@@ -47,33 +47,22 @@ def get_window_size():
 
 
 def to_screen_lines(procs, columns):
+    # type: (List[px_process.PxProcess], Optional[int]) -> List[text_type]
     """
     Returns an array of lines that can be printed to screen. Each line is at
     most columns wide.
 
     If columns is None, line lengths are unbounded.
     """
-    class Headings(px_process.PxProcess):
-        def __init__(self):
-            pass
-
-    headings = Headings()
-    headings.pid = "PID"
-    headings.command = "COMMAND"
-    headings.username = "USERNAME"
-    headings.cpu_percent_s = "CPU"
-    headings.cpu_time_s = "CPUTIME"
-    headings.memory_percent_s = "RAM"
-    headings.cmdline = "COMMANDLINE"
-    procs = [headings] + procs
+    headings = ["PID", "COMMAND", "USERNAME", "CPU", "CPUTIME", "RAM", "COMMANDLINE"]
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
-    pid_width = 0
-    command_width = 0
-    username_width = 0
-    cpu_width = 0
-    cputime_width = 0
-    mem_width = 0
+    pid_width = len(headings[0])
+    command_width = len(headings[1])
+    username_width = len(headings[2])
+    cpu_width = len(headings[3])
+    cputime_width = len(headings[4])
+    mem_width = len(headings[5])
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
         command_width = max(command_width, len(proc.command))
@@ -92,6 +81,8 @@ def to_screen_lines(procs, columns):
 
     # Print process list using the computed column widths
     lines = []
+    lines.append(format.format(
+        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6]))
     for proc in procs:
         line = format.format(
             proc.pid, proc.command, proc.username,
