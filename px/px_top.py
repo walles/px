@@ -33,11 +33,13 @@ SIGWINCH_KEY = u'\x00'
 CMD_UNKNOWN = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
-CMD_SEARCH_KEY_HANDLED = 3
+CMD_HANDLED = 3
 
 KEY_ESC = "\x1b"
 KEY_BACKSPACE = "\x1b[3~"
 KEY_DELETE = "\x7f"
+KEY_UPARROW = "\x1b[A"
+KEY_DOWNARROW = "\x1b[B"
 
 SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
@@ -211,22 +213,25 @@ def get_line_to_highlight(toplist, max_process_count):
         last_highlighted_pid = None
         return None
 
-    if last_highlighted_pid is None:
-        return 0
+    if last_highlighted_pid is not None:
+        # Find PID line in list
+        pid_line = None
+        for index, process in enumerate(toplist):
+            if process.pid == last_highlighted_pid:
+                pid_line = index
+                break
+        if pid_line is not None and pid_line < max_process_count:
+            last_highlighted_row = pid_line
+            return pid_line
 
-    # Find pid line in list
-    pid_line = None
-    for index, process in enumerate(toplist):
-        if process.pid == last_highlighted_pid:
-            pid_line = index
-            break
-    if pid_line is not None and pid_line < max_process_count:
-        last_highlighted_row = pid_line
-        return pid_line
+    # No PID or not found, go for the last highlighted line instead...
 
     # Bound highlight to toplist length and screen height
     last_highlighted_row = min(
         last_highlighted_row, max_process_count - 1, len(toplist) - 1)
+    if last_highlighted_row < 0:
+        last_highlighted_row = 0
+
     last_highlighted_pid = toplist[last_highlighted_row].pid
     return last_highlighted_row
 
@@ -367,11 +372,17 @@ def handle_search_keypress(key_sequence):
         search_string = None
         return
 
+    # NOTE: Uncomment to debug input characters
+    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
+    # return
+
     # FIXME: If we get multiple backspace keys, handle all of them. Try
     # holding down backspace and you'll see that nothing gets deleted.
     if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
         search_string = search_string[:-1]
         return
+
+    # FIXME: Move selection up / down on KEY_UPARROW and KEY_DOWNARROW
 
     if KEY_ESC in key_sequence:
         # Some special key, unprintable, unhandled, never mind
@@ -389,9 +400,6 @@ def handle_search_keypress(key_sequence):
 
     search_string += key_sequence
 
-    # NOTE: Uncomment to debug input characters
-    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
-
 
 def get_command(**kwargs):
     """
@@ -405,7 +413,21 @@ def get_command(**kwargs):
     global top_mode
     if top_mode == MODE_SEARCH:
         handle_search_keypress(char)
-        return CMD_SEARCH_KEY_HANDLED
+        return CMD_HANDLED
+
+    # FIXME: Holding down KEY_UPARROW or KEY_DOWNARROW doesn't repeat
+
+    global last_highlighted_row
+    global last_highlighted_pid
+    if char == KEY_UPARROW:
+        last_highlighted_row -= 1
+        last_highlighted_pid = None
+        return CMD_HANDLED
+
+    if char == KEY_DOWNARROW:
+        last_highlighted_row += 1
+        last_highlighted_pid = None
+        return CMD_HANDLED
 
     if char == u'/':
         global search_string
