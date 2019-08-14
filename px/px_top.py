@@ -48,6 +48,14 @@ MODE_SEARCH = 1
 top_mode = MODE_BASE  # type: int
 search_string = None  # type: Optional[text_type]
 
+# Which pid were we last hovering? None means user has
+# not moved the selection, so stay on the top line.
+last_highlighted_pid = None  # type: Optional[int]
+
+# Which row were we last hovering? Go for this one if
+# we can't use last_pid.
+last_highlighted_row = 0  # type: int
+
 
 def adjust_cpu_times(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
@@ -188,6 +196,41 @@ def clear_screen():
     writebytes(CSI + b"H")
 
 
+def get_line_to_highlight(toplist, max_process_count):
+    # type: (List[px_process.PxProcess], int) -> Optional[int]
+    global last_highlighted_pid
+    global last_highlighted_row
+
+    if not toplist:
+        # Toplist is empty or None
+        last_highlighted_pid = None
+        return None
+
+    if max_process_count <= 0:
+        # No space for the highlight
+        last_highlighted_pid = None
+        return None
+
+    if last_highlighted_pid is None:
+        return 0
+
+    # Find pid line in list
+    pid_line = None
+    for index, process in enumerate(toplist):
+        if process.pid == last_highlighted_pid:
+            pid_line = index
+            break
+    if pid_line is not None and pid_line < max_process_count:
+        last_highlighted_row = pid_line
+        return pid_line
+
+    # Bound highlight to toplist length and screen height
+    last_highlighted_row = min(
+        last_highlighted_row, max_process_count - 1, len(toplist) - 1)
+    last_highlighted_pid = toplist[last_highlighted_row].pid
+    return last_highlighted_row
+
+
 def get_screen_lines(
     load_bar,  # type: px_load_bar.PxLoadBar
     toplist,   # type: List[px_process.PxProcess]
@@ -238,11 +281,27 @@ def get_screen_lines(
     # Compute cputop height now that we know how many launchlines we have
     cputop_height = rows - header_height - len(launchlines) - footer_height
 
+    max_process_count = cputop_height - 2
+    if search is not None:
+        # Search prompt needs one line
+        max_process_count -= 1
+
     toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
         heading_line = px_terminal.underline_bold(heading_line)
+
+        highlight_me = get_line_to_highlight(toplist, max_process_count)
+        if highlight_me is not None:
+            # The "+ 1" here is to skip the heading line
+            highlighted = toplist_table_lines[highlight_me + 1]
+            highlighted = px_terminal.get_string_of_length(highlighted, columns)
+            highlighted = px_terminal.inverse_video(highlighted)
+
+            # The "+ 1" here is to skip the heading line
+            toplist_table_lines[highlight_me + 1] = highlighted
+
         toplist_table_lines[0] = heading_line
 
     # Ensure that we cover the whole screen, even if it's higher than the
@@ -250,12 +309,10 @@ def get_screen_lines(
     toplist_table_lines += rows * ['']
 
     lines += [px_terminal.bold("Top CPU using processes")]
-    max_process_count = cputop_height - 1
     if search is not None:
         lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
-        max_process_count -= 1
 
-    lines += toplist_table_lines[0:max_process_count]
+    lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the heading line
 
     lines += launchlines
 
