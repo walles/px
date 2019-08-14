@@ -30,7 +30,7 @@ SIGWINCH_PIPE = os.pipe()
 # NOTE: This must be detected as non-printable by handle_search_keypress().
 SIGWINCH_KEY = u'\x00'
 
-CMD_UNKNOWN = -1
+CMD_WHATEVER = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
 CMD_HANDLED = 3
@@ -59,6 +59,26 @@ last_highlighted_pid = None  # type: Optional[int]
 last_highlighted_row = 0  # type: int
 
 highlight_has_moved = False  # type: bool
+
+
+class ConsumableString(object):
+    def __init__(self, string):
+        # type: (text_type) -> None
+        self._string = string
+
+    def __len__(self):
+        return len(self._string)
+
+    def consume(self, to_consume):
+        # type: (text_type) -> bool
+        if not self._string.startswith(to_consume):
+            return False
+
+        self._string = self._string[len(to_consume):]
+        return True
+
+    def __str__(self):
+        return self._string
 
 
 def adjust_cpu_times(baseline, current):
@@ -133,7 +153,7 @@ def read_select(fds, timeout_seconds):
 
 
 def getch(timeout_seconds=0, fd=None):
-    # type: (int, int) -> Optional[text_type]
+    # type: (int, int) -> Optional[ConsumableString]
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
@@ -149,9 +169,9 @@ def getch(timeout_seconds=0, fd=None):
     # stream is ready, we'll catch the second one on the next call to this
     # function, so just doing the first is fine.
     for stream in can_read_from:
-        return_me = os.read(stream, 1234).decode("UTF-8")
-        if len(return_me) > 0:
-            return return_me
+        string = os.read(stream, 1234).decode("UTF-8")
+        if len(string) > 0:
+            return ConsumableString(string)
 
         # A zero length response means we got EOF from one of the streams. This
         # happens (at least) during testing.
@@ -367,38 +387,38 @@ def redraw(
     sys.stdout.flush()
 
 
-def handle_search_keypress(key_sequence):
-    # type: (text_type) -> None
+def handle_search_keypresses(key_sequence):
+    # type: (ConsumableString) -> None
     global search_string
 
     # If this triggers our top_mode state machine is broken
     assert search_string is not None
 
-    if key_sequence == KEY_ESC:
-        # Exit search mode
-        global top_mode
-        top_mode = MODE_BASE
-        search_string = None
+    while len(key_sequence) > 0:
+        # FIXME: Move selection up / down on KEY_UPARROW and KEY_DOWNARROW
+        if key_sequence.consume(KEY_BACKSPACE):
+            search_string = search_string[:-1]
+        elif key_sequence.consume(KEY_DELETE):
+            search_string = search_string[:-1]
+        elif key_sequence.consume(KEY_ESC):
+            # Exit search mode
+            global top_mode
+            top_mode = MODE_BASE
+            search_string = None
+            return
+        else:
+            # Unable to consume more, give up
+            break
+
+    if len(key_sequence) == 0:
         return
 
-    # NOTE: Uncomment to debug input characters
-    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
-    # return
-
-    # FIXME: If we get multiple backspace keys, handle all of them. Try
-    # holding down backspace and you'll see that nothing gets deleted.
-    if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
-        search_string = search_string[:-1]
-        return
-
-    # FIXME: Move selection up / down on KEY_UPARROW and KEY_DOWNARROW
-
-    if KEY_ESC in key_sequence:
+    if KEY_ESC in str(key_sequence):
         # Some special key, unprintable, unhandled, never mind
         return
 
     try:
-        for char in key_sequence:
+        for char in str(key_sequence):
             if unicodedata.category(char).startswith("C"):
                 # Non-printable character, see:
                 # http://www.unicode.org/reports/tr44/#GC_Values_Table
@@ -407,50 +427,46 @@ def handle_search_keypress(key_sequence):
         # Unable to type check this, let's not add it, just to be safe
         return
 
-    search_string += key_sequence
+    search_string += str(key_sequence)
 
 
 def get_command(**kwargs):
     """
     Call getch() and interpret the results.
     """
-    char = getch(**kwargs)
-    if char is None:
+    input = getch(**kwargs)
+    if input is None:
         return None
-    assert len(char) > 0
+    assert len(input) > 0
 
     global top_mode
     if top_mode == MODE_SEARCH:
-        handle_search_keypress(char)
+        handle_search_keypresses(input)
         return CMD_HANDLED
-
-    # FIXME: Holding down KEY_UPARROW or KEY_DOWNARROW doesn't repeat
 
     global last_highlighted_row
     global last_highlighted_pid
-    if char == KEY_UPARROW:
-        last_highlighted_row -= 1
-        last_highlighted_pid = None
-        return CMD_HANDLED
+    while len(input) > 0:
+        if input.consume(KEY_UPARROW):
+            last_highlighted_row -= 1
+            last_highlighted_pid = None
+        elif input.consume(KEY_DOWNARROW):
+            last_highlighted_row += 1
+            last_highlighted_pid = None
+        elif input.consume(u'/'):
+            global search_string
+            top_mode = MODE_SEARCH
+            search_string = ""
+            return None
+        elif input.consume(u'q'):
+            return CMD_QUIT
+        elif input.consume(SIGWINCH_KEY):
+            return CMD_RESIZE
+        else:
+            # Unable to consume anything, give up
+            break
 
-    if char == KEY_DOWNARROW:
-        last_highlighted_row += 1
-        last_highlighted_pid = None
-        return CMD_HANDLED
-
-    if char == u'/':
-        global search_string
-        top_mode = MODE_SEARCH
-        search_string = ""
-        return None
-
-    if char == u'q':
-        return CMD_QUIT
-
-    if char == SIGWINCH_KEY:
-        return CMD_RESIZE
-
-    return CMD_UNKNOWN
+    return CMD_WHATEVER
 
 
 def _top():
