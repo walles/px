@@ -389,16 +389,23 @@ def redraw(
 def handle_search_keypresses(key_sequence):
     # type: (ConsumableString) -> None
     global search_string
+    global last_highlighted_row
+    global last_highlighted_pid
 
     # If this triggers our top_mode state machine is broken
     assert search_string is not None
 
     while len(key_sequence) > 0:
-        # FIXME: Move selection up / down on KEY_UPARROW and KEY_DOWNARROW
         if key_sequence.consume(KEY_BACKSPACE):
             search_string = search_string[:-1]
         elif key_sequence.consume(KEY_DELETE):
             search_string = search_string[:-1]
+        elif key_sequence.consume(KEY_UPARROW):
+            last_highlighted_row -= 1
+            last_highlighted_pid = None
+        elif key_sequence.consume(KEY_DOWNARROW):
+            last_highlighted_row += 1
+            last_highlighted_pid = None
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
