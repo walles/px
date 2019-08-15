@@ -1,6 +1,7 @@
 import sys
 import tty
 import copy
+import time
 import errno
 import signal
 import select
@@ -59,6 +60,9 @@ last_highlighted_pid = None  # type: Optional[int]
 last_highlighted_row = 0  # type: int
 
 highlight_has_moved = False  # type: bool
+
+# When we last polled the system for a process list, in seconds since the Epoch
+last_process_poll = 0.0
 
 
 class ConsumableString(object):
@@ -493,8 +497,13 @@ def _top():
 
             command = get_command(timeout_seconds=0)
 
-        # FIXME: Do this at most twice per second
-        current = px_process.get_all()
+        # For interactivity reasons, don't do this too often
+        global last_process_poll
+        now = time.time()
+        delta_seconds = now - last_process_poll
+        if delta_seconds >= 0.8:
+            current = px_process.get_all()
+            last_process_poll = now
 
 
 def sigwinch_handler(signum, frame):
