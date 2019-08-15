@@ -202,6 +202,10 @@ def print_fds(process, processes):
     print(datetime.datetime.now().isoformat() +
           ": Now invoking lsof, this can take over a minute on a big system...")
 
+    # Flush what we have so far so the user has something to read during the pause.
+    # This is useful when piping output into a pager like moar or less.
+    sys.stdout.flush()
+
     files = px_file.get_all()
     print(datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
 
