@@ -225,12 +225,10 @@ def get_line_to_highlight(toplist, max_process_count):
 
     if not toplist:
         # Toplist is empty or None
-        last_highlighted_pid = None
         return None
 
     if max_process_count <= 0:
         # No space for the highlight
-        last_highlighted_pid = None
         return None
 
     if last_highlighted_pid is not None:
