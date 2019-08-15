@@ -49,7 +49,9 @@ def test_getch():
     os.write(write, b'q')
 
     # We should get unicode responses from getch()
-    assert str(px_top.getch(timeout_seconds=0, fd=read)) == u'q'
+    sequence = px_top.getch(timeout_seconds=0, fd=read)
+    assert sequence is not None
+    assert sequence._string == u'q'
 
 
 def test_get_command():

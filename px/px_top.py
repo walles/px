@@ -77,9 +77,6 @@ class ConsumableString(object):
         self._string = self._string[len(to_consume):]
         return True
 
-    def __str__(self):
-        return self._string
-
 
 def adjust_cpu_times(baseline, current):
     # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
@@ -400,7 +397,7 @@ def handle_search_keypresses(key_sequence):
             search_string = search_string[:-1]
         elif key_sequence.consume(KEY_DELETE):
             search_string = search_string[:-1]
-        elif key_sequence.consume(KEY_ESC):
+        elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
             top_mode = MODE_BASE
@@ -413,12 +410,12 @@ def handle_search_keypresses(key_sequence):
     if len(key_sequence) == 0:
         return
 
-    if KEY_ESC in str(key_sequence):
+    if KEY_ESC in key_sequence._string:
         # Some special key, unprintable, unhandled, never mind
         return
 
     try:
-        for char in str(key_sequence):
+        for char in key_sequence._string:
             if unicodedata.category(char).startswith("C"):
                 # Non-printable character, see:
                 # http://www.unicode.org/reports/tr44/#GC_Values_Table
@@ -427,7 +424,7 @@ def handle_search_keypresses(key_sequence):
         # Unable to type check this, let's not add it, just to be safe
         return
 
-    search_string += str(key_sequence)
+    search_string += key_sequence._string
 
 
 def get_command(**kwargs):
@@ -498,6 +495,7 @@ def _top():
 
             command = get_command(timeout_seconds=0)
 
+        # FIXME: Do this at most twice per second
         current = px_process.get_all()
 
 
