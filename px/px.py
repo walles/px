@@ -105,7 +105,7 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        px_processinfo.print_process_info(pid)
+        px_processinfo.print_pid_info(pid)
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving

@@ -1,6 +1,9 @@
+# coding=utf-8
+
 import sys
 import tty
 import copy
+import time
 import errno
 import signal
 import select
@@ -13,12 +16,14 @@ from . import px_process
 from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
+from . import px_processinfo
 from . import px_launchcounter
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List      # NOQA
     from typing import Dict      # NOQA
+    from typing import Union     # NOQA
     from typing import Optional  # NOQA
     from six import text_type    # NOQA
 
@@ -30,14 +35,17 @@ SIGWINCH_PIPE = os.pipe()
 # NOTE: This must be detected as non-printable by handle_search_keypress().
 SIGWINCH_KEY = u'\x00'
 
-CMD_UNKNOWN = -1
+CMD_WHATEVER = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
-CMD_SEARCH_KEY_HANDLED = 3
+CMD_HANDLED = 3
 
 KEY_ESC = "\x1b"
 KEY_BACKSPACE = "\x1b[3~"
 KEY_DELETE = "\x7f"
+KEY_UPARROW = "\x1b[A"
+KEY_DOWNARROW = "\x1b[B"
+KEY_ENTER = "\x0d"
 
 SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
@@ -45,8 +53,41 @@ SEARCH_CURSOR = px_terminal.inverse_video(" ")
 MODE_BASE = 0
 MODE_SEARCH = 1
 
+initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
+
 top_mode = MODE_BASE  # type: int
 search_string = None  # type: Optional[text_type]
+
+# Which pid were we last hovering?
+last_highlighted_pid = None  # type: Optional[int]
+
+# Which row were we last hovering? Go for this one if
+# we can't use last_pid.
+last_highlighted_row = 0  # type: int
+
+# Has the user manually moved the highlight? If not, just stay on the top
+# row even if the tow PID moves away.
+highlight_has_moved = False  # type: bool
+
+# When we last polled the system for a process list, in seconds since the Epoch
+last_process_poll = 0.0
+
+
+class ConsumableString(object):
+    def __init__(self, string):
+        # type: (text_type) -> None
+        self._string = string
+
+    def __len__(self):
+        return len(self._string)
+
+    def consume(self, to_consume):
+        # type: (text_type) -> bool
+        if not self._string.startswith(to_consume):
+            return False
+
+        self._string = self._string[len(to_consume):]
+        return True
 
 
 def adjust_cpu_times(baseline, current):
@@ -121,7 +162,7 @@ def read_select(fds, timeout_seconds):
 
 
 def getch(timeout_seconds=0, fd=None):
-    # type: (int, int) -> Optional[text_type]
+    # type: (int, int) -> Optional[ConsumableString]
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
@@ -137,9 +178,9 @@ def getch(timeout_seconds=0, fd=None):
     # stream is ready, we'll catch the second one on the next call to this
     # function, so just doing the first is fine.
     for stream in can_read_from:
-        return_me = os.read(stream, 1234).decode("UTF-8")
-        if len(return_me) > 0:
-            return return_me
+        string = os.read(stream, 1234).decode("UTF-8")
+        if len(string) > 0:
+            return ConsumableString(string)
 
         # A zero length response means we got EOF from one of the streams. This
         # happens (at least) during testing.
@@ -186,6 +227,49 @@ def clear_screen():
     CSI = b"\x1b["
     writebytes(CSI + b"1J")
     writebytes(CSI + b"H")
+
+
+def get_line_to_highlight(toplist, max_process_count):
+    # type: (List[px_process.PxProcess], int) -> Optional[int]
+    global last_highlighted_pid
+    global last_highlighted_row
+    global highlight_has_moved
+
+    if not toplist:
+        # Toplist is empty or None
+        return None
+
+    if max_process_count <= 0:
+        # No space for the highlight
+        return None
+
+    # Before the user has moved the highlight, we don't follow a particular PID
+    if last_highlighted_pid is not None and highlight_has_moved:
+        # Find PID line in list
+        pid_line = None
+        for index, process in enumerate(toplist):
+            if process.pid == last_highlighted_pid:
+                pid_line = index
+                break
+        if pid_line is not None and pid_line < max_process_count:
+            last_highlighted_row = pid_line
+            return pid_line
+
+    # No PID or not found, go for the last highlighted line instead...
+
+    # Bound highlight to toplist length and screen height
+    last_highlighted_row = min(
+        last_highlighted_row, max_process_count - 1, len(toplist) - 1)
+    if last_highlighted_row < 0:
+        last_highlighted_row = 0
+
+    if last_highlighted_row > 0:
+        highlight_has_moved = True
+
+    # Stay on the top line unless the user has explicitly moved the highlight
+    last_highlighted_pid = toplist[last_highlighted_row].pid
+
+    return last_highlighted_row
 
 
 def get_screen_lines(
@@ -238,11 +322,28 @@ def get_screen_lines(
     # Compute cputop height now that we know how many launchlines we have
     cputop_height = rows - header_height - len(launchlines) - footer_height
 
+    # -2 = Section name + column headings
+    max_process_count = cputop_height - 2
+    if search is not None:
+        # Search prompt needs one line
+        max_process_count -= 1
+
     toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
     if toplist_table_lines:
         heading_line = toplist_table_lines[0]
         heading_line = px_terminal.get_string_of_length(heading_line, columns)
         heading_line = px_terminal.underline_bold(heading_line)
+
+        highlight_me = get_line_to_highlight(toplist, max_process_count)
+        if highlight_me is not None:
+            # The "+ 1" here is to skip the heading line
+            highlighted = toplist_table_lines[highlight_me + 1]
+            highlighted = px_terminal.get_string_of_length(highlighted, columns)
+            highlighted = px_terminal.inverse_video(highlighted)
+
+            # The "+ 1" here is to skip the heading line
+            toplist_table_lines[highlight_me + 1] = highlighted
+
         toplist_table_lines[0] = heading_line
 
     # Ensure that we cover the whole screen, even if it's higher than the
@@ -250,17 +351,15 @@ def get_screen_lines(
     toplist_table_lines += rows * ['']
 
     lines += [px_terminal.bold("Top CPU using processes")]
-    max_process_count = cputop_height - 1
     if search is not None:
         lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
-        max_process_count -= 1
 
-    lines += toplist_table_lines[0:max_process_count]
+    lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the column headings
 
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit  / - Search"
+        footer_line = u"  q - Quit  / - Search  ↑↓ - Move selection  Enter - Select"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
@@ -296,32 +395,87 @@ def redraw(
     sys.stdout.flush()
 
 
-def handle_search_keypress(key_sequence):
-    # type: (text_type) -> None
+def restore_display():
+    fd = sys.stdin.fileno()
+    tty.setcbreak(fd)
+
+    # tty.setraw() disables local echo, so we have to re-enable it here.
+    # See the "source code" comment to this answer:
+    # http://stackoverflow.com/a/8758047/473672
+    global initial_termios_attr
+    if initial_termios_attr:
+        termios.tcsetattr(fd, termios.TCSADRAIN, initial_termios_attr)
+
+
+# Print info about PID and exit
+def print_info_and_quit(pid):
+    # type: (Optional[int]) -> None
+    if pid is None:
+        # Nothing selected, never mind
+        return
+
+    # Is this PID available?
+    processes = px_process.get_all()
+    process = px_processinfo.find_process_by_pid(pid, processes)
+    if not process:
+        # Process not available, never mind
+        return
+
+    restore_display()
+
+    # Visually distance ourselves from the ptop view
+    print("")
+    print("")
+
+    px_processinfo.print_process_info(process, processes)
+    sys.exit(0)
+
+
+def handle_search_keypresses(key_sequence):
+    # type: (ConsumableString) -> None
     global search_string
+    global last_highlighted_row
+    global last_highlighted_pid
 
     # If this triggers our top_mode state machine is broken
     assert search_string is not None
 
-    if key_sequence == KEY_ESC:
-        # Exit search mode
-        global top_mode
-        top_mode = MODE_BASE
-        search_string = None
+    # NOTE: Uncomment to debug input characters
+    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence._string)
+    # return
+
+    while len(key_sequence) > 0:
+        if key_sequence.consume(KEY_BACKSPACE):
+            search_string = search_string[:-1]
+        elif key_sequence.consume(KEY_DELETE):
+            search_string = search_string[:-1]
+        elif key_sequence.consume(KEY_UPARROW):
+            last_highlighted_row -= 1
+            last_highlighted_pid = None
+        elif key_sequence.consume(KEY_DOWNARROW):
+            last_highlighted_row += 1
+            last_highlighted_pid = None
+        elif key_sequence.consume(KEY_ENTER):
+            print_info_and_quit(last_highlighted_pid)
+        elif key_sequence._string == KEY_ESC:
+            # Exit search mode
+            global top_mode
+            top_mode = MODE_BASE
+            search_string = None
+            return
+        else:
+            # Unable to consume more, give up
+            break
+
+    if len(key_sequence) == 0:
         return
 
-    # FIXME: If we get multiple backspace keys, handle all of them. Try
-    # holding down backspace and you'll see that nothing gets deleted.
-    if key_sequence in [KEY_BACKSPACE, KEY_DELETE]:
-        search_string = search_string[:-1]
-        return
-
-    if KEY_ESC in key_sequence:
+    if KEY_ESC in key_sequence._string:
         # Some special key, unprintable, unhandled, never mind
         return
 
     try:
-        for char in key_sequence:
+        for char in key_sequence._string:
             if unicodedata.category(char).startswith("C"):
                 # Non-printable character, see:
                 # http://www.unicode.org/reports/tr44/#GC_Values_Table
@@ -330,39 +484,48 @@ def handle_search_keypress(key_sequence):
         # Unable to type check this, let's not add it, just to be safe
         return
 
-    search_string += key_sequence
-
-    # NOTE: Uncomment to debug input characters
-    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence)
+    search_string += key_sequence._string
 
 
 def get_command(**kwargs):
     """
     Call getch() and interpret the results.
     """
-    char = getch(**kwargs)
-    if char is None:
+    input = getch(**kwargs)
+    if input is None:
         return None
-    assert len(char) > 0
+    assert len(input) > 0
 
     global top_mode
     if top_mode == MODE_SEARCH:
-        handle_search_keypress(char)
-        return CMD_SEARCH_KEY_HANDLED
+        handle_search_keypresses(input)
+        return CMD_HANDLED
 
-    if char == u'/':
-        global search_string
-        top_mode = MODE_SEARCH
-        search_string = ""
-        return None
+    global last_highlighted_row
+    global last_highlighted_pid
+    while len(input) > 0:
+        if input.consume(KEY_UPARROW):
+            last_highlighted_row -= 1
+            last_highlighted_pid = None
+        elif input.consume(KEY_DOWNARROW):
+            last_highlighted_row += 1
+            last_highlighted_pid = None
+        elif input.consume(KEY_ENTER):
+            print_info_and_quit(last_highlighted_pid)
+        elif input.consume(u'/'):
+            global search_string
+            top_mode = MODE_SEARCH
+            search_string = ""
+            return None
+        elif input.consume(u'q'):
+            return CMD_QUIT
+        elif input.consume(SIGWINCH_KEY):
+            return CMD_RESIZE
+        else:
+            # Unable to consume anything, give up
+            break
 
-    if char == u'q':
-        return CMD_QUIT
-
-    if char == SIGWINCH_KEY:
-        return CMD_RESIZE
-
-    return CMD_UNKNOWN
+    return CMD_WHATEVER
 
 
 def _top():
@@ -394,7 +557,13 @@ def _top():
 
             command = get_command(timeout_seconds=0)
 
-        current = px_process.get_all()
+        # For interactivity reasons, don't do this too often
+        global last_process_poll
+        now = time.time()
+        delta_seconds = now - last_process_poll
+        if delta_seconds >= 0.8:
+            current = px_process.get_all()
+            last_process_poll = now
 
 
 def sigwinch_handler(signum, frame):
@@ -413,17 +582,16 @@ def top():
     signal.signal(signal.SIGWINCH, sigwinch_handler)
 
     fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
+
+    global initial_termios_attr
+    initial_termios_attr = termios.tcgetattr(sys.stdin.fileno())
+
     tty.setraw(fd)
+
     try:
         _top()
     finally:
-        tty.setcbreak(fd)
-
-        # tty.setraw() disables local echo, so we have to re-enable it here.
-        # See the "source code" comment to this answer:
-        # http://stackoverflow.com/a/8758047/473672
-        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        restore_display()
 
         # Make sure we actually end up on a new line
         print("")
