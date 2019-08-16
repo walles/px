@@ -58,14 +58,15 @@ initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 top_mode = MODE_BASE  # type: int
 search_string = None  # type: Optional[text_type]
 
-# Which pid were we last hovering? None means user has
-# not moved the selection, so stay on the top line.
+# Which pid were we last hovering?
 last_highlighted_pid = None  # type: Optional[int]
 
 # Which row were we last hovering? Go for this one if
 # we can't use last_pid.
 last_highlighted_row = 0  # type: int
 
+# Has the user manually moved the highlight? If not, just stay on the top
+# row even if the tow PID moves away.
 highlight_has_moved = False  # type: bool
 
 # When we last polled the system for a process list, in seconds since the Epoch
@@ -321,6 +322,7 @@ def get_screen_lines(
     # Compute cputop height now that we know how many launchlines we have
     cputop_height = rows - header_height - len(launchlines) - footer_height
 
+    # -2 = Section name + column headings
     max_process_count = cputop_height - 2
     if search is not None:
         # Search prompt needs one line
@@ -352,7 +354,7 @@ def get_screen_lines(
     if search is not None:
         lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
 
-    lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the heading line
+    lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the column headings
 
     lines += launchlines
 
@@ -421,7 +423,7 @@ def print_info_and_quit(pid):
 
     restore_display()
 
-    # Make sure we actually end up on a new line
+    # Visually distance ourselves from the ptop view
     print("")
     print("")
 
