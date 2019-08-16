@@ -240,7 +240,8 @@ def get_line_to_highlight(toplist, max_process_count):
         # No space for the highlight
         return None
 
-    if last_highlighted_pid is not None:
+    # Before the user has moved the highlight, we don't follow a particular PID
+    if last_highlighted_pid is not None and highlight_has_moved:
         # Find PID line in list
         pid_line = None
         for index, process in enumerate(toplist):
@@ -263,8 +264,7 @@ def get_line_to_highlight(toplist, max_process_count):
         highlight_has_moved = True
 
     # Stay on the top line unless the user has explicitly moved the highlight
-    if highlight_has_moved:
-        last_highlighted_pid = toplist[last_highlighted_row].pid
+    last_highlighted_pid = toplist[last_highlighted_row].pid
 
     return last_highlighted_row
 
@@ -408,8 +408,6 @@ def print_info_and_quit(pid):
     # type: (Optional[int]) -> None
     if pid is None:
         # Nothing selected, never mind
-        # FIXME: This will happen when pressing Enter before moving the selection,
-        # just starting ptop and pressing Enter must work!
         return
 
     # Is this PID available?
