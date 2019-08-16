@@ -237,7 +237,9 @@ TODO ``iotop`` replacement
 TODO misc
 ---------
 
-* ``ptop``: Let user switch between CPU time sort and memory sort
+* ptop: Let user switch between CPU time sort and memory sort
+* ptop: Load bar: Set foreground color in green section to black, white on
+  green is hard to read. Or maybe try dark green if there is such a thing?
 * Details: When no users were found to be logged in at process start,
   automatically detect whether it's because we don't have history that far back or
   whether it seems to be that nobody was actually logged in. Inform the user about
