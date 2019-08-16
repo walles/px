@@ -199,16 +199,18 @@ Releasing a new Version
 1. Consider updating `the Output section`_, push those changes. Consider updating
    the ``ptop`` screenshot, scale your window to 90x24 before shooting it.
 2. Do ``git tag | cat`` and think about what the next version number should be.
-3. Do ``git tag --annotate 1.2.3`` to set the next version number. The
+3. Do ``git log --first-parent $(git describe --abbrev=0)..HEAD`` to see changes
+   since the last release
+4. Do ``git tag --annotate 1.2.3`` to set the next version number. The
    text you write for this tag will show up as the release description on Github,
    write something nice! And remember that the first line is the subject line for
    the release.
-4. ``./release-to-pypi.sh``
-5. ``git push --tags``
-6. Go to the `Releases`_ page on GitHub, click your new release, click the
+5. ``./release-to-pypi.sh``
+6. ``git push --tags``
+7. Go to the `Releases`_ page on GitHub, click your new release, click the
    ``Edit tag`` button, then attach your ``px.pex`` file that you just built to
    the release.
-7. Press "Publish Release"
+8. Press "Publish Release"
 
 Your release should now be visible on the `pxpx page on Pypi`_.
 
