@@ -262,7 +262,7 @@ def print_start_time(process):
         ))
 
 
-def print_process_info(pid):
+def print_pid_info(pid):
     # type: (int) -> None
     processes = px_process.get_all()
 
@@ -271,6 +271,11 @@ def print_process_info(pid):
         sys.stderr.write("No such PID: {}\n".format(pid))
         exit(1)
 
+    print_process_info(process, processes)
+
+
+def print_process_info(process, processes):
+    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
     print_command_line(process)
 
     # Print a process tree with all PID's parents and all its children

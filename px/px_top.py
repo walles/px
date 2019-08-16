@@ -14,12 +14,14 @@ from . import px_process
 from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
+from . import px_processinfo
 from . import px_launchcounter
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List      # NOQA
     from typing import Dict      # NOQA
+    from typing import Union     # NOQA
     from typing import Optional  # NOQA
     from six import text_type    # NOQA
 
@@ -41,12 +43,15 @@ KEY_BACKSPACE = "\x1b[3~"
 KEY_DELETE = "\x7f"
 KEY_UPARROW = "\x1b[A"
 KEY_DOWNARROW = "\x1b[B"
+KEY_ENTER = "\x0d"
 
 SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
 
 MODE_BASE = 0
 MODE_SEARCH = 1
+
+initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 
 top_mode = MODE_BASE  # type: int
 search_string = None  # type: Optional[text_type]
@@ -386,6 +391,44 @@ def redraw(
     sys.stdout.flush()
 
 
+def restore_display():
+    fd = sys.stdin.fileno()
+    tty.setcbreak(fd)
+
+    # tty.setraw() disables local echo, so we have to re-enable it here.
+    # See the "source code" comment to this answer:
+    # http://stackoverflow.com/a/8758047/473672
+    global initial_termios_attr
+    if initial_termios_attr:
+        termios.tcsetattr(fd, termios.TCSADRAIN, initial_termios_attr)
+
+
+# Print info about PID and exit
+def print_info_and_quit(pid):
+    # type: (Optional[int]) -> None
+    if pid is None:
+        # Nothing selected, never mind
+        # FIXME: This will happen when pressing Enter before moving the selection,
+        # just starting ptop and pressing Enter must work!
+        return
+
+    # Is this PID available?
+    processes = px_process.get_all()
+    process = px_processinfo.find_process_by_pid(pid, processes)
+    if not process:
+        # Process not available, never mind
+        return
+
+    restore_display()
+
+    # Make sure we actually end up on a new line
+    print("")
+    print("")
+
+    px_processinfo.print_process_info(process, processes)
+    sys.exit(0)
+
+
 def handle_search_keypresses(key_sequence):
     # type: (ConsumableString) -> None
     global search_string
@@ -394,6 +437,10 @@ def handle_search_keypresses(key_sequence):
 
     # If this triggers our top_mode state machine is broken
     assert search_string is not None
+
+    # NOTE: Uncomment to debug input characters
+    # search_string = ":".join("{:02x}".format(ord(c)) for c in key_sequence._string)
+    # return
 
     while len(key_sequence) > 0:
         if key_sequence.consume(KEY_BACKSPACE):
@@ -406,6 +453,8 @@ def handle_search_keypresses(key_sequence):
         elif key_sequence.consume(KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
+        elif key_sequence.consume(KEY_ENTER):
+            print_info_and_quit(last_highlighted_pid)
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
@@ -459,6 +508,8 @@ def get_command(**kwargs):
         elif input.consume(KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
+        elif input.consume(KEY_ENTER):
+            print_info_and_quit(last_highlighted_pid)
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
@@ -529,17 +580,16 @@ def top():
     signal.signal(signal.SIGWINCH, sigwinch_handler)
 
     fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
+
+    global initial_termios_attr
+    initial_termios_attr = termios.tcgetattr(sys.stdin.fileno())
+
     tty.setraw(fd)
+
     try:
         _top()
     finally:
-        tty.setcbreak(fd)
-
-        # tty.setraw() disables local echo, so we have to re-enable it here.
-        # See the "source code" comment to this answer:
-        # http://stackoverflow.com/a/8758047/473672
-        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        restore_display()
 
         # Make sure we actually end up on a new line
         print("")
