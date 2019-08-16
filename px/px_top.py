@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import sys
 import tty
 import copy
@@ -355,7 +357,7 @@ def get_screen_lines(
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit  / - Search"
+        footer_line = u"  q - Quit  / - Search  ↑↓ - Move selection  Enter - Select"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
