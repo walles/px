@@ -46,8 +46,8 @@ class PxLoadBar(object):
         self.normal = CSI + u"m"
         self.inverse = CSI + u"0;7m"
         self.red = CSI + u"27;1;37;41m"
-        self.yellow = CSI + u"27;1;37;43m"
-        self.green = CSI + u"27;1;37;42m"
+        self.yellow = CSI + u"27;1;30;43m"
+        self.green = CSI + u"27;1;30;42m"
 
     def _get_colored_bytes(self, load, columns, text=u""):
         # type: (float, int, text_type) -> Iterable[Tuple[text_type, text_type]]

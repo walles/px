@@ -239,8 +239,6 @@ TODO misc
 ---------
 
 * ptop: Let user switch between CPU time sort and memory sort
-* ptop: Load bar: Set foreground color in green section to black, white on
-  green is hard to read. Or maybe try dark green if there is such a thing?
 * Details: When no users were found to be logged in at process start,
   automatically detect whether it's because we don't have history that far back or
   whether it seems to be that nobody was actually logged in. Inform the user about
@@ -303,6 +301,8 @@ DONE
 * Run CI on both Python 2 and Python 3
 * In the details report, if the current process has a working directory that
   isn't ``/``, list all other processes that have the same working directory.
+* ptop: Load bar: Set foreground color in green section to black, white on
+  green is hard to read.
 
 .. _the Output section: #output
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
