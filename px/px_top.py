@@ -72,6 +72,9 @@ highlight_has_moved = False  # type: bool
 # When we last polled the system for a process list, in seconds since the Epoch
 last_process_poll = 0.0
 
+# Order top list by memory usage. The opposite is by CPU usage.
+sort_by_memory = False
+
 
 class ConsumableString(object):
     def __init__(self, string):
@@ -190,19 +193,35 @@ def getch(timeout_seconds=0, fd=None):
 
 
 def get_notnone_cpu_time_seconds(proc):
+    # type: (px_process.PxProcess) -> int
     seconds = proc.cpu_time_seconds
     if seconds is not None:
         return seconds
     return 0
 
 
-def get_toplist(baseline, current):
-    # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
+def get_notnone_memory_percent(proc):
+    # type: (px_process.PxProcess) -> int
+    seconds = proc.memory_percent
+    if seconds is not None:
+        return seconds
+    return 0
+
+
+def get_toplist(baseline,  # type: List[px_process.PxProcess]
+                current,   # type: List[px_process.PxProcess]
+                by_memory=False  # type: bool
+                ):
+    # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
 
     # Sort by CPU time used, then most interesting first
     toplist = px_process.order_best_first(toplist)
-    toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+    if by_memory:
+        toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
+    else:
+        # By CPU time, this is the default
+        toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
 
     return toplist
 
@@ -541,7 +560,8 @@ def _top():
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
-        toplist = get_toplist(baseline, current)
+        global sort_by_memory
+        toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(load_bar, toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
