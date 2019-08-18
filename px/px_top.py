@@ -347,23 +347,9 @@ def get_screen_lines(
         # Search prompt needs one line
         max_process_count -= 1
 
-    toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
-    if toplist_table_lines:
-        heading_line = toplist_table_lines[0]
-        heading_line = px_terminal.get_string_of_length(heading_line, columns)
-        heading_line = px_terminal.underline_bold(heading_line)
-
-        highlight_me = get_line_to_highlight(toplist, max_process_count)
-        if highlight_me is not None:
-            # The "+ 1" here is to skip the heading line
-            highlighted = toplist_table_lines[highlight_me + 1]
-            highlighted = px_terminal.get_string_of_length(highlighted, columns)
-            highlighted = px_terminal.inverse_video(highlighted)
-
-            # The "+ 1" here is to skip the heading line
-            toplist_table_lines[highlight_me + 1] = highlighted
-
-        toplist_table_lines[0] = heading_line
+    highlight_me = get_line_to_highlight(toplist, max_process_count)
+    toplist_table_lines = \
+        px_terminal.to_screen_lines(toplist, columns, highlight_me, sort_by_memory)
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes

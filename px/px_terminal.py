@@ -46,8 +46,8 @@ def get_window_size():
     return (rows, columns)
 
 
-def to_screen_lines(procs, columns):
-    # type: (List[px_process.PxProcess], Optional[int]) -> List[text_type]
+def to_screen_lines(procs, columns, row_to_highlight, sort_by_memory):
+    # type: (List[px_process.PxProcess], Optional[int], Optional[int], bool) -> List[text_type]
     """
     Returns an array of lines that can be printed to screen. Each line is at
     most columns wide.
@@ -81,14 +81,31 @@ def to_screen_lines(procs, columns):
 
     # Print process list using the computed column widths
     lines = []
-    lines.append(format.format(
-        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6]))
+
+    # FIXME: Show sort column header in inverse video
+    heading_line = format.format(
+        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
+    heading_line = get_string_of_length(heading_line, columns)
+    heading_line = underline_bold(heading_line)
+    lines.append(heading_line)
+
     for proc in procs:
         line = format.format(
             proc.pid, proc.command, proc.username,
             proc.cpu_percent_s, proc.cpu_time_s,
             proc.memory_percent_s, proc.cmdline)
         lines.append(line[0:columns])
+
+    if row_to_highlight is not None:
+        # The "+ 1" here is to skip the heading line
+        highlighted = lines[row_to_highlight + 1]
+        highlighted = get_string_of_length(highlighted, columns)
+        highlighted = inverse_video(highlighted)
+
+        # The "+ 1" here is to skip the heading line
+        lines[row_to_highlight + 1] = highlighted
+
+    lines[0] = heading_line
 
     return lines
 

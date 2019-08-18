@@ -9,15 +9,15 @@ from . import testutils
 
 def test_to_screen_lines_unbounded():
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
-    assert px_terminal.to_screen_lines(procs, None) == [
-        "  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE",
+    assert px_terminal.to_screen_lines(procs, None, None, False) == [
+        "\x1b[1;4m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[0m",
         "47536 fluff   root      0%   0.03s  0% /usr/bin/fluff 1234"
     ]
 
 
 def test_to_screen_lines_unicode():
     procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
-    converted = px_terminal.to_screen_lines(procs, None)
+    converted = px_terminal.to_screen_lines(procs, None, None, False)
     if sys.version_info.major > 3:
         assert converted == [
             "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",

@@ -119,7 +119,7 @@ def _main(argv):
     window_size = px_terminal.get_window_size()
     if window_size is not None:
         columns = window_size[1]
-    lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns)
+    lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns, None, False)
     print("\n".join(lines))
 
 
