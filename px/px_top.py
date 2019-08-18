@@ -378,7 +378,8 @@ def get_screen_lines(
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit  / - Search  ↑↓ - Move selection  Enter - Select"
+        footer_line = \
+            u"  q - Quit  / - Search  ↑↓ - Move selection  Enter - Select  m - Sort by RAM or CPU"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
@@ -522,6 +523,7 @@ def get_command(**kwargs):
 
     global last_highlighted_row
     global last_highlighted_pid
+    global sort_by_memory
     while len(input) > 0:
         if input.consume(KEY_UPARROW):
             last_highlighted_row -= 1
@@ -536,6 +538,8 @@ def get_command(**kwargs):
             top_mode = MODE_SEARCH
             search_string = ""
             return None
+        elif input.consume(u'm') or input.consume(u'M'):
+            sort_by_memory = not sort_by_memory
         elif input.consume(u'q'):
             return CMD_QUIT
         elif input.consume(SIGWINCH_KEY):
