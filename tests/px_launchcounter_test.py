@@ -108,4 +108,4 @@ def test_get_screen_lines_column_cutoff():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
     lines = launchcounter.get_screen_lines(10)
-    assert lines == ['init -> ' + px_terminal.bold('iT')]
+    assert lines == ['init -> \x1b[1miT\x1b[0m']
