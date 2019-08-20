@@ -67,7 +67,8 @@ def test_print_launch_counts():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(3) -> ' +
-        px_terminal.bold('fish') + '(2)'
+        px_terminal.bold('fish') + '(2)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
 
