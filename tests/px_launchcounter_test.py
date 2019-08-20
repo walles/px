@@ -35,7 +35,8 @@ def test_get_screen_lines_coalesces():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)'
+        px_terminal.bold('fish') + '(1)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
     # Then the same thing backwards
@@ -48,7 +49,8 @@ def test_get_screen_lines_coalesces():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)'
+        px_terminal.bold('fish') + '(1)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
 
