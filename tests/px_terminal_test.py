@@ -9,7 +9,7 @@ from . import testutils
 
 def test_to_screen_lines_unbounded():
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
-    assert px_terminal.to_screen_lines(procs, None, None, False) == [
+    assert px_terminal.to_screen_lines(procs, None, None, None) == [
         "\x1b[1;4m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[0m",
         "47536 fluff   root      0%   0.03s  0% /usr/bin/fluff 1234"
     ]
@@ -17,7 +17,7 @@ def test_to_screen_lines_unbounded():
 
 def test_to_screen_lines_unicode():
     procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
-    converted = px_terminal.to_screen_lines(procs, None, None, False)
+    converted = px_terminal.to_screen_lines(procs, None, None, None)
     if sys.version_info.major > 3:
         assert converted == [
             "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
@@ -63,4 +63,4 @@ def test_crop_ansi_string_at_length():
     assert px_terminal.crop_ansi_string_at_length(bold_middle, 6) == \
         u"123[1m456[0m".replace('[', CSI)
     assert px_terminal.crop_ansi_string_at_length(bold_middle, 7) == \
-        u"123[1m456[0m7".replace('[', CSI)
+        u"123[1m456[22m7[0m".replace('[', CSI)

@@ -46,15 +46,26 @@ def get_window_size():
     return (rows, columns)
 
 
-def to_screen_lines(procs, columns, row_to_highlight, sort_by_memory):
-    # type: (List[px_process.PxProcess], Optional[int], Optional[int], bool) -> List[text_type]
+def to_screen_lines(procs,  # type: List[px_process.PxProcess]
+                    columns,  # type: Optional[int]
+                    row_to_highlight,  # type: Optional[int]
+                    highlight_heading  # type: Optional[text_type]
+                    ):
+    # type: (...) -> List[text_type]
     """
     Returns an array of lines that can be printed to screen. Each line is at
     most columns wide.
 
     If columns is None, line lengths are unbounded.
+
+    If highligh_heading contains a column name, that column will be highlighted.
+    The column name must be from the hard coded list in this function, see below.
     """
-    headings = ["PID", "COMMAND", "USERNAME", "CPU", "CPUTIME", "RAM", "COMMANDLINE"]
+
+    headings = [u"PID", u"COMMAND", u"USERNAME", u"CPU", u"CPUTIME", u"RAM", u"COMMANDLINE"]
+    highlight_column = None  # type: Optional[int]
+    if highlight_heading is not None:
+        highlight_column = headings.index(highlight_heading)
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
     pid_width = len(headings[0])
@@ -82,11 +93,26 @@ def to_screen_lines(procs, columns, row_to_highlight, sort_by_memory):
     # Print process list using the computed column widths
     lines = []
 
-    # FIXME: Show sort column header in inverse video
     heading_line = format.format(
         headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
-    heading_line = get_string_of_length(heading_line, columns)
-    heading_line = underline_bold(heading_line)
+    heading_line_length = len(heading_line)
+    heading_line_delta = 0
+    if columns is not None:
+        heading_line_delta = columns - heading_line_length
+
+    # Highlight the highlight_column
+    if highlight_column is not None:
+        headings[highlight_column] = underline(headings[highlight_column])
+    heading_line = format.format(
+        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
+
+    # Set heading line length
+    if heading_line_delta > 0:
+        heading_line += heading_line_delta * u' '
+    if heading_line_delta < 0:
+        heading_line = crop_ansi_string_at_length(heading_line, heading_line_delta)
+
+    heading_line = bold(heading_line)
     lines.append(heading_line)
 
     for proc in procs:
@@ -114,21 +140,28 @@ def inverse_video(string):
     # type: (text_type) -> text_type
     CSI = "\x1b["
 
-    return CSI + "7m" + string + CSI + "0m"
+    return CSI + "7m" + string + CSI + "27m"
 
 
 def underline_bold(string):
     # type: (text_type) -> text_type
     CSI = "\x1b["
 
-    return CSI + "1;4m" + string + CSI + "0m"
+    return CSI + "1;4m" + string + CSI + "24;22m"
 
 
 def bold(string):
     # type: (text_type) -> text_type
     CSI = "\x1b["
 
-    return CSI + "1m" + string + CSI + "0m"
+    return CSI + "1m" + string + CSI + "22m"
+
+
+def underline(string):
+    # type: (text_type) -> text_type
+    CSI = "\x1b["
+
+    return CSI + "4m" + string + CSI + "24m"
 
 
 def get_string_of_length(string, length):

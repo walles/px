@@ -347,9 +347,12 @@ def get_screen_lines(
         # Search prompt needs one line
         max_process_count -= 1
 
-    highlight_me = get_line_to_highlight(toplist, max_process_count)
+    highlight_row = get_line_to_highlight(toplist, max_process_count)
+    highlight_column = u"CPUTIME"
+    if sort_by_memory:
+        highlight_column = u"RAM"
     toplist_table_lines = \
-        px_terminal.to_screen_lines(toplist, columns, highlight_me, sort_by_memory)
+        px_terminal.to_screen_lines(toplist, columns, highlight_row, highlight_column)
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
