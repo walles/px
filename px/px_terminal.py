@@ -143,13 +143,6 @@ def inverse_video(string):
     return CSI + "7m" + string + CSI + "27m"
 
 
-def underline_bold(string):
-    # type: (text_type) -> text_type
-    CSI = "\x1b["
-
-    return CSI + "1;4m" + string + CSI + "24;22m"
-
-
 def bold(string):
     # type: (text_type) -> text_type
     CSI = "\x1b["
