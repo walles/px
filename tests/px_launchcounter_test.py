@@ -35,7 +35,8 @@ def test_get_screen_lines_coalesces():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)'
+        px_terminal.bold('fish') + '(1)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
     # Then the same thing backwards
@@ -48,7 +49,8 @@ def test_get_screen_lines_coalesces():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)'
+        px_terminal.bold('fish') + '(1)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
 
@@ -65,7 +67,8 @@ def test_print_launch_counts():
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(3) -> ' +
-        px_terminal.bold('fish') + '(2)'
+        px_terminal.bold('fish') + '(2)' +
+        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
     ]
 
 
@@ -108,4 +111,4 @@ def test_get_screen_lines_column_cutoff():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
     lines = launchcounter.get_screen_lines(10)
-    assert lines == ['init -> ' + px_terminal.bold('iT')]
+    assert lines == ['init -> \x1b[1miT\x1b[0m']

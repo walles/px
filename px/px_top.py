@@ -72,6 +72,9 @@ highlight_has_moved = False  # type: bool
 # When we last polled the system for a process list, in seconds since the Epoch
 last_process_poll = 0.0
 
+# Order top list by memory usage. The opposite is by CPU usage.
+sort_by_memory = False
+
 
 class ConsumableString(object):
     def __init__(self, string):
@@ -190,19 +193,35 @@ def getch(timeout_seconds=0, fd=None):
 
 
 def get_notnone_cpu_time_seconds(proc):
+    # type: (px_process.PxProcess) -> int
     seconds = proc.cpu_time_seconds
     if seconds is not None:
         return seconds
     return 0
 
 
-def get_toplist(baseline, current):
-    # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
+def get_notnone_memory_percent(proc):
+    # type: (px_process.PxProcess) -> int
+    seconds = proc.memory_percent
+    if seconds is not None:
+        return seconds
+    return 0
+
+
+def get_toplist(baseline,  # type: List[px_process.PxProcess]
+                current,   # type: List[px_process.PxProcess]
+                by_memory=False  # type: bool
+                ):
+    # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
 
     # Sort by CPU time used, then most interesting first
     toplist = px_process.order_best_first(toplist)
-    toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+    if by_memory:
+        toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
+    else:
+        # By CPU time, this is the default
+        toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
 
     return toplist
 
@@ -328,23 +347,12 @@ def get_screen_lines(
         # Search prompt needs one line
         max_process_count -= 1
 
-    toplist_table_lines = px_terminal.to_screen_lines(toplist, columns)
-    if toplist_table_lines:
-        heading_line = toplist_table_lines[0]
-        heading_line = px_terminal.get_string_of_length(heading_line, columns)
-        heading_line = px_terminal.underline_bold(heading_line)
-
-        highlight_me = get_line_to_highlight(toplist, max_process_count)
-        if highlight_me is not None:
-            # The "+ 1" here is to skip the heading line
-            highlighted = toplist_table_lines[highlight_me + 1]
-            highlighted = px_terminal.get_string_of_length(highlighted, columns)
-            highlighted = px_terminal.inverse_video(highlighted)
-
-            # The "+ 1" here is to skip the heading line
-            toplist_table_lines[highlight_me + 1] = highlighted
-
-        toplist_table_lines[0] = heading_line
+    highlight_row = get_line_to_highlight(toplist, max_process_count)
+    highlight_column = u"CPUTIME"
+    if sort_by_memory:
+        highlight_column = u"RAM"
+    toplist_table_lines = \
+        px_terminal.to_screen_lines(toplist, columns, highlight_row, highlight_column)
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
@@ -359,7 +367,8 @@ def get_screen_lines(
     lines += launchlines
 
     if include_footer:
-        footer_line = u"  q - Quit  / - Search  ↑↓ - Move selection  Enter - Select"
+        footer_line = \
+            u"  q - Quit  m - Sort by RAM or CPU  / - Search  ↑↓ - Move selection  Enter - Select"
         footer_line = px_terminal.get_string_of_length(footer_line, columns)
         footer_line = px_terminal.inverse_video(footer_line)
 
@@ -503,6 +512,7 @@ def get_command(**kwargs):
 
     global last_highlighted_row
     global last_highlighted_pid
+    global sort_by_memory
     while len(input) > 0:
         if input.consume(KEY_UPARROW):
             last_highlighted_row -= 1
@@ -517,6 +527,8 @@ def get_command(**kwargs):
             top_mode = MODE_SEARCH
             search_string = ""
             return None
+        elif input.consume(u'm') or input.consume(u'M'):
+            sort_by_memory = not sort_by_memory
         elif input.consume(u'q'):
             return CMD_QUIT
         elif input.consume(SIGWINCH_KEY):
@@ -541,7 +553,8 @@ def _top():
             sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
             exit(1)
         rows, columns = window_size
-        toplist = get_toplist(baseline, current)
+        global sort_by_memory
+        toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(load_bar, toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
