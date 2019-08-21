@@ -176,6 +176,8 @@ information; the command will work without it but might miss some information.
   the numbers you get from ``uptime``.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
+* Selecting a process with Enter will dump detailed information about that
+  process and exit ``ptop``.
 * After you press ``q`` to quit, the display is retained and some lines at the
   bottom are removed to prevent the information you want from scrolling out of
   view.
@@ -238,7 +240,6 @@ TODO ``iotop`` replacement
 TODO misc
 ---------
 
-* ptop: Let user switch between CPU time sort and memory sort
 * Details: When no users were found to be logged in at process start,
   automatically detect whether it's because we don't have history that far back or
   whether it seems to be that nobody was actually logged in. Inform the user about
@@ -303,6 +304,7 @@ DONE
   isn't ``/``, list all other processes that have the same working directory.
 * ptop: Load bar: Set foreground color in green section to black, white on
   green is hard to read.
+* ptop: Let user switch between CPU time sort and memory sort
 
 .. _the Output section: #output
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
