@@ -231,23 +231,6 @@ def writebytes(bytestring):
     os.write(sys.stdout.fileno(), bytestring)
 
 
-def clear_screen():
-    """
-    Clear the screen and move cursor to top left corner:
-    https://en.wikipedia.org/wiki/ANSI_escape_code
-
-    Note that some experimentation was involved in coming up with this
-    exact sequence; if you do first "clear the full screen" then "home"
-    for example, the contents of the previous screen gets added to the
-    scrollback buffer, which isn't what we want. Tread carefully if you
-    intend to change these.
-    """
-
-    CSI = b"\x1b["
-    writebytes(CSI + b"1J")
-    writebytes(CSI + b"H")
-
-
 def get_line_to_highlight(toplist, max_process_count):
     # type: (List[px_process.PxProcess], int) -> Optional[int]
     global last_highlighted_pid
@@ -396,12 +379,13 @@ def redraw(
     lines = get_screen_lines(
         load_bar, toplist, launchcounter, rows, columns, include_footer,
         search=search_string)
+
+    clear_sequence = u""
     if clear:
-        clear_screen()
+        clear_sequence = px_terminal.CLEAR_SCREEN
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
-    writebytes(u"\r\n".join(lines).encode('utf-8'))
-    sys.stdout.flush()
+    writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
 
 
 def restore_display():
@@ -436,7 +420,7 @@ def print_info_and_quit(pid):
     print("")
     print("")
 
-    px_processinfo.print_process_info(process, processes)
+    px_processinfo.print_process_info(sys.stdout.fileno(), process, processes)
     sys.exit(0)
 
 

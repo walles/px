@@ -12,6 +12,18 @@ if sys.version_info.major >= 3:
 
 CSI = "\x1b["
 
+"""
+Clear the screen and move cursor to top left corner:
+https://en.wikipedia.org/wiki/ANSI_escape_code
+
+Note that some experimentation was involved in coming up with this
+exact sequence; if you do first "clear the full screen" then "home"
+for example, the contents of the previous screen gets added to the
+scrollback buffer, which isn't what we want. Tread carefully if you
+intend to change these.
+"""
+CLEAR_SCREEN = CSI + u"1J" + CSI + u"H"
+
 
 def get_window_size():
     # type: () -> Optional[Tuple[int, int]]
