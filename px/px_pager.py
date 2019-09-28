@@ -12,6 +12,7 @@ if sys.version_info.major >= 3:
 
 
 def _pump_info_to_fd(fileno, process, processes):
+    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
     try:
         px_processinfo.print_process_info(fileno, process, processes)
         os.close(fileno)
@@ -23,11 +24,16 @@ def _pump_info_to_fd(fileno, process, processes):
         pass
 
 
+def launch_pager():
+    # FIXME: Get a suitable pager + command line options based on the $PAGER
+    # variable
+    return subprocess.Popen(['moar'], stdin=subprocess.PIPE)
+
+
 def page_process_info(process, processes):
     # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
 
-    # FIXME: Get a suitable pager + command line options based on the $PAGER variable
-    pager = subprocess.Popen(['moar'], stdin=subprocess.PIPE)
+    pager = launch_pager()
     pager_stdin = pager.stdin
     assert pager_stdin is not None
 
