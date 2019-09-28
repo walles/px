@@ -16,6 +16,7 @@ def page_process_info(process, processes):
     pager_stdin = pager.stdin
     assert pager_stdin is not None
     px_processinfo.print_process_info(pager_stdin.fileno(), process, processes)
+    pager_stdin.close()
 
     # FIXME: If this returns an error code, what do we do?
     pager.wait()
