@@ -42,6 +42,7 @@ def page_process_info(process, processes):
     info_thread = threading.Thread(
         target=_pump_info_to_fd,
         args=(pager_stdin.fileno(), process, processes))
+    info_thread.setDaemon(True)  # Exiting while this is running is fine
     info_thread.start()
 
     # FIXME: If this returns an error code, what do we do?
