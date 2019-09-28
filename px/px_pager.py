@@ -1,4 +1,6 @@
+import os
 import sys
+import threading
 import subprocess
 
 from . import px_processinfo
@@ -9,6 +11,18 @@ if sys.version_info.major >= 3:
     from typing import List   # NOQA
 
 
+def _pump_info_to_fd(fileno, process, processes):
+    try:
+        px_processinfo.print_process_info(fileno, process, processes)
+        os.close(fileno)
+    except Exception:
+        # Ignore exceptions; we can get those if the pager hangs / goes away
+        # unexpectedly, and we really don't care about those.
+
+        # FIXME: Should we report this to the user? How and where in that case?
+        pass
+
+
 def page_process_info(process, processes):
     # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
 
@@ -17,11 +31,12 @@ def page_process_info(process, processes):
     pager_stdin = pager.stdin
     assert pager_stdin is not None
 
-    # FIXME: If the pager goes away before we're done with this, arrow buttons
-    # don't work any more after coming back into ptop
-    px_processinfo.print_process_info(pager_stdin.fileno(), process, processes)
-
-    pager_stdin.close()
+    # Do this in a thread to avoid problems if the pager hangs / goes away
+    # unexpectedly
+    info_thread = threading.Thread(
+        target=_pump_info_to_fd,
+        args=(pager_stdin.fileno(), process, processes))
+    info_thread.start()
 
     # FIXME: If this returns an error code, what do we do?
     pager.wait()
