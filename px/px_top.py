@@ -428,7 +428,6 @@ def handle_search_keypresses(key_sequence):
             last_highlighted_pid = None
         elif key_sequence.consume(KEY_ENTER):
             page_process_info(last_highlighted_pid)
-            # FIXME: Implicitly exit search mode as well?
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
