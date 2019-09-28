@@ -1,14 +1,20 @@
 import os
 import sys
+import termios
+import tty
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
     from typing import List      # NOQA
     from typing import Tuple     # NOQA
+    from typing import Union     # NOQA
     from typing import Optional  # NOQA
     from typing import Iterable  # NOQA
     from . import px_process     # NOQA
+
+initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
+
 
 CSI = "\x1b["
 
@@ -226,3 +232,59 @@ def crop_ansi_string_at_length(string, length):
         result += token
 
     return result + reset_sequence
+
+
+def _enter_fullscreen():
+    global initial_termios_attr
+    assert initial_termios_attr is None
+
+    fd = sys.stdin.fileno()
+
+    initial_termios_attr = termios.tcgetattr(sys.stdin.fileno())
+
+    tty.setraw(fd)
+
+
+def _exit_fullscreen():
+    global initial_termios_attr
+    assert initial_termios_attr is not None
+
+    fd = sys.stdin.fileno()
+    tty.setcbreak(fd)
+
+    # tty.setraw() disables local echo, so we have to re-enable it here.
+    # See the "source code" comment to this answer:
+    # http://stackoverflow.com/a/8758047/473672
+    if initial_termios_attr:
+        termios.tcsetattr(fd, termios.TCSADRAIN, initial_termios_attr)
+    initial_termios_attr = None
+
+
+class fullscreen_display:
+    def __enter__(self):
+        _enter_fullscreen()
+        return None
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        _exit_fullscreen()
+
+        # Re-raise any exception:
+        # https://docs.python.org/2.5/whatsnew/pep-343.html#context-managers
+        return False
+
+
+class normal_display:
+    """
+    Pause fullscreen mode
+    """
+
+    def __enter__(self):
+        _exit_fullscreen()
+        return None
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        _enter_fullscreen()
+
+        # Re-raise any exception:
+        # https://docs.python.org/2.5/whatsnew/pep-343.html#context-managers
+        return False

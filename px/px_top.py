@@ -1,17 +1,16 @@
 # coding=utf-8
 
 import sys
-import tty
 import copy
 import time
 import errno
 import signal
 import select
-import termios
 import unicodedata
 
 import os
 from . import px_load
+from . import px_pager
 from . import px_process
 from . import px_terminal
 from . import px_load_bar
@@ -52,8 +51,6 @@ SEARCH_CURSOR = px_terminal.inverse_video(" ")
 
 MODE_BASE = 0
 MODE_SEARCH = 1
-
-initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 
 top_mode = MODE_BASE  # type: int
 search_string = None  # type: Optional[text_type]
@@ -388,20 +385,7 @@ def redraw(
     writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
 
 
-def restore_display():
-    fd = sys.stdin.fileno()
-    tty.setcbreak(fd)
-
-    # tty.setraw() disables local echo, so we have to re-enable it here.
-    # See the "source code" comment to this answer:
-    # http://stackoverflow.com/a/8758047/473672
-    global initial_termios_attr
-    if initial_termios_attr:
-        termios.tcsetattr(fd, termios.TCSADRAIN, initial_termios_attr)
-
-
-# Print info about PID and exit
-def print_info_and_quit(pid):
+def page_process_info(pid):
     # type: (Optional[int]) -> None
     if pid is None:
         # Nothing selected, never mind
@@ -414,14 +398,8 @@ def print_info_and_quit(pid):
         # Process not available, never mind
         return
 
-    restore_display()
-
-    # Visually distance ourselves from the ptop view
-    print("")
-    print("")
-
-    px_processinfo.print_process_info(sys.stdout.fileno(), process, processes)
-    sys.exit(0)
+    with px_terminal.normal_display():
+        px_pager.page_process_info(process, processes)
 
 
 def handle_search_keypresses(key_sequence):
@@ -449,7 +427,8 @@ def handle_search_keypresses(key_sequence):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif key_sequence.consume(KEY_ENTER):
-            print_info_and_quit(last_highlighted_pid)
+            page_process_info(last_highlighted_pid)
+            # FIXME: Implicitly exit search mode as well?
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
@@ -505,7 +484,7 @@ def get_command(**kwargs):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif input.consume(KEY_ENTER):
-            print_info_and_quit(last_highlighted_pid)
+            page_process_info(last_highlighted_pid)
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
@@ -577,18 +556,8 @@ def top():
         exit(1)
 
     signal.signal(signal.SIGWINCH, sigwinch_handler)
-
-    fd = sys.stdin.fileno()
-
-    global initial_termios_attr
-    initial_termios_attr = termios.tcgetattr(sys.stdin.fileno())
-
-    tty.setraw(fd)
-
-    try:
+    with px_terminal.fullscreen_display():
         _top()
-    finally:
-        restore_display()
 
         # Make sure we actually end up on a new line
         print("")
