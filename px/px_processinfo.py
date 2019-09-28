@@ -17,6 +17,12 @@ if sys.version_info.major >= 3:
     from typing import Optional    # NOQA
     from typing import Iterable    # NOQA
     from typing import List        # NOQA
+    from six import text_type      # NOQA
+
+
+def println(fd, string):
+    # type: (int, text_type) -> None
+    os.write(fd, string.encode() + b"\n")
 
 
 def find_process_by_pid(pid, processes):
@@ -28,28 +34,28 @@ def find_process_by_pid(pid, processes):
     return None
 
 
-def print_command_line(process):
+def print_command_line(fd, process):
     """
     Print command line separated by linefeeds rather than space, this adds
     readability to long command lines
     """
     array = process.get_command_line_array()
-    print(array[0])
+    println(fd, array[0])
     for parameter in array[1:]:
         if parameter == "":
             # Print empty parameters as "", otherwise the printout just looks
             # broken.
             parameter = '""'
-        print("  " + parameter)
+        println(fd, "  " + parameter)
 
 
-def print_process_subtree(process, indentation, lines):
+def print_process_subtree(fd, process, indentation, lines):
     lines.append(("  " * indentation + str(process), process))
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
-        print_process_subtree(child, indentation + 1, lines)
+        print_process_subtree(fd, child, indentation + 1, lines)
 
 
-def print_process_tree(process):
+def print_process_tree(fd, process):
     # Contains tuples; the line to print and the process that line is for
     lines_and_processes = []
 
@@ -72,7 +78,7 @@ def print_process_tree(process):
 
     # Print all our child trees
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
-        print_process_subtree(child, indentation, lines_and_processes)
+        print_process_subtree(fd, child, indentation, lines_and_processes)
 
     # Add an owners column to the right of the tree
     tree_width = max(map(lambda lp: len(lp[0]), lines_and_processes))
@@ -88,7 +94,7 @@ def print_process_tree(process):
 
         lines.append(lineformat.format(line, owner))
 
-    print('\n'.join(lines))
+    println(fd, '\n'.join(lines))
 
 
 def to_relative_start_string(base, relative):
@@ -139,21 +145,23 @@ def get_closest_starts(process, all_processes):
     return closest
 
 
-def print_processes_started_at_the_same_time(process, all_processes):
-    print("Other processes started close to " + str(process) + ":")
+def print_processes_started_at_the_same_time(fd, process, all_processes):
+    println(fd, "Other processes started close to " + str(process) + ":")
     for close in get_closest_starts(process, all_processes):
-        print("  " + to_relative_start_string(process, close))
+        println(fd, "  " + to_relative_start_string(process, close))
 
 
-def print_users_when_process_started(process):
-    print("Users logged in when " + str(process) + " started:")
+def print_users_when_process_started(fd, process):
+    println(fd, "Users logged in when " + str(process) + " started:")
     users = px_loginhistory.get_users_at(process.start_time)
     if not users:
-        print('  <Nobody found, either nobody was logged in or the wtmp logs have been rotated>')
+        println(
+            fd,
+            '  <Nobody found, either nobody was logged in or the wtmp logs have been rotated>')
         return
 
     for user in sorted(users):
-        print("  " + user)
+        println(fd, "  " + user)
 
 
 def to_ipc_lines(ipc_map):
@@ -171,83 +179,86 @@ def to_ipc_lines(ipc_map):
     return return_me
 
 
-def print_cwd_friends(process, all_processes, all_files):
+def print_cwd_friends(fd, process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
-    print("Others sharing this process' working directory (" +
-          (friends.cwd or "<UNKNOWN>") +
-          ")")
+    println(fd, "Others sharing this process' working directory (" +
+            (friends.cwd or "<UNKNOWN>") +
+            ")")
     if not friends.cwd:
-        print('  Working directory unknown, try again or try "sudo px ' +
-              str(process.pid) +
-              '"')
+        println(fd, '  Working directory unknown, try again or try "sudo px ' +
+                str(process.pid) +
+                '"')
         return
 
     if friends.cwd == '/':
-        print("  Working directory too common, never mind.")
+        println(fd, "  Working directory too common, never mind.")
         return
 
     if len(friends.friends) == 0:
-        print("  Nobody else shares this working directory.")
+        println(fd, "  Nobody else shares this working directory.")
         return
 
     for friend in friends.friends:
-        print("  " + str(friend))
+        println(fd, "  " + str(friend))
 
 
-def print_fds(process, processes):
-    # type: (px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
+def print_fds(fd, process, processes):
+    # type: (int, px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
 
     # It's true, I measured it myself /johan.walles@gmail.com
-    print(datetime.datetime.now().isoformat() +
-          ": Now invoking lsof, this can take over a minute on a big system...")
+    println(fd, datetime.datetime.now().isoformat() +
+            ": Now invoking lsof, this can take over a minute on a big system...")
 
     # Flush what we have so far so the user has something to read during the pause.
     # This is useful when piping output into a pager like moar or less.
-    sys.stdout.flush()
+
+    # NOTE: If we switch to writing to file-like objects we should flush here,
+    # our println() function flushes implicitly.
 
     files = px_file.get_all()
-    print(datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
+    println(fd, datetime.datetime.now().isoformat() + ": lsof done, proceeding.")
 
-    print("")
-    print_cwd_friends(process, processes, files)
+    println(fd, "")
+    print_cwd_friends(fd, process, processes, files)
 
     is_root = (os.geteuid() == 0)
     ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
 
-    print("")
-    print("File descriptors:")
-    print("  stdin : " + ipc_map.fds[0])
-    print("  stdout: " + ipc_map.fds[1])
-    print("  stderr: " + ipc_map.fds[2])
+    println(fd, "")
+    println(fd, "File descriptors:")
+    println(fd, "  stdin : " + ipc_map.fds[0])
+    println(fd, "  stdout: " + ipc_map.fds[1])
+    println(fd, "  stderr: " + ipc_map.fds[2])
     # Note that we used to list all FDs here, but some processes (like Chrome)
     # has silly amounts, making the px output unreadable. Users should consult
     # lsof directly for the full list.
 
-    print("")
-    print("Network connections:")
+    println(fd, "")
+    println(fd, "Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
     for connection in sorted(ipc_map.network_connections, key=operator.attrgetter("name")):
-        print("  " + str(connection))
+        println(fd, "  " + str(connection))
 
-    print("")
-    print("Inter Process Communication:")
+    println(fd, "")
+    println(fd, "Inter Process Communication:")
     for line in to_ipc_lines(ipc_map):
-        print("  " + line)
+        println(fd, "  " + line)
 
-    print("")
-    print("For a list of all open files, do \"sudo lsof -p {0}\", "
-          "or \"sudo watch lsof -p {0}\" for a live view.".format(process.pid))
+    println(fd, "")
+    println(fd, "For a list of all open files, do \"sudo lsof -p {0}\", "
+            "or \"sudo watch lsof -p {0}\" for a live view.".format(process.pid))
 
     if os.getuid() != 0:
-        print("")
-        print("NOTE: This information might be incomplete, "
-              "running as root sometimes produces better results.")
+        println(fd, "")
+        println(fd, "NOTE: This information might be incomplete, "
+                "running as root sometimes produces better results.")
 
 
-def print_start_time(process):
-    print("{} ago {} was started, at {}.".format(
+def print_start_time(fd, process):
+    # type: (int, px_process.PxProcess) -> None
+    println(fd, "{} ago {} was started, at {}.".format(
         process.age_s,
         process.command,
         process.start_time.isoformat(),
@@ -255,15 +266,15 @@ def print_start_time(process):
 
     if process.cpu_time_seconds and process.age_seconds:
         cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
-        print("{:.1f}% has been its average CPU usage since then, or {}/{}".format(
+        println(fd, "{:.1f}% has been its average CPU usage since then, or {}/{}".format(
             cpu_percent,
             process.cpu_time_s,
             process.age_s,
         ))
 
 
-def print_pid_info(pid):
-    # type: (int) -> None
+def print_pid_info(fd, pid):
+    # type: (int, int) -> None
     processes = px_process.get_all()
 
     process = find_process_by_pid(pid, processes)
@@ -271,31 +282,33 @@ def print_pid_info(pid):
         sys.stderr.write("No such PID: {}\n".format(pid))
         exit(1)
 
-    print_process_info(process, processes)
+    print_process_info(fd, process, processes)
 
 
-def print_process_info(process, processes):
-    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
-    print_command_line(process)
+def print_process_info(fd, process, processes):
+    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
+    print_command_line(fd, process)
 
     # Print a process tree with all PID's parents and all its children
-    print("")
-    print_process_tree(process)
+    println(fd, "")
+    print_process_tree(fd, process)
 
-    print("")
-    print_start_time(process)
+    println(fd, "")
+    print_start_time(fd, process)
 
-    print("")
-    print_processes_started_at_the_same_time(process, processes)
+    println(fd, "")
+    print_processes_started_at_the_same_time(fd, process, processes)
 
-    print("")
-    print_users_when_process_started(process)
+    println(fd, "")
+    print_users_when_process_started(fd, process)
 
     # List all files PID has open
-    print("")
+    println(fd, "")
     try:
-        print_fds(process, processes)
+        print_fds(fd, process, processes)
     except OSError as e:
         if e.errno != errno.ENOENT:
             raise
-        print("Can't list IPC / network sockets, make sure \"lsof\" is installed and in your $PATH")
+        println(
+            fd,
+            "Can't list IPC / network sockets, make sure \"lsof\" is installed and in your $PATH")

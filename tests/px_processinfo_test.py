@@ -92,7 +92,7 @@ def test_print_starttime():
     # Just make sure it doesn't crash
     all = px_process.get_all()
     process0 = list(filter(lambda p: p.pid == 0, all))[0]
-    px_processinfo.print_start_time(process0)
+    px_processinfo.print_start_time(sys.stdout.fileno(), process0)
 
 
 def test_print_process_subtree():
@@ -104,7 +104,7 @@ def test_print_process_subtree():
     parent_proc = testutils.create_process(pid=1, commandline="parent")
     parent_proc.children = [child_proc]
 
-    px_processinfo.print_process_subtree(parent_proc, 0, lines)
+    px_processinfo.print_process_subtree(sys.stdout.fileno(), parent_proc, 0, lines)
 
     assert lines == [
         ('' + str(parent_proc), parent_proc),
