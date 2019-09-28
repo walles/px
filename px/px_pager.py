@@ -77,6 +77,10 @@ def launch_pager():
     # FIXME: What should we do if we don't find anything to page with?
     assert pager_cmd is not None
 
+    if pager_cmd[0].split(os.sep)[-1] == 'less':
+        # Prevent --quit-if-one-screen, we always want a pager
+        pager_cmd = pager_cmd[0:1]
+
     return subprocess.Popen(pager_cmd, stdin=subprocess.PIPE, env=env)
 
 
