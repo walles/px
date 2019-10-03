@@ -89,7 +89,7 @@ flake8 px tests scripts setup.py
 # https://github.com/pypa/setuptools/issues/479
 #
 # FIXME: Go for just -Werror as soon as possible
-python -Werror -Wdefault::DeprecationWarning ./setup.py test
+python -Werror -Wdefault::DeprecationWarning -Wdefault::PendingDeprecationWarning ./setup.py test
 
 # Create px wheel...
 rm -rf dist "${ENVDIR}"/pxpx-*.whl build/lib/px
