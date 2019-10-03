@@ -3,7 +3,7 @@ pip == 10.0.1
 flake8 == 3.5.0
 wheel == 0.31.1
 setuptools == 40.6.2
-pytest == 4.2.0
+pytest == 4.6.5
 pytest-avoidance == 0.2.0
 
 # Buildtime requirements for runtime dependencies
