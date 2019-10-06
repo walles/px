@@ -34,9 +34,11 @@ of which processes are most active right now.
 --version: Print version information
 """
 
+import logging
+import six
 import sys
-
 import os
+
 from . import px_install
 from . import px_process
 from . import px_terminal
@@ -63,6 +65,33 @@ def main():
     _main(sys.argv)
 
 
+def createLogger(stringIO):
+    # type: (six.StringIO) -> logging.Logger
+
+    # This method inspired by: https://stackoverflow.com/a/9534960/473672
+
+    log = logging.getLogger('px')
+    log.setLevel(logging.ERROR)  # NOTE: Can be modified for debugging purposes
+
+    handlers = []
+    for handler in log.handlers:
+        handlers.append(handler)
+    for handler in handlers:
+        log.removeHandler(handler)
+    log.addHandler(logging.StreamHandler(stringIO))
+
+    return log
+
+
+def handleLogMessages(messages):
+    if not messages:
+        return
+
+    # FIXME: Print how-to-report-bugs header
+
+    sys.stderr.write(messages)
+
+
 def _main(argv):
     if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
         argv.append("--top")
@@ -83,9 +112,13 @@ def _main(argv):
         return
 
     if arg == '--top':
+        stringIO = six.StringIO()
+        logger = createLogger(stringIO)
+
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
-        px_top.top()
+        px_top.top(logger)
+        handleLogMessages(stringIO.getvalue())
         return
 
     if arg == '--help':

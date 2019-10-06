@@ -1,19 +1,19 @@
 import os
-import sys
 import threading
 import subprocess
 
 from . import px_processinfo
 
-if sys.version_info.major >= 3:
+if False:
     # For mypy PEP-484 static typing validation
+    import logging               # NOQA
     from . import px_process     # NOQA
     from typing import List      # NOQA
     from typing import Optional  # NOQA
 
 
-def _pump_info_to_fd(fileno, process, processes):
-    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
+def _pump_info_to_fd(fileno, process, processes, log):
+    # type: (int, px_process.PxProcess, List[px_process.PxProcess], logging.Logger) -> None
     try:
         px_processinfo.print_process_info(fileno, process, processes)
         os.close(fileno)
@@ -21,8 +21,8 @@ def _pump_info_to_fd(fileno, process, processes):
         # Ignore exceptions; we can get those if the pager hangs / goes away
         # unexpectedly, and we really don't care about those.
 
-        # FIXME: Should we report this to the user? How and where in that case?
-        pass
+        # FIXME: Should we actually log this?
+        log.exception("Failed pumping process info into pager")
 
 
 # From: https://stackoverflow.com/a/377028/473672
@@ -84,20 +84,22 @@ def launch_pager():
     return subprocess.Popen(pager_cmd, stdin=subprocess.PIPE, env=env)
 
 
-def page_process_info(process, processes):
-    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
+def page_process_info(process, processes, log):
+    # type: (px_process.PxProcess, List[px_process.PxProcess], logging.Logger) -> None
 
     pager = launch_pager()
     pager_stdin = pager.stdin
     assert pager_stdin is not None
 
-    # Do this in a thread to avoid problems if the pager hangs / goes away
-    # unexpectedly
+    # Do this in a thread to avoid problems with pipe buffers filling up and blocking
     info_thread = threading.Thread(
         target=_pump_info_to_fd,
-        args=(pager_stdin.fileno(), process, processes))
-    info_thread.setDaemon(True)  # Exiting while this is running is fine
+        args=(pager_stdin.fileno(), process, processes, log))
+    info_thread.setDaemon(True)  # Terminating ptop while this is running is fine
     info_thread.start()
 
     # FIXME: If this returns an error code, what do we do?
     pager.wait()
+
+    # FIXME: Maybe join info_thread here as well to ensure we aren't still pumping before returning?
+    # This could possibly prevent https://github.com/walles/px/issues/67
