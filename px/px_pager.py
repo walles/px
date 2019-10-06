@@ -98,8 +98,9 @@ def page_process_info(process, processes, log):
     info_thread.setDaemon(True)  # Terminating ptop while this is running is fine
     info_thread.start()
 
-    # FIXME: If this returns an error code, what do we do?
-    pager.wait()
+    pagerExitcode = pager.wait()
+    if pagerExitcode != 0:
+        log.warn("Pager exited with code %d", pagerExitcode)
 
     # FIXME: Maybe join info_thread here as well to ensure we aren't still pumping before returning?
     # This could possibly prevent https://github.com/walles/px/issues/67
