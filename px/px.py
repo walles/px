@@ -115,6 +115,7 @@ def handleLogMessages(messages):
     sys.stderr.write("Platform info: " + platform.platform() + "\n")
     sys.stderr.write("\n")
     sys.stderr.write(messages)
+    sys.stderr.write("\n")
     sys.exit(1)
 
 
