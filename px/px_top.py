@@ -561,7 +561,10 @@ def top(log):
 
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with px_terminal.fullscreen_display():
-        _top(log)
+        try:
+            _top(log)
+        except Exception:
+            log.exception("Running ptop failed")
 
         # Make sure we actually end up on a new line
         print("")
