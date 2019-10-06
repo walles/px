@@ -54,6 +54,11 @@ Problems detected, please send this text to either:
 * johan.walles@gmail.com
 """
 
+# What level of messages should we propagate to the user?
+#
+# Set to INFO or lower when developing / testing.
+LOGLEVEL = logging.ERROR
+
 
 def install(argv):
     # Find full path to self
@@ -81,14 +86,20 @@ def createLogger(stringIO):
     # This method inspired by: https://stackoverflow.com/a/9534960/473672
 
     log = logging.getLogger('px')
-    log.setLevel(logging.ERROR)  # NOTE: Can be modified for debugging purposes
+    log.setLevel(LOGLEVEL)
 
     handlers = []
     for handler in log.handlers:
         handlers.append(handler)
     for handler in handlers:
         log.removeHandler(handler)
-    log.addHandler(logging.StreamHandler(stringIO))
+
+    handler = logging.StreamHandler(stringIO)
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S%Z')
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
 
     return log
 
