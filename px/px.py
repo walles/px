@@ -34,6 +34,7 @@ of which processes are most active right now.
 --version: Print version information
 """
 
+import platform
 import logging
 import six
 import sys
@@ -43,6 +44,15 @@ from . import px_install
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
+
+
+ERROR_REPORTING_HEADER = """
+---
+
+Problems detected, please send this text to either:
+* https://github.com/walles/px/issues/new
+* johan.walles@gmail.com
+"""
 
 
 def install(argv):
@@ -87,9 +97,14 @@ def handleLogMessages(messages):
     if not messages:
         return
 
-    # FIXME: Print how-to-report-bugs header
-
+    sys.stderr.write(ERROR_REPORTING_HEADER)
+    sys.stderr.write("\n")
+    sys.stderr.write("Python version: " + sys.version + "\n")
+    sys.stderr.write("\n")
+    sys.stderr.write("Platform info: " + platform.platform() + "\n")
+    sys.stderr.write("\n")
     sys.stderr.write(messages)
+    sys.exit(1)
 
 
 def _main(argv):
