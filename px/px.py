@@ -49,7 +49,7 @@ from . import px_processinfo
 ERROR_REPORTING_HEADER = """
 ---
 
-Problems detected, please send this text to either:
+Problems detected, please send this text to one of:
 * https://github.com/walles/px/issues/new
 * johan.walles@gmail.com
 """

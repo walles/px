@@ -1,5 +1,4 @@
 import os
-import logging
 
 from px import px_top
 from px import px_process
@@ -61,7 +60,7 @@ def test_get_command():
     os.write(write, b'q')
 
     assert px_top.get_command(
-        logging.getLogger("test"),
+        testutils.get_logger(),
         timeout_seconds=0,
         fd=read) == px_top.CMD_QUIT
 
@@ -75,7 +74,7 @@ def test_sigwinch_handler():
     # see :).
     STDIN = 0
     assert px_top.get_command(
-        logging.getLogger("test"),
+        testutils.get_logger(),
         timeout_seconds=0,
         fd=STDIN) == px_top.CMD_RESIZE
 
