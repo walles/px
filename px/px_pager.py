@@ -18,11 +18,14 @@ def _pump_info_to_fd(fileno, process, processes, log):
         px_processinfo.print_process_info(log, fileno, process, processes)
         os.close(fileno)
     except Exception:
-        # Ignore exceptions; we can get those if the pager hangs / goes away
-        # unexpectedly, and we really don't care about those.
+        # Logging exceptions on warning level will make them visible to somebody
+        # who changes the LOGLEVEL in px.py, but not to ordinary users.
+        #
+        # Getting some exceptions may or may not be benign if the user closes
+        # the pager before we're done writing to its stdin pipe.
 
-        # FIXME: Should we actually log this?
-        log.exception("Failed pumping process info into pager")
+        # Got exc_info from: https://stackoverflow.com/a/193153/473672
+        log.warning("Failed pumping process info into pager", exc_info=True)
 
 
 # From: https://stackoverflow.com/a/377028/473672
