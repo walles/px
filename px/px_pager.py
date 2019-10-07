@@ -15,7 +15,7 @@ if False:
 def _pump_info_to_fd(fileno, process, processes, log):
     # type: (int, px_process.PxProcess, List[px_process.PxProcess], logging.Logger) -> None
     try:
-        px_processinfo.print_process_info(fileno, process, processes)
+        px_processinfo.print_process_info(log, fileno, process, processes)
         os.close(fileno)
     except Exception:
         # Ignore exceptions; we can get those if the pager hangs / goes away

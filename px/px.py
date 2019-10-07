@@ -138,10 +138,10 @@ def _main(argv):
         install(argv)
         return
 
-    if arg == '--top':
-        stringIO = six.StringIO()
-        logger = createLogger(stringIO)
+    stringIO = six.StringIO()
+    logger = createLogger(stringIO)
 
+    if arg == '--top':
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
         px_top.top(logger)
@@ -165,7 +165,8 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
+        px_processinfo.print_pid_info(logger, sys.stdout.fileno(), pid)
+        handleLogMessages(stringIO.getvalue())
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving

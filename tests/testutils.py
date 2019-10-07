@@ -1,5 +1,6 @@
 import re
 import random
+import logging
 import datetime
 
 from px import px_file
@@ -106,3 +107,10 @@ def fake_callchain(*args):
         parent = proc
 
     return proc
+
+
+def get_logger():
+    # type: () -> logging.Logger
+    log = logging.getLogger("test")
+    log.setLevel(logging.DEBUG)
+    return log

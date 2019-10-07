@@ -1,4 +1,3 @@
-import sys
 import datetime
 import subprocess
 
@@ -6,6 +5,9 @@ import os
 import re
 import dateutil.tz
 
+if False:
+    import logging  # NOQA
+    from typing import Set, Optional  # NOQA
 
 # last regexp parts
 LAST_USERNAME = "([^ ]+)"
@@ -52,7 +54,13 @@ MONTHS = {
 }
 
 
-def get_users_at(timestamp, last_output=None, now=None):
+def get_users_at(
+    log,  # type: logging.Logger
+    timestamp,  # type: datetime.datetime
+    last_output=None,  # type: Optional[str]
+    now=None  # type: Optional[datetime.datetime]
+):
+    # type: (...) -> Set[str]
     """
     Return a set of strings corresponding to which users were logged in from
     which addresses at a given timestamp.
@@ -84,9 +92,7 @@ def get_users_at(timestamp, last_output=None, now=None):
 
         match = LAST_RE.match(line)
         if not match:
-            sys.stderr.write(
-                "WARNING: Please report unmatched last line at {}: <{}>\n".format(
-                    "https://github.com/walles/px/issues/new", line))
+            log.error("Unmatched last line: <%s>", line)
             continue
 
         username = match.group(1)
@@ -102,9 +108,7 @@ def get_users_at(timestamp, last_output=None, now=None):
             if timestamp < from_timestamp:
                 continue
         except Exception:
-            sys.stderr.write(
-                "WARNING: Please report problematic1 last line at {}: <{}>\n".format(
-                    "https://github.com/walles/px/issues/new", line))
+            log.error("Problematic1 last line: <%s>", line)
             continue
 
         if duration_s is None:
@@ -118,10 +122,7 @@ def get_users_at(timestamp, last_output=None, now=None):
             if timestamp > to_timestamp:
                 continue
         except Exception:
-            sys.stderr.write(
-                "WARNING: Please report problematic2 last line at {}: <{}>\n".format(
-                    "https://github.com/walles/px/issues/new", line))
-            continue
+            log.error("Problematic2 last line: <%s>", line)
 
         users.add(username)
 
