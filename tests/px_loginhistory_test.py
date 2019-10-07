@@ -5,6 +5,11 @@ import dateutil.tz
 
 from px import px_loginhistory
 
+from . import testutils
+
+if False:
+    from typing import Set  # NOQA
+
 
 @pytest.yield_fixture
 def check_output(capfd):
@@ -16,12 +21,15 @@ def check_output(capfd):
 
 
 def get_users_at(last_output, now, testtime):
+    # type: (str, datetime.datetime, datetime.datetime) -> Set[str]
     """
     Ask px_loginhistory to parse last_output given the current timestamp of now.
 
     Then return the users px_loginhistory claims were logged in at testtime.
     """
-    return px_loginhistory.get_users_at(testtime, last_output=last_output, now=now)
+    log = testutils.get_logger()
+
+    return px_loginhistory.get_users_at(log, testtime, last_output=last_output, now=now)
 
 
 def test_get_users_at_range(check_output):
@@ -254,21 +262,19 @@ def test_get_users_at_trailing_noise(check_output):
     assert not get_users_at("wtmp begins Thu Oct  1 22:54 ", now, now)
 
 
-def test_get_users_at_unexpected_last_output(capfd):
+def test_get_users_at_unexpected_last_output(caplog):
     UNEXPECTED = "glasskiosk"
 
     now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=dateutil.tz.tzlocal())
     assert not get_users_at(UNEXPECTED, now, now)
 
-    out, err = capfd.readouterr()
-    assert not out
-    assert UNEXPECTED in err
-    assert 'https://github.com/walles/px/issues' in err
+    assert UNEXPECTED in caplog.text
 
 
 def test_get_users_at_just_run_it(check_output):
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
-    px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
+    log = testutils.get_logger()
+    px_loginhistory.get_users_at(log, datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
 def test_to_timestamp(check_output):

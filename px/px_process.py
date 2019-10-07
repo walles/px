@@ -169,6 +169,19 @@ class PxProcessBuilder(object):
         self.cpu_time = None  # type: Optional[float]
         self.memory_percent = None  # type: Optional[float]
 
+    def __repr__(self):
+        return \
+            "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>" % (
+                self.start_time_string,
+                self.pid,
+                self.ppid,
+                self.username,
+                self.cpu_percent,
+                self.cpu_time,
+                self.memory_percent,
+                self.cmdline
+            )
+
 
 def call_ps():
     """

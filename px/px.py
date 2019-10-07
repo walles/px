@@ -34,13 +34,30 @@ of which processes are most active right now.
 --version: Print version information
 """
 
+import platform
+import logging
+import six
 import sys
-
 import os
+
 from . import px_install
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
+
+
+ERROR_REPORTING_HEADER = """
+---
+
+Problems detected, please send this text to one of:
+* https://github.com/walles/px/issues/new
+* johan.walles@gmail.com
+"""
+
+# What level of messages should we propagate to the user?
+#
+# Set to INFO or lower when developing / testing.
+LOGLEVEL = logging.ERROR
 
 
 def install(argv):
@@ -63,6 +80,45 @@ def main():
     _main(sys.argv)
 
 
+def createLogger(stringIO):
+    # type: (six.StringIO) -> logging.Logger
+
+    # This method inspired by: https://stackoverflow.com/a/9534960/473672
+
+    log = logging.getLogger('px')
+    log.setLevel(LOGLEVEL)
+
+    handlers = []
+    for handler in log.handlers:
+        handlers.append(handler)
+    for handler in handlers:
+        log.removeHandler(handler)
+
+    handler = logging.StreamHandler(stringIO)
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S%Z')
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+
+    return log
+
+
+def handleLogMessages(messages):
+    if not messages:
+        return
+
+    sys.stderr.write(ERROR_REPORTING_HEADER)
+    sys.stderr.write("\n")
+    sys.stderr.write("Python version: " + sys.version + "\n")
+    sys.stderr.write("\n")
+    sys.stderr.write("Platform info: " + platform.platform() + "\n")
+    sys.stderr.write("\n")
+    sys.stderr.write(messages)
+    sys.stderr.write("\n")
+    sys.exit(1)
+
+
 def _main(argv):
     if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
         argv.append("--top")
@@ -82,10 +138,14 @@ def _main(argv):
         install(argv)
         return
 
+    stringIO = six.StringIO()
+    logger = createLogger(stringIO)
+
     if arg == '--top':
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
-        px_top.top()
+        px_top.top(logger)
+        handleLogMessages(stringIO.getvalue())
         return
 
     if arg == '--help':
@@ -105,7 +165,8 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
+        px_processinfo.print_pid_info(logger, sys.stdout.fileno(), pid)
+        handleLogMessages(stringIO.getvalue())
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving

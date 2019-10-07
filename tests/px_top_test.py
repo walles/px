@@ -59,7 +59,10 @@ def test_get_command():
     read, write = pipe
     os.write(write, b'q')
 
-    assert px_top.get_command(timeout_seconds=0, fd=read) == px_top.CMD_QUIT
+    assert px_top.get_command(
+        testutils.get_logger(),
+        timeout_seconds=0,
+        fd=read) == px_top.CMD_QUIT
 
 
 def test_sigwinch_handler():
@@ -70,7 +73,10 @@ def test_sigwinch_handler():
     # so we need to explicitly use the STDIN fd here. Try removing it and you'll
     # see :).
     STDIN = 0
-    assert px_top.get_command(timeout_seconds=0, fd=STDIN) == px_top.CMD_RESIZE
+    assert px_top.get_command(
+        testutils.get_logger(),
+        timeout_seconds=0,
+        fd=STDIN) == px_top.CMD_RESIZE
 
 
 def test_redraw():

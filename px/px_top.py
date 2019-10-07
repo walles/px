@@ -18,8 +18,9 @@ from . import px_cpuinfo
 from . import px_processinfo
 from . import px_launchcounter
 
-if sys.version_info.major >= 3:
+if False:
     # For mypy PEP-484 static typing validation
+    import logging               # NOQA
     from typing import List      # NOQA
     from typing import Dict      # NOQA
     from typing import Union     # NOQA
@@ -385,8 +386,8 @@ def redraw(
     writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
 
 
-def page_process_info(pid):
-    # type: (Optional[int]) -> None
+def page_process_info(pid, log):
+    # type: (Optional[int], logging.Logger) -> None
     if pid is None:
         # Nothing selected, never mind
         return
@@ -399,11 +400,11 @@ def page_process_info(pid):
         return
 
     with px_terminal.normal_display():
-        px_pager.page_process_info(process, processes)
+        px_pager.page_process_info(process, processes, log)
 
 
-def handle_search_keypresses(key_sequence):
-    # type: (ConsumableString) -> None
+def handle_search_keypresses(key_sequence, log):
+    # type: (ConsumableString, logging.Logger) -> None
     global search_string
     global last_highlighted_row
     global last_highlighted_pid
@@ -427,7 +428,7 @@ def handle_search_keypresses(key_sequence):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif key_sequence.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid)
+            page_process_info(last_highlighted_pid, log)
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
@@ -458,7 +459,7 @@ def handle_search_keypresses(key_sequence):
     search_string += key_sequence._string
 
 
-def get_command(**kwargs):
+def get_command(log, **kwargs):
     """
     Call getch() and interpret the results.
     """
@@ -469,7 +470,7 @@ def get_command(**kwargs):
 
     global top_mode
     if top_mode == MODE_SEARCH:
-        handle_search_keypresses(input)
+        handle_search_keypresses(input, log)
         return CMD_HANDLED
 
     global last_highlighted_row
@@ -483,7 +484,7 @@ def get_command(**kwargs):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif input.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid)
+            page_process_info(last_highlighted_pid, log)
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
@@ -502,7 +503,9 @@ def get_command(**kwargs):
     return CMD_WHATEVER
 
 
-def _top():
+def _top(log):
+    # type: (logging.Logger) -> None
+
     physical, logical = px_cpuinfo.get_core_count()
     load_bar = px_load_bar.PxLoadBar(physical, logical)
     baseline = px_process.get_all()
@@ -519,7 +522,7 @@ def _top():
         toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(load_bar, toplist, launchcounter, rows, columns)
 
-        command = get_command(timeout_seconds=1)
+        command = get_command(log, timeout_seconds=1)
 
         # Handle all keypresses before refreshing the display
         while command is not None:
@@ -530,7 +533,7 @@ def _top():
                 redraw(load_bar, toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
 
-            command = get_command(timeout_seconds=0)
+            command = get_command(log, timeout_seconds=0)
 
         # For interactivity reasons, don't do this too often
         global last_process_poll
@@ -549,14 +552,19 @@ def sigwinch_handler(signum, frame):
     os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("utf-8"))
 
 
-def top():
+def top(log):
+    # type: (logging.Logger) -> None
+
     if not sys.stdout.isatty():
         sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
         exit(1)
 
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with px_terminal.fullscreen_display():
-        _top()
+        try:
+            _top(log)
+        except Exception:
+            log.exception("Running ptop failed")
 
         # Make sure we actually end up on a new line
         print("")
