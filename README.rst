@@ -247,6 +247,7 @@ TODO misc
 * In the px / top views, in the process owner column, maybe print other non-root
   process owners of parent processes inside parentheses?
 * Ignore -E switch on Python command lines
+* Use logging for ``px`` as well as ``ptop`` in ``px_loginhistory.get_users_at()``
 
 
 DONE
