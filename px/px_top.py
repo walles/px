@@ -6,6 +6,7 @@ import time
 import errno
 import signal
 import select
+import logging
 import unicodedata
 
 import os
@@ -26,6 +27,8 @@ if False:
     from typing import Union     # NOQA
     from typing import Optional  # NOQA
     from six import text_type    # NOQA
+
+LOG = logging.getLogger(__name__)
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -386,8 +389,8 @@ def redraw(
     writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
 
 
-def page_process_info(pid, log):
-    # type: (Optional[int], logging.Logger) -> None
+def page_process_info(pid):
+    # type: (Optional[int]) -> None
     if pid is None:
         # Nothing selected, never mind
         return
@@ -400,11 +403,11 @@ def page_process_info(pid, log):
         return
 
     with px_terminal.normal_display():
-        px_pager.page_process_info(process, processes, log)
+        px_pager.page_process_info(process, processes)
 
 
-def handle_search_keypresses(key_sequence, log):
-    # type: (ConsumableString, logging.Logger) -> None
+def handle_search_keypresses(key_sequence):
+    # type: (ConsumableString) -> None
     global search_string
     global last_highlighted_row
     global last_highlighted_pid
@@ -428,7 +431,7 @@ def handle_search_keypresses(key_sequence, log):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif key_sequence.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid, log)
+            page_process_info(last_highlighted_pid)
         elif key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
@@ -459,7 +462,7 @@ def handle_search_keypresses(key_sequence, log):
     search_string += key_sequence._string
 
 
-def get_command(log, **kwargs):
+def get_command(**kwargs):
     """
     Call getch() and interpret the results.
     """
@@ -470,7 +473,7 @@ def get_command(log, **kwargs):
 
     global top_mode
     if top_mode == MODE_SEARCH:
-        handle_search_keypresses(input, log)
+        handle_search_keypresses(input)
         return CMD_HANDLED
 
     global last_highlighted_row
@@ -484,7 +487,7 @@ def get_command(log, **kwargs):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif input.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid, log)
+            page_process_info(last_highlighted_pid)
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
@@ -503,8 +506,8 @@ def get_command(log, **kwargs):
     return CMD_WHATEVER
 
 
-def _top(log):
-    # type: (logging.Logger) -> None
+def _top():
+    # type: () -> None
 
     physical, logical = px_cpuinfo.get_core_count()
     load_bar = px_load_bar.PxLoadBar(physical, logical)
@@ -522,7 +525,7 @@ def _top(log):
         toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(load_bar, toplist, launchcounter, rows, columns)
 
-        command = get_command(log, timeout_seconds=1)
+        command = get_command(timeout_seconds=1)
 
         # Handle all keypresses before refreshing the display
         while command is not None:
@@ -533,7 +536,7 @@ def _top(log):
                 redraw(load_bar, toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
 
-            command = get_command(log, timeout_seconds=0)
+            command = get_command(timeout_seconds=0)
 
         # For interactivity reasons, don't do this too often
         global last_process_poll
@@ -552,8 +555,8 @@ def sigwinch_handler(signum, frame):
     os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("utf-8"))
 
 
-def top(log):
-    # type: (logging.Logger) -> None
+def top():
+    # type: () -> None
 
     if not sys.stdout.isatty():
         sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
@@ -562,9 +565,9 @@ def top(log):
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with px_terminal.fullscreen_display():
         try:
-            _top(log)
+            _top()
         except Exception:
-            log.exception("Running ptop failed")
+            LOG.exception("Running ptop failed")
 
         # Make sure we actually end up on a new line
         print("")

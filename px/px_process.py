@@ -234,7 +234,8 @@ def uid_to_username(uid):
 
 def ps_line_to_process(ps_line, now):
     match = PS_LINE.match(ps_line)
-    assert match is not None
+    if not match:
+        raise Exception("Failed to match ps line <%r>" % ps_line)
 
     process_builder = PxProcessBuilder()
     process_builder.pid = int(match.group(1))

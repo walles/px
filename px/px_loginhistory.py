@@ -1,3 +1,4 @@
+import logging
 import datetime
 import subprocess
 
@@ -8,6 +9,8 @@ import dateutil.tz
 if False:
     import logging  # NOQA
     from typing import Set, Optional  # NOQA
+
+LOG = logging.getLogger(__name__)
 
 # last regexp parts
 LAST_USERNAME = "([^ ]+)"
@@ -55,7 +58,6 @@ MONTHS = {
 
 
 def get_users_at(
-    log,  # type: logging.Logger
     timestamp,  # type: datetime.datetime
     last_output=None,  # type: Optional[str]
     now=None  # type: Optional[datetime.datetime]
@@ -92,7 +94,7 @@ def get_users_at(
 
         match = LAST_RE.match(line)
         if not match:
-            log.error("Unmatched last line: <%s>", line)
+            LOG.error("Unmatched last line: <%s>", line)
             continue
 
         username = match.group(1)
@@ -108,7 +110,7 @@ def get_users_at(
             if timestamp < from_timestamp:
                 continue
         except Exception:
-            log.error("Problematic1 last line: <%s>", line)
+            LOG.error("Problematic1 last line: <%s>", line)
             continue
 
         if duration_s is None:
@@ -122,7 +124,7 @@ def get_users_at(
             if timestamp > to_timestamp:
                 continue
         except Exception:
-            log.error("Problematic2 last line: <%s>", line)
+            LOG.error("Problematic2 last line: <%s>", line)
 
         users.add(username)
 

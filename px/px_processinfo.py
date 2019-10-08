@@ -152,10 +152,10 @@ def print_processes_started_at_the_same_time(fd, process, all_processes):
         println(fd, "  " + to_relative_start_string(process, close))
 
 
-def print_users_when_process_started(log, fd, process):
-    # type: (logging.Logger, int, px_process.PxProcess) -> None
+def print_users_when_process_started(fd, process):
+    # type: (int, px_process.PxProcess) -> None
     println(fd, "Users logged in when " + str(process) + " started:")
-    users = px_loginhistory.get_users_at(log, process.start_time)
+    users = px_loginhistory.get_users_at(process.start_time)
     if not users:
         println(
             fd,
@@ -275,8 +275,8 @@ def print_start_time(fd, process):
         ))
 
 
-def print_pid_info(log, fd, pid):
-    # type: (logging.Logger, int, int) -> None
+def print_pid_info(fd, pid):
+    # type: (int, int) -> None
     processes = px_process.get_all()
 
     process = find_process_by_pid(pid, processes)
@@ -284,11 +284,11 @@ def print_pid_info(log, fd, pid):
         sys.stderr.write("No such PID: {}\n".format(pid))
         exit(1)
 
-    print_process_info(log, fd, process, processes)
+    print_process_info(fd, process, processes)
 
 
-def print_process_info(log, fd, process, processes):
-    # type: (logging.Logger, int, px_process.PxProcess, List[px_process.PxProcess]) -> None
+def print_process_info(fd, process, processes):
+    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
     print_command_line(fd, process)
 
     # Print a process tree with all PID's parents and all its children
@@ -302,7 +302,7 @@ def print_process_info(log, fd, process, processes):
     print_processes_started_at_the_same_time(fd, process, processes)
 
     println(fd, "")
-    print_users_when_process_started(log, fd, process)
+    print_users_when_process_started(fd, process)
 
     # List all files PID has open
     println(fd, "")

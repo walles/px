@@ -80,28 +80,26 @@ def main():
     _main(sys.argv)
 
 
-def createLogger(stringIO):
-    # type: (six.StringIO) -> logging.Logger
+def configureLogging(stringIO):
+    # type: (six.StringIO) -> None
 
     # This method inspired by: https://stackoverflow.com/a/9534960/473672
 
-    log = logging.getLogger('px')
-    log.setLevel(LOGLEVEL)
+    rootLogger = logging.getLogger()
+    rootLogger.setLevel(LOGLEVEL)
 
     handlers = []
-    for handler in log.handlers:
+    for handler in rootLogger.handlers:
         handlers.append(handler)
     for handler in handlers:
-        log.removeHandler(handler)
+        rootLogger.removeHandler(handler)
 
     handler = logging.StreamHandler(stringIO)
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S%Z')
     handler.setFormatter(formatter)
 
-    log.addHandler(handler)
-
-    return log
+    rootLogger.addHandler(handler)
 
 
 def handleLogMessages(messages):
@@ -139,12 +137,12 @@ def _main(argv):
         return
 
     stringIO = six.StringIO()
-    logger = createLogger(stringIO)
+    configureLogging(stringIO)
 
     if arg == '--top':
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
-        px_top.top(logger)
+        px_top.top()
         handleLogMessages(stringIO.getvalue())
         return
 
@@ -165,7 +163,7 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        px_processinfo.print_pid_info(logger, sys.stdout.fileno(), pid)
+        px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
         handleLogMessages(stringIO.getvalue())
         return
     except ValueError:

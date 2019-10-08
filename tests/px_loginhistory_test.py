@@ -5,8 +5,6 @@ import dateutil.tz
 
 from px import px_loginhistory
 
-from . import testutils
-
 if False:
     from typing import Set  # NOQA
 
@@ -27,9 +25,7 @@ def get_users_at(last_output, now, testtime):
 
     Then return the users px_loginhistory claims were logged in at testtime.
     """
-    log = testutils.get_logger()
-
-    return px_loginhistory.get_users_at(log, testtime, last_output=last_output, now=now)
+    return px_loginhistory.get_users_at(testtime, last_output=last_output, now=now)
 
 
 def test_get_users_at_range(check_output):
@@ -273,8 +269,7 @@ def test_get_users_at_unexpected_last_output(caplog):
 
 def test_get_users_at_just_run_it(check_output):
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
-    log = testutils.get_logger()
-    px_loginhistory.get_users_at(log, datetime.datetime.now(dateutil.tz.tzlocal()))
+    px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
 
 
 def test_to_timestamp(check_output):
