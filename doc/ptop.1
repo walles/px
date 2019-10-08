@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 .\" FIXME: Other man pages don't need to use \p to break lines here,
 .\" and use the Nm macro for the command name. Why can't we?
-.Ic Nm
+.Ic ptop [ --debug ]
 .Sh DESCRIPTION
 .Nm
 periodically displays a sorted list of system processes.
@@ -35,6 +35,12 @@ To exit
 .Nm ,
 press
 .Ql q .
+.Pp
+With the
+.Fl -debug
+flag, extra log messages are sometimes printed after
+.Nm
+finishes.
 .Sh PROCESS NAMING
 .Nm
 tries to be helpful about naming processes, and avoid printing names

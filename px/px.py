@@ -4,10 +4,10 @@
      https://github.com/walles/px
 
 Usage:
-  px
-  px <filter>
-  px <PID>
-  px --top
+  px [--debug]
+  px [--debug] <filter>
+  px [--debug] <PID>
+  px [--debug] --top
   px --install
   px --help
   px --version
@@ -54,11 +54,6 @@ Problems detected, please send this text to one of:
 * johan.walles@gmail.com
 """
 
-# What level of messages should we propagate to the user?
-#
-# Set to INFO or lower when developing / testing.
-LOGLEVEL = logging.ERROR
-
 
 def install(argv):
     # Find full path to self
@@ -80,13 +75,13 @@ def main():
     _main(sys.argv)
 
 
-def configureLogging(stringIO):
-    # type: (six.StringIO) -> None
+def configureLogging(loglevel, stringIO):
+    # type: (int, six.StringIO) -> None
 
     # This method inspired by: https://stackoverflow.com/a/9534960/473672
 
     rootLogger = logging.getLogger()
-    rootLogger.setLevel(LOGLEVEL)
+    rootLogger.setLevel(loglevel)
 
     handlers = []
     for handler in rootLogger.handlers:
@@ -118,6 +113,11 @@ def handleLogMessages(messages):
 
 
 def _main(argv):
+    loglevel = logging.ERROR
+    while '--debug' in argv:
+        argv.remove('--debug')
+        loglevel = logging.DEBUG
+
     if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
         argv.append("--top")
 
@@ -137,7 +137,7 @@ def _main(argv):
         return
 
     stringIO = six.StringIO()
-    configureLogging(stringIO)
+    configureLogging(loglevel, stringIO)
 
     if arg == '--top':
         # Pulling px_top in on demand like this improves test result caching
