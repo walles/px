@@ -200,10 +200,10 @@ Releasing a new Version
 -----------------------
 1. Consider updating `the Output section`_, push those changes. Consider updating
    the ``ptop`` screenshot, scale your window to 90x24 before shooting it.
-2. Do ``git describe --abbrev=0`` to see the most recent version number, and think
-   about what the next version number should be.
-3. Do ``git log --first-parent $(git describe --abbrev=0)..HEAD | cat`` to see
+2. Do ``git log --first-parent $(git describe --abbrev=0)..HEAD | cat`` to see
    changes since the last release
+3. Do ``git describe --abbrev=0`` to see the most recent version number, and think
+   about what the next version number should be.
 4. Do ``git tag --annotate 1.2.3`` to set the next version number. The
    text you write for this tag will show up as the release description on Github,
    write something nice! And remember that the first line is the subject line for
