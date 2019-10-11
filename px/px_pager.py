@@ -1,4 +1,5 @@
 import os
+import errno
 import logging
 import threading
 import subprocess
@@ -15,11 +16,26 @@ if False:
 LOG = logging.getLogger(__name__)
 
 
-def _pump_info_to_fd(fileno, process, processes):
-    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
+def _pump_info_to_fd(with_fileno, process, processes):
+    # FIXME: Type check first parameter using mypy protocols?
+    # See: https://stackoverflow.com/a/56081214/473672
+
+    # NOTE: The first parameter to this function *must* be *an object owning the fileno*,
+    # not just the fileno itself. Otherwise the file will get closed when the fileno owner
+    # goes out of scope in the main thread, and we'll be talking to a fileno which points
+    # to who-knows-where.
     try:
-        px_processinfo.print_process_info(fileno, process, processes)
-        os.close(fileno)
+        px_processinfo.print_process_info(with_fileno.fileno(), process, processes)
+    except OSError as e:
+        if e.errno == errno.EPIPE:
+            # The user probably just exited the pager before we were done piping into it
+            LOG.debug("Lost contact with pager, errno %d", e.errno)
+
+            # FIXME: If an lsof instance was spawned by our px_processinfo.print_process_info()
+            # call above (this is likely), we may want to kill that particular lsof instance.
+            # It will use a bunch of CPU for some time, and we will never use its result anyway.
+        else:
+            LOG.warning("Unexpected OSError pumping process info into pager", exc_info=True)
     except Exception:
         # Logging exceptions on warning level will make them visible to somebody
         # who changes the LOGLEVEL in px.py, but not to ordinary users.
@@ -100,7 +116,7 @@ def page_process_info(process, processes):
     # Do this in a thread to avoid problems with pipe buffers filling up and blocking
     info_thread = threading.Thread(
         target=_pump_info_to_fd,
-        args=(pager_stdin.fileno(), process, processes))
+        args=(pager_stdin, process, processes))
     info_thread.setDaemon(True)  # Terminating ptop while this is running is fine
     info_thread.start()
 
