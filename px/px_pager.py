@@ -26,6 +26,7 @@ def _pump_info_to_fd(with_fileno, process, processes):
     # to who-knows-where.
     try:
         px_processinfo.print_process_info(with_fileno.fileno(), process, processes)
+        with_fileno.close()
     except OSError as e:
         if e.errno == errno.EPIPE:
             # The user probably just exited the pager before we were done piping into it
