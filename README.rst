@@ -177,7 +177,7 @@ information; the command will work without it but might miss some information.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
 * Selecting a process with Enter will show you detailed information about that
-  process.
+  process, in ``$PAGER``, `moar`_ or ``less``.
 * After you press ``q`` to quit, the display is retained and some lines at the
   bottom are removed to prevent the information you want from scrolling out of
   view.
@@ -314,6 +314,7 @@ DONE
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
 .. _Releases: https://github.com/walles/px/releases
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
+.. _moar: https://github.com/walles/moar
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px
