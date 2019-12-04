@@ -50,14 +50,15 @@ KEY_UPARROW = "\x1b[A"
 KEY_DOWNARROW = "\x1b[B"
 KEY_ENTER = "\x0d"
 
-SEARCH_PROMPT = px_terminal.bold("Search (ESC to cancel): ")
+SEARCH_PROMPT_ACTIVE = px_terminal.bold("Search (ENTER when done): ")
+SEARCH_PROMPT_INACTIVE = "Search ('/' to edit): "
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
 
 MODE_BASE = 0
 MODE_SEARCH = 1
 
 top_mode = MODE_BASE  # type: int
-search_string = None  # type: Optional[text_type]
+search_string = ""  # type: text_type
 
 # Which pid were we last hovering?
 last_highlighted_pid = None  # type: Optional[int]
@@ -327,9 +328,9 @@ def get_screen_lines(
 
     # -2 = Section name + column headings
     max_process_count = cputop_height - 2
-    if search is not None:
-        # Search prompt needs one line
-        max_process_count -= 1
+
+    # Search prompt needs one line
+    max_process_count -= 1
 
     highlight_row = get_line_to_highlight(toplist, max_process_count)
     highlight_column = u"CPUTIME"
@@ -343,8 +344,12 @@ def get_screen_lines(
     toplist_table_lines += rows * ['']
 
     lines += [px_terminal.bold("Top CPU using processes")]
-    if search is not None:
-        lines += [SEARCH_PROMPT + search + SEARCH_CURSOR]
+    global top_mode
+    if top_mode == MODE_SEARCH:
+        lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]
+    else:
+        assert top_mode == MODE_BASE
+        lines += [SEARCH_PROMPT_INACTIVE + px_terminal.bold(search or "")]
 
     lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the column headings
 
@@ -430,13 +435,10 @@ def handle_search_keypresses(key_sequence):
         elif key_sequence.consume(KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
-        elif key_sequence.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid)
-        elif key_sequence._string == KEY_ESC:
+        elif key_sequence.consume(KEY_ENTER) or key_sequence._string == KEY_ESC:
             # Exit search mode
             global top_mode
             top_mode = MODE_BASE
-            search_string = None
             return
         else:
             # Unable to consume more, give up
@@ -491,7 +493,6 @@ def get_command(**kwargs):
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
-            search_string = ""
             return None
         elif input.consume(u'm') or input.consume(u'M'):
             sort_by_memory = not sort_by_memory
