@@ -18,6 +18,7 @@ if False:
     from typing import Optional    # NOQA
     from typing import Iterable    # NOQA
     from typing import List        # NOQA
+    from typing import Tuple       # NOQA
     from six import text_type      # NOQA
 
 
@@ -51,6 +52,7 @@ def print_command_line(fd, process):
 
 
 def print_process_subtree(fd, process, indentation, lines):
+    # type: (int, px_process.PxProcess, int, List[Tuple[str, px_process.PxProcess]]) -> None
     lines.append(("  " * indentation + str(process), process))
     for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
         print_process_subtree(fd, child, indentation + 1, lines)
