@@ -64,7 +64,7 @@ def create_file(filetype,     # type: str
     file.type = filetype
 
     # Remove leading [] group from name if any
-    match = re.match('(\[[^]]*\] )?(.*)', name)
+    match = re.match(r'(\[[^]]*\] )?(.*)', name)
     assert match
     file.name = match.group(2)
 

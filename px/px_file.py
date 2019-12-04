@@ -152,7 +152,7 @@ def resolve_endpoint(endpoint):
         # Lookup failed for whatever reason, give up
         return endpoint
 
-    if host is "localhost.localdomain":
+    if host == "localhost.localdomain":
         # "localdomain" is just a long word that doesn't add any information
         host = "localhost"
 
