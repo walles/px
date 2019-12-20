@@ -81,7 +81,10 @@ def get_command(commandline):
             '-W2'
         ])
 
-    if command in ["bash", "sh", "perl", "node"]:
+    if command == "node":
+        return get_generic_script_command(commandline, ["--max_old_space_size"])
+
+    if command in ["bash", "sh", "perl"]:
         return get_generic_script_command(commandline)
 
     if len(command) < 25:
@@ -218,7 +221,7 @@ def get_generic_script_command(commandline, ignore_switches=[]):
     # type: (text_type, List[text_type]) -> text_type
     array = to_array(commandline)
 
-    while len(array) > 1 and array[1] in ignore_switches:
+    while len(array) > 1 and array[1].split("=")[0] in ignore_switches:
         del array[1]
 
     vm = os.path.basename(array[0])

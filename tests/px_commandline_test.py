@@ -173,3 +173,8 @@ def test_get_command_unicode():
 def test_get_command_ruby_switches():
     assert px_commandline.get_command(
         "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust") == "brew.rb"
+
+
+def test_node_max_old_space():
+    assert px_commandline.get_command(
+        "node --max_old_space_size=4096 scripts/start.js") == "start.js"
