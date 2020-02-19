@@ -8,7 +8,7 @@ os:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update             ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python@2 || brew upgrade python@2 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip install --upgrade virtualenv ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip install virtualenv==16.7.9 ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install shellcheck ; fi
 
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository -y ppa:fkrull/deadsnakes ; fi
