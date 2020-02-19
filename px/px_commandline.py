@@ -81,6 +81,9 @@ def get_command(commandline):
             '-W2'
         ])
 
+    if command == "sudo":
+        return get_sudo_command(commandline)
+
     if command == "node":
         return get_generic_script_command(commandline, ["--max_old_space_size"])
 
@@ -142,6 +145,19 @@ def get_python_command(commandline):
             return os.path.basename(array[2])
 
     return python
+
+
+def get_sudo_command(commandline):
+    # type: (text_type) -> text_type
+    without_sudo = commandline[5:].strip()
+    if not without_sudo:
+        return "sudo"
+
+    if without_sudo.startswith('-'):
+        # Give up on options
+        return "sudo"
+
+    return "sudo " + get_command(without_sudo)
 
 
 def prettify_fully_qualified_java_class(class_name):

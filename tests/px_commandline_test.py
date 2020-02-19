@@ -148,6 +148,15 @@ def test_get_command_resque():
     assert px_commandline.get_command("resqued-0.7.12 a b c") == "resqued-0.7.12"
 
 
+def test_get_command_sudo():
+    assert px_commandline.get_command("sudo") == "sudo"
+    assert px_commandline.get_command("sudo python /usr/bin/hej gris --flaska") == "sudo hej"
+
+    # We could support flags at some point, but until proven necessary we'll
+    # fall back on just "sudo" when we get flags.
+    assert px_commandline.get_command("sudo -B python /usr/bin/hej") == "sudo"
+
+
 def test_get_command_interpreters():
     assert px_commandline.get_command("ruby") == "ruby"
     assert px_commandline.get_command("ruby /some/path/apa.rb") == "apa.rb"
