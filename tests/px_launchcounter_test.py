@@ -72,6 +72,35 @@ def test_print_launch_counts():
     ]
 
 
+def test_ignore_surrounding_parentheses():
+    launchcounter = px_launchcounter.Launchcounter()
+    launchcounter._register_launches([
+        testutils.fake_callchain('init', 'iTerm'),
+        testutils.fake_callchain('init', 'iTerm'),
+        testutils.fake_callchain('init', '(iTerm)'),
+        testutils.fake_callchain('init', 'iTerm()'),
+        testutils.fake_callchain('init', 'i(Term)'),
+        testutils.fake_callchain('init', '(i)Term'),
+    ])
+    lines = launchcounter.get_screen_lines(100)
+
+    # Note that the ordering of the lines doesn't really matter here, just as
+    # long as all of them are in there
+    assert set(lines) == set([
+        'init -> ' + px_terminal.bold('iTerm') + '(3)' +
+        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
+
+        'init -> ' + px_terminal.bold('(i)Term') + '(1)' +
+        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
+
+        'init -> ' + px_terminal.bold('i(Term)') + '(1)' +
+        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
+
+        'init -> ' + px_terminal.bold('iTerm()') + '(1)' +
+        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
+    ])
+
+
 def test_to_tuple_list():
     launchcounter = px_launchcounter.Launchcounter()
     assert \

@@ -42,6 +42,16 @@ class Launchcounter(object):
         # Most recent process snapshot
         self._last_processlist = None  # type: Optional[List[px_process.PxProcess]]
 
+    def _strip_parentheses(self, s):
+        # type: (text_type) -> text_type
+        if not s:
+            return s
+        if s[0] != '(':
+            return s
+        if s[-1] != ')':
+            return s
+        return s[1:-1]
+
     def _callchain(self, process):
         # type: (px_process.PxProcess) -> Tuple[text_type, ...]
 
@@ -49,7 +59,7 @@ class Launchcounter(object):
 
         current = process  # type: Optional[px_process.PxProcess]
         while current is not None:
-            reverse_callchain.append(current.command)
+            reverse_callchain.append(self._strip_parentheses(current.command))
             current = current.parent
 
         return tuple(reversed(reverse_callchain))
