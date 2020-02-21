@@ -157,6 +157,20 @@ def test_get_command_sudo():
     assert px_commandline.get_command("sudo -B python /usr/bin/hej") == "sudo"
 
 
+def test_get_command_sudo_with_space(tmpdir):
+    # Create a file name with a space in it
+    spaced_path = tmpdir.join("i contain spaces")
+    spaced_path.write_binary(b"")
+    spaced_name = str(spaced_path)
+
+    # Verify splitting of the spaced file name
+    assert px_commandline.get_command("sudo " + spaced_name) == "sudo i contain spaces"
+
+    # Verify splitting with more parameters on the line
+    assert px_commandline.get_command("sudo " + spaced_name + " parameter") == \
+        "sudo i contain spaces"
+
+
 def test_get_command_interpreters():
     assert px_commandline.get_command("ruby") == "ruby"
     assert px_commandline.get_command("ruby /some/path/apa.rb") == "apa.rb"
