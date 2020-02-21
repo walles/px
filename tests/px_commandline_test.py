@@ -1,5 +1,7 @@
 # coding=utf-8
 
+import os
+
 from px import px_commandline
 
 
@@ -157,7 +159,7 @@ def test_get_command_sudo():
     assert px_commandline.get_command("sudo -B python /usr/bin/hej") == "sudo"
 
 
-def test_get_command_sudo_with_space(tmpdir):
+def test_get_command_sudo_with_space_in_command_name(tmpdir):
     # Create a file name with a space in it
     spaced_path = tmpdir.join("i contain spaces")
     spaced_path.write_binary(b"")
@@ -169,6 +171,22 @@ def test_get_command_sudo_with_space(tmpdir):
     # Verify splitting with more parameters on the line
     assert px_commandline.get_command("sudo " + spaced_name + " parameter") == \
         "sudo i contain spaces"
+
+
+def test_get_command_sudo_with_space_in_path(tmpdir):
+    # Create a file name with a space in it
+    spaced_dir = tmpdir.join("i contain spaces")
+    os.mkdir(str(spaced_dir))
+    spaced_path = spaced_dir + "/runme"
+
+    spaced_path.write_binary(b"")
+    spaced_name = str(spaced_path)
+
+    # Verify splitting of the spaced file name
+    assert px_commandline.get_command("sudo " + spaced_name) == "sudo runme"
+
+    # Verify splitting with more parameters on the line
+    assert px_commandline.get_command("sudo " + spaced_name + " parameter") == "sudo runme"
 
 
 def test_get_command_interpreters():
