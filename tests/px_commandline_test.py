@@ -216,6 +216,16 @@ def test_get_command_ruby_switches():
         "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust") == "brew.rb"
 
 
+def test_get_homebrew_commandline():
+    # Source: https://github.com/walles/px/issues/72
+    assert px_commandline.get_command(" ".join([
+        "/usr/local/Homebrew/Library/Homebrew/vendor/portable-ruby/current/bin/ruby",
+        "-W0",
+        "--disable=gems,did_you_mean,rubyopt",
+        "/usr/local/Homebrew/Library/Homebrew/brew.rb",
+        "upgrade"])) == "brew.rb"
+
+
 def test_node_max_old_space():
     assert px_commandline.get_command(
         "node --max_old_space_size=4096 scripts/start.js") == "start.js"

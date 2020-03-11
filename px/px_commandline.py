@@ -68,6 +68,7 @@ def get_command(commandline):
             '-a',
             '-d',
             '--debug',
+            '--disable',
             '-l',
             '-n',
             '-p',
