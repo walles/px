@@ -37,6 +37,29 @@ def to_array(commandline):
     return merged_split
 
 
+def is_human_friendly(command):
+    # type: (text_type) -> bool
+    """
+    AKA "Does this command contain any capital letters?"
+    """
+    for char in command:
+        if char.isupper():
+            return True
+    return False
+
+
+def get_app_name_prefix(commandline):
+    # type: (text_type) -> text_type
+    """
+    On macOS, get which app this command is part of.
+    """
+    command_with_path = to_array(commandline)[0]
+    for part in command_with_path.split("/"):
+        if part.endswith(".app") and len(part) > 4:
+            return part[0:-4] + "/"
+    return ""
+
+
 def get_command(commandline):
     # type: (text_type) -> text_type
     """
@@ -91,8 +114,13 @@ def get_command(commandline):
     if command in ["bash", "sh", "perl"]:
         return get_generic_script_command(commandline)
 
+    app_name_prefix = get_app_name_prefix(commandline)
+    if is_human_friendly(command):
+        # Already human friendly, prefer keeping it short
+        app_name_prefix = ""
+
     if len(command) < 25:
-        return command
+        return app_name_prefix + command
 
     command_split = command.split(".")
     if len(command_split) > 1:
@@ -105,7 +133,7 @@ def get_command(commandline):
             # next to last part
             command = command_split[-2]
 
-    return command
+    return app_name_prefix + command
 
 
 def get_python_command(commandline):
