@@ -223,9 +223,50 @@ def test_get_homebrew_commandline():
         "-W0",
         "--disable=gems,did_you_mean,rubyopt",
         "/usr/local/Homebrew/Library/Homebrew/brew.rb",
-        "upgrade"])) == "brew.rb"
+        "upgrade"
+    ])) == "brew.rb"
 
 
 def test_node_max_old_space():
     assert px_commandline.get_command(
         "node --max_old_space_size=4096 scripts/start.js") == "start.js"
+
+
+def test_macos_app():
+    assert px_commandline.get_command("/".join([
+        "/System",
+        "Library",
+        "CoreServices",
+        "Dock.app",
+        "Contents",
+        "XPCServices",
+        "com.apple.dock.external.extra.xpc",
+        "Contents",
+        "MacOS",
+        "com.apple.dock.external.extra"
+    ])) == "Dock/extra"
+
+    # https://github.com/walles/px/issues/73
+    assert px_commandline.get_command("/".join([
+        "/Applications",
+        "Firefox.app",
+        "Contents",
+        "MacOS",
+        "plugin-container.app",
+        "Contents",
+        "MacOS",
+        "plugin-container"
+    ])) == "Firefox/plugin-container"
+
+    assert px_commandline.get_command("/".join([
+        "/Applications",
+        "Visual Studio Code.app",
+        "Contents",
+        "Frameworks",
+        "Code Helper (Renderer).app",
+        "Contents",
+        "MacOS",
+        "Code Helper (Renderer)"
+    ])) == "Code Helper (Renderer)"
+
+    assert px_commandline.get_command("/Applications/iTerm.app/Contents/MacOS/iTerm2") == "iTerm2"
