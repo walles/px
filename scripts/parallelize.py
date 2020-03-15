@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Run multiple command lines in parallel
 
@@ -24,12 +24,7 @@ import sys
 import os
 
 
-try:
-    from typing import Dict      # NOQA
-    from typing import List      # NOQA
-    from typing import Optional  # NOQA
-except Exception:
-    pass
+from typing import Dict, List, Optional
 
 
 PUMP_BUFFER_SIZE = 16384
@@ -44,7 +39,7 @@ if len(sys.argv) < 2:
 
 
 class WrappedProcess:
-    def __init__(self, commandline):
+    def __init__(self, commandline: str):
         self.commandline = commandline
 
         self.output = tempfile.NamedTemporaryFile()
@@ -63,11 +58,11 @@ class WrappedProcess:
         """
         window_size = b'\0' * 4
         # Get terminal window dimensions from stdout
-        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, window_size)
+        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, window_size, True)
 
         pty_in, pty_out = pty.openpty()
 
-        fcntl.ioctl(pty_in, termios.TIOCSWINSZ, window_size)
+        fcntl.ioctl(pty_in, termios.TIOCSWINSZ, window_size, False)
         return pty_in, pty_out
 
     def cleanup(self):
@@ -75,9 +70,8 @@ class WrappedProcess:
         self.output.close()
 
 
-def pump(processes, current_process, timeout_seconds=0.2):
-    # type: (List[WrappedProcess], Optional[WrappedProcess], float) -> None
-    fd_to_wrapper = {}  # type: Dict[int, WrappedProcess]
+def pump(processes: List[WrappedProcess], current_process: Optional[WrappedProcess], timeout_seconds=0.2) -> None:
+    fd_to_wrapper: Dict[int, WrappedProcess] = {}
     for process in processes:
         fd_to_wrapper[process.pty_out] = process
 

@@ -78,8 +78,12 @@ fi
 if python --version 2>&1 | grep " 3" ; then
   # Verson of "python" binary is 3, do static type analysis. Mypy requires
   # Python 3, that's why we do this only on Python 3.
+
+  # Run Python 3 tests on auxillary scripts and source code alike
   mypy ./*.py ./*/*.py --disallow-any-generics
-  mypy ./*.py ./*/*.py --python-version=2.7
+
+  # Run 2.7 tests on the actual px code only
+  mypy px/*.py tests/*.py --python-version=2.7
 fi
 
 flake8 px tests scripts setup.py
