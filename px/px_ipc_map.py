@@ -297,9 +297,11 @@ class PeerProcess(object):
             if pid is None:
                 raise ValueError("Either pid, name or both must be set")
             name = "PID " + str(pid)
+        else:
+            if pid is not None:
+                name += "(" + str(pid) + ")"
 
         self.name = name  # type: Text
-        self.pid = pid    # type: Optional[int]
 
     def __repr__(self):
         return self.name
