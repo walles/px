@@ -279,6 +279,6 @@ def test_ipc_pipe_osx():
     assert len(ipc_map.keys()) == 1
 
 
-def test_create_fake_process_str():
-    assert str(px_ipc_map.create_fake_process(pid=45)) == "PID 45"
-    assert str(px_ipc_map.create_fake_process(name="Johan")) == "Johan"
+def test_peer_process_str():
+    assert str(px_ipc_map.PeerProcess(pid=45)) == "PID 45"
+    assert str(px_ipc_map.PeerProcess(name="Johan")) == "Johan"

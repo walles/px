@@ -114,7 +114,7 @@ class PxProcess(object):
 
     def set_cpu_time_seconds(self, seconds):
         # type: (Optional[float]) -> None
-        self.cpu_time_s = "--"
+        self.cpu_time_s = "--"  # type: Text
         self.cpu_time_seconds = None
         if seconds is not None:
             self.cpu_time_s = seconds_to_str(seconds)
@@ -228,7 +228,7 @@ def call_ps():
 
 
 def parse_time(timestring):
-    # type: (str) -> float
+    # type: (Text) -> float
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)

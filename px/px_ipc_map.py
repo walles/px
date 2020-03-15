@@ -1,13 +1,14 @@
 import sys
 
-from . import px_process
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from . import px_file              # NOQA
+    from . import px_process           # NOQA
     from typing import Set             # NOQA
     from typing import List            # NOQA
     from typing import Dict            # NOQA
+    from typing import Text            # NOQA
     from typing import AbstractSet     # NOQA
     from typing import MutableMapping  # NOQA
     from typing import Iterable        # NOQA
@@ -54,7 +55,7 @@ class IpcMap(object):
         self.processes = processes
         self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
 
-        self._map = {}  # type: MutableMapping[px_process.PxProcess, Set[px_file.PxFile]]
+        self._map = {}  # type: MutableMapping[PeerProcess, Set[px_file.PxFile]]
         self._create_mapping()
 
         self.fds = self._create_fds(is_root)
@@ -138,7 +139,7 @@ class IpcMap(object):
         # type: () -> None
         self._create_indices()
 
-        unknown = create_fake_process(
+        unknown = PeerProcess(
             name="UNKNOWN destinations: Running with sudo might help find out where these go")
 
         network_connections = set()
@@ -164,7 +165,7 @@ class IpcMap(object):
 
                 other_end_process = self._pid2process.get(other_end_pid)
                 if not other_end_process:
-                    other_end_process = create_fake_process(pid=other_end_pid)
+                    other_end_process = PeerProcess(pid=other_end_pid)
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
@@ -265,7 +266,7 @@ class IpcMap(object):
         return pids
 
     def add_ipc_entry(self, process, file):
-        # type: (px_process.PxProcess, px_file.PxFile) -> None
+        # type: (PeerProcess, px_file.PxFile) -> None
         """
         Note that we're connected to process via file
         """
@@ -275,25 +276,30 @@ class IpcMap(object):
         self._map[process].add(file)
 
     def keys(self):
-        # type: () -> Iterable[px_process.PxProcess]
+        # type: () -> Iterable[PeerProcess]
         """
         Returns a set of other px_processes this process is connected to
         """
         return self._map.keys()
 
     def __getitem__(self, process):
-        # type: (px_process.PxProcess) -> Set[px_file.PxFile]
+        # type: (PeerProcess) -> Set[px_file.PxFile]
         """
         Returns a set of px_files through which we're connected to the px_process
         """
         return self._map.__getitem__(process)
 
 
-class FakeProcess(px_process.PxProcess):
-    def __init__(self):
-        self.name = None               # type: str
-        self.lowercase_command = None  # type: str
-        self.pid = None                # type: Optional[int]
+class PeerProcess(object):
+    def __init__(self, name=None, pid=None):
+        # type: (Optional[Text], Optional[int]) -> None
+        if not name:
+            if pid is None:
+                raise ValueError("Either pid, name or both must be set")
+            name = "PID " + str(pid)
+
+        self.name = name  # type: Text
+        self.pid = pid    # type: Optional[int]
 
     def __repr__(self):
         return self.name
@@ -302,35 +308,17 @@ class FakeProcess(px_process.PxProcess):
         return self.name.__hash__()
 
     def __str__(self):
-        if self.name:
-            return self.name
-        return "PID " + str(self.pid)
-
-
-def create_fake_process(pid=None, name=None):
-    # type: (Optional[int], Optional[str]) -> FakeProcess
-    """Fake a process with a useable name"""
-    if pid is None and name is None:
-        raise ValueError("At least one of pid and name must be set")
-
-    if name is None:
-        name = "PID " + str(pid)
-
-    process = FakeProcess()
-    process.name = name
-    process.lowercase_command = name.lower()
-    process.pid = pid
-    return process
+        return self.name
 
 
 def create_pid2process(processes):
-    # type: (Iterable[px_process.PxProcess]) -> MutableMapping[int, px_process.PxProcess]
-    pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
+    # type: (Iterable[px_process.PxProcess]) -> MutableMapping[int, PeerProcess]
+    pid2process = {}  # type: MutableMapping[int, PeerProcess]
     for process in processes:
         # Guard against duplicate PIDs
         assert process.pid not in pid2process
 
-        pid2process[process.pid] = process
+        pid2process[process.pid] = PeerProcess(name=process.command, pid=process.pid)
 
     return pid2process
 
