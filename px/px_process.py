@@ -39,17 +39,17 @@ class PxProcess(object):
     def __init__(self,
                  cmdline,   # type: Text
                  pid,       # type: int
-                 ppid,      # type: int
                  start_time_string,  # type: Text
                  username,  # type: Text
                  now,       # type: datetime.datetime
+                 ppid,      # type: Optional[int]
                  memory_percent=None,  # type: Optional[float]
                  cpu_percent=None,     # type: Optional[float]
                  cpu_time=None,        # type: Optional[float]
                  ):
         # type: (...) -> None
         self.pid = pid  # type: int
-        self.ppid = ppid  # type: int
+        self.ppid = ppid  # type: Optional[int]
 
         self.cmdline = cmdline  # type: text_type
         self.command = self._get_command()  # type: text_type
@@ -198,7 +198,6 @@ class PxProcessBuilder(object):
         # type: (datetime.datetime) -> PxProcess
         assert self.cmdline
         assert self.pid is not None
-        assert self.ppid is not None
         assert self.start_time_string
         assert self.username
         return PxProcess(
@@ -319,6 +318,8 @@ def resolve_links(processes, now):
 
     for process in processes.values():
         if process.pid == 0:
+            process.parent = None
+        elif process.ppid is None:
             process.parent = None
         else:
             process.parent = processes[process.ppid]
