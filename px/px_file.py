@@ -27,6 +27,7 @@ class PxFileBuilder():
         self.fdtype = None  # type: Optional[str]
 
     def build(self):
+        # type: () -> PxFile
         assert self.pid is not None
         assert self.name
         assert self.type
@@ -36,6 +37,8 @@ class PxFileBuilder():
         pxFile.device = self.device
         pxFile.access = self.access
         pxFile.fdtype = self.fdtype
+
+        return pxFile
 
 
 class PxFile(object):
@@ -211,7 +214,7 @@ def lsof_to_files(lsof):
     """
 
     pid = None
-    file = None
+    file_builder = None  # type: Optional[PxFileBuilder]
     files = []  # type: List[PxFile]
     for shard in lsof.split('\0'):
         if shard[0] == "\n":
@@ -230,42 +233,47 @@ def lsof_to_files(lsof):
         if infotype == 'p':
             pid = int(value)
         elif infotype == 'f':
-            file = PxFileBuilder()
+            if file_builder:
+                files.append(file_builder.build())
+
+            file_builder = PxFileBuilder()
             if value.isdigit():
-                file.fd = int(value)
+                file_builder.fd = int(value)
             else:
                 # Words like "cwd", "txt" and probably others as well
-                file.fdtype = value
+                file_builder.fdtype = value
             assert pid is not None
-            file.pid = pid
-            file.type = "??"
-            file.device = None
-            file.inode = None
-
-            files.append(file.build())
+            file_builder.pid = pid
+            file_builder.type = "??"
+            file_builder.device = None
+            file_builder.inode = None
         elif infotype == 'a':
-            assert file is not None
+            assert file_builder is not None
             access = {
                 ' ': None,
                 'r': "r",
                 'w': "w",
                 'u': "rw"}[value]
-            file.access = access
+            file_builder.access = access
         elif infotype == 't':
-            assert file is not None
-            file.type = value
+            assert file_builder is not None
+            file_builder.type = value
         elif infotype == 'd':
-            assert file is not None
-            file.device = value
+            assert file_builder is not None
+            file_builder.device = value
         elif infotype == 'n':
-            assert file is not None
-            file.name = value
+            assert file_builder is not None
+            file_builder.name = value
         elif infotype == 'i':
-            assert file is not None
-            file.inode = value
+            assert file_builder is not None
+            file_builder.inode = value
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(infotype, shard))
+
+    if file_builder:
+        # Don't forget the last file
+        files.append(file_builder.build())
 
     return files
 
