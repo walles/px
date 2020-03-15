@@ -67,7 +67,7 @@ class PxProcess(object):
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(process_builder.cpu_time)
 
-        self.children = None  # type: MutableSet[PxProcess]
+        self.children = set()  # type: MutableSet[PxProcess]
         self.parent = None  # type: Optional[PxProcess]
 
     def __repr__(self):
@@ -266,8 +266,6 @@ def create_kernel_process(now):
     process_builder.cmdline = u"kernel PID 0"
     process = PxProcess(process_builder, now)
 
-    process.children = set()
-
     return process
 
 
@@ -283,9 +281,6 @@ def resolve_links(processes, now):
     Also, all processes will have a (possibly empty) "children" field containing
     a set of references to child processes.
     """
-    for process in processes.values():
-        process.children = set()
-
     if 0 not in processes:
         kernel_process = create_kernel_process(now)
         processes[0] = kernel_process
