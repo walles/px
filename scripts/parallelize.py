@@ -70,7 +70,9 @@ class WrappedProcess:
         self.output.close()
 
 
-def pump(processes: List[WrappedProcess], current_process: Optional[WrappedProcess], timeout_seconds=0.2) -> None:
+def pump(processes: List[WrappedProcess],
+         current_process: Optional[WrappedProcess],
+         timeout_seconds=0.2) -> None:
     fd_to_wrapper: Dict[int, WrappedProcess] = {}
     for process in processes:
         fd_to_wrapper[process.pty_out] = process
