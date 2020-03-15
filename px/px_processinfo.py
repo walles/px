@@ -172,7 +172,7 @@ def to_ipc_lines(ipc_map):
     # type: (px_ipc_map.IpcMap) -> Iterable[str]
 
     return_me = []
-    for target in sorted(ipc_map.keys(), key=operator.attrgetter("lowercase_command", "pid")):
+    for target in sorted(ipc_map.keys(), key=operator.attrgetter("name", "pid")):
         channels = ipc_map[target]
         channel_names = set()  # type: MutableSet[str]
         for channel_name in map(lambda c: str(c), channels):

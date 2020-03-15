@@ -29,9 +29,9 @@ class PxFileBuilder():
     def build(self):
         # type: () -> PxFile
         assert self.pid is not None
-        assert self.name
         assert self.type
-        pxFile = PxFile(self.pid, self.name, self.type)
+        pxFile = PxFile(self.pid, self.type)
+        pxFile.name = self.name
         pxFile.fd = self.fd
         pxFile.inode = self.inode
         pxFile.device = self.device
@@ -40,14 +40,18 @@ class PxFileBuilder():
 
         return pxFile
 
+    def __repr__(self):
+        return "PxFileBuilder(pid={}, name={}, type={})".format(
+            self.pid, self.name, self.type)
+
 
 class PxFile(object):
-    def __init__(self, pid, name, filetype):
-        # type: (int, str, str) -> None
+    def __init__(self, pid, filetype):
+        # type: (int, str) -> None
         self.fd = None  # type: Optional[int]
         self.pid = pid
-        self.name = name
         self.type = filetype
+        self.name = None    # type: Optional[str]
         self.inode = None   # type: Optional[str]
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
@@ -83,7 +87,9 @@ class PxFile(object):
             name = self._resolve_name()
 
         # Decorate non-regular files with their type
-        return "[" + self.type + "] " + name + listen_suffix
+        if name:
+            return "[" + self.type + "] " + name + listen_suffix
+        return "[" + self.type + "] " + listen_suffix
 
     def _resolve_name(self):
         local, remote = self.get_endpoints()
@@ -137,6 +143,9 @@ class PxFile(object):
         This method will never return None, but both local and remote can be
         None in case this isn't a network connection for example.
         """
+        if not self.name:
+            return (None, None)
+
         if self.type not in ['IPv4', 'IPv6']:
             return (None, None)
 

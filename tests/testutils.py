@@ -66,8 +66,8 @@ def create_file(filetype,     # type: str
     assert match
     name = match.group(2)
 
-    file = px_file.PxFile(pid, name, filetype)
-    file.type = filetype
+    file = px_file.PxFile(pid, filetype)
+    file.name = name
 
     file.device = device
     file.access = access

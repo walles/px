@@ -31,6 +31,9 @@ class PxCwdFriends(object):
 
         cwd_to_processes = {}  # type: Dict[text_type, List[px_process.PxProcess]]
         for current_file in all_files:
+            if not current_file.name:
+                continue
+
             if current_file.fdtype != 'cwd':
                 continue
 
