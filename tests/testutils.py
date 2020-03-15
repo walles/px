@@ -60,15 +60,14 @@ def create_file(filetype,     # type: str
                 ):
     # type (...) -> px_file.PxFile
 
-    file = px_file.PxFile()
-    file.type = filetype
-
     # Remove leading [] group from name if any
     match = re.match(r'(\[[^]]*\] )?(.*)', name)
     assert match
-    file.name = match.group(2)
+    name = match.group(2)
 
-    file.pid = pid
+    file = px_file.PxFile(pid, name, filetype)
+    file.type = filetype
+
     file.device = device
     file.access = access
     file.inode = inode
