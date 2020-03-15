@@ -82,8 +82,8 @@ if python --version 2>&1 | grep " 3" ; then
   # Run Python 3 tests on auxillary scripts and source code alike
   mypy ./*.py ./*/*.py --disallow-any-generics
 
-  # Run 2.7 tests on the actual px code only
-  mypy px/*.py tests/*.py --python-version=2.7
+  # Run 2.7 tests on directly px related code only
+  mypy setup.py px/*.py tests/*.py --python-version=2.7
 fi
 
 flake8 px tests scripts setup.py
