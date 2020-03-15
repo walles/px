@@ -13,12 +13,38 @@ if sys.version_info.major >= 3:
     from typing import Optional  # NOQA
 
 
-class PxFile(object):
+class PxFileBuilder():
     def __init__(self):
         self.fd = None  # type: Optional[int]
-        self.pid = None  # type: int
-        self.name = None  # type: str
-        self.type = None  # type: str
+        self.pid = None  # type: Optional[int]
+        self.name = None  # type: Optional[str]
+        self.type = None  # type: Optional[str]
+        self.inode = None   # type: Optional[str]
+        self.device = None  # type: Optional[str]
+        self.access = None  # type: Optional[str]
+
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype = None  # type: Optional[str]
+
+    def build(self):
+        assert self.pid is not None
+        assert self.name
+        assert self.type
+        pxFile = PxFile(self.pid, self.name, self.type)
+        pxFile.fd = self.fd
+        pxFile.inode = self.inode
+        pxFile.device = self.device
+        pxFile.access = self.access
+        pxFile.fdtype = self.fdtype
+
+
+class PxFile(object):
+    def __init__(self, pid, name, filetype):
+        # type: (int, str, str) -> None
+        self.fd = None  # type: Optional[int]
+        self.pid = pid
+        self.name = name
+        self.type = filetype
         self.inode = None   # type: Optional[str]
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
@@ -130,6 +156,7 @@ class PxFile(object):
 
 
 def resolve_endpoint(endpoint):
+    # type: (str) -> str
     """
     Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
     """
@@ -203,7 +230,7 @@ def lsof_to_files(lsof):
         if infotype == 'p':
             pid = int(value)
         elif infotype == 'f':
-            file = PxFile()
+            file = PxFileBuilder()
             if value.isdigit():
                 file.fd = int(value)
             else:
@@ -215,7 +242,7 @@ def lsof_to_files(lsof):
             file.device = None
             file.inode = None
 
-            files.append(file)
+            files.append(file.build())
         elif infotype == 'a':
             assert file is not None
             access = {
