@@ -60,7 +60,7 @@ def print_process_subtree(fd, process, indentation, lines):
 
 def print_process_tree(fd, process):
     # Contains tuples; the line to print and the process that line is for
-    lines_and_processes = []
+    lines_and_processes = []  # type: List[Tuple[str, px_process.PxProcess]]
 
     # List all parents up to the top
     parents = []

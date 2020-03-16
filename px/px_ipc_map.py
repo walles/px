@@ -304,6 +304,7 @@ class PeerProcess(object):
                 name += "(" + str(pid) + ")"
 
         self.name = name  # type: Text
+        self.pid = pid    # type: Optional[int]
 
     def __repr__(self):
         return self.name
