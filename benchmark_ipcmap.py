@@ -14,7 +14,7 @@ the highest number of entries in that file.
 
 import time
 
-from . import testutils
+from tests import testutils
 from px import px_file
 
 import sys
