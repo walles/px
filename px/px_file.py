@@ -244,8 +244,13 @@ def lsof_to_files(lsof):
         elif infotype == 'f':
             if file_builder:
                 files.append(file_builder.build())
+            else:
+                file_builder = PxFileBuilder()
 
-            file_builder = PxFileBuilder()
+            # Reset the file builder object. This operation is on a hot path
+            # and doing without an extra object allocation here actually helps.
+            file_builder.__init__()  # type: ignore
+
             if value.isdigit():
                 file_builder.fd = int(value)
             else:
