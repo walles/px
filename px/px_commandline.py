@@ -79,7 +79,10 @@ def get_command(commandline):
     if OSX_PARENTHESIZED_PROC.match(commandline):
         return commandline
 
-    command = os.path.basename(to_array(commandline)[0])
+    command_before_basename = to_array(commandline)[0]
+    print("Johan: Command before basename: " + command_before_basename)
+    command = os.path.basename(command_before_basename)
+    print("Johan: Command after basename: " + command)
 
     if command.startswith('python') or command == 'Python':
         return get_python_command(commandline)
