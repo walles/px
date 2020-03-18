@@ -258,15 +258,19 @@ def test_macos_app():
         "plugin-container"
     ])) == "Firefox/plugin-container"
 
+    # Note that if we have spaces inside of the path, the path in
+    # question needs to be valid on the local system for it to
+    # be deciphered properly by px. So this path is from an actual
+    # path, but with all spaces removed.
     assert px_commandline.get_command("/".join([
         "/Applications",
-        "Visual Studio Code.app",
+        "VisualStudioCode.app",
         "Contents",
         "Frameworks",
-        "Code Helper (Renderer).app",
+        "CodeHelper(Renderer).app",
         "Contents",
         "MacOS",
-        "Code Helper (Renderer)"
-    ])) == "Code Helper (Renderer)"
+        "CodeHelper(Renderer)"
+    ])) == "CodeHelper(Renderer)"
 
     assert px_commandline.get_command("/Applications/iTerm.app/Contents/MacOS/iTerm2") == "iTerm2"
