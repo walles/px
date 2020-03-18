@@ -44,7 +44,9 @@ def is_human_friendly(command):
     """
     for char in command:
         if char.isupper():
+            print("Johan: Human friendly: " + command)
             return True
+    print("Johan: Not human friendly: " + command)
     return False
 
 
