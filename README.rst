@@ -34,6 +34,9 @@ To exit ``ptop``, press "``q``".
 Also try ``px --help`` to see what else ``px`` can do except for just listing all
 processes.
 
+If you run into problems, try running with the ``--debug`` switch, it will print
+debug logging output after ``px``/``ptop`` is done.
+
 Output
 ======
 

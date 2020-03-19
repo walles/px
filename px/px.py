@@ -29,6 +29,7 @@ invoked px, rather than from when each process started. This gives you a picture
 of which processes are most active right now.
 
 --top: Show a continuously refreshed process list
+--debug: Print debug logs (if any) after running
 --install: Install /usr/local/bin/px and /usr/local/bin/ptop
 --help: Print this help
 --version: Print version information
