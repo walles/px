@@ -35,6 +35,9 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
+TIMEZONE = dateutil.tz.tzlocal()
+
+
 uid_to_username_cache = {}  # type: Dict[int, Text]
 
 
@@ -59,7 +62,7 @@ class PxProcess(object):
         self.lowercase_command = self.command.lower()  # type: text_type
 
         time = datetime.datetime.strptime(start_time_string.strip(), "%c")
-        self.start_time = time.replace(tzinfo=dateutil.tz.tzlocal())  # type: datetime.datetime
+        self.start_time = time.replace(tzinfo=TIMEZONE)  # type: datetime.datetime
         self.age_seconds = (now - self.start_time).total_seconds()  # type: float
         assert self.age_seconds >= 0
         self.age_s = seconds_to_str(self.age_seconds)  # type: text_type
@@ -350,7 +353,7 @@ def get_all():
     # type: () -> List[PxProcess]
     processes = {}
     ps_lines = call_ps()
-    now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
     for ps_line in ps_lines:
         process = ps_line_to_process(ps_line, now)
         processes[process.pid] = process
