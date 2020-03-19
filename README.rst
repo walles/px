@@ -220,10 +220,15 @@ Your release should now be visible on the `pxpx page on Pypi`_.
 Performance testing
 -------------------
 * Store the output of ``lsof -F fnaptd0i`` from a big system in lsof.txt.
-* ``./tests/benchmark_ipcmap.py lsof.txt``
+* ``./benchmark_ipcmap.py lsof.txt``
 
 Keeping this benchmark performant is important to be able to use ``px`` on big
 systems.
+
+To run it in a profiler, install `snakeviz`_ and:
+
+* ``python3 -m cProfile -o profile.out ./benchmark_ipcmap.py lsof.txt``
+* ``snakeviz profile.out``
 
 TODO ``top`` replacement
 ------------------------
@@ -315,6 +320,7 @@ DONE
 .. _Releases: https://github.com/walles/px/releases
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
 .. _moar: https://github.com/walles/moar
+.. _snakeviz: https://jiffyclub.github.io/snakeviz/
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px

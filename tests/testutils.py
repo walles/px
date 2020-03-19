@@ -14,6 +14,7 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableMapping  # NOQA
     from typing import Optional        # NOQA
+    from typing import List            # NOQA
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar 7 09:33:11 2016"
@@ -60,15 +61,14 @@ def create_file(filetype,     # type: str
                 ):
     # type (...) -> px_file.PxFile
 
-    file = px_file.PxFile()
-    file.type = filetype
-
     # Remove leading [] group from name if any
     match = re.match(r'(\[[^]]*\] )?(.*)', name)
     assert match
-    file.name = match.group(2)
+    name = match.group(2)
 
-    file.pid = pid
+    file = px_file.PxFile(pid, filetype)
+    file.name = name
+
     file.device = device
     file.access = access
     file.inode = inode
@@ -78,6 +78,7 @@ def create_file(filetype,     # type: str
 
 
 def create_ipc_map(pid, all_files, is_root=False):
+    # type: (int, List[px_file.PxFile], bool) -> px_ipc_map.IpcMap
     """Wrapper around IpcMap() so that we can test it"""
     pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
     for file in all_files:

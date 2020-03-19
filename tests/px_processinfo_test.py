@@ -1,4 +1,5 @@
 from px import px_process
+from px import px_ipc_map
 from px import px_processinfo
 
 from . import testutils
@@ -114,10 +115,10 @@ def test_print_process_subtree():
 
 def test_to_ipc_lines():
     ipcmap = {
-        testutils.create_process(commandline="foo"): [
+        px_ipc_map.PeerProcess(name="foo", pid=47536): [
             testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
         ],
-        testutils.create_process(commandline="bar"): [
+        px_ipc_map.PeerProcess(name="bar", pid=47536): [
             testutils.create_file("PIPE", "[] ->0xAda", "0xE0e", 25),
         ],
     }

@@ -131,8 +131,9 @@ def adjust_cpu_times(baseline, current):
             continue
 
         current_proc = copy.copy(current_proc)
-        current_proc.set_cpu_time_seconds(
-            current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds)
+        if current_proc.cpu_time_seconds and baseline_proc.cpu_time_seconds:
+            current_proc.set_cpu_time_seconds(
+                current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds)
         pid2proc[current_proc.pid] = current_proc
 
     return list(pid2proc.values())
@@ -195,7 +196,7 @@ def getch(timeout_seconds=0, fd=None):
 
 
 def get_notnone_cpu_time_seconds(proc):
-    # type: (px_process.PxProcess) -> int
+    # type: (px_process.PxProcess) -> float
     seconds = proc.cpu_time_seconds
     if seconds is not None:
         return seconds
@@ -203,10 +204,10 @@ def get_notnone_cpu_time_seconds(proc):
 
 
 def get_notnone_memory_percent(proc):
-    # type: (px_process.PxProcess) -> int
-    seconds = proc.memory_percent
-    if seconds is not None:
-        return seconds
+    # type: (px_process.PxProcess) -> float
+    percent = proc.memory_percent
+    if percent is not None:
+        return percent
     return 0
 
 

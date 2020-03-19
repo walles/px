@@ -14,11 +14,9 @@ in the background and pretend we never started them.
 
 import subprocess
 import tempfile
-import termios
 import atexit
 import select
 import shutil
-import fcntl
 import pty
 import sys
 import os
@@ -50,25 +48,12 @@ class WrappedProcess:
         self.output = tempfile.NamedTemporaryFile()
         atexit.register(self.cleanup)
 
-        pty_in, pty_out = self.get_terminalized_pipe()
+        pty_in, pty_out = pty.openpty()
         self.pty_out = pty_out
 
         # FIXME: Set stdin to pipe in from nowhere
         self.process = subprocess.Popen(
             commandline, bufsize=-1, stdout=pty_in, stderr=pty_in, shell=True)
-
-    def get_terminalized_pipe(self):
-        """
-        Get a pipe-like object where the input end pretends to be a terminal.
-        """
-        window_size = b'\0' * 4
-        # Get terminal window dimensions from stdout
-        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, window_size)
-
-        pty_in, pty_out = pty.openpty()
-
-        fcntl.ioctl(pty_in, termios.TIOCSWINSZ, window_size)
-        return pty_in, pty_out
 
     def cleanup(self):
         # This implicitly deletes the temp file

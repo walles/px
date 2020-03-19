@@ -1,6 +1,11 @@
 import re
+import sys
 
 from px import px_file
+
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List  # NOQA
 
 
 def test_lsof_to_files():
@@ -74,6 +79,7 @@ def test_get_all():
 
 
 def lsof_to_file(shard_array):
+    # type: (List[str]) -> px_file.PxFile
     return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
 
 
@@ -145,21 +151,18 @@ def test_remote_endpoint():
 
 def test_str_resolve():
     # FIXME: This will break if Google changes the name of 8.8.8.8
-    test_me = px_file.PxFile()
-    test_me.type = "IPv4"
+    test_me = px_file.PxFile(pid=0, filetype="IPv4")
     test_me.name = "127.0.0.1:51786->8.8.8.8:https"
     assert str(test_me) in [
         "[IPv4] localhost:51786->google-public-dns-a.google.com:https",
         "[IPv4] localhost:51786->dns.google:https",
     ]
 
-    test_me = px_file.PxFile()
-    test_me.type = "IPv4"
+    test_me = px_file.PxFile(pid=0, filetype="IPv4")
     test_me.name = "127.0.0.1:17600"
     assert str(test_me) == "[IPv4] localhost:17600 (LISTEN)"
 
-    test_me = px_file.PxFile()
-    test_me.type = "IPv6"
+    test_me = px_file.PxFile(pid=0, filetype="IPv6")
     test_me.name = "[::1]:17600"
 
     match = re.match(r"^\[IPv6\] (.*):17600 \(LISTEN\)$", str(test_me))
@@ -167,7 +170,6 @@ def test_str_resolve():
     resolution = match.group(1)
     assert resolution == "[::1]" or "localhost" in resolution
 
-    test_me = px_file.PxFile()
-    test_me.type = "IPv4"
+    test_me = px_file.PxFile(pid=0, filetype="IPv4")
     test_me.name = "this:is:garbage:17600"
     assert str(test_me) == "[IPv4] this:is:garbage:17600 (LISTEN)"

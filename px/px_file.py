@@ -13,12 +13,45 @@ if sys.version_info.major >= 3:
     from typing import Optional  # NOQA
 
 
-class PxFile(object):
+class PxFileBuilder():
     def __init__(self):
         self.fd = None  # type: Optional[int]
-        self.pid = None  # type: int
-        self.name = None  # type: str
-        self.type = None  # type: str
+        self.pid = None  # type: Optional[int]
+        self.name = None  # type: Optional[str]
+        self.type = None  # type: Optional[str]
+        self.inode = None   # type: Optional[str]
+        self.device = None  # type: Optional[str]
+        self.access = None  # type: Optional[str]
+
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype = None  # type: Optional[str]
+
+    def build(self):
+        # type: () -> PxFile
+        assert self.pid is not None
+        assert self.type
+        pxFile = PxFile(self.pid, self.type)
+        pxFile.name = self.name
+        pxFile.fd = self.fd
+        pxFile.inode = self.inode
+        pxFile.device = self.device
+        pxFile.access = self.access
+        pxFile.fdtype = self.fdtype
+
+        return pxFile
+
+    def __repr__(self):
+        return "PxFileBuilder(pid={}, name={}, type={})".format(
+            self.pid, self.name, self.type)
+
+
+class PxFile(object):
+    def __init__(self, pid, filetype):
+        # type: (int, str) -> None
+        self.fd = None  # type: Optional[int]
+        self.pid = pid
+        self.type = filetype
+        self.name = None    # type: Optional[str]
         self.inode = None   # type: Optional[str]
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
@@ -54,7 +87,9 @@ class PxFile(object):
             name = self._resolve_name()
 
         # Decorate non-regular files with their type
-        return "[" + self.type + "] " + name + listen_suffix
+        if name:
+            return "[" + self.type + "] " + name + listen_suffix
+        return "[" + self.type + "] " + listen_suffix
 
     def _resolve_name(self):
         local, remote = self.get_endpoints()
@@ -108,6 +143,9 @@ class PxFile(object):
         This method will never return None, but both local and remote can be
         None in case this isn't a network connection for example.
         """
+        if not self.name:
+            return (None, None)
+
         if self.type not in ['IPv4', 'IPv6']:
             return (None, None)
 
@@ -130,6 +168,7 @@ class PxFile(object):
 
 
 def resolve_endpoint(endpoint):
+    # type: (str) -> str
     """
     Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
     """
@@ -184,7 +223,7 @@ def lsof_to_files(lsof):
     """
 
     pid = None
-    file = None
+    file_builder = None  # type: Optional[PxFileBuilder]
     files = []  # type: List[PxFile]
     for shard in lsof.split('\0'):
         if shard[0] == "\n":
@@ -203,42 +242,52 @@ def lsof_to_files(lsof):
         if infotype == 'p':
             pid = int(value)
         elif infotype == 'f':
-            file = PxFile()
+            if file_builder:
+                files.append(file_builder.build())
+            else:
+                file_builder = PxFileBuilder()
+
+            # Reset the file builder object. This operation is on a hot path
+            # and doing without an extra object allocation here actually helps.
+            file_builder.__init__()  # type: ignore
+
             if value.isdigit():
-                file.fd = int(value)
+                file_builder.fd = int(value)
             else:
                 # Words like "cwd", "txt" and probably others as well
-                file.fdtype = value
+                file_builder.fdtype = value
             assert pid is not None
-            file.pid = pid
-            file.type = "??"
-            file.device = None
-            file.inode = None
-
-            files.append(file)
+            file_builder.pid = pid
+            file_builder.type = "??"
+            file_builder.device = None
+            file_builder.inode = None
         elif infotype == 'a':
-            assert file is not None
+            assert file_builder is not None
             access = {
                 ' ': None,
                 'r': "r",
                 'w': "w",
                 'u': "rw"}[value]
-            file.access = access
+            file_builder.access = access
         elif infotype == 't':
-            assert file is not None
-            file.type = value
+            assert file_builder is not None
+            file_builder.type = value
         elif infotype == 'd':
-            assert file is not None
-            file.device = value
+            assert file_builder is not None
+            file_builder.device = value
         elif infotype == 'n':
-            assert file is not None
-            file.name = value
+            assert file_builder is not None
+            file_builder.name = value
         elif infotype == 'i':
-            assert file is not None
-            file.inode = value
+            assert file_builder is not None
+            file_builder.inode = value
 
         else:
             raise Exception("Unhandled type <{}> for shard <{}>".format(infotype, shard))
+
+    if file_builder:
+        # Don't forget the last file
+        files.append(file_builder.build())
 
     return files
 

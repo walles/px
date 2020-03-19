@@ -22,7 +22,7 @@ def test_create_process():
     process_builder.cpu_time = 1.3
     process_builder.memory_percent = 42.7
     process_builder.cmdline = "hej kontinent"
-    test_me = px_process.PxProcess(process_builder, testutils.now())
+    test_me = process_builder.build(testutils.now())
 
     assert test_me.pid == 7
     assert test_me.ppid == 1
