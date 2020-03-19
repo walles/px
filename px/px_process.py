@@ -39,6 +39,7 @@ TIMEZONE = dateutil.tz.tzlocal()
 
 
 uid_to_username_cache = {}  # type: Dict[int, Text]
+get_command_cache = {}  # type: Dict[Text, Text]
 
 
 class PxProcess(object):
@@ -158,7 +159,13 @@ class PxProcess(object):
 
     def _get_command(self):
         """Return just the command without any arguments or path"""
-        return px_commandline.get_command(self.cmdline)
+        if self.cmdline in get_command_cache:
+            return get_command_cache[self.cmdline]
+
+        command = px_commandline.get_command(self.cmdline)
+        get_command_cache[self.cmdline] = command
+
+        return command
 
     def get_sudo_user(self):
         """Retrieves the $SUDO_USER value for this process, or None if not set"""
