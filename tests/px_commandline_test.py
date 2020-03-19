@@ -274,3 +274,15 @@ def test_macos_app():
     ])) == "CodeHelper(Renderer)"
 
     assert px_commandline.get_command("/Applications/iTerm.app/Contents/MacOS/iTerm2") == "iTerm2"
+
+    # Don't duplicate the .app name
+    assert px_commandline.get_command("/".join([
+        "/System",
+        "Library",
+        "PrivateFrameworks",
+        "IDS.framework",
+        "identityservicesd.app",
+        "Contents",
+        "MacOS",
+        "identityservicesd"
+    ])) == "IDS/identityservicesd"

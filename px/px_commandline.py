@@ -54,9 +54,20 @@ def get_app_name_prefix(commandline):
     On macOS, get which app this command is part of.
     """
     command_with_path = to_array(commandline)[0]
+    command = os.path.basename(command_with_path)
     for part in command_with_path.split("/"):
-        if part.endswith(".app") and len(part) > 4:
-            return part[0:-4] + "/"
+        if '.' not in part:
+            continue
+
+        name, suffix = part.rsplit(".", 1)
+        if suffix not in ["app", "framework"]:
+            continue
+
+        if name == command:
+            continue
+
+        return name + "/"
+
     return ""
 
 
