@@ -225,10 +225,9 @@ Performance testing
 Keeping this benchmark performant is important to be able to use ``px`` on big
 systems.
 
-To run it in a profiler, install `snakeviz`_ and:
+To run it in a profiler, install `pyinstrument`_ and:
 
-* ``python3 -m cProfile -o profile.out ./benchmark_ipcmap.py lsof.txt``
-* ``snakeviz profile.out``
+* ``python3 -m pyinstrument ./benchmark_ipcmap.py lsof.txt``
 
 TODO ``top`` replacement
 ------------------------
@@ -320,7 +319,7 @@ DONE
 .. _Releases: https://github.com/walles/px/releases
 .. _pxpx page on Pypi: https://pypi.python.org/pypi/pxpx
 .. _moar: https://github.com/walles/moar
-.. _snakeviz: https://jiffyclub.github.io/snakeviz/
+.. _pyinstrument: https://github.com/joerick/pyinstrument#installation
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px

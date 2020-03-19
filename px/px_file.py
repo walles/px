@@ -71,7 +71,7 @@ class PxFile(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash(frozenset(self.__dict__.items()))
+        return hash((self.name, self.fd, self.fdtype, self.pid))
 
     def __str__(self):
         if self.type == "REG":
@@ -259,8 +259,6 @@ def lsof_to_files(lsof):
             assert pid is not None
             file_builder.pid = pid
             file_builder.type = "??"
-            file_builder.device = None
-            file_builder.inode = None
         elif infotype == 'a':
             assert file_builder is not None
             access = {
