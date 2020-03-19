@@ -35,6 +35,9 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
+uid_to_username_cache = {}  # type: Dict[int, Text]
+
+
 class PxProcess(object):
     def __init__(self,
                  cmdline,   # type: Text
@@ -256,10 +259,16 @@ def parse_time(timestring):
 
 def uid_to_username(uid):
     # type: (int)->Text
+    if uid in uid_to_username_cache:
+        return uid_to_username_cache[uid]
+
+    # Populate cache
     try:
-        return six.text_type(pwd.getpwuid(uid).pw_name)
+        uid_to_username_cache[uid] = six.text_type(pwd.getpwuid(uid).pw_name)
     except KeyError:
-        return six.text_type(uid)
+        uid_to_username_cache[uid] = six.text_type(uid)
+
+    return uid_to_username_cache[uid]
 
 
 def ps_line_to_process(ps_line, now):
