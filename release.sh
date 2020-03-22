@@ -41,9 +41,12 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 # List changes since last release
+echo
+echo "List of changes since last release:"
 git log --color --format="format:%Cgreen%s%Creset (%ad)%n%b" --first-parent "$(git describe --abbrev=0)..HEAD" | cat
 
 echo
+echo "=="
 echo "Last version number was $(git describe --abbrev=0), enter new version number."
 read -r -p "New version number: " NEW_VERSION_NUMBER
 
@@ -64,6 +67,7 @@ fi
 # Get release message from user
 cat << EOM
 
+==
 You will now get to compose the release description for Github,
 write something nice! And remember that the first line is the
 subject line for the release.
@@ -113,6 +117,7 @@ git push --tags
 
 cat << EOM
 
+==
 Now, go to the Releases page on GitHub...
 
 https://github.com/walles/px/releases
@@ -127,4 +132,5 @@ EOM
 read -r -p "Press ENTER when done: "
 
 echo
+echo "=="
 echo "Your release should now be available on Github and at https://pypi.python.org/pypi/pxpx"
