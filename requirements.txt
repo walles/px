@@ -2,7 +2,7 @@
 # co-existence with other packages if installed globally using
 # pip.
 #
-# Fox exact versions that we like, check requirements-dev.txt.
+# For exact versions that we like, check requirements-dev.txt.
 #
 # If making changes here make sure they don't clash!
 
