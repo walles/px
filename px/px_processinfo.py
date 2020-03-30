@@ -66,6 +66,7 @@ def print_process_tree(fd, process):
     parents = []
     here = process
     while here.parent is not None:
+        # FIXME: There can actually be loops; we must detect that hand handle it appropriately
         parents.append(here.parent)
         here = here.parent
 
