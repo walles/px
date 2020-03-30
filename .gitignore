@@ -1,6 +1,7 @@
 /env/
 /build/
 /dist/
+/.tox/
 /.eggs/
 /.vscode/
 /.coverage
