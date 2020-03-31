@@ -167,6 +167,7 @@ def get_python_command(commandline):
         '-t', '-tt',
         '-u',
         '-v',
+        '-Werror',
         '-x',
         '-3'
     ]
