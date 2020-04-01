@@ -152,7 +152,7 @@ def _main(argv):
         return
 
     if arg == '--version':
-        # If this fails, run "ci.sh" once and the "version.py" file will be created for you.
+        # If this fails, run "tox.sh" once and the "version.py" file will be created for you.
         #
         # NOTE: If we "import version" at the top of this file, we will depend on it even if
         # we don't use it. And this will make test avoidance fail to avoid px.py tests every

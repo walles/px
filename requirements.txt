@@ -1,12 +1,8 @@
 # These are runtime dependencies, we want them weak to improve
 # co-existence with other packages if installed globally using
 # pip.
-#
-# For exact versions that we like, check requirements-dev.txt.
-#
-# If making changes here make sure they don't clash!
 
-# We're only using text_type from six, any version works
+# We're six simpletons, any version works
 six
 
 # 2.6.1 is what we started out using, older is probably fine
