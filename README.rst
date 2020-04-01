@@ -187,7 +187,7 @@ information; the command will work without it but might miss some information.
 
 Development
 ===========
-Note that before editing any code, you need to run ``ci.sh`` first to create
+Note that before editing any code, you need to run ``tox.sh`` once to create
 the ``px/version.py`` file.
 
 Note that the build infrastructure here is designed to create a ``px.pex`` file
@@ -195,7 +195,7 @@ that works on both Python 2 and Python 3, and on "all" machines with Python
 interpreters (tested on Linux and OS X).
 
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
-* Build and test: ``./ci.sh``
+* Build and test: ``./tox.sh``
 * Run: ``./px.pex``
 * To add dependencies, edit ``requirements.txt``
 

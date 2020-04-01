@@ -84,7 +84,7 @@ cd "$(dirname "$0")"
 find . -name 'px*.whl' -delete
 
 # Build the release
-./ci.sh
+tox
 
 # Make a relelase virtualenv
 ENVDIR="$(mktemp -d)"

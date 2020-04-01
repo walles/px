@@ -17,9 +17,9 @@ before_install:
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install python3.5 python3.5-dev --force-yes -y ; fi
 
-  - sudo -H pip2 install coveralls coverage
+  - sudo -H pip2 install coveralls coverage tox
 
-script: ./ci.sh
+script: tox
 
 after_success:
   - coveralls
