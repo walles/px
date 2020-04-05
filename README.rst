@@ -14,6 +14,8 @@ copy / pasting this command into a terminal::
 
   curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
 
+**Help wanted**: If somebody could `create a macOS Homebrew package`_ that would be super!
+
 Or you can install from Pypi. At least on macOS this can be problematic however,
 so the install script above is still preferred::
 
@@ -316,6 +318,7 @@ DONE
 .. _moar: https://github.com/walles/moar
 .. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
+.. _create a macOS Homebrew package: https://github.com/walles/px/issues/52
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px
