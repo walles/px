@@ -187,12 +187,23 @@ information; the command will work without it but might miss some information.
 
 Development
 ===========
+
+Prerequisites
+-------------
+
+* A Python 2 version
+* A Python 3 version
+* `tox`_
+
+Building and Running
+--------------------
+
 Note that before editing any code, you need to run ``tox.sh`` once to create
 the ``px/version.py`` file.
 
 Note that the build infrastructure here is designed to create a ``px.pex`` file
 that works on both Python 2 and Python 3, and on "all" machines with Python
-interpreters (tested on Linux and OS X).
+interpreters (tested on Linux and macOS).
 
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
 * Build and test: ``./tox.sh``
@@ -303,6 +314,7 @@ DONE
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
 .. _moar: https://github.com/walles/moar
+.. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
