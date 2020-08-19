@@ -112,6 +112,6 @@ def parse_sysctl_output(sysctl_lines):
         if line.startswith(PHYSICAL_PREFIX):
             physical = int(line[len(PHYSICAL_PREFIX):])
         elif line.startswith(LOGICAL_PREFIX):
-            logical = int(line[len(LOGICAL_PREFIX)])
+            logical = int(line[len(LOGICAL_PREFIX):])
 
     return (physical, logical)
