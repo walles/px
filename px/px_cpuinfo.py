@@ -89,6 +89,15 @@ def get_core_count_from_sysctl():
     sysctl_stdout = sysctl.communicate()[0].decode('utf-8')
     sysctl_lines = sysctl_stdout.split('\n')
 
+    physical, logical = parse_sysctl_output(sysctl_lines)
+    if physical is None or logical is None:
+        # On Linux, sysctl exists but it doesn't contain the values we want
+        return None
+
+    return (physical, logical)
+
+
+def parse_sysctl_output(sysctl_lines):
     # Note the ending spaces, they must be there for number extraction to work!
     PHYSICAL_PREFIX = 'hw.physicalcpu: '
     LOGICAL_PREFIX = 'hw.logicalcpu: '
@@ -100,9 +109,5 @@ def get_core_count_from_sysctl():
             physical = int(line[len(PHYSICAL_PREFIX):])
         elif line.startswith(LOGICAL_PREFIX):
             logical = int(line[len(LOGICAL_PREFIX)])
-
-    if physical is None or logical is None:
-        # On Linux, sysctl exists but it doesn't contain the values we want
-        return None
 
     return (physical, logical)
