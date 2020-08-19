@@ -1,9 +1,18 @@
 import os
 import errno
+import platform
 import subprocess
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import Optional  # NOQA
+    from typing import Tuple # NOQA
+    from typing import List # NOQA
+    from six import text_type # NOQA
 
 def get_core_count():
+    # type: () -> Tuple[int,int]
     """
     Count the number of cores in the system.
 
@@ -18,10 +27,14 @@ def get_core_count():
     if return_me is not None:
         return return_me
 
-    return None
+    uname = str(platform.uname())
+    platform = uname + " Python " + sys.version
+
+    raise IOError("Unable to get cores info " + platform)
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
+    # type: (str) -> Optional[Tuple[int,int]]
     """
     Count the number of cores in /proc/cpuinfo.
 
@@ -59,6 +72,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
 
 
 def get_core_count_from_sysctl():
+    # type: () -> Optional[Tuple[int,int]]
     env = os.environ.copy()
     if "LANG" in env:
         del env["LANG"]
@@ -77,6 +91,17 @@ def get_core_count_from_sysctl():
     sysctl_stdout = sysctl.communicate()[0].decode('utf-8')
     sysctl_lines = sysctl_stdout.split('\n')
 
+    physical, logical = parse_sysctl_output(sysctl_lines)
+    if physical is None or logical is None:
+        # On Linux, sysctl exists but it doesn't contain the values we want
+        return None
+
+    return (physical, logical)
+
+
+def parse_sysctl_output(sysctl_lines):
+    # type: (List[text_type]) -> Tuple[Optional[int],Optional[int]]
+
     # Note the ending spaces, they must be there for number extraction to work!
     PHYSICAL_PREFIX = 'hw.physicalcpu: '
     LOGICAL_PREFIX = 'hw.logicalcpu: '
@@ -87,10 +112,6 @@ def get_core_count_from_sysctl():
         if line.startswith(PHYSICAL_PREFIX):
             physical = int(line[len(PHYSICAL_PREFIX):])
         elif line.startswith(LOGICAL_PREFIX):
-            logical = int(line[len(LOGICAL_PREFIX)])
-
-    if physical is None or logical is None:
-        # On Linux, sysctl exists but it doesn't contain the values we want
-        return None
+            logical = int(line[len(LOGICAL_PREFIX):])
 
     return (physical, logical)
