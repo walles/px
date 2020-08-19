@@ -1,9 +1,16 @@
 import os
 import errno
+import platform
 import subprocess
 
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import Optional  # NOQA
+    from typing import Tuple # NOQA
 
 def get_core_count():
+    # type: () -> Tuple[int,int]
     """
     Count the number of cores in the system.
 
@@ -18,10 +25,14 @@ def get_core_count():
     if return_me is not None:
         return return_me
 
-    return None
+    uname = str(platform.uname())
+    platform = uname + " Python " + sys.version
+
+    raise IOError("Unable to get cores info " + platform)
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
+    # type: (str) -> Optional[Tuple[int,int]]
     """
     Count the number of cores in /proc/cpuinfo.
 
@@ -59,6 +70,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
 
 
 def get_core_count_from_sysctl():
+    # type: () -> Optional[Tuple[int,int]]
     env = os.environ.copy()
     if "LANG" in env:
         del env["LANG"]
