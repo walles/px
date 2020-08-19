@@ -8,6 +8,8 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
     from typing import Tuple # NOQA
+    from typing import List # NOQA
+    from six import text_type # NOQA
 
 def get_core_count():
     # type: () -> Tuple[int,int]
@@ -98,6 +100,8 @@ def get_core_count_from_sysctl():
 
 
 def parse_sysctl_output(sysctl_lines):
+    # type: (List[text_type]) -> Tuple[Optional[int],Optional[int]]
+
     # Note the ending spaces, they must be there for number extraction to work!
     PHYSICAL_PREFIX = 'hw.physicalcpu: '
     LOGICAL_PREFIX = 'hw.logicalcpu: '
