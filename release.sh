@@ -106,11 +106,11 @@ pip install "twine == 1.9.1"
 
 # Upload!
 echo
-# Note that we take the wheel file from one of our virtualenvs where
-# it was built. When testing this for the 1.12 release, both wheel
-# files (created with Python 2 or Python 3) were identical, so the
-# choice of "python3" here is arbitrary.
-twine upload --repository pypi .python3-env/pxpx-*-py2.py3-none-any.whl
+# Note that we take the wheel file from one of our dist directories where it was
+# built. When testing this for the 1.0.33 release, both wheel files (created
+# with Python 2 or Python 3) had identical contents when unzipped, so the choice
+# of "dist3" here is arbitrary.
+twine upload --repository pypi dist3/pxpx-*-py2.py3-none-any.whl
 
 # Mark new release on Github
 git push --tags
