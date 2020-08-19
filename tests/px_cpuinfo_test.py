@@ -51,3 +51,20 @@ def test_get_core_count_from_sysctl():
     assert physical >= 1
     assert logical >= physical
     assert logical % physical == 0
+
+
+def test_parse_sysctl_output():
+    result = px_cpuinfo.parse_sysctl_output([])
+    assert result == (None, None)
+
+    result = px_cpuinfo.parse_sysctl_output([
+        'hw.physicalcpu: 1',
+        'hw.logicalcpu: 2'
+    ])
+    assert result == (1, 2)
+
+    result = px_cpuinfo.parse_sysctl_output([
+        'hw.physicalcpu: 12',
+        'hw.logicalcpu: 34'
+    ])
+    assert result == (12, 34)
