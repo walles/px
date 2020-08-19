@@ -57,6 +57,9 @@ def test_parse_sysctl_output():
     result = px_cpuinfo.parse_sysctl_output([])
     assert result == (None, None)
 
+    result = px_cpuinfo.parse_sysctl_output(['gurka'])
+    assert result == (None, None)
+
     result = px_cpuinfo.parse_sysctl_output([
         'hw.physicalcpu: 1',
         'hw.logicalcpu: 2'
