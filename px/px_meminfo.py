@@ -62,42 +62,39 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
 
 def _get_ram_numbers_from_sysctl_and_vm_stat():
     # type: () -> Optional[Tuple[int, int]]
-    total_ram_bytes = _get_total_ram_from_sysctl()
-    if total_ram_bytes is None:
+
+    # List based on https://apple.stackexchange.com/a/196925/182882
+    page_size_bytes = None
+    pages_free = None
+    pages_active = None
+    pages_inactive = None
+    pages_speculative = None
+    pages_wired = None
+    pages_uncompressed = None  # "Pages stored in compressor"
+
+    )))FIXME: Call vm_stat and populate the variables
+
+    if page_size_bytes is None:
+        return None
+    if pages_free is None:
+        return None
+    if pages_active is None:
+        return None
+    if pages_inactive is None:
+        return None
+    if pages_speculative is None:
+        return None
+    if pages_wired is None:
+        return None
+    if pages_uncompressed is None:
         return None
 
-    wanted_ram_bytes = _get_wanted_ram_bytes_from_vm_stat()
-    if wanted_ram_bytes is None:
-        return None
+    total_ram_pages = \
+        pages_free + pages_active + pages_inactive + pages_speculative + pages_wired
+    wanted_ram_pages = \
+        pages_active + pages_wired + pages_uncompressed
+
+    total_ram_bytes = total_ram_pages * page_size_bytes
+    wanted_ram_bytes = wanted_ram_pages * page_size_bytes
 
     return (total_ram_bytes, wanted_ram_bytes)
-
-
-def _get_total_ram_from_sysctl():
-    # type: () -> Optional[int]
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
-    try:
-        sysctl = subprocess.Popen(["sysctl", '-n', 'hw.memsize'],
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                  env=env)
-    except (IOError, OSError) as e:
-        if e.errno == errno.ENOENT:
-            # sysctl not found, we're probably not on OSX
-            return None
-
-        raise
-
-    sysctl_stdout = sysctl.communicate()[0].decode('utf-8')
-    sysctl_lines = sysctl_stdout.split('\n')
-
-    return int(sysctl_lines[0])
-
-
-def _get_wanted_ram_bytes_from_vm_stat():
-    # type: () -> Optional[int]
-
-    # FIXME: Unimplemented
-    return 1234567890
