@@ -16,6 +16,7 @@ from . import px_process
 from . import px_terminal
 from . import px_load_bar
 from . import px_cpuinfo
+from . import px_meminfo
 from . import px_processinfo
 from . import px_launchcounter
 
@@ -294,7 +295,7 @@ def get_screen_lines(
         toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
 
     # Hand out different amount of lines to the different sections
-    header_height = 2
+    header_height = 3  # System load, RAM load, empty line
     footer_height = 0
     cputop_minheight = 10
     if include_footer:
@@ -304,8 +305,10 @@ def get_screen_lines(
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
+    meminfo = px_meminfo.get_meminfo()
     lines = [
-        u"System load: " + loadbar,
+        u"Sysload: " + loadbar,
+        u"RAM Use: " + meminfo,
         u""]
 
     # Create a launchers section
