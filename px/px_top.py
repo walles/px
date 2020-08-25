@@ -14,7 +14,6 @@ from . import px_load
 from . import px_pager
 from . import px_process
 from . import px_terminal
-from . import px_load_bar
 from . import px_cpuinfo
 from . import px_meminfo
 from . import px_processinfo
@@ -279,7 +278,6 @@ def get_line_to_highlight(toplist, max_process_count):
 
 
 def get_screen_lines(
-    load_bar,  # type: px_load_bar.PxLoadBar
     toplist,   # type: List[px_process.PxProcess]
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
@@ -304,10 +302,10 @@ def get_screen_lines(
     # Print header
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
-    loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
+
     meminfo = px_meminfo.get_meminfo()
     lines = [
-        px_terminal.bold(u"Sysload: ") + loadbar,
+        px_terminal.bold(u"Sysload: ") + loadstring,
         px_terminal.bold(u"RAM Use: ") + meminfo,
         u""]
 
@@ -371,7 +369,6 @@ def get_screen_lines(
 
 
 def redraw(
-    load_bar,  # type: px_load_bar.PxLoadBar
     toplist,   # type: List[px_process.PxProcess]
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
@@ -387,7 +384,7 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        load_bar, toplist, launchcounter, rows, columns, include_footer,
+        toplist, launchcounter, rows, columns, include_footer,
         search=search_string)
 
     clear_sequence = u""
@@ -514,8 +511,6 @@ def get_command(**kwargs):
 def _top():
     # type: () -> None
 
-    physical, logical = px_cpuinfo.get_core_count()
-    load_bar = px_load_bar.PxLoadBar(physical, logical)
     baseline = px_process.get_all()
     current = baseline
     launchcounter = px_launchcounter.Launchcounter()
@@ -528,7 +523,7 @@ def _top():
         rows, columns = window_size
         global sort_by_memory
         toplist = get_toplist(baseline, current, sort_by_memory)
-        redraw(load_bar, toplist, launchcounter, rows, columns)
+        redraw(toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
 
@@ -538,7 +533,7 @@ def _top():
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
-                redraw(load_bar, toplist, launchcounter, rows - 4, columns, include_footer=False)
+                redraw(toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
 
             command = get_command(timeout_seconds=0)

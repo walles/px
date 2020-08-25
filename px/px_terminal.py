@@ -168,6 +168,13 @@ def bold(string):
     return CSI + "1m" + string + CSI + "22m"
 
 
+def faint(string):
+    # type: (text_type) -> text_type
+    CSI = "\x1b["
+
+    return CSI + "2m" + string + CSI + "22m"
+
+
 def underline(string):
     # type: (text_type) -> text_type
     CSI = "\x1b["
