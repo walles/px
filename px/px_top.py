@@ -307,8 +307,8 @@ def get_screen_lines(
     loadbar = load_bar.get_bar(load=load[0], columns=40, text=loadstring)
     meminfo = px_meminfo.get_meminfo()
     lines = [
-        u"Sysload: " + loadbar,
-        u"RAM Use: " + meminfo,
+        px_terminal.bold(u"Sysload: ") + loadbar,
+        px_terminal.bold(u"RAM Use: ") + meminfo,
         u""]
 
     # Create a launchers section
