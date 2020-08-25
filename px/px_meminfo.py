@@ -33,7 +33,24 @@ def bytes_to_string(bytes_count):
     """
     Turn byte counts into strings like "14MB"
     """
-    return str(bytes_count)
+    KB = 1024 ** 1
+    MB = 1024 ** 2
+    GB = 1024 ** 3
+    TB = 1024 ** 4
+
+    if bytes_count < 7 * KB:
+        return str(bytes_count)
+
+    if bytes_count < 7 * MB:
+        return str(int(round(float(bytes_count) / KB))) + "KB"
+
+    if bytes_count < 7 * GB:
+        return str(int(round(float(bytes_count) / MB))) + "MB"
+
+    if bytes_count < 7 * TB:
+        return str(int(round(float(bytes_count) / GB))) + "GB"
+
+    return str(int(round(float(bytes_count) / TB))) + "TB"
 
 
 def _get_ram_numbers():
@@ -169,9 +186,11 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
         pages_free + pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed
 
     # This matches what the Activity Monitor shows in macOS 10.15.6
-    # For anonymous-purgeable: https://stackoverflow.com/a/36721309/473672
     #
-    # NOTE: We would like to add swapped out pages to this as well
+    # For anonymous - purgeable: https://stackoverflow.com/a/36721309/473672
+    #
+    # NOTE: We want to add swapped out pages to this as well, since those also
+    # represent a want for pages.
     wanted_ram_pages = \
         pages_anonymous - pages_purgeable + pages_wired + pages_compressed
 
