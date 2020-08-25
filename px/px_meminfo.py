@@ -19,7 +19,21 @@ def get_meminfo():
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100 * wanted_ram_bytes) // total_ram_bytes
 
-    return str(percentage) + "%"
+    return "".join([
+        str(percentage),
+        "%  ",
+        bytes_to_string(wanted_ram_bytes),
+        "/",
+        bytes_to_string(total_ram_bytes)
+        ])
+
+
+def bytes_to_string(bytes_count):
+    # type: (int) -> text_type
+    """
+    Turn byte counts into strings like "14MB"
+    """
+    return str(bytes_count)
 
 
 def _get_ram_numbers():
@@ -109,6 +123,9 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
     pages_inactive = None
     pages_speculative = None
     pages_wired = None
+    pages_anonymous = None
+    pages_purgeable = None
+    pages_compressed = None  # "Pages occupied by compressor"
     pages_uncompressed = None  # "Pages stored in compressor"
 
     for line in vm_stat_lines:
@@ -122,7 +139,10 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
         pages_inactive = _update_if_prefix(pages_inactive, line, "Pages inactive:")
         pages_speculative = _update_if_prefix(pages_speculative, line, "Pages speculative:")
         pages_wired = _update_if_prefix(pages_wired, line, "Pages wired down:")
-        pages_uncompressed = _update_if_prefix(pages_free, line, "Pages stored in compressor:")
+        pages_anonymous = _update_if_prefix(pages_anonymous, line, "Anonymous pages:")
+        pages_purgeable = _update_if_prefix(pages_purgeable, line, "Pages purgeable:")
+        pages_compressed = _update_if_prefix(pages_compressed, line, "Pages occupied by compressor:")
+        pages_uncompressed = _update_if_prefix(pages_uncompressed, line, "Pages stored in compressor:")
 
     if page_size_bytes is None:
         return None
@@ -136,13 +156,24 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
         return None
     if pages_wired is None:
         return None
+    if pages_anonymous is None:
+        return None
+    if pages_purgeable is None:
+        return None
+    if pages_compressed is None:
+        return None
     if pages_uncompressed is None:
         return None
 
     total_ram_pages = \
-        pages_free + pages_active + pages_inactive + pages_speculative + pages_wired
+        pages_free + pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed
+
+    # This matches what the Activity Monitor shows in macOS 10.15.6
+    # For anonymous-purgeable: https://stackoverflow.com/a/36721309/473672
+    #
+    # NOTE: We would like to add swapped out pages to this as well
     wanted_ram_pages = \
-        pages_active + pages_wired + pages_uncompressed
+        pages_anonymous - pages_purgeable + pages_wired + pages_compressed
 
     total_ram_bytes = total_ram_pages * page_size_bytes
     wanted_ram_bytes = wanted_ram_pages * page_size_bytes
