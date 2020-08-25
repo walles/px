@@ -130,6 +130,9 @@ def get_load_string(load_values=None):
         load_string = RED + load_string + NORMAL
 
     recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
-    graph = px_terminal.bold(levels_to_graph([old] * 10 + [between] * 4 + [recent]))
+    graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
+
+    # Increase intensity for more recent times
+    graph = px_terminal.faint(graph[0:3]) + graph[3:6] + px_terminal.bold(graph[6:])
 
     return u"{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)
