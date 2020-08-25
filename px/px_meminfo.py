@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import errno
 import platform
@@ -7,6 +8,7 @@ import subprocess
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
+    from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Optional  # NOQA
 
@@ -33,9 +35,11 @@ def _get_ram_numbers():
     if return_me is not None:
         return return_me
 
-    return_me = _get_ram_numbers_from_sysctl_and_vm_stat()
-    if return_me is not None:
-        return return_me
+    vm_stat_lines = _get_vmstat_output_lines()
+    if vm_stat_lines is not None:
+        return_me = _get_ram_numbers_from_vm_stat_output(vm_stat_lines)
+        if return_me is not None:
+            return return_me
 
     uname = str(platform.uname())
     platform_s = uname + " Python " + sys.version
@@ -60,8 +64,43 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     raise Exception("FIXME: Not implemented")
 
 
-def _get_ram_numbers_from_sysctl_and_vm_stat():
-    # type: () -> Optional[Tuple[int, int]]
+def _get_vmstat_output_lines():
+    # type: () -> Optional[List[text_type]]
+    env = os.environ.copy()
+    if "LANG" in env:
+        del env["LANG"]
+
+    try:
+        vm_stat = subprocess.Popen(["vm_stat"],
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                  env=env)
+    except (IOError, OSError) as e:
+        if e.errno == errno.ENOENT:
+            # vm_stat not found, we're probably not on OSX
+            return None
+
+        raise
+
+    vm_stat_stdout = vm_stat.communicate()[0].decode('utf-8')
+    vm_stat_lines = vm_stat_stdout.split('\n')
+
+    return vm_stat_lines
+
+
+def _update_if_prefix(base, line, prefix):
+    # type: (Optional[int], text_type, text_type) -> Optional[int]
+    if not line.startswith(prefix):
+        return base
+
+    no_ending_dot = line.rstrip(".")
+
+    return int(no_ending_dot[len(prefix):])
+
+
+def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
+    # type: (List[text_type]) -> Optional[Tuple[int, int]]
+
+    PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
 
     # List based on https://apple.stackexchange.com/a/196925/182882
     page_size_bytes = None
@@ -72,7 +111,18 @@ def _get_ram_numbers_from_sysctl_and_vm_stat():
     pages_wired = None
     pages_uncompressed = None  # "Pages stored in compressor"
 
-    )))FIXME: Call vm_stat and populate the variables
+    for line in vm_stat_lines:
+        page_size_match = PAGE_SIZE_RE.search(line)
+        if page_size_match:
+            page_size_bytes = int(page_size_match.group(1))
+            continue
+
+        pages_free = _update_if_prefix(pages_free, line, "Pages free:")
+        pages_active = _update_if_prefix(pages_active, line, "Pages active:")
+        pages_inactive = _update_if_prefix(pages_inactive, line, "Pages inactive:")
+        pages_speculative = _update_if_prefix(pages_speculative, line, "Pages speculative:")
+        pages_wired = _update_if_prefix(pages_wired, line, "Pages wired down:")
+        pages_uncompressed = _update_if_prefix(pages_free, line, "Pages stored in compressor:")
 
     if page_size_bytes is None:
         return None
