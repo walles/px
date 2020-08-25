@@ -16,16 +16,32 @@ if sys.version_info.major >= 3:
 def get_meminfo():
     # type: () -> text_type
 
-    total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
-    percentage = (100 * wanted_ram_bytes) // total_ram_bytes
+    CSI = u"\x1b["
+    NORMAL = CSI + u"m"
+    RED = CSI + u"1;37;41m"
+    YELLOW = CSI + u"1;30;43m"
+    GREEN = CSI + u"1;30;42m"
 
-    return "".join([
-        str(percentage),
+    total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
+    percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
+
+    ram_text = "".join([
+        str(int(round(percentage))),
         "%  ",
         bytes_to_string(wanted_ram_bytes),
         "/",
         bytes_to_string(total_ram_bytes)
         ])
+
+    # "80"? I made it up.
+    if percentage < 80:
+        color = GREEN
+    elif percentage < 100:
+        color = YELLOW
+    else:
+        color = RED
+
+    return color + " " + ram_text + " " + NORMAL
 
 
 def bytes_to_string(bytes_count):
