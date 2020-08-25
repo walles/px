@@ -17,7 +17,8 @@ if sys.version_info.major >= 3:
 
 
 physical, logical = px_cpuinfo.get_core_count()
-cores_string = "[{} cores | {} virtual]".format(physical, logical)
+physical_string = px_terminal.bold(str(physical) + " cores")
+cores_string = "[{} | {} virtual]".format(physical_string, logical)
 
 
 def average_to_level(average, peak):
