@@ -113,6 +113,8 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     buffers_kb = None  # type: Optional[int]
     cached_kb = None  # type: Optional[int]
     swapcached_kb = None  # type: Optional[int]
+    swaptotal_kb = None  # type: Optional[int]
+    swapfree_kb = None  # type: Optional[int]
 
     try:
         with open(proc_meminfo) as f:
@@ -123,6 +125,8 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
                 buffers_kb = _update_from_meminfo(buffers_kb, line, "Buffers")
                 cached_kb = _update_from_meminfo(cached_kb, line, "Cached")
                 swapcached_kb = _update_from_meminfo(swapcached_kb, line, "SwapCached")
+                swaptotal_kb = _update_from_meminfo(swaptotal_kb, line, "SwapTotal")
+                swapfree_kb = _update_from_meminfo(swapfree_kb, line, "SwapFree")
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # /proc/meminfo not found, we're probably not on Linux
@@ -132,13 +136,19 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
 
     if total_kb is None:
         return None
+    if swaptotal_kb is None:
+        return None
+    if swapfree_kb is None:
+        return None
+    swapused_kb = swaptotal_kb - swapfree_kb
 
     if available_kb is not None:
         # Use MemAvailable if we can:
         # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
 
-        # FIXME: Add swap usage to this
-        return (total_kb * 1024, (total_kb - available_kb) * 1024)
+        ramused_kb = total_kb - available_kb
+
+        return (total_kb * 1024, (swapused_kb + ramused_kb) * 1024)
 
     if free_kb is None:
         return None
@@ -149,10 +159,9 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     if swapcached_kb is None:
         return None
 
-    # FIXME: Add swap usage to this
-    wanted_kb = total_kb - (free_kb + buffers_kb + cached_kb + swapcached_kb)
+    ramused_kb = total_kb - (free_kb + buffers_kb + cached_kb + swapcached_kb)
 
-    return (total_kb * 1024, wanted_kb * 1024)
+    return (total_kb * 1024, (swapused_kb + ramused_kb) * 1024)
 
 
 def _get_vmstat_output_lines():
