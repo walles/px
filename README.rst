@@ -173,8 +173,8 @@ information; the command will work without it but might miss some information.
 * Note how the default sort order of CPU-usage-since-``ptop``-started makes the
   display rather stable.
 * Note the system load bar that correlates the system load with the number of
-  CPU cores in the system. Green is load handled by physical cores, yellow
-  (not shown here) is load handled by hyperthreading cores, and red is load
+  CPU cores in the system. **Green** is load handled by physical cores, **yellow**
+  (not shown here) is load handled by hyperthreading cores, and **red** is load
   over the number of cores.
 * Note the fifteen minute load history graph in the load bar. On this system the
   load has been high for the last fifteen minutes. This is a visualization of
