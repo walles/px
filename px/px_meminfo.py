@@ -94,13 +94,35 @@ def _get_ram_numbers():
     raise IOError("Unable to get memory info " + platform_s)
 
 
+def _update_from_meminfo(base, line, name):
+    # type: (Optional[int], text_type, text_type) -> Optional[int]
+    if not line.startswith(name + ":"):
+        return base
+
+    just_the_number = line[len(name) + 1:len(line) - 3]
+
+    return int(just_the_number)
+
+
 def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     # type: (str) -> Optional[Tuple[int, int]]
+
+    total_kb = None  # type: Optional[int]
+    available_kb = None  # type: Optional[int]
+    free_kb = None  # type: Optional[int]
+    buffers_kb = None  # type: Optional[int]
+    cached_kb = None  # type: Optional[int]
+    swapcached_kb = None  # type: Optional[int]
+
     try:
         with open(proc_meminfo) as f:
             for line in f:
-                # FIXME: Write code here
-                pass
+                total_kb = _update_from_meminfo(total_kb, line, "MemTotal")
+                available_kb = _update_from_meminfo(available_kb, line, "MemAvailable")
+                free_kb = _update_from_meminfo(free_kb, line, "MemFree")
+                buffers_kb = _update_from_meminfo(buffers_kb, line, "Buffers")
+                cached_kb = _update_from_meminfo(cached_kb, line, "Cached")
+                swapcached_kb = _update_from_meminfo(swapcached_kb, line, "SwapCached")
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # /proc/meminfo not found, we're probably not on Linux
@@ -108,7 +130,29 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
 
         raise
 
-    raise Exception("FIXME: Not implemented")
+    if total_kb is None:
+        return None
+
+    if available_kb is not None:
+        # Use MemAvailable if we can:
+        # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
+
+        # FIXME: Add swap usage to this
+        return (total_kb * 1024, (total_kb - available_kb) * 1024)
+
+    if free_kb is None:
+        return None
+    if buffers_kb is None:
+        return None
+    if cached_kb is None:
+        return None
+    if swapcached_kb is None:
+        return None
+
+    # FIXME: Add swap usage to this
+    wanted_kb = total_kb - (free_kb + buffers_kb + cached_kb + swapcached_kb)
+
+    return (total_kb * 1024, wanted_kb * 1024)
 
 
 def _get_vmstat_output_lines():
@@ -206,7 +250,7 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
     #
     # For anonymous - purgeable: https://stackoverflow.com/a/36721309/473672
     #
-    # NOTE: We want to add swapped out pages to this as well, since those also
+    # FIXME: We want to add swapped out pages to this as well, since those also
     # represent a want for pages.
     wanted_ram_pages = \
         pages_anonymous - pages_purgeable + pages_wired + pages_compressed
