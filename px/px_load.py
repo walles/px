@@ -6,10 +6,18 @@ The one you probably want to call is get_load_string().
 
 import os
 
+from . import px_cpuinfo
+from . import px_terminal
+
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import Tuple  # NOQA
+    from six import text_type  # NOQA
+    from typing import Tuple   # NOQA
+
+
+physical, logical = px_cpuinfo.get_core_count()
+cores_string = "[{} cores | {} virtual]".format(physical, logical)
 
 
 def average_to_level(average, peak):
@@ -90,10 +98,26 @@ def get_load_values():
 
 
 def get_load_string(load_values=None):
+    # type: (Tuple[float, float, float]) -> text_type
+    """
+    Example return string, underlines indicate bold:
+    "1.5  [4 cores | 8 virtual]  [15m load history: GRAPH]"
+     ^^^                                            ^^^^^
+
+    Load number is color coded:
+    * <= physical core count: Green
+    * <= virtual core count: Yellow
+    * Larger: Red
+    """
     if load_values is None:
         load_values = get_load_values()
 
     avg0to1, avg1to5, avg5to15 = load_values
+
+    # FIXME: Colorize!
+    load_string = px_terminal.bold(u"{:.1f}".format(avg0to1))
+
     recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
-    graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
-    return u"{:.1f}, history: |{}|".format(avg0to1, graph)
+    graph = px_terminal.bold(levels_to_graph([old] * 10 + [between] * 4 + [recent]))
+
+    return u"{}  {}  [15m load history: |{}|]".format(load_string, cores_string, graph)

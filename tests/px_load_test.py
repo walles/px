@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from px import px_load
+from px import px_terminal
 
 
 def test_averages_to_levels():
@@ -36,7 +37,7 @@ def test_levels_to_graph():
 
 
 def test_get_load_string():
-    assert px_load.get_load_string((0.3, 0.2, 0.1)).startswith("0.3, history: ")
-    assert px_load.get_load_string((3.0, 0.2, 0.1)).startswith("3.0, history: ")
-    assert px_load.get_load_string((1.135135, 0.2, 0.1)).startswith("1.1, history: ")
-    assert px_load.get_load_string((2.0, 3.0, 4.0)).startswith("2.0, history: ")
+    assert px_terminal.bold("0.3") in px_load.get_load_string((0.3, 0.2, 0.1))
+    assert px_terminal.bold("3.0") in px_load.get_load_string((3.0, 0.2, 0.1))
+    assert px_terminal.bold("1.1") in px_load.get_load_string((1.135135, 0.2, 0.1))
+    assert px_terminal.bold("2.0") in px_load.get_load_string((2.0, 3.0, 4.0))
