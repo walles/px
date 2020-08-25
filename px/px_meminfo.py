@@ -18,9 +18,9 @@ def get_meminfo():
 
     CSI = u"\x1b["
     NORMAL = CSI + u"m"
-    RED = CSI + u"1;37;41m"
-    YELLOW = CSI + u"1;30;43m"
-    GREEN = CSI + u"1;30;42m"
+    RED = CSI + u"1;31m"
+    YELLOW = CSI + u"1;33m"
+    GREEN = CSI + u"1;32m"
 
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
@@ -41,7 +41,7 @@ def get_meminfo():
     else:
         color = RED
 
-    return color + " " + ram_text + " " + NORMAL
+    return color + ram_text + NORMAL
 
 
 def bytes_to_string(bytes_count):
