@@ -37,7 +37,8 @@ def test_levels_to_graph():
 
 
 def test_get_load_string():
-    assert px_terminal.bold("0.3") in px_load.get_load_string((0.3, 0.2, 0.1))
-    assert px_terminal.bold("3.0") in px_load.get_load_string((3.0, 0.2, 0.1))
-    assert px_terminal.bold("1.1") in px_load.get_load_string((1.135135, 0.2, 0.1))
-    assert px_terminal.bold("2.0") in px_load.get_load_string((2.0, 3.0, 4.0))
+    CSI = u"\x1b["
+    assert "0.3" + CSI in px_load.get_load_string((0.3, 0.2, 0.1))
+    assert "3.0" + CSI in px_load.get_load_string((3.0, 0.2, 0.1))
+    assert "1.1" + CSI in px_load.get_load_string((1.135135, 0.2, 0.1))
+    assert "2.0" + CSI in px_load.get_load_string((2.0, 3.0, 4.0))
