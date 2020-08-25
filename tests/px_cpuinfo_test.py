@@ -15,14 +15,14 @@ def test_get_core_count_from_proc_cpuinfo():
     my_dir = os.path.dirname(__file__)
 
     info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-2p4l"))
+        os.path.join(my_dir, "proc-cpuinfo-2p4l.txt"))
     assert info
     physical, logical = info
     assert physical == 2
     assert logical == 4
 
     info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-1p1l"))
+        os.path.join(my_dir, "proc-cpuinfo-1p1l.txt"))
     assert info
     physical, logical = info
     assert physical == 1
@@ -31,7 +31,7 @@ def test_get_core_count_from_proc_cpuinfo():
     # This one is from my cell phone, just to provide a weird corner case example of things
     # we may have to handle.
     info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-8p8l"))
+        os.path.join(my_dir, "proc-cpuinfo-8p8l.txt"))
     assert info
     physical, logical = info
     assert physical == 8

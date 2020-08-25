@@ -55,7 +55,7 @@ def bytes_to_string(bytes_count):
     TB = 1024 ** 4
 
     if bytes_count < 7 * KB:
-        return str(bytes_count)
+        return str(bytes_count) + "B"
 
     if bytes_count < 7 * MB:
         return str(int(round(float(bytes_count) / KB))) + "KB"
@@ -198,6 +198,7 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
     if pages_uncompressed is None:
         return None
 
+    # In experiments, this has added up well to the amount of physical RAM in my machine
     total_ram_pages = \
         pages_free + pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed
 
