@@ -28,9 +28,9 @@ def get_core_count():
         return return_me
 
     uname = str(platform.uname())
-    platform = uname + " Python " + sys.version
+    platform_s = uname + " Python " + sys.version
 
-    raise IOError("Unable to get cores info " + platform)
+    raise IOError("Unable to get cores info " + platform_s)
 
 
 def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
