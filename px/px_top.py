@@ -305,8 +305,10 @@ def get_screen_lines(
 
     meminfo = px_meminfo.get_meminfo()
     lines = [
-        px_terminal.bold(u"Sysload: ") + loadstring,
-        px_terminal.bold(u"RAM Use: ") + meminfo,
+        px_terminal.crop_ansi_string_at_length(
+            px_terminal.bold(u"Sysload: ") + loadstring, columns),
+        px_terminal.crop_ansi_string_at_length(
+            px_terminal.bold(u"RAM Use: ") + meminfo, columns),
         u""]
 
     # Create a launchers section
@@ -318,8 +320,9 @@ def get_screen_lines(
             # Add a section header
             launchlines = [
                 '',
-                px_terminal.bold(
-                    "Launched binaries, launch counts in (parentheses)")
+                px_terminal.crop_ansi_string_at_length(
+                    px_terminal.bold(
+                        "Launched binaries, launch counts in (parentheses)"), columns)
             ] + launchlines
 
             # Cut if we got too many lines
