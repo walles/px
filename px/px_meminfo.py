@@ -24,22 +24,18 @@ SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
 def get_meminfo():
     # type: () -> text_type
 
-    CSI = u"\x1b["
-    NORMAL = CSI + u"m"
-    RED = CSI + u"1;31m"
-    YELLOW = CSI + u"1;33m"
-    GREEN = CSI + u"1;32m"
-
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
 
+    percentage_string = str(int(round(percentage))) + u"%"
+
     # "80"? I made it up.
     if percentage < 80:
-        color = GREEN
+        percentage_string = px_terminal.green(percentage_string)
     elif percentage < 100:
-        color = YELLOW
+        percentage_string = px_terminal.yellow(percentage_string)
     else:
-        color = RED
+        percentage_string = px_terminal.red(percentage_string)
 
     wanted_and_total_string = "".join([
         bytes_to_string(wanted_ram_bytes),
@@ -49,16 +45,13 @@ def get_meminfo():
     wanted_and_total_string = px_terminal.bold(wanted_and_total_string)
 
     ram_text = "".join([
-        color,
-        str(int(round(percentage))),
-        "%",
-        NORMAL,
+        percentage_string,
         "  [",
         wanted_and_total_string,
         "]"
         ])
 
-    return color + ram_text + NORMAL
+    return ram_text
 
 
 def bytes_to_string(bytes_count):

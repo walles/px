@@ -156,30 +156,37 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
 
 def inverse_video(string):
     # type: (text_type) -> text_type
-    CSI = "\x1b["
-
     return CSI + "7m" + string + CSI + "27m"
 
 
 def bold(string):
     # type: (text_type) -> text_type
-    CSI = "\x1b["
-
     return CSI + "1m" + string + CSI + "22m"
 
 
 def faint(string):
     # type: (text_type) -> text_type
-    CSI = "\x1b["
-
     return CSI + "2m" + string + CSI + "22m"
 
 
 def underline(string):
     # type: (text_type) -> text_type
-    CSI = "\x1b["
-
     return CSI + "4m" + string + CSI + "24m"
+
+
+def red(string):
+    # type: (text_type) -> text_type
+    return CSI + "1;30;41m" + string + CSI + "49;39;22m"
+
+
+def yellow(string):
+    # type: (text_type) -> text_type
+    return CSI + "30;103m" + string + CSI + "49;39m"
+
+
+def green(string):
+    # type: (text_type) -> text_type
+    return CSI + "1;32m" + string + CSI + "39;22m"
 
 
 def get_string_of_length(string, length):
