@@ -1,4 +1,4 @@
-|Build Status| |Coverage Status|
+|Build Status|
 
 ``ps`` and ``top`` for Human Beings
 ===================================
@@ -172,12 +172,9 @@ information; the command will work without it but might miss some information.
 
 * Note how the default sort order of CPU-usage-since-``ptop``-started makes the
   display rather stable.
-* Note the system load bar that correlates the system load with the number of
-  CPU cores in the system. **Green** is load handled by physical cores, **yellow**
-  (not shown here) is load handled by hyperthreading cores, and **red** is load
-  over the number of cores.
-* Note the fifteen minute load history graph in the load bar. On this system the
-  load has been high for the last fifteen minutes. This is a visualization of
+* Note the core count right next to the system load number, for easy comparison.
+* Note the load history graph next to the load numbers. On this system the
+  load has been the same for the last fifteen minutes. This is a visualization of
   the numbers you get from ``uptime``.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
@@ -322,6 +319,4 @@ DONE
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px
-.. |Coverage Status| image:: https://coveralls.io/repos/github/walles/px/badge.svg?branch=python
-   :target: https://coveralls.io/github/walles/px?branch=python
 .. |ptop screenshot| image:: doc/ptop-screenshot.png
