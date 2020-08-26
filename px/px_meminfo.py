@@ -5,6 +5,8 @@ import errno
 import platform
 import subprocess
 
+from . import px_terminal
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
@@ -31,14 +33,6 @@ def get_meminfo():
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
 
-    ram_text = "".join([
-        str(int(round(percentage))),
-        "%  ",
-        bytes_to_string(wanted_ram_bytes),
-        "/",
-        bytes_to_string(total_ram_bytes)
-        ])
-
     # "80"? I made it up.
     if percentage < 80:
         color = GREEN
@@ -46,6 +40,23 @@ def get_meminfo():
         color = YELLOW
     else:
         color = RED
+
+    wanted_and_total_string = "".join([
+        bytes_to_string(wanted_ram_bytes),
+        " / ",
+        bytes_to_string(total_ram_bytes)
+        ])
+    wanted_and_total_string = px_terminal.bold(wanted_and_total_string)
+
+    ram_text = "".join([
+        color,
+        str(int(round(percentage))),
+        "%",
+        NORMAL,
+        "  [",
+        wanted_and_total_string,
+        "]"
+        ])
 
     return color + ram_text + NORMAL
 
