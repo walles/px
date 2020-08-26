@@ -128,7 +128,8 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
     if heading_line_delta > 0:
         heading_line += heading_line_delta * u' '
     if heading_line_delta < 0:
-        heading_line = crop_ansi_string_at_length(heading_line, heading_line_delta)
+        new_length = heading_line_length + heading_line_delta
+        heading_line = crop_ansi_string_at_length(heading_line, new_length)
 
     heading_line = bold(heading_line)
     lines.append(heading_line)
@@ -226,6 +227,8 @@ def _tokenize(string):
 
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
+    assert length >= 0
+
     result = u""
     char_count = 0
 

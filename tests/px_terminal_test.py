@@ -15,6 +15,14 @@ def test_to_screen_lines_unbounded():
     ]
 
 
+def test_crop_heading_lines():
+    procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
+    assert px_terminal.to_screen_lines(procs, 10, None, None) == [
+        "\x1b[1m  PID COMM\x1b[22m",
+        "47536 fluf"
+    ]
+
+
 def test_to_screen_lines_unicode():
     procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
     converted = px_terminal.to_screen_lines(procs, None, None, None)
