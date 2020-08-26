@@ -348,7 +348,13 @@ def get_screen_lines(
     # number of processes
     toplist_table_lines += rows * ['']
 
-    lines += [px_terminal.bold("Top CPU using processes")]
+    top_what = "CPU"
+    if sort_by_memory:
+        top_what = "memory"
+    lines += [
+        px_terminal.crop_ansi_string_at_length(
+            px_terminal.bold("Top " + top_what + " using processes"), columns)
+    ]
     global top_mode
     if top_mode == MODE_SEARCH:
         lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]
