@@ -13,6 +13,12 @@ if sys.version_info.major >= 3:
     from typing import Optional  # NOQA
 
 
+PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
+
+# Example input, from "sysctl vm.swapusage":
+# "vm.swapusage: total = 2048.00M  used = 562.75M  free = 1485.25M  (encrypted)"
+SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
+
 def get_meminfo():
     # type: () -> text_type
 
@@ -82,11 +88,9 @@ def _get_ram_numbers():
     if return_me is not None:
         return return_me
 
-    vm_stat_lines = _get_vmstat_output_lines()
-    if vm_stat_lines is not None:
-        return_me = _get_ram_numbers_from_vm_stat_output(vm_stat_lines)
-        if return_me is not None:
-            return return_me
+    return_me = _get_ram_numbers_macos()
+    if return_me is not None:
+        return return_me
 
     uname = str(platform.uname())
     platform_s = uname + " Python " + sys.version
@@ -164,6 +168,23 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     return (total_kb * 1024, (swapused_kb + ramused_kb) * 1024)
 
 
+def _get_ram_numbers_macos():
+    # type: () -> Optional[Tuple[int, int]]
+    vm_stat_lines = _get_vmstat_output_lines()
+    if vm_stat_lines is None:
+        return None
+
+    vmstat_ram = _get_ram_numbers_from_vm_stat_output(vm_stat_lines)
+    if vmstat_ram is None:
+        return None
+
+    total_ram_bytes, used_ram_bytes = vmstat_ram
+
+    used_swap_bytes = _get_used_swap_bytes_sysctl()
+
+    return (total_ram_bytes, used_ram_bytes + used_swap_bytes)
+
+
 def _get_vmstat_output_lines():
     # type: () -> Optional[List[text_type]]
     env = os.environ.copy()
@@ -187,6 +208,21 @@ def _get_vmstat_output_lines():
     return vm_stat_lines
 
 
+def _get_used_swap_bytes_sysctl():
+    # type: () -> int
+    env = os.environ.copy()
+    if "LANG" in env:
+        del env["LANG"]
+
+    raw_response = subprocess.check_output(['sysctl', 'vm.swapusage'], env=env)
+    string_response = raw_response.decode('utf-8').strip()
+    match = SWAPUSAGE_RE.match(string_response)
+    if not match:
+        raise IOError("No swap usage in 'sysctl vm.swapusage' output: " + string_response)
+
+    return int(float(match.group(1)) * 1024 * 1024)
+
+
 def _update_if_prefix(base, line, prefix):
     # type: (Optional[int], text_type, text_type) -> Optional[int]
     if not line.startswith(prefix):
@@ -199,8 +235,6 @@ def _update_if_prefix(base, line, prefix):
 
 def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
     # type: (List[text_type]) -> Optional[Tuple[int, int]]
-
-    PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
 
     # List based on https://apple.stackexchange.com/a/196925/182882
     page_size_bytes = None
