@@ -207,11 +207,10 @@ def _get_used_swap_bytes_sysctl():
     if "LANG" in env:
         del env["LANG"]
 
-    raw_response = subprocess.check_output(['sysctl', 'vm.swapusage'], env=env)
-    string_response = raw_response.decode('utf-8').strip()
-    match = SWAPUSAGE_RE.match(string_response)
+    stdout = px_exec_util.run(['sysctl', 'vm.swapusage'], check_exitcode=True)
+    match = SWAPUSAGE_RE.match(stdout.strip())
     if not match:
-        raise IOError("No swap usage in 'sysctl vm.swapusage' output: " + string_response)
+        raise IOError("No swap usage in 'sysctl vm.swapusage' output: " + stdout)
 
     return int(float(match.group(1)) * 1024 * 1024)
 

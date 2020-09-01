@@ -9,8 +9,8 @@ if sys.version_info.major >= 3:
     from typing import Dict  # NOQA
 
 
-def run(command):
-    # type: (List[str]) -> text_type
+def run(command, check_exitcode=False):
+    # type: (List[str], bool) -> text_type
     env = {}  # type: Dict[str, str]
     for name, value in os.environ.items():
         if name == "LANG":
@@ -24,5 +24,8 @@ def run(command):
                            stderr=subprocess.PIPE,
                            env=env)
     stdout = run.communicate()[0].decode('utf-8')
+
+    if check_exitcode and run.returncode != 0:
+        raise subprocess.CalledProcessError(run.returncode, command)
 
     return stdout
