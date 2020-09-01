@@ -21,7 +21,6 @@ from . import px_launchcounter
 
 if False:
     # For mypy PEP-484 static typing validation
-    import logging               # NOQA
     from typing import List      # NOQA
     from typing import Dict      # NOQA
     from typing import Union     # NOQA
