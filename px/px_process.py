@@ -1,3 +1,4 @@
+import logging
 import datetime
 import operator
 import subprocess
@@ -19,6 +20,9 @@ if sys.version_info.major >= 3:
     from typing import Optional    # NOQA
     from typing import List        # NOQA
     from six import text_type      # NOQA
+
+
+LOG = logging.getLogger(__name__)
 
 
 # Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
@@ -65,6 +69,14 @@ class PxProcess(object):
         time = datetime.datetime.strptime(start_time_string.strip(), "%c")
         self.start_time = time.replace(tzinfo=TIMEZONE)  # type: datetime.datetime
         self.age_seconds = (now - self.start_time).total_seconds()  # type: float
+        if self.age_seconds < 0:
+            LOG.error("Process age < 0: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
+                self.age_seconds,
+                now,
+                self.start_time,
+                start_time_string.strip(),
+                datetime.datetime.now(TIMEZONE).tzname())
+            assert False
         assert self.age_seconds >= 0
         self.age_s = seconds_to_str(self.age_seconds)  # type: text_type
 
