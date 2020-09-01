@@ -35,6 +35,7 @@ of which processes are most active right now.
 --version: Print version information
 """
 
+import traceback
 import platform
 import logging
 import six
@@ -45,6 +46,11 @@ from . import px_install
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
+
+import sys
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import Optional  # NOQA
 
 
 ERROR_REPORTING_HEADER = """
@@ -73,7 +79,10 @@ def install(argv):
 
 # This is the setup.py entry point
 def main():
-    _main(sys.argv)
+    try:
+        _main(sys.argv)
+    except Exception:
+        handleLogMessages(traceback.format_exc())
 
 
 def configureLogging(loglevel, stringIO):
@@ -99,6 +108,7 @@ def configureLogging(loglevel, stringIO):
 
 
 def handleLogMessages(messages):
+    # type: (Optional[str]) -> None
     if not messages:
         return
 
