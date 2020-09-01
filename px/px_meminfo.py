@@ -6,6 +6,7 @@ import platform
 import subprocess
 
 from . import px_terminal
+from . import px_exec_util
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -190,25 +191,14 @@ def _get_ram_numbers_macos():
 
 def _get_vmstat_output_lines():
     # type: () -> Optional[List[text_type]]
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
     try:
-        vm_stat = subprocess.Popen(["vm_stat"],
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                  env=env)
+        return px_exec_util.run(["vm_stat"]).splitlines()
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # vm_stat not found, we're probably not on OSX
             return None
 
         raise
-
-    vm_stat_stdout = vm_stat.communicate()[0].decode('utf-8')
-    vm_stat_lines = vm_stat_stdout.split('\n')
-
-    return vm_stat_lines
 
 
 def _get_used_swap_bytes_sysctl():

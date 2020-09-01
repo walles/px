@@ -6,6 +6,8 @@ import os
 import re
 import dateutil.tz
 
+from . import px_exec_util
+
 if False:
     from typing import Set, Optional  # NOQA
 
@@ -134,14 +136,7 @@ def call_last():
     """
     Call last and return the result as one big string
     """
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
-    last = subprocess.Popen("last",
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env)
-    return last.communicate()[0].decode('utf-8')
+    return px_exec_util.run(["last"])
 
 
 def _to_timestamp(string, now):

@@ -3,6 +3,8 @@ import subprocess
 
 import os
 
+from . import px_exec_util
+
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -202,18 +204,11 @@ def call_lsof():
     """
     Call lsof and return the result as one big string
     """
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
     # See OUTPUT FOR OTHER PROGRAMS: http://linux.die.net/man/8/lsof
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    lsof = subprocess.Popen(["lsof", '-n', '-F', 'fnaptd0i'],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env)
-    return lsof.communicate()[0].decode('utf-8')
+    return px_exec_util.run(["lsof", '-n', '-F', 'fnaptd0i'])
 
 
 def lsof_to_files(lsof):
