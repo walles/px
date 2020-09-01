@@ -203,10 +203,6 @@ def _get_vmstat_output_lines():
 
 def _get_used_swap_bytes_sysctl():
     # type: () -> int
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
     stdout = px_exec_util.run(['sysctl', 'vm.swapusage'], check_exitcode=True)
     match = SWAPUSAGE_RE.match(stdout.strip())
     if not match:
