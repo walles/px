@@ -79,10 +79,23 @@ def install(argv):
 
 # This is the setup.py entry point
 def main():
+    argv = list(sys.argv)
+
+    loglevel = logging.ERROR
+    while '--debug' in argv:
+        argv.remove('--debug')
+        loglevel = logging.DEBUG
+
+    stringIO = six.StringIO()
+    configureLogging(loglevel, stringIO)
+
     try:
-        _main(sys.argv)
+        _main(argv)
     except Exception:
-        handleLogMessages(traceback.format_exc())
+        LOG = logging.getLogger(__name__)
+        LOG.exception("Uncaught Exception")
+
+    handleLogMessages(stringIO.getvalue())
 
 
 def configureLogging(loglevel, stringIO):
@@ -124,11 +137,6 @@ def handleLogMessages(messages):
 
 
 def _main(argv):
-    loglevel = logging.ERROR
-    while '--debug' in argv:
-        argv.remove('--debug')
-        loglevel = logging.DEBUG
-
     if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
         argv.append("--top")
 
@@ -147,14 +155,10 @@ def _main(argv):
         install(argv)
         return
 
-    stringIO = six.StringIO()
-    configureLogging(loglevel, stringIO)
-
     if arg == '--top':
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
         px_top.top()
-        handleLogMessages(stringIO.getvalue())
         return
 
     if arg == '--help':
@@ -175,7 +179,6 @@ def _main(argv):
     try:
         pid = int(arg)
         px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
-        handleLogMessages(stringIO.getvalue())
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving

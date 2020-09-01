@@ -7,7 +7,6 @@ import re
 import dateutil.tz
 
 if False:
-    import logging  # NOQA
     from typing import Set, Optional  # NOQA
 
 LOG = logging.getLogger(__name__)
