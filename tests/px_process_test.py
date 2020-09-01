@@ -192,6 +192,9 @@ def test_get_all_swedish():
     won't mess up our parsing.
     """
     os.environ["LANG"] = "sv_SE.UTF-8"
+    os.environ["LC_TIME"] = "sv_SE.UTF-8"
+    os.environ["LC_NUMERIC"] = "sv_SE.UTF-8"
+
     _test_get_all()
 
 

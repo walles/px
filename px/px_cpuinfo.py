@@ -3,6 +3,8 @@ import errno
 import platform
 import subprocess
 
+from . import px_exec_util
+
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -73,14 +75,8 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
 
 def get_core_count_from_sysctl():
     # type: () -> Optional[Tuple[int,int]]
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-
     try:
-        sysctl = subprocess.Popen(["sysctl", 'hw'],
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                  env=env)
+        stdout = px_exec_util.run(["sysctl", 'hw'])
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # sysctl not found, we're probably not on OSX
@@ -88,8 +84,7 @@ def get_core_count_from_sysctl():
 
         raise
 
-    sysctl_stdout = sysctl.communicate()[0].decode('utf-8')
-    sysctl_lines = sysctl_stdout.split('\n')
+    sysctl_lines = stdout.splitlines()
 
     physical, logical = parse_sysctl_output(sysctl_lines)
     if physical is None or logical is None:

@@ -8,7 +8,9 @@ import re
 import pwd
 import six
 import dateutil.tz
+
 from . import px_commandline
+from . import px_exec_util
 
 
 import sys
@@ -181,13 +183,7 @@ class PxProcess(object):
 
     def get_sudo_user(self):
         """Retrieves the $SUDO_USER value for this process, or None if not set"""
-        env = os.environ.copy()
-        if "LANG" in env:
-            del env["LANG"]
-        ps = subprocess.Popen(["ps", "e", str(self.pid)],
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                              env=env)
-        stdout = ps.communicate()[0].decode('utf-8')
+        stdout = px_exec_util.run(["ps", "e", str(self.pid)])
         match = re.match(".* SUDO_USER=([^ ]+)", stdout, re.DOTALL)
         if not match:
             return None
@@ -242,13 +238,8 @@ def call_ps():
     """
     Call ps and return the result in an iterable of one output line per process
     """
-    env = os.environ.copy()
-    if "LANG" in env:
-        del env["LANG"]
-    ps = subprocess.Popen(["ps", "-ax", "-o", "pid,ppid,lstart,uid,pcpu,time,%mem,command"],
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                          env=env)
-    return ps.communicate()[0].decode('utf-8').splitlines()[1:]
+    stdout = px_exec_util.run(["ps", "-ax", "-o", "pid,ppid,lstart,uid,pcpu,time,%mem,command"])
+    return stdout.splitlines()[1:]
 
 
 def parse_time(timestring):

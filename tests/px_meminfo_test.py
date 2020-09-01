@@ -2,6 +2,24 @@ import os
 
 from px import px_meminfo
 
+
+def test_get_ram_numbers_live():
+    info = px_meminfo._get_ram_numbers()
+    assert info is not None
+
+    total_bytes, wanted_bytes = info
+    assert total_bytes > 0
+    assert wanted_bytes > 0
+
+
+def test_get_ram_numbers_in_swedish():
+    os.environ["LANG"] = "sv_SE.UTF-8"
+    os.environ["LC_TIME"] = "sv_SE.UTF-8"
+    os.environ["LC_NUMERIC"] = "sv_SE.UTF-8"
+
+    test_get_ram_numbers_live()
+
+
 def test_get_ram_numbers_from_proc_none():
     my_dir = os.path.dirname(__file__)
 
