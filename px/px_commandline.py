@@ -253,6 +253,31 @@ def get_java_command(commandline):
                 continue
             if component.startswith('-javaagent:'):
                 continue
+            if component.startswith('--add-modules='):
+                continue
+            if component == '--add-modules':
+                state = "skip next"
+                continue
+            if component.startswith('--add-opens='):
+                continue
+            if component == '--add-opens':
+                state = "skip next"
+                continue
+            if component.startswith('--add-exports='):
+                continue
+            if component == '--add-exports':
+                state = "skip next"
+                continue
+            if component.startswith('--add-reads='):
+                continue
+            if component == '--add-reads':
+                state = "skip next"
+                continue
+            if component.startswith('--patch-module='):
+                continue
+            if component == '--patch-module':
+                state = "skip next"
+                continue
             if component == "-server":
                 continue
             if component == "-noverify":

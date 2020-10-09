@@ -144,6 +144,38 @@ def test_get_command_java_gradleworkermain():
     assert px_commandline.get_command(commandline) == "GradleWorkerMain"
 
 
+def test_get_command_java_equinox():
+    # You get these processes with Visual Studio Code's java environment in October 2020
+    commandline = (
+        "/Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home/bin/java "
+        "--add-modules=ALL-SYSTEM "
+        "--add-opens "
+        "java.base/java.util=ALL-UNNAMED "
+        "--add-opens "
+        "java.base/java.lang=ALL-UNNAMED "
+        "-Declipse.application=org.eclipse.jdt.ls.core.id1 "
+        "-Dosgi.bundles.defaultStartLevel=4 "
+        "-Declipse.product=org.eclipse.jdt.ls.core.product "
+        "-Dfile.encoding=utf8 "
+        "-XX:+UseParallelGC "
+        "-XX:GCTimeRatio=4 "
+        "-XX:AdaptiveSizePolicyWeight=90 "
+        "-Dsun.zip.disableMemoryMapping=true "
+        "-Xmx1G "
+        "-Xms100m "
+        "-noverify "
+        "-jar "
+        "/Users/walles/.vscode/extensions/redhat.java-0.68.0/server/plugins/org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar "
+        "-configuration "
+        "/Users/walles/Library/Application "
+        "Support/Code/User/globalStorage/redhat.java/0.68.0/config_mac "
+        "-data "
+        "/Users/walles/Library/Application "
+        "Support/Code/User/workspaceStorage/b8c3a38f62ce0fc92ce4edfb836480db/redhat.java/jdt_ws "
+    )
+    assert px_commandline.get_command(commandline) == "org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar"
+
+
 def test_get_command_resque():
     # These command names are from a real-world system
     assert px_commandline.get_command("resque-1.20.0: x y z") == "resque-1.20.0:"
