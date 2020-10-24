@@ -2,6 +2,7 @@ import os
 
 from px import px_top
 from px import px_process
+from px import px_terminal
 from px import px_launchcounter
 
 from . import testutils
@@ -42,17 +43,6 @@ def test_get_toplist():
     px_top.get_toplist(px_process.get_all(), px_process.get_all())
 
 
-def test_getch():
-    pipe = os.pipe()
-    read, write = pipe
-    os.write(write, b'q')
-
-    # We should get unicode responses from getch()
-    sequence = px_top.getch(timeout_seconds=0, fd=read)
-    assert sequence is not None
-    assert sequence._string == u'q'
-
-
 def test_get_command():
     pipe = os.pipe()
     read, write = pipe
@@ -63,7 +53,7 @@ def test_get_command():
 
 def test_sigwinch_handler():
     # Args ignored at the time of writing this, fill in better values if needed
-    px_top.sigwinch_handler(None, None)
+    px_terminal.sigwinch_handler(None, None)
 
     # sys.stdin doesn't work when STDIN has been redirected (as during testing),
     # so we need to explicitly use the STDIN fd here. Try removing it and you'll
