@@ -115,6 +115,7 @@ def to_relative_start_string(base, relative):
 
 
 def get_closest_starts(process, all_processes):
+    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> List[px_process.PxProcess]
     """
     Return the processes that were started closest in time to the base process.
 
