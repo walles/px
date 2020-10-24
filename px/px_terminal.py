@@ -114,8 +114,8 @@ def read_select(
             raise
 
 
-def getch(timeout_seconds=0, fd=None):
-    # type: (int, int) -> Optional[ConsumableString]
+def getch(timeout_seconds=None, fd=None):
+    # type: (Optional[int], int) -> Optional[ConsumableString]
     """
     Wait at most timeout_seconds for a character to become available on stdin.
 
