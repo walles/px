@@ -18,6 +18,7 @@ from . import px_cpuinfo
 from . import px_meminfo
 from . import px_processinfo
 from . import px_launchcounter
+from . import px_process_menu
 
 if False:
     # For mypy PEP-484 static typing validation
@@ -29,25 +30,10 @@ if False:
 
 LOG = logging.getLogger(__name__)
 
-# Used for informing our getch() function that a window resize has occured
-SIGWINCH_PIPE = os.pipe()
-
-# We'll report window resize as this key having been pressed.
-#
-# NOTE: This must be detected as non-printable by handle_search_keypress().
-SIGWINCH_KEY = u'\x00'
-
 CMD_WHATEVER = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
 CMD_HANDLED = 3
-
-KEY_ESC = "\x1b"
-KEY_BACKSPACE = "\x1b[3~"
-KEY_DELETE = "\x7f"
-KEY_UPARROW = "\x1b[A"
-KEY_DOWNARROW = "\x1b[B"
-KEY_ENTER = "\x0d"
 
 SEARCH_PROMPT_ACTIVE = px_terminal.bold("Search (ENTER when done): ")
 SEARCH_PROMPT_INACTIVE = "Search ('/' to edit): "
@@ -75,23 +61,6 @@ last_process_poll = 0.0
 
 # Order top list by memory usage. The opposite is by CPU usage.
 sort_by_memory = False
-
-
-class ConsumableString(object):
-    def __init__(self, string):
-        # type: (text_type) -> None
-        self._string = string
-
-    def __len__(self):
-        return len(self._string)
-
-    def consume(self, to_consume):
-        # type: (text_type) -> bool
-        if not self._string.startswith(to_consume):
-            return False
-
-        self._string = self._string[len(to_consume):]
-        return True
 
 
 def adjust_cpu_times(baseline, current):
@@ -136,62 +105,6 @@ def adjust_cpu_times(baseline, current):
         pid2proc[current_proc.pid] = current_proc
 
     return list(pid2proc.values())
-
-
-def read_select(fds, timeout_seconds):
-    """Select on any of the fds becoming ready for read, retry on EINTR"""
-
-    # NOTE: If you change this method, you must test running "px --top" and
-    # resize the window in both Python 2 and Python 3.
-    while True:
-        try:
-            return select.select(fds, [], [], timeout_seconds)[0]
-        except OSError as ose:
-            # Python 3
-            if ose.errno == errno.EINTR:
-                # EINTR happens when the terminal window is resized by the user,
-                # just try again.
-                continue
-
-            # Non-EINTR exceptions are unexpected, help!
-            raise
-        except select.error as se:
-            # Python 2
-            if se.args[0] == errno.EINTR:
-                # EINTR happens when the terminal window is resized by the user,
-                # just try again.
-                continue
-
-            # Non-EINTR exceptions are unexpected, help!
-            raise
-
-
-def getch(timeout_seconds=0, fd=None):
-    # type: (int, int) -> Optional[ConsumableString]
-    """
-    Wait at most timeout_seconds for a character to become available on stdin.
-
-    Returns the character, or None on timeout.
-    """
-    if fd is None:
-        fd = sys.stdin.fileno()
-
-    can_read_from = (
-        read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
-
-    # Read all(ish) bytes from the first ready-for-read stream. If more than one
-    # stream is ready, we'll catch the second one on the next call to this
-    # function, so just doing the first is fine.
-    for stream in can_read_from:
-        string = os.read(stream, 1234).decode("UTF-8")
-        if len(string) > 0:
-            return ConsumableString(string)
-
-        # A zero length response means we got EOF from one of the streams. This
-        # happens (at least) during testing.
-        continue
-
-    return None
 
 
 def get_notnone_cpu_time_seconds(proc):
@@ -403,25 +316,8 @@ def redraw(
     writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
 
 
-def page_process_info(pid):
-    # type: (Optional[int]) -> None
-    if pid is None:
-        # Nothing selected, never mind
-        return
-
-    # Is this PID available?
-    processes = px_process.get_all()
-    process = px_processinfo.find_process_by_pid(pid, processes)
-    if not process:
-        # Process not available, never mind
-        return
-
-    with px_terminal.normal_display():
-        px_pager.page_process_info(process, processes)
-
-
 def handle_search_keypresses(key_sequence):
-    # type: (ConsumableString) -> None
+    # type: (px_terminal.ConsumableString) -> None
     global search_string
     global last_highlighted_row
     global last_highlighted_pid
@@ -434,17 +330,17 @@ def handle_search_keypresses(key_sequence):
     # return
 
     while len(key_sequence) > 0:
-        if key_sequence.consume(KEY_BACKSPACE):
+        if key_sequence.consume(px_terminal.KEY_BACKSPACE):
             search_string = search_string[:-1]
-        elif key_sequence.consume(KEY_DELETE):
+        elif key_sequence.consume(px_terminal.KEY_DELETE):
             search_string = search_string[:-1]
-        elif key_sequence.consume(KEY_UPARROW):
+        elif key_sequence.consume(px_terminal.KEY_UPARROW):
             last_highlighted_row -= 1
             last_highlighted_pid = None
-        elif key_sequence.consume(KEY_DOWNARROW):
+        elif key_sequence.consume(px_terminal.KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
-        elif key_sequence.consume(KEY_ENTER) or key_sequence._string == KEY_ESC:
+        elif key_sequence.consume(px_terminal.KEY_ENTER) or key_sequence._string == px_terminal.KEY_ESC:
             # Exit search mode
             global top_mode
             top_mode = MODE_BASE
@@ -456,7 +352,7 @@ def handle_search_keypresses(key_sequence):
     if len(key_sequence) == 0:
         return
 
-    if KEY_ESC in key_sequence._string:
+    if px_terminal.KEY_ESC in key_sequence._string:
         # Some special key, unprintable, unhandled, never mind
         return
 
@@ -477,7 +373,7 @@ def get_command(**kwargs):
     """
     Call getch() and interpret the results.
     """
-    input = getch(**kwargs)
+    input = px_terminal.getch(**kwargs)
     if input is None:
         return None
     assert len(input) > 0
@@ -491,14 +387,14 @@ def get_command(**kwargs):
     global last_highlighted_pid
     global sort_by_memory
     while len(input) > 0:
-        if input.consume(KEY_UPARROW):
+        if input.consume(px_terminal.KEY_UPARROW):
             last_highlighted_row -= 1
             last_highlighted_pid = None
-        elif input.consume(KEY_DOWNARROW):
+        elif input.consume(px_terminal.KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
-        elif input.consume(KEY_ENTER):
-            page_process_info(last_highlighted_pid)
+        elif input.consume(px_terminal.KEY_ENTER):
+            px_process_menu.show_process_menu(last_highlighted_pid)
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH
@@ -507,7 +403,7 @@ def get_command(**kwargs):
             sort_by_memory = not sort_by_memory
         elif input.consume(u'q'):
             return CMD_QUIT
-        elif input.consume(SIGWINCH_KEY):
+        elif input.consume(px_terminal.SIGWINCH_KEY):
             return CMD_RESIZE
         else:
             # Unable to consume anything, give up
@@ -526,8 +422,7 @@ def _top():
         launchcounter.update(current)
         window_size = px_terminal.get_window_size()
         if window_size is None:
-            sys.stderr.write("Cannot find terminal window size, are you on a terminal?\r\n")
-            exit(1)
+            exit("Cannot find terminal window size, are you on a terminal?\r\n")
         rows, columns = window_size
         global sort_by_memory
         toplist = get_toplist(baseline, current, sort_by_memory)
@@ -555,14 +450,6 @@ def _top():
             last_process_poll = now
 
 
-def sigwinch_handler(signum, frame):
-    """Handle window resize signals by telling our getch() function to return"""
-    # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
-    # doesn't collide with anything with some meaning other than "please
-    # redraw".
-    os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("utf-8"))
-
-
 def top():
     # type: () -> None
 
@@ -570,7 +457,6 @@ def top():
         sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
         exit(1)
 
-    signal.signal(signal.SIGWINCH, sigwinch_handler)
     with px_terminal.fullscreen_display():
         try:
             _top()
