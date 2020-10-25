@@ -389,8 +389,13 @@ def get_command(**kwargs):
             last_highlighted_row += 1
             last_highlighted_pid = None
         elif input.consume(px_terminal.KEY_ENTER):
-            if last_highlighted_pid is not None:
-                px_process_menu.PxProcessMenu(last_highlighted_pid).start()
+            if last_highlighted_pid is None:
+                continue
+            processes = px_process.get_all()
+            process = px_processinfo.find_process_by_pid(last_highlighted_pid, processes)
+            if not process:
+                continue
+            px_process_menu.PxProcessMenu(process).start()
         elif input.consume(u'/'):
             global search_string
             top_mode = MODE_SEARCH

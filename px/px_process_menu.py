@@ -21,15 +21,17 @@ if False:
 class PxProcessMenu(object):
     MENU_ENTRIES = [
         u"Show info",
+        u"Show info as root",
         u"Kill process",
         u"Kill process as root",
-        u"Show info as root",
+        u"Back to process listing"
     ]
 
-    def __init__(self, pid):
-        # type: (int) -> None
-        self.pid = pid
+    def __init__(self, process):
+        # type: (px_process.PxProcess) -> None
+        self.process = process
         self.done = False
+
 
     def redraw(self):
         # type: () -> None
@@ -44,6 +46,7 @@ class PxProcessMenu(object):
         rows, columns = window_size
 
         lines = [u"Imagine a process menu here " + str(time.time())]
+        lines += [u"Process: " + px_terminal.bold(self.process.command)]
         lines += self.MENU_ENTRIES
         px_terminal.draw_screen_lines(lines, True)
 
@@ -94,7 +97,7 @@ class PxProcessMenu(object):
         """
         # Is this PID available?
         processes = px_process.get_all()
-        process = px_processinfo.find_process_by_pid(self.pid, processes)
+        process = px_processinfo.find_process_by_pid(self.process.pid, processes)
         if not process:
             # Process not available, never mind
             return
