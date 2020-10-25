@@ -32,6 +32,9 @@ class PxProcessMenu(object):
         self.process = process
         self.done = False
 
+        # Index into MENU_ENTRIES
+        self.active_entry = 0
+
 
     def redraw(self):
         # type: () -> None
@@ -45,9 +48,16 @@ class PxProcessMenu(object):
             exit("Cannot find terminal window size, are you on a terminal?\r\n")
         rows, columns = window_size
 
-        lines = [u"Imagine a process menu here " + str(time.time())]
+        lines = []
         lines += [u"Process: " + px_terminal.bold(self.process.command)]
-        lines += self.MENU_ENTRIES
+        lines += [u""]
+
+        for entry_no, text in enumerate(self.MENU_ENTRIES):
+            prefix = u'  '
+            if entry_no == self.active_entry:
+                prefix = u'->'
+            lines += [prefix + text]
+
         px_terminal.draw_screen_lines(lines, True)
 
     def handle_commands(self):
@@ -64,11 +74,13 @@ class PxProcessMenu(object):
 
         while len(input) > 0:
             if input.consume(px_terminal.KEY_UPARROW):
-                # FIXME: Move up the menu options
-                pass
+                self.active_entry -= 1
+                if self.active_entry < 0:
+                    self.active_entry = 0
             elif input.consume(px_terminal.KEY_DOWNARROW):
-                # FIXME: Move down the menu options
-                pass
+                self.active_entry += 1
+                if self.active_entry >= len(self.MENU_ENTRIES):
+                    self.active_entry = len(self.MENU_ENTRIES) - 1
             elif input.consume(px_terminal.KEY_ENTER):
                 # FIXME: Execute the current menu option
                 pass
