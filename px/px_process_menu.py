@@ -56,7 +56,11 @@ class PxProcessMenu(object):
         rows, columns = window_size
 
         lines = []
-        lines += [u"Process: " + px_terminal.bold(self.process.command)]
+
+        process_line = str(self.process.pid) + u" " + self.process.command
+        process_line = px_terminal.get_string_of_length(process_line, columns)
+        process_line = px_terminal.inverse_video(process_line)
+        lines += [process_line]
         lines += [u""]
 
         for entry_no, text in enumerate(self.MENU_ENTRIES):
@@ -83,6 +87,7 @@ class PxProcessMenu(object):
             return
         assert len(input) > 0
 
+        self.status = u''
         while len(input) > 0:
             if input.consume(px_terminal.KEY_UPARROW):
                 self.active_entry -= 1
@@ -163,7 +168,6 @@ class PxProcessMenu(object):
     def execute_menu_entry(self):
         # NOTE: Constants here must match lines in self.MENU_ENTRIES
         # at the top of this file
-        self.status = u''
         if self.active_entry == 0:
             self.page_process_info()
         elif self.active_entry == 1:
