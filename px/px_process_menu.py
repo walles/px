@@ -29,6 +29,7 @@ class PxProcessMenu(object):
     def __init__(self, pid):
         # type: (int) -> None
         self.pid = pid
+        self.done = False
 
     def redraw(self):
         # type: () -> None
@@ -46,8 +47,8 @@ class PxProcessMenu(object):
         lines += self.MENU_ENTRIES
         px_terminal.draw_screen_lines(lines, True)
 
-    def handle_commands_return_should_quit(self):
-        # type: () -> bool
+    def handle_commands(self):
+        # type: () -> None
         """
         Call getch() and interpret the results.
 
@@ -55,7 +56,7 @@ class PxProcessMenu(object):
         """
         input = px_terminal.getch()
         if input is None:
-            return False
+            return
         assert len(input) > 0
 
         while len(input) > 0:
@@ -69,25 +70,22 @@ class PxProcessMenu(object):
                 # FIXME: Execute the current menu option
                 pass
             elif input.consume(u'q'):
-                return True
+                self.done = True
+                return
             elif input.consume(px_terminal.SIGWINCH_KEY):
-                return False
+                return
             else:
                 # Unable to consume anything, give up
                 break
-
-        return False
 
     def start(self):
         # type: () -> None
         """
         Process menu main loop
         """
-        while True:
+        while not self.done:
             self.redraw()
-
-            if self.handle_commands_return_should_quit():
-                return
+            self.handle_commands()
 
     def page_process_info(self):
         # type: () -> None
