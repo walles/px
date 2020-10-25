@@ -186,6 +186,8 @@ def draw_screen_lines(lines, clear=True):
     else:
         screen_bytes = linestring
 
+    # FIXME: Append sequence for moving cursor to bottom right corner
+
     os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
 
 

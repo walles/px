@@ -19,6 +19,7 @@ if False:
 
 
 class PxProcessMenu(object):
+    # NOTE: Must match number constants in execute_menu_entry()
     MENU_ENTRIES = [
         u"Show info",
         u"Show info as root",
@@ -82,15 +83,16 @@ class PxProcessMenu(object):
                 if self.active_entry >= len(self.MENU_ENTRIES):
                     self.active_entry = len(self.MENU_ENTRIES) - 1
             elif input.consume(px_terminal.KEY_ENTER):
-                # FIXME: Execute the current menu option
-                pass
+                self.execute_menu_entry()
             elif input.consume(u'q'):
                 self.done = True
                 return
             elif input.consume(px_terminal.SIGWINCH_KEY):
-                return
+                # After we return the screen will be refreshed anyway,
+                # no need to do anything here.
+                continue
             else:
-                # Unable to consume anything, give up
+                # Unable to consume, give up
                 break
 
     def start(self):
@@ -116,3 +118,17 @@ class PxProcessMenu(object):
 
         with px_terminal.normal_display():
             px_pager.page_process_info(process, processes)
+
+    def execute_menu_entry(self):
+        # NOTE: Constants here must match lines in self.MENU_ENTRIES
+        # at the top of this file
+        if self.active_entry == 0:
+            self.page_process_info()
+        elif self.active_entry == 1:
+            pass  # FIXME: sudo page_process_info()
+        elif self.active_entry == 2:
+            pass  # FIXME: kill_process()
+        elif self.active_entry == 3:
+            pass  # FIXME: sudo kill_process()
+        elif self.active_entry == 4:
+            self.done = True
