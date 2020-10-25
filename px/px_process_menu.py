@@ -18,18 +18,28 @@ if False:
     from typing import Optional  # NOQA
 
 
-def redraw(
-    rows,    # type: int
-    columns  # type: int
-):
-    # type: (...) -> None
+MENU_ENTRIES = [
+    u"Show info",
+    u"Kill process",
+    u"Kill process as root",
+    u"Show info as root",
+]
+
+
+def redraw():
+    # type: () -> None
     """
     Refresh display.
 
     The new display will be rows rows x columns columns.
     """
+    window_size = px_terminal.get_window_size()
+    if window_size is None:
+        exit("Cannot find terminal window size, are you on a terminal?\r\n")
+    rows, columns = window_size
 
     lines = [u"Imagine a process menu here " + str(time.time())]
+    lines += MENU_ENTRIES
     px_terminal.draw_screen_lines(lines, True)
 
 
@@ -71,11 +81,7 @@ def show_process_menu(pid):
     Process menu main loop
     """
     while True:
-        window_size = px_terminal.get_window_size()
-        if window_size is None:
-            exit("Cannot find terminal window size, are you on a terminal?\r\n")
-        rows, columns = window_size
-        redraw(rows, columns)
+        redraw()
 
         if handle_commands_return_should_quit():
             return
