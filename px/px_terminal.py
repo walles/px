@@ -175,6 +175,20 @@ def get_window_size():
     return (rows, columns)
 
 
+def draw_screen_lines(lines, clear=True):
+    # type: (List[text_type], bool) -> None
+
+    # We need both \r and \n when the TTY is in tty.setraw() mode
+    linestring = u"\r\n".join(lines)
+
+    if clear:
+        screen_bytes = CLEAR_SCREEN + linestring
+    else:
+        screen_bytes = linestring
+
+    os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
+
+
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
                     columns,  # type: Optional[int]
                     row_to_highlight,  # type: Optional[int]

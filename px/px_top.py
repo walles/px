@@ -308,12 +308,7 @@ def redraw(
         toplist, launchcounter, rows, columns, include_footer,
         search=search_string)
 
-    clear_sequence = u""
-    if clear:
-        clear_sequence = px_terminal.CLEAR_SCREEN
-
-    # We need both \r and \n when the TTY is in tty.setraw() mode
-    writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
+    px_terminal.draw_screen_lines(lines, clear)
 
 
 def handle_search_keypresses(key_sequence):

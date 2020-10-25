@@ -18,11 +18,6 @@ if False:
     from typing import Optional  # NOQA
 
 
-def writebytes(bytestring):
-    # type: (bytes) -> None
-    os.write(sys.stdout.fileno(), bytestring)
-
-
 def redraw(
     rows,    # type: int
     columns  # type: int
@@ -34,11 +29,8 @@ def redraw(
     The new display will be rows rows x columns columns.
     """
 
-    clear_sequence = px_terminal.CLEAR_SCREEN
-    lines = ["Imagine a process menu here " + str(time.time())]
-
-    # We need both \r and \n when the TTY is in tty.setraw() mode
-    writebytes((clear_sequence + u"\r\n".join(lines)).encode('utf-8'))
+    lines = [u"Imagine a process menu here " + str(time.time())]
+    px_terminal.draw_screen_lines(lines, True)
 
 
 def handle_commands_return_should_quit():
