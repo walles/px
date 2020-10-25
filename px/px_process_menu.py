@@ -7,6 +7,8 @@ Invoked from px_top.py.
 import os
 import sys
 import time
+import errno
+import signal
 
 from . import px_pager
 from . import px_process
@@ -16,6 +18,7 @@ from . import px_processinfo
 if False:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
+    from typing import Union     # NOQA
 
 
 class PxProcessMenu(object):
@@ -32,6 +35,9 @@ class PxProcessMenu(object):
         # type: (px_process.PxProcess) -> None
         self.process = process
         self.done = False
+
+        # Shown to user, status of last operation
+        self.status = u""
 
         # Index into MENU_ENTRIES
         self.active_entry = 0
@@ -58,6 +64,10 @@ class PxProcessMenu(object):
             if entry_no == self.active_entry:
                 prefix = u'->'
             lines += [prefix + text]
+
+        if self.status:
+            lines += [u"", u'Status: ' + px_terminal.bold(self.status)]
+
 
         px_terminal.draw_screen_lines(lines, True)
 
@@ -91,6 +101,9 @@ class PxProcessMenu(object):
                 # After we return the screen will be refreshed anyway,
                 # no need to do anything here.
                 continue
+            elif input.consume(px_terminal.KEY_ESC):
+                self.done = True
+                return
             else:
                 # Unable to consume, give up
                 break
@@ -119,15 +132,44 @@ class PxProcessMenu(object):
         with px_terminal.normal_display():
             px_pager.page_process_info(process, processes)
 
+    def isPermissionError(self, e):
+        # type: (Union[IOError, OSError]) -> bool
+        # Inspired by https://stackoverflow.com/a/18200289/473672
+        return e.errno in [errno.EPERM, errno.EACCES]
+
+
+    def kill_process(self):
+        # Please die
+        try:
+            os.kill(self.process.pid, signal.SIGTERM)
+        except (IOError, OSError) as e:
+            if not self.isPermissionError(e):
+                raise e
+
+            self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
+            return
+
+        # FIXME: Give process 5s to die, possibly show a countdown for the duration
+
+        # FIXME: If process dead: self.done = True
+
+        # FIXME: Try again with -9 if it didn't die
+
+        # FIXME: Give process another 5s to die, possibly show a countdown for the duration
+
+        # FIXME: If it's still not dead, complain and give up
+
+
     def execute_menu_entry(self):
         # NOTE: Constants here must match lines in self.MENU_ENTRIES
         # at the top of this file
+        self.status = u''
         if self.active_entry == 0:
             self.page_process_info()
         elif self.active_entry == 1:
             pass  # FIXME: sudo page_process_info()
         elif self.active_entry == 2:
-            pass  # FIXME: kill_process()
+            self.kill_process()
         elif self.active_entry == 3:
             pass  # FIXME: sudo kill_process()
         elif self.active_entry == 4:
