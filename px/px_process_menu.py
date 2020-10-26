@@ -143,26 +143,56 @@ class PxProcessMenu(object):
         return e.errno in [errno.EPERM, errno.EACCES]
 
 
-    def kill_process(self):
-        # Please die
+    def kill_process(self, signo = None):
+        # type: (int) -> bool
+        """
+        Kill process with signal, wait 5s for it to die.
+
+        signo None: Try with SIGTERM, wait 5s, then try SIGKILL
+        signo number: Try killing with this signal, wait 5s for process to go away
+
+        Returns: True if the process died, False otherwise
+        """
+
+        if signo is None:
+            # Please die
+            if self.kill_process(signal.SIGTERM):
+                return True
+
+            # Die!!
+            if self.kill_process(signal.SIGKILL):
+                return True
+
+            return False
+
         try:
-            os.kill(self.process.pid, signal.SIGTERM)
+            os.kill(self.process.pid, signo)
         except (IOError, OSError) as e:
             if not self.isPermissionError(e):
                 raise e
 
             self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
-            return
+            return False
 
-        # FIXME: Give process 5s to die, possibly show a countdown for the duration
+        # Give process 5s to die, possibly show a countdown for the duration
+        t0 = time.time()
+        while (time.time() - t0) < 5:
+            if not self.process.is_alive():
+                return True
 
-        # FIXME: If process dead: self.done = True
+            dt = time.time() - t0
+            self.status = u""
+            if dt > 1:
+                self.status = u"Signal {} did not kill {} after {:.1f}s".format(
+                    signo,
+                    self.process.command,
+                    dt
+                )
+            self.redraw()
 
-        # FIXME: Try again with -9 if it didn't die
+            time.sleep(0.3)
 
-        # FIXME: Give process another 5s to die, possibly show a countdown for the duration
-
-        # FIXME: If it's still not dead, complain and give up
+        return False
 
 
     def execute_menu_entry(self):
@@ -173,7 +203,8 @@ class PxProcessMenu(object):
         elif self.active_entry == 1:
             pass  # FIXME: sudo page_process_info()
         elif self.active_entry == 2:
-            self.kill_process()
+            if self.kill_process():
+                self.done = True
         elif self.active_entry == 3:
             pass  # FIXME: sudo kill_process()
         elif self.active_entry == 4:
