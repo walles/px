@@ -67,6 +67,7 @@ class PxProcessMenu(object):
             prefix = u'  '
             if entry_no == self.active_entry:
                 prefix = u'->'
+                text = px_terminal.bold(text)
             lines += [prefix + text]
 
         if self.status:
