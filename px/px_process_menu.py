@@ -27,7 +27,6 @@ class PxProcessMenu(object):
     # NOTE: Must match number constants in execute_menu_entry()
     MENU_ENTRIES = [
         u"Show info",
-        u"Show info as root",
         u"Kill process",
         u"Kill process as root",
         u"Back to process listing"
@@ -205,11 +204,9 @@ class PxProcessMenu(object):
         if self.active_entry == 0:
             self.page_process_info()
         elif self.active_entry == 1:
-            pass  # FIXME: sudo page_process_info()
-        elif self.active_entry == 2:
             if self.kill_process():
                 self.done = True
-        elif self.active_entry == 3:
+        elif self.active_entry == 2:
             pass  # FIXME: sudo kill_process()
-        elif self.active_entry == 4:
+        elif self.active_entry == 3:
             self.done = True
