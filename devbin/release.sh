@@ -2,7 +2,7 @@
 
 set -o pipefail
 set -e
-cd "$(dirname "$0")"
+cd "$(dirname "$0"/..)"
 
 if ! [ -f ~/.pypirc ] ; then
   echo "ERROR: For this script to work you need a working ~/.pypirc file:"

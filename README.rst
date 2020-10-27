@@ -211,19 +211,19 @@ interpreters (tested on Linux and macOS).
 
 Releasing a new Version
 -----------------------
-To release a new version, run ``./release.sh`` and follow instructions.
+To release a new version, run ``./devbin/release.sh`` and follow instructions.
 
 Performance testing
 -------------------
 * Store the output of ``lsof -F fnaptd0i`` from a big system in lsof.txt.
-* ``./benchmark_ipcmap.py lsof.txt``
+* ``./devbin/benchmark_ipcmap.py lsof.txt``
 
 Keeping this benchmark performant is important to be able to use ``px`` on big
 systems.
 
 To run it in a profiler, install `pyinstrument`_ and:
 
-* ``python3 -m pyinstrument ./benchmark_ipcmap.py lsof.txt``
+* ``python3 -m pyinstrument ./devbin/benchmark_ipcmap.py lsof.txt``
 
 TODO ``top`` replacement
 ------------------------

@@ -12,12 +12,17 @@ This program will parse that output and make an IPC map of the process that has
 the highest number of entries in that file.
 """
 
+import os
+MYDIR = os.path.dirname(os.path.abspath(__file__))
+
+import sys
+sys.path.append(os.path.join(MYDIR, ".."))
+
 import time
 
 from tests import testutils
 from px import px_file
 
-import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableMapping  # NOQA
