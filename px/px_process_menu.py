@@ -20,6 +20,8 @@ if False:
     from typing import Optional  # NOQA
     from typing import Union     # NOQA
 
+KILL_TIMEOUT_SECONDS = 5
+
 
 class PxProcessMenu(object):
     # NOTE: Must match number constants in execute_menu_entry()
@@ -177,21 +179,22 @@ class PxProcessMenu(object):
 
         # Give process 5s to die, possibly show a countdown for the duration
         t0 = time.time()
-        while (time.time() - t0) < 5:
+        while (time.time() - t0) < KILL_TIMEOUT_SECONDS:
             if not self.process.is_alive():
                 return True
 
-            dt = time.time() - t0
-            self.status = u""
-            if dt > 1:
-                self.status = u"Signal {} did not kill {} after {:.1f}s".format(
-                    signo,
-                    self.process.command,
-                    dt
-                )
+            dt_s = time.time() - t0
+            countdown_s = KILL_TIMEOUT_SECONDS - dt_s
+            if countdown_s <= 0:
+                break
+            self.status = u"{:.1f}s Waiting for {} to die by signal {}".format(
+                countdown_s,
+                self.process.command,
+                signo,
+            )
             self.redraw()
 
-            time.sleep(0.3)
+            time.sleep(0.1)
 
         return False
 
