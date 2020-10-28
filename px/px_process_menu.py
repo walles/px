@@ -18,9 +18,28 @@ from . import px_processinfo
 if False:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
+    from typing import Callable  # NOQA
     from typing import Union     # NOQA
 
 KILL_TIMEOUT_SECONDS = 5
+
+
+def kill(pid, signo):
+    # type: (int, int) -> bool
+    """
+    Signal a process.
+
+    Returns True if the signal was delivered, False otherwise (not allowed).
+    """
+    try:
+        os.kill(pid, signo)
+    except (IOError, OSError) as e:
+        if e.errno not in [errno.EPERM, errno.EACCES]:
+            raise e
+
+        return False
+
+    return True
 
 
 class PxProcessMenu(object):
@@ -120,7 +139,7 @@ class PxProcessMenu(object):
         """
         Process menu main loop
         """
-        while not self.done:
+        while (not self.done) and (self.process.is_alive()):
             self.redraw()
             self.handle_commands()
 
@@ -139,44 +158,14 @@ class PxProcessMenu(object):
         with px_terminal.normal_display():
             px_pager.page_process_info(process, processes)
 
-    def isPermissionError(self, e):
-        # type: (Union[IOError, OSError]) -> bool
-        # Inspired by https://stackoverflow.com/a/18200289/473672
-        return e.errno in [errno.EPERM, errno.EACCES]
 
-
-    def kill_process(self, signo = None):
-        # type: (int) -> bool
+    def await_death(self, message):
+        # type(text_type) -> bool
         """
-        Kill process with signal, wait 5s for it to die.
+        Wait KILL_TIMEOUT_SECONDS for process to die.
 
-        signo None: Try with SIGTERM, wait 5s, then try SIGKILL
-        signo number: Try killing with this signal, wait 5s for process to go away
-
-        Returns: True if the process died, False otherwise
+        Returns True if it did, False if it didn't.
         """
-
-        if signo is None:
-            # Please die
-            if self.kill_process(signal.SIGTERM):
-                return True
-
-            # Die!!
-            if self.kill_process(signal.SIGKILL):
-                return True
-
-            return False
-
-        try:
-            os.kill(self.process.pid, signo)
-        except (IOError, OSError) as e:
-            if not self.isPermissionError(e):
-                raise e
-
-            self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
-            return False
-
-        # Give process 5s to die, possibly show a countdown for the duration
         t0 = time.time()
         while (time.time() - t0) < KILL_TIMEOUT_SECONDS:
             if not self.process.is_alive():
@@ -186,15 +175,39 @@ class PxProcessMenu(object):
             countdown_s = KILL_TIMEOUT_SECONDS - dt_s
             if countdown_s <= 0:
                 break
-            self.status = u"{:.1f}s Waiting for {} to die by signal {}".format(
+            self.status = u"{:.1f}s {}".format(
                 countdown_s,
-                self.process.command,
-                signo,
+                message,
             )
             self.redraw()
 
             time.sleep(0.1)
 
+
+    def kill_process(self, signal_process):
+        # type: (Callable[[int, int], bool]) -> bool
+        """
+        Kill process with signal, wait 5s for it to die.
+
+        signo None: Try with SIGTERM, wait 5s, then try SIGKILL
+        signo number: Try killing with this signal, wait 5s for process to go away
+
+        Returns: True if the process died, False otherwise
+        """
+
+        # Please go away
+        if not signal_process(self.process.pid, signal.SIGTERM):
+            self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
+            return False
+        if self.await_death(u"Waiting for %s to shut down after SIGTERM" % self.process.command):
+            return True
+
+        # Die!!
+        assert signal_process(self.process.pid, signal.SIGKILL)
+        if self.await_death(u"Waiting for %s to shut down after kill -9" % self.process.command):
+            return True
+
+        self.status = u"<" + self.process.command + "> did not die!"
         return False
 
 
@@ -204,8 +217,7 @@ class PxProcessMenu(object):
         if self.active_entry == 0:
             self.page_process_info()
         elif self.active_entry == 1:
-            if self.kill_process():
-                self.done = True
+            self.kill_process(kill)
         elif self.active_entry == 2:
             pass  # FIXME: sudo kill_process()
         elif self.active_entry == 3:
