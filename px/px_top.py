@@ -421,10 +421,7 @@ def _top():
     launchcounter = px_launchcounter.Launchcounter()
     while True:
         launchcounter.update(current)
-        window_size = px_terminal.get_window_size()
-        if window_size is None:
-            exit("Cannot find terminal window size, are you on a terminal?\r\n")
-        rows, columns = window_size
+        rows, columns = px_terminal.get_window_size()
         global sort_by_memory
         toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(toplist, launchcounter, rows, columns)

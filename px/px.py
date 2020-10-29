@@ -186,12 +186,14 @@ def _main(argv):
 
     procs = filter(lambda p: p.match(arg), px_process.get_all())
 
+    columns = None  # type: Optional[int]
+    try:
+        rows, columns = px_terminal.get_window_size()
+    except px_terminal.TerminalError:
+        columns = None
+
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
-    columns = None
-    window_size = px_terminal.get_window_size()
-    if window_size is not None:
-        columns = window_size[1]
     lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), columns, None, None)
     print("\n".join(lines))
 

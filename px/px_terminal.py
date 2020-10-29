@@ -147,35 +147,40 @@ def getch(timeout_seconds=None, fd=None):
     return None
 
 
-def get_window_size():
-    # type: () -> Optional[Tuple[int, int]]
-    """
-    Return the terminal window size as tuple (rows, columns) if available, or
-    None if not.
-    """
+class TerminalError(Exception):
+    def __init__(self, message):
+        super(TerminalError, self).__init__(message)
 
+
+def get_window_size():
+    # type: () -> Tuple[int, int]
+    """
+    Return the terminal window size as tuple (rows, columns).
+
+    Raises a TerminalError if the window size is unavailable.
+    """
     if not sys.stdout.isatty():
         # We shouldn't truncate lines when piping
-        return None
+        raise TerminalError("Not a TTY, window size not available")
 
     result = None
     with os.popen('stty size', 'r') as stty_size:
         result = stty_size.read().split()
     if len(result) < 2:
         # Getting the terminal window width failed, don't truncate
-        return None
+        raise TerminalError("Incomplete response to window size query")
 
     columns = int(result[1])
     if columns < 1:
         # This seems to happen during OS X CI runs:
         # https://travis-ci.org/walles/px/jobs/113134994
-        return None
+        raise TerminalError("Window width unreasonably small: " + str(columns))
 
     rows = int(result[0])
     if rows < 1:
         # Don't know if this actually happens, we just do it for symmetry with
         # the columns check above
-        return None
+        raise TerminalError("Window height unreasonably small: " + str(rows))
 
     return (rows, columns)
 
