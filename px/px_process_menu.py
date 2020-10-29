@@ -62,7 +62,7 @@ def sudo_kill(process, signo):
     """
     Signal a process as root.
 
-    Returns True if the signal was delivered, False otherwise (not allowed).
+    Returns True if the signal was delivered, False otherwise.
     """
     with px_terminal.normal_display():
         print(px_terminal.CLEAR_SCREEN)
@@ -115,13 +115,8 @@ class PxProcessMenu(object):
         self.active_entry = 0
 
 
-    def redraw(self):
+    def refresh_display(self):
         # type: () -> None
-        """
-        Refresh display.
-
-        The new display will be rows rows x columns columns.
-        """
         window_size = px_terminal.get_window_size()
         if window_size is None:
             exit("Cannot find terminal window size, are you on a terminal?\r\n")
@@ -145,13 +140,8 @@ class PxProcessMenu(object):
 
         px_terminal.draw_screen_lines(lines, True)
 
-    def handle_commands(self):
+    def await_and_handle_user_input(self):
         # type: () -> None
-        """
-        Call getch() and interpret the results.
-
-        Returns True if the user requested quit, False otherwise.
-        """
         input = px_terminal.getch()
         if input is None:
             return
@@ -189,15 +179,14 @@ class PxProcessMenu(object):
         Process menu main loop
         """
         while (not self.done) and (self.process.is_alive()):
-            self.redraw()
-            self.handle_commands()
+            self.refresh_display()
+            self.await_and_handle_user_input()
 
     def page_process_info(self):
         # type: () -> None
         """
         Display process info in a pager.
         """
-        # Is this PID available?
         processes = px_process.get_all()
         process = px_processinfo.find_process_by_pid(self.process.pid, processes)
         if not process:
@@ -209,26 +198,27 @@ class PxProcessMenu(object):
 
 
     def await_death(self, message):
-        # type(text_type) -> bool
+        # type(text_type) -> None
         """
         Wait KILL_TIMEOUT_SECONDS for process to die.
 
-        Returns True if it did, False if it didn't.
+        Returns after either the process dies or we run out of time,
+        whichever comes first.
         """
         t0 = time.time()
         while (time.time() - t0) < KILL_TIMEOUT_SECONDS:
             if not self.process.is_alive():
-                return True
+                return
 
             dt_s = time.time() - t0
             countdown_s = KILL_TIMEOUT_SECONDS - dt_s
             if countdown_s <= 0:
-                break
+                return
             self.status = u"{:.1f}s {}".format(
                 countdown_s,
                 message,
             )
-            self.redraw()
+            self.refresh_display()
 
             time.sleep(0.1)
 
@@ -238,19 +228,21 @@ class PxProcessMenu(object):
         """
         Send first SIGTERM then SIGKILL to a process.
 
-        Wait five secods in between to give it a chance to go away.
+        Wait KILL_TIMEOUT_SECONDS secods in between to give it a chance to go away.
         """
 
         # Please go away
         if not signal_process(self.process, SIGTERM):
             self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
             return
-        if self.await_death(u"Waiting for %s to shut down after SIGTERM" % self.process.command):
+        self.await_death(u"Waiting for %s to shut down after SIGTERM" % self.process.command)
+        if not self.process.is_alive():
             return
 
         # Die!!
         assert signal_process(self.process, SIGKILL)
-        if self.await_death(u"Waiting for %s to shut down after kill -9" % self.process.command):
+        self.await_death(u"Waiting for %s to shut down after kill -9" % self.process.command)
+        if not self.process.is_alive():
             return
 
         self.status = u"<" + self.process.command + "> did not die!"

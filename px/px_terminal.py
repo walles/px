@@ -9,7 +9,6 @@ import tty
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
-    from typing import Any       # NOQA
     from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Union     # NOQA
