@@ -5,7 +5,7 @@ import time
 import signal
 
 def receiveSignal(signalNumber, frame):
-    print('Received:', signalNumber)
+    print('Received signal ' + str(signalNumber))
     return
 
 signal.signal(signal.SIGTERM, receiveSignal)
