@@ -7,6 +7,7 @@ import os
 import re
 import pwd
 import six
+import errno
 import dateutil.tz
 
 from . import px_commandline
@@ -189,6 +190,22 @@ class PxProcess(object):
             return None
 
         return match.group(1)
+
+    def is_alive(self):
+        try:
+            # Signal 0 has no effect
+            os.kill(self.pid, 0)
+        except OSError as e:
+            if e.errno == errno.ESRCH:
+                # No such process
+                return False
+
+            # Process found but something else went wrong
+            return True
+
+        # No problem, process was there
+        return True
+
 
 
 class PxProcessBuilder(object):

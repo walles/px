@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import os
 import sys
 
 from px import px_terminal
@@ -72,3 +73,14 @@ def test_crop_ansi_string_at_length():
         u"123[1m456[0m".replace('[', CSI)
     assert px_terminal.crop_ansi_string_at_length(bold_middle, 7) == \
         u"123[1m456[22m7[0m".replace('[', CSI)
+
+
+def test_getch():
+    pipe = os.pipe()
+    read, write = pipe
+    os.write(write, b'q')
+
+    # We should get unicode responses from getch()
+    sequence = px_terminal.getch(timeout_seconds=0, fd=read)
+    assert sequence is not None
+    assert sequence._string == u'q'

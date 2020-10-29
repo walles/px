@@ -1,5 +1,8 @@
 import os
 import sys
+import errno
+import signal
+import select
 import termios
 import tty
 
@@ -12,6 +15,15 @@ if sys.version_info.major >= 3:
     from typing import Optional  # NOQA
     from typing import Iterable  # NOQA
     from . import px_process     # NOQA
+
+
+KEY_ESC = "\x1b"
+KEY_BACKSPACE = "\x1b[3~"
+KEY_DELETE = "\x7f"
+KEY_UPARROW = "\x1b[A"
+KEY_DOWNARROW = "\x1b[B"
+KEY_ENTER = "\x0d"
+
 
 initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 
@@ -29,6 +41,110 @@ scrollback buffer, which isn't what we want. Tread carefully if you
 intend to change these.
 """
 CLEAR_SCREEN = CSI + u"1J" + CSI + u"H"
+
+# Actually this is "Move 998 down and 999 right", but as long as people's
+# terminal windows are smaller than that it will work fine.
+#
+# Inspired by: https://stackoverflow.com/a/53168713/473672
+CURSOR_TO_BOTTOM_RIGHT = CSI + u"998B" + CSI + u"999C"
+
+
+# Used for informing our getch() function that a window resize has occured
+SIGWINCH_PIPE = os.pipe()
+
+# We'll report window resize as this key having been pressed.
+#
+# NOTE: This must be detected as non-printable by handle_search_keypress().
+SIGWINCH_KEY = u'\x00'
+
+def sigwinch_handler(signum, frame):
+    """Handle window resize signals by telling our getch() function to return"""
+    # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
+    # doesn't collide with anything with some meaning other than "please
+    # redraw".
+    os.write(
+        SIGWINCH_PIPE[1],
+        SIGWINCH_KEY.encode("utf-8"))
+
+# Subscribe to window size change signals
+signal.signal(signal.SIGWINCH, sigwinch_handler)
+
+
+class ConsumableString(object):
+    def __init__(self, string):
+        # type: (text_type) -> None
+        self._string = string
+
+    def __len__(self):
+        return len(self._string)
+
+    def consume(self, to_consume):
+        # type: (text_type) -> bool
+        if not self._string.startswith(to_consume):
+            return False
+
+        self._string = self._string[len(to_consume):]
+        return True
+
+
+def read_select(
+    fds,  # type: List[int]
+    timeout_seconds=None  # type: Optional[int]
+):
+    # type: (...) -> List[int]
+    """Select on any of the fds becoming ready for read, retry on EINTR"""
+
+    # NOTE: If you change this method, you must test running "px --top" and
+    # resize the window in both Python 2 and Python 3.
+    while True:
+        try:
+            return select.select(fds, [], [], timeout_seconds)[0]
+        except OSError as ose:
+            # Python 3
+            if ose.errno == errno.EINTR:
+                # EINTR happens when the terminal window is resized by the user,
+                # just try again.
+                continue
+
+            # Non-EINTR exceptions are unexpected, help!
+            raise
+        except select.error as se:
+            # Python 2
+            if se.args[0] == errno.EINTR:
+                # EINTR happens when the terminal window is resized by the user,
+                # just try again.
+                continue
+
+            # Non-EINTR exceptions are unexpected, help!
+            raise
+
+
+def getch(timeout_seconds=None, fd=None):
+    # type: (Optional[int], int) -> Optional[ConsumableString]
+    """
+    Wait at most timeout_seconds for a character to become available on stdin.
+
+    Returns the character, or None on timeout.
+    """
+    if fd is None:
+        fd = sys.stdin.fileno()
+
+    can_read_from = (
+        read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
+
+    # Read all(ish) bytes from the first ready-for-read stream. If more than one
+    # stream is ready, we'll catch the second one on the next call to this
+    # function, so just doing the first is fine.
+    for stream in can_read_from:
+        string = os.read(stream, 1234).decode("UTF-8")
+        if len(string) > 0:
+            return ConsumableString(string)
+
+        # A zero length response means we got EOF from one of the streams. This
+        # happens (at least) during testing.
+        continue
+
+    return None
 
 
 def get_window_size():
@@ -62,6 +178,22 @@ def get_window_size():
         return None
 
     return (rows, columns)
+
+
+def draw_screen_lines(lines, clear=True):
+    # type: (List[text_type], bool) -> None
+
+    # We need both \r and \n when the TTY is in tty.setraw() mode
+    linestring = u"\r\n".join(lines)
+
+    if clear:
+        screen_bytes = CLEAR_SCREEN + linestring
+    else:
+        screen_bytes = linestring
+
+    screen_bytes += CURSOR_TO_BOTTOM_RIGHT
+
+    os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
 
 
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
