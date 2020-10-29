@@ -68,10 +68,7 @@ def sudo_kill(process, signo):
         print(px_terminal.CLEAR_SCREEN)
 
         # Print process screen heading followed by an empty line
-        window_size = px_terminal.get_window_size()
-        if window_size is None:
-            exit("Cannot find terminal window size, are you on a terminal?\r\n")
-        rows, columns = window_size
+        rows, columns = px_terminal.get_window_size()
 
         print(get_header_line(process, columns))
         print("")
@@ -117,10 +114,7 @@ class PxProcessMenu(object):
 
     def refresh_display(self):
         # type: () -> None
-        window_size = px_terminal.get_window_size()
-        if window_size is None:
-            exit("Cannot find terminal window size, are you on a terminal?\r\n")
-        rows, columns = window_size
+        rows, columns = px_terminal.get_window_size()
 
         lines = []
 
