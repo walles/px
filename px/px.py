@@ -187,7 +187,7 @@ def _main(argv):
 
             px_pager.page_process_info(process, processes)
         else:
-            # FIXME: Turn of color in this case
+            px_terminal.disable_color()
             px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
         return
     except ValueError:
