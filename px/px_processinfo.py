@@ -94,6 +94,9 @@ def print_process_tree(fd, process):
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
         owner = line_and_process[1].username
+        if owner == "root":
+            owner = px_terminal.faint(owner)
+
         if line_and_process[1].pid == process.pid:
             sudo_user = process.get_sudo_user()
             if sudo_user:
