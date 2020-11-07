@@ -93,6 +93,8 @@ def print_process_tree(fd, process):
     tree_width = max(map(lambda lp: px_terminal.visual_length(lp[0]), lines_and_processes))
     lines = []
     current_user = getpass.getuser()
+    if os.environ['SUDO_USER']:
+        current_user = os.environ['SUDO_USER']
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
         owner = line_and_process[1].username
