@@ -276,18 +276,18 @@ def print_fds(fd, process, processes):
 
 def print_start_time(fd, process):
     # type: (int, px_process.PxProcess) -> None
-    println(fd, "{} ago {} was started, at {}.".format(
-        process.age_s,
+    println(fd, "{} {} was started, at {}.".format(
+        px_terminal.bold(process.age_s + " ago"),
         process.command,
-        process.start_time.isoformat(),
+        px_terminal.bold(process.start_time.isoformat()),
     ))
 
     if process.cpu_time_seconds and process.age_seconds:
         cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
-        println(fd, "{:.1f}% has been its average CPU usage since then, or {}/{}".format(
-            cpu_percent,
-            process.cpu_time_s,
-            process.age_s,
+        println(fd, "{} has been its average CPU usage since then, or {}/{}".format(
+            px_terminal.bold("{:.1f}%".format(cpu_percent)),
+            px_terminal.bold(process.cpu_time_s),
+            px_terminal.bold(process.age_s),
         ))
 
 
