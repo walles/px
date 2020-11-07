@@ -8,9 +8,9 @@ import os
 from . import px_file
 from . import px_process
 from . import px_ipc_map
+from . import px_terminal
 from . import px_cwdfriends
 from . import px_loginhistory
-from . import px_terminal
 
 
 if False:

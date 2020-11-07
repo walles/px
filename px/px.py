@@ -42,6 +42,7 @@ import six
 import sys
 import os
 
+from . import px_pager
 from . import px_install
 from . import px_process
 from . import px_terminal
@@ -178,7 +179,16 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
+        if sys.stdout.isatty():
+            processes = px_process.get_all()
+            process = px_processinfo.find_process_by_pid(pid, processes)
+            if not process:
+                exit("No such PID: {}\n".format(pid))
+
+            px_pager.page_process_info(process, processes)
+        else:
+            # FIXME: Turn of color in this case
+            px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving
