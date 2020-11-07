@@ -80,7 +80,6 @@ git tag --annotate "$NEW_VERSION_NUMBER"
 # Lots of automation from here on, be verbose for troubleshooting purposes
 set -x
 
-cd "$(dirname "$0")"
 find . -name 'px*.whl' -delete
 
 # Build the release
