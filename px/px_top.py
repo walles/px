@@ -35,7 +35,7 @@ CMD_QUIT = 1
 CMD_RESIZE = 2
 CMD_HANDLED = 3
 
-SEARCH_PROMPT_ACTIVE = px_terminal.bold("Search (ENTER when done): ")
+SEARCH_PROMPT_ACTIVE = px_terminal.inverse_video("Search (ENTER when done): ")
 SEARCH_PROMPT_INACTIVE = "Search ('/' to edit): "
 SEARCH_CURSOR = px_terminal.inverse_video(" ")
 
@@ -250,6 +250,10 @@ def get_screen_lines(
     max_process_count -= 1
 
     highlight_row = get_line_to_highlight(toplist, max_process_count)
+    global top_mode
+    if top_mode == MODE_SEARCH:
+        highlight_row = None
+
     highlight_column = u"CPUTIME"
     if sort_by_memory:
         highlight_column = u"RAM"
@@ -267,7 +271,7 @@ def get_screen_lines(
         px_terminal.crop_ansi_string_at_length(
             px_terminal.bold("Top " + top_what + " using processes"), columns)
     ]
-    global top_mode
+
     if top_mode == MODE_SEARCH:
         lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]
     else:
