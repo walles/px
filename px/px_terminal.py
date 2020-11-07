@@ -376,6 +376,7 @@ def crop_ansi_string_at_length(string, length):
             return result + reset_sequence
 
         if len(token) == 1:
+            # This was a character
             char_count += 1
         else:
             reset_sequence = CSI + '0m'
@@ -387,6 +388,20 @@ def crop_ansi_string_at_length(string, length):
 
     return result + reset_sequence
 
+
+def visual_length(string):
+    # type: (text_type) -> int
+    """
+    If we print this string, possibly containing ANSI characters, to
+    screen, how many characters wide will it be?
+    """
+    count = 0
+    for token in _tokenize(string):
+        if len(token) == 1:
+            # This is a character, not an ANSI sequence
+            count += 1
+
+    return count
 
 def _enter_fullscreen():
     global initial_termios_attr

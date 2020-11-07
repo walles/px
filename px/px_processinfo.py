@@ -9,6 +9,7 @@ from . import px_process
 from . import px_ipc_map
 from . import px_cwdfriends
 from . import px_loginhistory
+from . import px_terminal
 
 
 if False:
@@ -37,6 +38,7 @@ def find_process_by_pid(pid, processes):
 
 
 def print_command_line(fd, process):
+    # type: (int, px_process.PxProcess) -> None
     """
     Print command line separated by linefeeds rather than space, this adds
     readability to long command lines
@@ -59,6 +61,7 @@ def print_process_subtree(fd, process, indentation, lines):
 
 
 def print_process_tree(fd, process):
+    # type: (int, px_process.PxProcess) -> None
     # Contains tuples; the line to print and the process that line is for
     lines_and_processes = []  # type: List[Tuple[str, px_process.PxProcess]]
 
@@ -77,7 +80,8 @@ def print_process_tree(fd, process):
         indentation += 1
 
     # Print ourselves
-    lines_and_processes.append(("--" * (indentation - 1) + "> " + str(process), process))
+    bold_process = str(px_terminal.bold(str(process)))
+    lines_and_processes.append(("--" * (indentation - 1) + "> " + bold_process, process))
     indentation += 1
 
     # Print all our child trees
@@ -85,8 +89,7 @@ def print_process_tree(fd, process):
         print_process_subtree(fd, child, indentation, lines_and_processes)
 
     # Add an owners column to the right of the tree
-    tree_width = max(map(lambda lp: len(lp[0]), lines_and_processes))
-    lineformat = "{:" + str(tree_width) + "s}  {}"
+    tree_width = max(map(lambda lp: px_terminal.visual_length(lp[0]), lines_and_processes))
     lines = []
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
@@ -96,7 +99,8 @@ def print_process_tree(fd, process):
             if sudo_user:
                 owner += ', $SUDO_USER=' + sudo_user
 
-        lines.append(lineformat.format(line, owner))
+        padding = " " * (tree_width + 2 -px_terminal.visual_length(line))
+        lines.append(line + padding + owner)
 
     println(fd, '\n'.join(lines))
 
