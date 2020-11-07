@@ -200,13 +200,14 @@ def to_ipc_lines(ipc_map):
 def print_cwd_friends(fd, process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
-    println(fd, "Others sharing this process' working directory (" +
-            (friends.cwd or "<UNKNOWN>") +
-            ")")
+    cwd_suffix = u""
+    if friends.cwd:
+        cwd_suffix = u" (" + px_terminal.bold(friends.cwd) + ")"
+    println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
-        println(fd, '  Working directory unknown, try again or try "sudo px ' +
-                str(process.pid) +
-                '"')
+        sudo_px = px_terminal.bold("sudo px {}".format(process.pid))
+        println(fd,
+            '  Working directory unknown, try again or try "{}"'.format(sudo_px))
         return
 
     if friends.cwd == '/':
