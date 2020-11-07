@@ -266,8 +266,10 @@ def print_fds(fd, process, processes):
         println(fd, "  " + line)
 
     println(fd, "")
-    println(fd, "For a list of all open files, do \"sudo lsof -p {0}\", "
-            "or \"sudo watch lsof -p {0}\" for a live view.".format(process.pid))
+    lsof = px_terminal.bold("sudo lsof -p {}".format(process.pid))
+    watch_lsof = px_terminal.bold("sudo watch lsof -p {}".format(process.pid))
+    println(fd, "For a list of all open files, do \"{}\", "
+            "or \"{}\" for a live view.".format(lsof, watch_lsof))
 
     if os.getuid() != 0:
         println(fd, "")
