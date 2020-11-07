@@ -192,7 +192,7 @@ def to_ipc_lines(ipc_map):
         for channel_name in map(lambda c: str(c), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
-            return_me.append("{}: {}".format(target, channel_name))
+            return_me.append("{}: {}".format(px_terminal.bold(str(target)), channel_name))
 
     return return_me
 
