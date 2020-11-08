@@ -178,8 +178,8 @@ information; the command will work without it but might miss some information.
   the numbers you get from ``uptime``.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
-* Selecting a process with Enter will show you detailed information about that
-  process, in ``$PAGER``, `moar`_ or ``less``.
+* Selecting a process with Enter will offer you to see detailed information
+  about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
 * After you press ``q`` to quit, the display is retained and some lines at the
   bottom are removed to prevent the information you want from scrolling out of
   view.
