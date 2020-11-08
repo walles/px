@@ -6,7 +6,7 @@
 Usage:
   px [--debug]
   px [--debug] <filter>
-  px [--debug] <PID>
+  px [--debug] [--no-pager] [--color] <PID>
   px [--debug] --top
   px --install
   px --help
@@ -31,6 +31,8 @@ of which processes are most active right now.
 --top: Show a continuously refreshed process list
 --debug: Print debug logs (if any) after running
 --install: Install /usr/local/bin/px and /usr/local/bin/ptop
+--no-pager: Print PID info to stdout rather than to a pager
+--color: Force color output even when piping
 --help: Print this help
 --version: Print version information
 """
@@ -138,6 +140,23 @@ def handleLogMessages(messages):
 
 
 def _main(argv):
+    with_pager = None  # type: Optional[bool]
+    with_color = None  # type: Optional[bool]
+
+    while '--no-pager' in argv:
+        with_pager = False
+        argv.remove('--no-pager')
+    if with_pager is None:
+        with_pager = sys.stdout.isatty()
+
+    while '--color' in argv:
+        with_color = True
+        argv.remove('--color')
+    if with_color is None:
+        with_color = sys.stdout.isatty()
+    if not with_color:
+        px_terminal.disable_color()
+
     if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
         argv.append("--top")
 
@@ -179,16 +198,17 @@ def _main(argv):
 
     try:
         pid = int(arg)
-        if sys.stdout.isatty():
-            processes = px_process.get_all()
-            process = px_processinfo.find_process_by_pid(pid, processes)
-            if not process:
-                exit("No such PID: {}\n".format(pid))
-
-            px_pager.page_process_info(process, processes)
-        else:
-            px_terminal.disable_color()
+        if not with_pager:
             px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
+            return
+
+        # Page it!
+        processes = px_process.get_all()
+        process = px_processinfo.find_process_by_pid(pid, processes)
+        if not process:
+            exit("No such PID: {}\n".format(pid))
+
+        px_pager.page_process_info(process, processes)
         return
     except ValueError:
         # It's a search filter and not a PID, keep moving
