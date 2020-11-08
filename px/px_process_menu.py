@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Interactive menu for killing or infoing a process.
 
@@ -33,9 +35,9 @@ KILL_TIMEOUT_SECONDS = 5
 
 def get_header_line(process, columns):
     # type: (px_process.PxProcess, int) -> text_type
-    header_line = str(process.pid) + u" " + process.command
-    header_line = px_terminal.get_string_of_length(header_line, columns)
-    header_line = px_terminal.inverse_video(header_line)
+    header_line = u"Process: "
+    header_line += str(process.pid) + u" " + process.command
+    header_line = px_terminal.bold(header_line)
     return header_line
 
 
@@ -121,11 +123,27 @@ class PxProcessMenu(object):
         lines += [get_header_line(self.process, columns)]
         lines += [u""]
 
+        lines += [
+            px_terminal.bold("Arrow keys") +
+            " move up and down, " +
+            px_terminal.bold("RETURN") +
+            " selects, " +
+            px_terminal.bold("ESC") +
+            " to go back."]
+        lines += [u""]
+
+        last_entry_no = len(self.MENU_ENTRIES) - 1
         for entry_no, text in enumerate(self.MENU_ENTRIES):
-            prefix = u'  '
+            prefix = u'    '
+            arrow = u"⇵"
+            if entry_no == 0:
+                arrow = u"↓"
+            elif entry_no == last_entry_no:
+                arrow = u"↑"
             if entry_no == self.active_entry:
-                prefix = u'->'
-                text = px_terminal.bold(text)
+                prefix = arrow + u' ->'
+                text = px_terminal.inverse_video(text)
+
             lines += [prefix + text]
 
         if self.status:
