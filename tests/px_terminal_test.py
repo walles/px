@@ -12,7 +12,23 @@ def test_to_screen_lines_unbounded():
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
     assert px_terminal.to_screen_lines(procs, None, None, None) == [
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
-        "47536 fluff   root      0%   0.03s  0% /usr/bin/fluff 1234"
+        "47536 fluff   root     "
+        + px_terminal.faint(" 0%")
+        + "   0.03s "
+        + px_terminal.faint(" 0%")
+        + " /usr/bin/fluff 1234"
+    ]
+
+
+def test_to_screen_lines_bounded():
+    procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
+    assert px_terminal.to_screen_lines(procs, 50, None, None) == [
+        "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
+        "47536 fluff   root     "
+        + px_terminal.faint(" 0%")
+        + "   0.03s "
+        + px_terminal.faint(" 0%")
+        + " /usr/bin/fl\x1b[0m"
     ]
 
 

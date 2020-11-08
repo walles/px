@@ -278,11 +278,23 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
     lines.append(heading_line)
 
     for proc in procs:
+        cpu_percent_s = proc.cpu_percent_s
+        if proc.cpu_percent_s == "0%":
+            cpu_percent_s = faint(cpu_percent_s.rjust(cpu_width))
+
+        memory_percent_s = proc.memory_percent_s
+        if proc.memory_percent_s == "0%":
+            memory_percent_s = faint(memory_percent_s.rjust(mem_width))
+
         line = format.format(
             proc.pid, proc.command, proc.username,
-            proc.cpu_percent_s, proc.cpu_time_s,
-            proc.memory_percent_s, proc.cmdline)
-        lines.append(line[0:columns])
+            cpu_percent_s, proc.cpu_time_s,
+            memory_percent_s, proc.cmdline)
+
+        cropped = line
+        if columns is not None:
+            cropped = crop_ansi_string_at_length(line, columns)
+        lines.append(cropped)
 
     if row_to_highlight is not None:
         # The "+ 1" here is to skip the heading line
@@ -359,13 +371,17 @@ def get_string_of_length(string, length):
     if length is None:
         return string
 
-    if len(string) < length:
-        return string + (length - len(string)) * ' '
+    incoming_length = visual_length(string)
+    if incoming_length == length:
+        return string
 
-    if len(string) > length:
-        return string[0:length]
+    if incoming_length < length:
+        return string + u' ' * (length - incoming_length)
 
-    return string
+    if incoming_length > length:
+        return crop_ansi_string_at_length(string, length)
+
+    assert False  # How did we end up here?
 
 
 def _tokenize(string):
