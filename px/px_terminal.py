@@ -277,18 +277,43 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
     heading_line = bold(heading_line)
     lines.append(heading_line)
 
+    max_cpu_percent_s = None  # type: Optional[text_type]
+    max_cpu_percent = 0.0
+    max_memory_percent_s = None  # type: Optional[text_type]
+    max_memory_percent = 0.0
+    max_cpu_time_s = None  # type: Optional[text_type]
+    max_cpu_time = 0.0
+    for proc in procs:
+        if proc.cpu_percent is not None and proc.cpu_percent > max_cpu_percent:
+            max_cpu_percent = proc.cpu_percent
+            max_cpu_percent_s = proc.cpu_percent_s
+        if proc.memory_percent is not None and proc.memory_percent > max_memory_percent:
+            max_memory_percent = proc.memory_percent
+            max_memory_percent_s = proc.memory_percent_s
+        if proc.cpu_time_seconds is not None and proc.cpu_time_seconds > max_cpu_time:
+            max_cpu_time = proc.cpu_time_seconds
+            max_cpu_time_s = proc.cpu_time_s
+
     for proc in procs:
         cpu_percent_s = proc.cpu_percent_s
         if proc.cpu_percent_s == "0%":
             cpu_percent_s = faint(cpu_percent_s.rjust(cpu_width))
+        elif proc.cpu_percent_s == max_cpu_percent_s:
+            cpu_percent_s = bold(cpu_percent_s.rjust(cpu_width))
 
         memory_percent_s = proc.memory_percent_s
         if proc.memory_percent_s == "0%":
             memory_percent_s = faint(memory_percent_s.rjust(mem_width))
+        elif proc.memory_percent_s == max_memory_percent_s:
+            memory_percent_s = bold(memory_percent_s.rjust(mem_width))
+
+        cpu_time_s = proc.cpu_time_s
+        if proc.cpu_time_s == max_cpu_time_s:
+            cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
 
         line = format.format(
             proc.pid, proc.command, proc.username,
-            cpu_percent_s, proc.cpu_time_s,
+            cpu_percent_s, cpu_time_s,
             memory_percent_s, proc.cmdline)
 
         cropped = line

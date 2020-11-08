@@ -19,7 +19,9 @@ def test_to_screen_lines_unbounded():
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
         "47536 fluff   root     "
         + px_terminal.faint(" 0%")
-        + "   0.03s "
+        + " "
+        + px_terminal.bold("  0.03s")
+        + " "
         + px_terminal.faint(" 0%")
         + " /usr/bin/fluff 1234"
     ]
@@ -31,7 +33,9 @@ def test_to_screen_lines_bounded():
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
         "47536 fluff   root     "
         + px_terminal.faint(" 0%")
-        + "   0.03s "
+        + " "
+        + px_terminal.bold("  0.03s")
+        + " "
         + px_terminal.faint(" 0%")
         + " /usr/bin/fl\x1b[0m"
     ]
