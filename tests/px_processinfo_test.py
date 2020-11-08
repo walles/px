@@ -1,5 +1,6 @@
 from px import px_process
 from px import px_ipc_map
+from px import px_terminal
 from px import px_processinfo
 
 from . import testutils
@@ -124,6 +125,6 @@ def test_to_ipc_lines():
     }
     lines = px_processinfo.to_ipc_lines(ipcmap)  # type: ignore
     assert lines == [
-        "bar(47536): [PIPE] ->0xAda",
-        "foo(47536): [PIPE] ->0xAda"
+        px_terminal.bold("bar(47536)") + ": [PIPE] ->0xAda",
+        px_terminal.bold("foo(47536)") + ": [PIPE] ->0xAda"
     ]

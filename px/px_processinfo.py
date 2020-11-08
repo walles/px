@@ -1,5 +1,6 @@
 import sys
 import errno
+import getpass
 import datetime
 import operator
 
@@ -7,6 +8,7 @@ import os
 from . import px_file
 from . import px_process
 from . import px_ipc_map
+from . import px_terminal
 from . import px_cwdfriends
 from . import px_loginhistory
 
@@ -37,6 +39,7 @@ def find_process_by_pid(pid, processes):
 
 
 def print_command_line(fd, process):
+    # type: (int, px_process.PxProcess) -> None
     """
     Print command line separated by linefeeds rather than space, this adds
     readability to long command lines
@@ -59,6 +62,7 @@ def print_process_subtree(fd, process, indentation, lines):
 
 
 def print_process_tree(fd, process):
+    # type: (int, px_process.PxProcess) -> None
     # Contains tuples; the line to print and the process that line is for
     lines_and_processes = []  # type: List[Tuple[str, px_process.PxProcess]]
 
@@ -77,7 +81,8 @@ def print_process_tree(fd, process):
         indentation += 1
 
     # Print ourselves
-    lines_and_processes.append(("--" * (indentation - 1) + "> " + str(process), process))
+    bold_process = str(px_terminal.bold(str(process)))
+    lines_and_processes.append(("--" * (indentation - 1) + "> " + bold_process, process))
     indentation += 1
 
     # Print all our child trees
@@ -85,18 +90,25 @@ def print_process_tree(fd, process):
         print_process_subtree(fd, child, indentation, lines_and_processes)
 
     # Add an owners column to the right of the tree
-    tree_width = max(map(lambda lp: len(lp[0]), lines_and_processes))
-    lineformat = "{:" + str(tree_width) + "s}  {}"
+    tree_width = max(map(lambda lp: px_terminal.visual_length(lp[0]), lines_and_processes))
     lines = []
+    current_user = os.environ.get('SUDO_USER') or getpass.getuser()
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
         owner = line_and_process[1].username
+        if owner == "root":
+            owner = px_terminal.faint(owner)
+        elif owner != current_user:
+            # Neither root nor ourselves, highlight!
+            owner = px_terminal.bold(owner)
+
         if line_and_process[1].pid == process.pid:
             sudo_user = process.get_sudo_user()
             if sudo_user:
                 owner += ', $SUDO_USER=' + sudo_user
 
-        lines.append(lineformat.format(line, owner))
+        padding = " " * (tree_width + 2 -px_terminal.visual_length(line))
+        lines.append(line + padding + owner)
 
     println(fd, '\n'.join(lines))
 
@@ -180,7 +192,7 @@ def to_ipc_lines(ipc_map):
         for channel_name in map(lambda c: str(c), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
-            return_me.append("{}: {}".format(target, channel_name))
+            return_me.append("{}: {}".format(px_terminal.bold(str(target)), channel_name))
 
     return return_me
 
@@ -188,13 +200,14 @@ def to_ipc_lines(ipc_map):
 def print_cwd_friends(fd, process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
-    println(fd, "Others sharing this process' working directory (" +
-            (friends.cwd or "<UNKNOWN>") +
-            ")")
+    cwd_suffix = u""
+    if friends.cwd:
+        cwd_suffix = u" (" + px_terminal.bold(friends.cwd) + ")"
+    println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
-        println(fd, '  Working directory unknown, try again or try "sudo px ' +
-                str(process.pid) +
-                '"')
+        sudo_px = px_terminal.bold("sudo px {}".format(process.pid))
+        println(fd,
+            '  Working directory unknown, try again or try "{}"'.format(sudo_px))
         return
 
     if friends.cwd == '/':
@@ -253,8 +266,10 @@ def print_fds(fd, process, processes):
         println(fd, "  " + line)
 
     println(fd, "")
-    println(fd, "For a list of all open files, do \"sudo lsof -p {0}\", "
-            "or \"sudo watch lsof -p {0}\" for a live view.".format(process.pid))
+    lsof = px_terminal.bold("sudo lsof -p {}".format(process.pid))
+    watch_lsof = px_terminal.bold("sudo watch lsof -p {}".format(process.pid))
+    println(fd, "For a list of all open files, do \"{}\", "
+            "or \"{}\" for a live view.".format(lsof, watch_lsof))
 
     if os.getuid() != 0:
         println(fd, "")
@@ -264,18 +279,18 @@ def print_fds(fd, process, processes):
 
 def print_start_time(fd, process):
     # type: (int, px_process.PxProcess) -> None
-    println(fd, "{} ago {} was started, at {}.".format(
-        process.age_s,
+    println(fd, "{} {} was started, at {}.".format(
+        px_terminal.bold(process.age_s + " ago"),
         process.command,
-        process.start_time.isoformat(),
+        px_terminal.bold(process.start_time.isoformat()),
     ))
 
     if process.cpu_time_seconds and process.age_seconds:
         cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
-        println(fd, "{:.1f}% has been its average CPU usage since then, or {}/{}".format(
-            cpu_percent,
-            process.cpu_time_s,
-            process.age_s,
+        println(fd, "{} has been its average CPU usage since then, or {}/{}".format(
+            px_terminal.bold("{:.1f}%".format(cpu_percent)),
+            px_terminal.bold(process.cpu_time_s),
+            px_terminal.bold(process.age_s),
         ))
 
 
