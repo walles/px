@@ -7,6 +7,11 @@ from px import px_terminal
 
 from . import testutils
 
+if sys.version_info.major >= 3:
+    # For mypy PEP-484 static typing validation
+    from typing import List    # NOQA
+    from six import text_type  # NOQA
+
 
 def test_to_screen_lines_unbounded():
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
@@ -100,3 +105,18 @@ def test_getch():
     sequence = px_terminal.getch(timeout_seconds=0, fd=read)
     assert sequence is not None
     assert sequence._string == u'q'
+
+
+def test_tokenize():
+    input = u"ab" + px_terminal.bold(u"c") + u"de"
+    parts = []  # type: List[text_type]
+    for token in px_terminal._tokenize(input):
+        parts.append(token)
+
+    assert parts == [
+        'ab',
+        '\x1b[1m',
+        'c',
+        '\x1b[22m',
+        'de'
+    ]

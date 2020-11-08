@@ -387,27 +387,43 @@ def get_string_of_length(string, length):
 def _tokenize(string):
     # type: (text_type) -> Iterable[text_type]
     """
-    Tokenizes string into chars and ANSI sequences.
+    Tokenizes string into character sequences and ANSI sequences.
     """
     i = 0
     while i < len(string):
         try:
-            char = string[i]
-            if char == CSI[0]:
-                c0 = i
-                while string[i] != 'm':
-                    i += 1
-                yield string[c0:i + 1]
-                continue
+            next_csi_index = string.index(CSI, i)
+        except ValueError:
+            # No more CSIs
+            break
+        if next_csi_index > i:
+            # Yield char sequence until next CSI marker
+            yield string[i:next_csi_index]
+            i = next_csi_index
+            continue
 
-            yield string[i]
-        finally:
-            i += 1
+        # We are at a CSI marker
+        try:
+            next_m_index = string.index('m', i)
+        except ValueError:
+            # No end-of-escape sequence found
+            break
+        next_i = next_m_index + 1
+
+        # Yield full escape sequence
+        yield string[i:next_i]
+        i = next_i
+        continue
+
+    # Yield the remaining part of the string
+    yield string[i:]
 
 
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
     assert length >= 0
+    if length == 0:
+        return ''
 
     result = u""
     char_count = 0
@@ -415,19 +431,22 @@ def crop_ansi_string_at_length(string, length):
     reset_sequence = u""
 
     for token in _tokenize(string):
-        if char_count == length:
-            return result + reset_sequence
-
-        if len(token) == 1:
-            # This was a character
-            char_count += 1
-        else:
+        if token.startswith(CSI):
             reset_sequence = CSI + '0m'
             if token == reset_sequence:
                 # Already reset
                 reset_sequence = ""
+            result += token
+            continue
+
+        # Not a CSI token
+        missing_count = length - char_count
+        if len(token) >= missing_count:
+            result += token[:missing_count]
+            break
 
         result += token
+        char_count += len(token)
 
     return result + reset_sequence
 
@@ -440,9 +459,9 @@ def visual_length(string):
     """
     count = 0
     for token in _tokenize(string):
-        if len(token) == 1:
-            # This is a character, not an ANSI sequence
-            count += 1
+        if not token.startswith(CSI):
+            # These are characters
+            count += len(token)
 
     return count
 
