@@ -65,10 +65,18 @@ def test_to_screen_lines_unicode():
 
 
 def test_get_string_of_length():
+    CSI = u"\x1b["
+
     assert px_terminal.get_string_of_length("12345", 3) == "123"
     assert px_terminal.get_string_of_length("12345", 5) == "12345"
     assert px_terminal.get_string_of_length("12345", 7) == "12345  "
     assert px_terminal.get_string_of_length("12345", None) == "12345"
+
+    # Test with escaped strings
+    mid_bold = "1" + px_terminal.bold("234") + "5"
+    assert px_terminal.get_string_of_length(mid_bold, 6) == mid_bold + " "
+    assert px_terminal.get_string_of_length(mid_bold, 3) == \
+        "1" + CSI + "1m23" + CSI + "0m"
 
 
 def test_crop_ansi_string_at_length():

@@ -294,7 +294,7 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
             max_cpu_time = proc.cpu_time_seconds
             max_cpu_time_s = proc.cpu_time_s
 
-    for proc in procs:
+    for line_number, proc in enumerate(procs):
         cpu_percent_s = proc.cpu_percent_s
         if proc.cpu_percent_s == "0%":
             cpu_percent_s = faint(cpu_percent_s.rjust(cpu_width))
@@ -317,18 +317,12 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
             memory_percent_s, proc.cmdline)
 
         cropped = line
-        if columns is not None:
+        if row_to_highlight == line_number:
+            cropped = get_string_of_length(cropped, columns)
+            cropped = inverse_video(cropped)
+        elif columns is not None:
             cropped = crop_ansi_string_at_length(line, columns)
         lines.append(cropped)
-
-    if row_to_highlight is not None:
-        # The "+ 1" here is to skip the heading line
-        highlighted = lines[row_to_highlight + 1]
-        highlighted = get_string_of_length(highlighted, columns)
-        highlighted = inverse_video(highlighted)
-
-        # The "+ 1" here is to skip the heading line
-        lines[row_to_highlight + 1] = highlighted
 
     lines[0] = heading_line
 
@@ -396,14 +390,14 @@ def get_string_of_length(string, length):
     if length is None:
         return string
 
-    incoming_length = visual_length(string)
-    if incoming_length == length:
+    initial_length = visual_length(string)
+    if initial_length == length:
         return string
 
-    if incoming_length < length:
-        return string + u' ' * (length - incoming_length)
+    if initial_length < length:
+        return string + u' ' * (length - initial_length)
 
-    if incoming_length > length:
+    if initial_length > length:
         return crop_ansi_string_at_length(string, length)
 
     assert False  # How did we end up here?
