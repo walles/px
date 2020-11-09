@@ -89,6 +89,16 @@ def launch_pager():
     # Prevent --quit-if-one-screen, we always want a pager
     env['LESS'] = ''
 
+    # Git sets this to "FRX", but "F" means "don't page if output is too short"
+    # and we always want to page, so we go for "RX" only.
+    #
+    # "F" might work when somebody does "px 1234", but when ptop wants to show
+    # process info it w
+    env['LESS'] = 'RX'
+
+    # Git does this as well
+    env['LV'] = '-c'
+
     pager_cmd = to_command_line(env.get('PAGER', None))
     if not pager_cmd:
         # Prefer moar: https://github.com/walles/moar
