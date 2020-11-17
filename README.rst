@@ -3,44 +3,28 @@
 ``ps`` and ``top`` for Human Beings
 ===================================
 
-Installation
-------------
-On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install using::
-
-  sudo apt-get install px
-
-On other systems (macOs, other Linux distros, ...), install into ``/usr/local/bin`` by
-copy / pasting this command into a terminal::
-
-  curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
-
-**Help wanted**: If somebody could `create a macOS Homebrew package`_ that would be super!
-
-Or you can install from Pypi. At least on macOS this can be problematic however,
-so the install script above is still preferred::
-
-  sudo pip install --upgrade pxpx
-
-Now, you should be able to run ``px``, ``px --help`` or ``ptop`` from the command
-line. Otherwise please verify that ``/usr/local/bin`` is in your ``$PATH``.
-
-To try ``px`` without installing it, just `download the latest px.pex`_,
-``chmod a+x px.pex``, then run ``./px.pex``.
-
-Usage
------
-Just type ``px`` or ``ptop``, that's a good start!
-
-To exit ``ptop``, press "``q``".
-
-Also try ``px --help`` to see what else ``px`` can do except for just listing all
-processes.
-
-If you run into problems, try running with the ``--debug`` switch, it will print
-debug logging output after ``px``/``ptop`` is done.
+See below for `how to install`_.
 
 Output
 ======
+
+``ptop``
+--------
+|ptop screenshot|
+
+* Note how the default sort order of CPU-usage-since-``ptop``-started makes the
+  display rather stable.
+* Note the core count right next to the system load number, for easy comparison.
+* Note the load history graph next to the load numbers. On this system the
+  load has been the same for the last fifteen minutes. This is a visualization of
+  the numbers you get from ``uptime``.
+* Note that binaries launched while ``ptop`` is running are listed at the bottom
+  of the display.
+* Selecting a process with Enter will offer you to see detailed information
+  about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
+* After you press ``q`` to quit, the display is retained and some lines at the
+  bottom are removed to prevent the information you want from scrolling out of
+  view.
 
 ``px``
 -------------
@@ -166,23 +150,41 @@ This shows detailed info about PID 80727.
 The IPC data comes from ``lsof``. ``sudo`` helps ``lsof`` get more detailed
 information; the command will work without it but might miss some information.
 
-``ptop``
---------
-|ptop screenshot|
+Installation
+------------
+On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install using::
 
-* Note how the default sort order of CPU-usage-since-``ptop``-started makes the
-  display rather stable.
-* Note the core count right next to the system load number, for easy comparison.
-* Note the load history graph next to the load numbers. On this system the
-  load has been the same for the last fifteen minutes. This is a visualization of
-  the numbers you get from ``uptime``.
-* Note that binaries launched while ``ptop`` is running are listed at the bottom
-  of the display.
-* Selecting a process with Enter will offer you to see detailed information
-  about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
-* After you press ``q`` to quit, the display is retained and some lines at the
-  bottom are removed to prevent the information you want from scrolling out of
-  view.
+  sudo apt-get install px
+
+On other systems (macOs, other Linux distros, ...), install into ``/usr/local/bin`` by
+copy / pasting this command into a terminal::
+
+  curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
+
+**Help wanted**: If somebody could `create a macOS Homebrew package`_ that would be super!
+
+Or you can install from Pypi. At least on macOS this can be problematic however,
+so the install script above is still preferred::
+
+  sudo pip install --upgrade pxpx
+
+Now, you should be able to run ``px``, ``px --help`` or ``ptop`` from the command
+line. Otherwise please verify that ``/usr/local/bin`` is in your ``$PATH``.
+
+To try ``px`` without installing it, just `download the latest px.pex`_,
+``chmod a+x px.pex``, then run ``./px.pex``.
+
+Usage
+-----
+Just type ``px`` or ``ptop``, that's a good start!
+
+To exit ``ptop``, press "``q``".
+
+Also try ``px --help`` to see what else ``px`` can do except for just listing all
+processes.
+
+If you run into problems, try running with the ``--debug`` switch, it will print
+debug logging output after ``px``/``ptop`` is done.
 
 Development
 ===========
@@ -306,7 +308,7 @@ DONE
   green is hard to read.
 * ptop: Let user switch between CPU time sort and memory sort
 
-.. _the Output section: #output
+.. _how to install: #installation
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
 .. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
