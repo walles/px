@@ -3,30 +3,31 @@ import sys
 from px import px
 from unittest.mock import patch
 
-def test_main():
+@patch('px.px.install')
+def test_cmdline_install(mock):
     args = ['px', '--install']
-    with patch("px.px.install") as install_mock:
-        px._main(args)
-        install_mock.assert_called_once_with(args)
+    px._main(args)
+    mock.assert_called_once_with(args)
 
-    with patch("px.px_top.top") as top_mock:
-        px._main(['px', '--top'])
-        top_mock.assert_called_once()
+@patch("px.px_top.top")
+def test_cmdline_top(mock):
+    px._main(['px', '--top'])
+    mock.assert_called_once()
 
-    with patch("px.px_top.top") as top_mock:
-        px._main(['ptop'])
-        top_mock.assert_called_once()
+@patch("px.px_top.top")
+def test_cmdline_ptop(mock):
+    px._main(['ptop'])
+    mock.assert_called_once()
 
-    with patch("builtins.print") as print_mock:
-        px._main(['px', '--help'])
+@patch("builtins.print")
+def test_cmdline_help(mock):
+    px._main(['px', '--help'])
+    mock.assert_called_once_with(px.__doc__)
 
-        print_mock.assert_called_once_with(px.__doc__)
+# FIXME: Test --version
 
-    # FIXME: Test --version
+# FIXME: Test 'px 1'
 
-    # FIXME: Test 'px 1'
+# FIXME: Test 'px root'
 
-    # FIXME: Test 'px root'
-
-    # FIXME: Test just 'px'
-
+# FIXME: Test just 'px'
