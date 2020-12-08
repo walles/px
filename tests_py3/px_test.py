@@ -17,7 +17,10 @@ def test_main():
         px._main(['ptop'])
         top_mock.assert_called_once()
 
-    # FIXME: Test --help
+    with patch("builtins.print") as print_mock:
+        px._main(['px', '--help'])
+
+        print_mock.assert_called_once_with(px.__doc__)
 
     # FIXME: Test --version
 
