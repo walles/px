@@ -1,11 +1,5 @@
-# We need sudo to install pip system-wide
-sudo: required
-
 # Works on both Linux and macOS
 language: shell
-
-install:
-- sudo -H pip2 install coveralls coverage tox
 
 script: tox
 
@@ -21,7 +15,13 @@ jobs:
           packages:
           - python@2
           - shellcheck
+          - tox
 
     - name: "Linux"
       os: linux
       dist: bionic
+
+      addons:
+        apt:
+          packages:
+          - tox
