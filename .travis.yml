@@ -1,25 +1,27 @@
 # We need sudo to install pip system-wide
 sudo: required
 
-os:
-  - linux
-  - osx
-
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update             ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python@2 || brew upgrade python@2 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip install virtualenv==16.7.9 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install shellcheck ; fi
-
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository -y ppa:fkrull/deadsnakes ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update ; fi
+# Works on both Linux and macOS
+language: shell
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install python3.5 python3.5-dev --force-yes -y ; fi
-
-  - sudo -H pip2 install coveralls coverage tox
+- sudo -H pip2 install coveralls coverage tox
 
 script: tox
 
-after_success:
-  - coveralls
+jobs:
+  include:
+    - name: "macOS"
+      # From: https://docs.travis-ci.com/user/languages/python/#running-python-tests-on-multiple-operating-systems
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
+
+      addons:
+        homebrew:
+          packages:
+          - python@2
+          - shellcheck
+
+    - name: "Linux"
+      os: linux
+      dist: bionic
