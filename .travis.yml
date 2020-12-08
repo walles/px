@@ -20,8 +20,6 @@ jobs:
     - name: "Linux"
       os: linux
       dist: bionic
-
-      addons:
-        apt:
-          packages:
-          - tox
+      sudo: required  # For installing tox globally from pypi. The apt-get version is too old, so we can't use that.
+      install:
+      - sudo -H pip install tox
