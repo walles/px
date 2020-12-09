@@ -36,11 +36,11 @@ def test_cmdline_version(mock):
     mock.assert_called_once()
 
     first_print_arg: str = mock.call_args.args[0]
-    assert first_print_arg.startswith('1.')
+    assert first_print_arg
 
 @patch("px.px_processinfo.print_pid_info")
 def test_cmdline_pid(mock):
-    px._main(['px', '1235'])
+    px._main(['px', '1235', '--no-pager'])
 
     mock.assert_called_once()
     # First arg is a file descriptor that changes on every invocation, check the
@@ -49,7 +49,7 @@ def test_cmdline_pid(mock):
 
 @patch("px.px_terminal.to_screen_lines")
 def test_cmdline_filter(mock):
-    px._main(['px', 'root'])
+    px._main(['px', 'root', '--no-pager'])
 
     mock.assert_called_once()
     processes: List[px_process.PxProcess] = mock.call_args.args[0]
