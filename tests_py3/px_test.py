@@ -61,4 +61,12 @@ def test_cmdline_filter(mock):
     for process in processes:
         assert process.match('root')
 
-# FIXME: Test just 'px'
+@patch("px.px_terminal.to_screen_lines")
+def test_cmdline_list_all_processes(mock):
+    px._main(['px'])
+
+    mock.assert_called_once()
+    processes: List[px_process.PxProcess] = mock.call_args.args[0]
+
+    # We are running, and something started us, so this list must not be empty
+    assert len(processes) > 0
