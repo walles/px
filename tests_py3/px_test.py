@@ -43,6 +43,7 @@ def test_cmdline_pid(mock):
     px._main(['px', '1235', '--no-pager'])
 
     mock.assert_called_once()
+    print(mock.call_args.args)
     # First arg is a file descriptor that changes on every invocation, check the
     # PID arg only.
     assert mock.call_args.args[1] == 1235
@@ -53,6 +54,7 @@ def test_cmdline_filter(mock):
 
     mock.assert_called_once()
     processes: List[px_process.PxProcess] = mock.call_args.args[0]
+    print(processes)
 
     # This assumes something is running as root. We can assume that, right?
     assert len(processes) > 0
