@@ -24,7 +24,13 @@ def test_cmdline_help(mock):
     px._main(['px', '--help'])
     mock.assert_called_once_with(px.__doc__)
 
-# FIXME: Test --version
+@patch("builtins.print")
+def test_cmdline_version(mock):
+    px._main(['px', '--version'])
+    mock.assert_called_once()
+
+    first_print_arg: str = mock.call_args.args[0]
+    assert first_print_arg.startswith('1.')
 
 # FIXME: Test 'px 1'
 
