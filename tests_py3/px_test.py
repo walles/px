@@ -1,8 +1,13 @@
 import sys
 
 from px import px
+from px import px_process
+from px import px_terminal
 from px import px_processinfo
+
 from unittest.mock import patch
+
+from typing import List
 
 @patch('px.px.install')
 def test_cmdline_install(mock):
@@ -42,7 +47,18 @@ def test_cmdline_pid(mock):
     # PID arg only.
     assert mock.call_args.args[1] == 1235
 
+@patch("px.px_terminal.to_screen_lines")
+def test_cmdline_filter(mock):
+    px._main(['px', 'root'])
 
-# FIXME: Test 'px root'
+    mock.assert_called_once()
+    processes: List[px_process.PxProcess] = mock.call_args.args[0]
+
+    # This assumes something is running as root. We can assume that, right?
+    assert len(processes) > 0
+
+    # All listed processes must match
+    for process in processes:
+        assert process.match('root')
 
 # FIXME: Test just 'px'
