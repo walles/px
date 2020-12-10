@@ -211,6 +211,9 @@ interpreters (tested on Linux and macOS).
 * Run: ``./px.pex``
 * To add dependencies, edit ``requirements.txt``
 
+You can also run ``./devbin/tox-in-docker.sh``, which can be used to run Linux
+tests on a Mac.
+
 Releasing a new Version
 -----------------------
 To release a new version, run ``./devbin/release.sh`` and follow instructions.

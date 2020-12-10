@@ -2,6 +2,7 @@
 
 import os
 import re
+import shutil
 import filecmp
 import tempfile
 import subprocess
@@ -20,10 +21,10 @@ with tempfile.NamedTemporaryFile(suffix='.py', delete=False) as tmp:
 
     if not os.path.isfile(VERSIONFILE):
         # No version file found
-        os.rename(tmp.name, VERSIONFILE)
+        shutil.move(tmp.name, VERSIONFILE)
     elif not filecmp.cmp(tmp.name, VERSIONFILE):
         # Version file needs updating
-        os.rename(tmp.name, VERSIONFILE)
+        shutil.move(tmp.name, VERSIONFILE)
     else:
         # VERSIONFILE was already up to date. If we touch it in this
         # case, it will have its file timestamp updated, which will

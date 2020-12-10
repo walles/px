@@ -38,10 +38,8 @@ def test_create_process():
 def test_call_ps():
     lines = list(px_process.call_ps())
 
-    # There should be at least 20 processes running on any single system. If
-    # there's a counter example, we'll just have to lower the 20 and document
-    # the counter example.
-    assert len(lines) > 20
+    # Running in devbin/tox-in-docker.sh we get 10 processes
+    assert len(lines) > 5
 
     for line in lines:
         # 20 is an arbitrary lowest limit, if there are cases where this test

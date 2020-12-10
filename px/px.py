@@ -53,7 +53,7 @@ from . import px_processinfo
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
+    from typing import Optional, List  # NOQA
 
 
 ERROR_REPORTING_HEADER = """
@@ -66,7 +66,8 @@ Problems detected, please send this text to one of:
 
 
 def install(argv):
-    # Find full path to self
+    # type: (List[str]) -> None
+    """Find full path to self"""
     if not argv:
         sys.stderr.write("ERROR: Can't find myself, can't install\n")
         return
@@ -140,6 +141,7 @@ def handleLogMessages(messages):
 
 
 def _main(argv):
+    # type: (List[str]) -> None
     with_pager = None  # type: Optional[bool]
     with_color = None  # type: Optional[bool]
 
