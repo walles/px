@@ -25,6 +25,28 @@ def test_cmdline_ptop(mock):
     px._main(['ptop'])
     mock.assert_called_once()
 
+@patch("px.px_top.top")
+def test_cmdline_top_with_search(mock):
+    px._main(['px', '--top', 'kalas'])
+
+    mock.assert_called_once()
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+
+    assert kwargs.get('search') == 'kalas'
+
+@patch("px.px_top.top")
+def test_cmdline_ptop_with_search(mock):
+    px._main(['ptop', 'kalas'])
+
+    mock.assert_called_once()
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+
+    assert kwargs.get('search') == 'kalas'
+
 @patch("builtins.print")
 def test_cmdline_help(mock):
     px._main(['px', '--help'])

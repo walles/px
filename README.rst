@@ -193,7 +193,7 @@ Prerequisites
 -------------
 
 * A Python 2 version
-* A Python 3 version
+* A Python 3.6+ version
 * `tox`_
 
 Building and Running
