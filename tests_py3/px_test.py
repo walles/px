@@ -79,7 +79,11 @@ def test_cmdline_list_all_processes(mock):
     px._main(['px'])
 
     mock.assert_called_once()
-    processes: List[px_process.PxProcess] = mock.call_args.args[0]
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+    processes: List[px_process.PxProcess] = args[0]
 
     # We are running, and something started us, so this list must not be empty
     assert len(processes) > 0
+    assert processes[0].command
