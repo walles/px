@@ -4,10 +4,9 @@
      https://github.com/walles/px
 
 Usage:
-  px [--debug]
-  px [--debug] <filter>
+  px [--debug] [filter string]
   px [--debug] [--no-pager] [--color] <PID>
-  px [--debug] --top
+  px [--debug] --top [filter string]
   px --install
   px --help
   px --version
@@ -16,14 +15,14 @@ In the base case, px list all processes much like ps, but with the most
 interesting processes last. A process is considered interesting if it has high
 memory usage, has used lots of CPU or has been started recently.
 
-If the optional filter parameter is specified, processes will be shown if:
+If the optional filter string parameter is specified, processes will be shown if:
 * The filter matches the user name of the process
 * The filter matches a substring of the command line
 
 If the optional PID parameter is specified, you'll get detailed information
 about that particular PID.
 
-In --top mode, a new process list is shown every second. The most interesting
+In --top mode, a new process list is shown every second. The most CPU heavy
 processes are on top. In this mode, CPU times are counted from when you first
 invoked px, rather than from when each process started. This gives you a picture
 of which processes are most active right now.
@@ -142,8 +141,29 @@ def handleLogMessages(messages):
 
 def _main(argv):
     # type: (List[str]) -> None
+
+    if '--install' in argv:
+        install(argv)
+        return
+
+    if '--help' in argv:
+        print(__doc__)
+        return
+
+    if '--version' in argv:
+        # If this fails, run "tox.sh" once and the "version.py" file will be created for you.
+        #
+        # NOTE: If we "import version" at the top of this file, we will depend on it even if
+        # we don't use it. And this will make test avoidance fail to avoid px.py tests every
+        # time you make a new commit (because committing recreates version.py).
+        from . import version
+
+        print(version.VERSION)
+        return
+
     with_pager = None  # type: Optional[bool]
     with_color = None  # type: Optional[bool]
+    top = False  # type: bool
 
     while '--no-pager' in argv:
         with_pager = False
@@ -159,47 +179,29 @@ def _main(argv):
     if not with_color:
         px_terminal.disable_color()
 
-    if len(argv) == 1 and os.path.basename(argv[0]).endswith("top"):
-        argv.append("--top")
-
-    if len(argv) == 1:
-        # This is an empty filterstring
-        argv.append("")
+    while '--top' in argv:
+        top = True
+        argv.remove('--top')
+    if os.path.basename(argv[0]).endswith("top"):
+        top = True
 
     if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
         print(__doc__)
         sys.exit(1)
 
-    arg = argv[1]
+    search = ""
+    if len(argv) == 2:
+        search = argv[1]
 
-    if arg == '--install':
-        install(argv)
-        return
-
-    if arg == '--top':
+    if top:
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
-        px_top.top()
-        return
-
-    if arg == '--help':
-        print(__doc__)
-        return
-
-    if arg == '--version':
-        # If this fails, run "tox.sh" once and the "version.py" file will be created for you.
-        #
-        # NOTE: If we "import version" at the top of this file, we will depend on it even if
-        # we don't use it. And this will make test avoidance fail to avoid px.py tests every
-        # time you make a new commit (because committing recreates version.py).
-        from . import version
-
-        print(version.VERSION)
+        px_top.top(search=search)
         return
 
     try:
-        pid = int(arg)
+        pid = int(search)
         if not with_pager:
             px_processinfo.print_pid_info(sys.stdout.fileno(), pid)
             return
@@ -216,7 +218,7 @@ def _main(argv):
         # It's a search filter and not a PID, keep moving
         pass
 
-    procs = filter(lambda p: p.match(arg), px_process.get_all())
+    procs = filter(lambda p: p.match(search), px_process.get_all())
 
     columns = None  # type: Optional[int]
     try:

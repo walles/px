@@ -75,6 +75,7 @@ def test_get_screen_lines_low_screen():
 
     SCREEN_ROWS = 10
     SCREEN_COLUMNS = 70
+    px_terminal._enable_color = True
     lines = px_top.get_screen_lines(
         baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
 
@@ -98,6 +99,7 @@ def test_get_screen_lines_high_screen():
 
     SCREEN_ROWS = 100
     SCREEN_COLUMNS = 70
+    px_terminal._enable_color = True
     lines = px_top.get_screen_lines(
         baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
 

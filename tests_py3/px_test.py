@@ -25,6 +25,28 @@ def test_cmdline_ptop(mock):
     px._main(['ptop'])
     mock.assert_called_once()
 
+@patch("px.px_top.top")
+def test_cmdline_top_with_search(mock):
+    px._main(['px', '--top', 'kalas'])
+
+    mock.assert_called_once()
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+
+    assert kwargs.get('search') == 'kalas'
+
+@patch("px.px_top.top")
+def test_cmdline_ptop_with_search(mock):
+    px._main(['ptop', 'kalas'])
+
+    mock.assert_called_once()
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+
+    assert kwargs.get('search') == 'kalas'
+
 @patch("builtins.print")
 def test_cmdline_help(mock):
     px._main(['px', '--help'])
@@ -79,7 +101,11 @@ def test_cmdline_list_all_processes(mock):
     px._main(['px'])
 
     mock.assert_called_once()
-    processes: List[px_process.PxProcess] = mock.call_args.args[0]
+    args, kwargs = mock.call_args
+    print(args)
+    print(kwargs)
+    processes: List[px_process.PxProcess] = args[0]
 
     # We are running, and something started us, so this list must not be empty
     assert len(processes) > 0
+    assert processes[0].command

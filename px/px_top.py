@@ -417,8 +417,11 @@ def get_command(**kwargs):
     return CMD_WHATEVER
 
 
-def _top():
-    # type: () -> None
+def _top(search=""):
+    # type: (str) -> None
+
+    global search_string
+    search_string = search
 
     baseline = px_process.get_all()
     current = baseline
@@ -452,8 +455,8 @@ def _top():
             last_process_poll = now
 
 
-def top():
-    # type: () -> None
+def top(search=""):
+    # type: (str) -> None
 
     if not sys.stdout.isatty():
         sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
@@ -461,7 +464,7 @@ def top():
 
     with px_terminal.fullscreen_display():
         try:
-            _top()
+            _top(search=search)
         except Exception:
             LOG.exception("Running ptop failed")
 
