@@ -97,6 +97,7 @@ def create_ipc_map(pid, all_files, is_root=False):
 
 
 def fake_callchain(*args):
+    # type: (*str) -> px_process.PxProcess
     procs = []
     for arg in args:
         procs.append(create_process(commandline=arg))

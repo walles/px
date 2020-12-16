@@ -22,6 +22,7 @@ if sys.version_info.major >= 3:
     from typing import Text        # NOQA
     from typing import Optional    # NOQA
     from typing import List        # NOQA
+    from typing import Iterable    # NOQA
     from six import text_type      # NOQA
 
 
@@ -321,8 +322,11 @@ def ps_line_to_process(ps_line, now):
 
 
 def create_kernel_process(now):
-    # Fake a process 0, this one isn't returned by ps. More info about PID 0:
-    # https://en.wikipedia.org/wiki/Process_identifier
+    # type: (datetime.datetime) -> PxProcess
+    """
+    Fake a process 0, this one isn't returned by ps. More info about PID 0:
+    https://en.wikipedia.org/wiki/Process_identifier
+    """
     process_builder = PxProcessBuilder()
     process_builder.pid = 0
     process_builder.ppid = None
@@ -368,8 +372,10 @@ def resolve_links(processes, now):
 
 
 def remove_process_and_descendants(processes, pid):
+    # type: (Dict[int, PxProcess], int) -> None
     process = processes[pid]
-    process.parent.children.remove(process)
+    if process.parent is not None:
+        process.parent.children.remove(process)
     toexclude = [process]
     while toexclude:
         process = toexclude.pop()
@@ -394,11 +400,13 @@ def get_all():
 
 
 def order_best_last(processes):
+    # type: (Iterable[PxProcess]) -> List[PxProcess]
     """Returns process list ordered with the most interesting one last"""
     return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
 
 
 def order_best_first(processes):
+    # type: (Iterable[PxProcess]) -> List[PxProcess]
     """Returns process list ordered with the most interesting one first"""
     ordered = sorted(processes, key=operator.attrgetter('cmdline'))
     ordered = sorted(ordered, key=operator.attrgetter('score'), reverse=True)
