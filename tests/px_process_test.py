@@ -346,3 +346,15 @@ def test_uid_to_username():
     username = px_process.uid_to_username(456789)
     assert username == "456789"
     assert isinstance(username, six.text_type)
+
+
+def test_resolve_links():
+    UNKNOWN_PID = 1323532
+    p1 = testutils.create_process(pid=1, ppid=UNKNOWN_PID)
+    p2 = testutils.create_process(pid=2, ppid=1)
+    processes = { p1.pid: p1, p2.pid: p2 }
+    px_process.resolve_links(processes, testutils.now())
+
+    assert p1.parent is None
+    assert p2.parent is p1
+    assert p1.children == { p2 }

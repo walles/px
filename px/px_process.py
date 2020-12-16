@@ -361,7 +361,9 @@ def resolve_links(processes, now):
         elif process.ppid is None:
             process.parent = None
         else:
-            process.parent = processes[process.ppid]
+            process.parent = processes.get(process.ppid)
+
+        if process.parent is not None:
             process.parent.children.add(process)
 
 

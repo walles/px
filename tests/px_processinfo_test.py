@@ -101,10 +101,10 @@ def test_print_process_subtree():
     lines = []  # type: List[Tuple[str, px_process.PxProcess]]
 
     child_proc = testutils.create_process(pid=2, commandline="child")
-    child_proc.children = []
+    child_proc.children = set()
 
     parent_proc = testutils.create_process(pid=1, commandline="parent")
-    parent_proc.children = [child_proc]
+    parent_proc.children = { child_proc }
 
     px_processinfo.print_process_subtree(sys.stdout.fileno(), parent_proc, 0, lines)
 

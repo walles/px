@@ -36,7 +36,7 @@ def create_process(pid=47536, ppid=1234,
                    cputime="0:00.03", mempercent="0.0",
                    commandline="/usr/sbin/cupsd -l",
                    now=now()):
-
+    # type: (...) -> px_process.PxProcess
     psline = (spaces(at_least=0) +
               str(pid) + spaces() +
               str(ppid) + spaces() +
