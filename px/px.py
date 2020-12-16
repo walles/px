@@ -130,6 +130,11 @@ def handleLogMessages(messages):
 
     sys.stderr.write(ERROR_REPORTING_HEADER)
     sys.stderr.write("\n")
+
+    from . import version
+    sys.stderr.write("px version: " + version.VERSION + "\n")
+
+    sys.stderr.write("\n")
     sys.stderr.write("Python version: " + sys.version + "\n")
     sys.stderr.write("\n")
     sys.stderr.write("Platform info: " + platform.platform() + "\n")
