@@ -48,11 +48,21 @@ git log --color --format="format:%Cgreen%s%Creset (%ad)%n%b" --first-parent "$(g
 echo
 echo "=="
 echo "Last version number was $(git describe --abbrev=0), enter new version number."
+
+# If not, we'll for some reason get 0.0.0 versioned files in dist2/ and dist3/,
+# which messes up out Pypi publishing.
+echo "Version number must be on 1.2.3 format for the buildscripts to work."
+
 read -r -p "New version number: " NEW_VERSION_NUMBER
 
 # Validate new version number
 if [ -z "$NEW_VERSION_NUMBER" ] ; then
   echo "Empty version number, never mind"
+  exit 0
+fi
+
+if ! echo "$NEW_VERSION_NUMBER" | grep -E '^[0-9]+[.][0-9]+[.][0-9]+$' ; then
+  echo "Version number not in 1.2.3 format, never mind"
   exit 0
 fi
 
