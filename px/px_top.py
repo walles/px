@@ -123,6 +123,25 @@ def get_notnone_memory_percent(proc):
     return 0
 
 
+def sort_by_cpu_usage(toplist):
+    # type(List[px_process.PxProcess]) -> List[px_process.PxProcess]
+    can_sort_by_time = False
+    for process in toplist:
+        if process.cpu_time_seconds:
+            can_sort_by_time = True
+            break
+
+    if can_sort_by_time:
+        # There is at least one > 0 time in the process list, so sorting by time
+        # will be of some use
+        return sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+
+    # No > 0 time in the process list, try CPU percentage as an approximation of
+    # that. This should happen on the first iteration when ptop has just been
+    # launched.
+    return sorted(toplist, key=lambda process: process.cpu_percent or 0, reverse=True)
+
+
 def get_toplist(baseline,  # type: List[px_process.PxProcess]
                 current,   # type: List[px_process.PxProcess]
                 by_memory=False  # type: bool
@@ -130,13 +149,13 @@ def get_toplist(baseline,  # type: List[px_process.PxProcess]
     # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
 
-    # Sort by CPU time used, then most interesting first
+    # Sort by interestingness last
     toplist = px_process.order_best_first(toplist)
     if by_memory:
         toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
     else:
         # By CPU time, this is the default
-        toplist = sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+        toplist = sort_by_cpu_usage(toplist)
 
     return toplist
 
