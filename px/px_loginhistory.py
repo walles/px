@@ -1,8 +1,6 @@
 import logging
 import datetime
-import subprocess
 
-import os
 import re
 import dateutil.tz
 

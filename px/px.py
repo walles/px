@@ -36,7 +36,6 @@ of which processes are most active right now.
 --version: Print version information
 """
 
-import traceback
 import platform
 import logging
 import six

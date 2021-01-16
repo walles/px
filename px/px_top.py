@@ -3,18 +3,13 @@
 import sys
 import copy
 import time
-import errno
-import signal
-import select
 import logging
 import unicodedata
 
 import os
 from . import px_load
-from . import px_pager
 from . import px_process
 from . import px_terminal
-from . import px_cpuinfo
 from . import px_meminfo
 from . import px_processinfo
 from . import px_launchcounter
@@ -451,6 +446,7 @@ def _top(search=""):
         global sort_by_memory
         toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(toplist, launchcounter, rows, columns)
+        break  # FIXME: Remove
 
         command = get_command(timeout_seconds=1)
 

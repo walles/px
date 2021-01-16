@@ -7,10 +7,8 @@ Invoked from px_top.py.
 """
 
 import os
-import sys
 import time
 import errno
-import signal
 import subprocess
 
 from . import px_pager

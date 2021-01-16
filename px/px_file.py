@@ -1,7 +1,4 @@
 import socket
-import subprocess
-
-import os
 
 from . import px_exec_util
 

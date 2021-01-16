@@ -1,9 +1,7 @@
-import os
 import re
 import sys
 import errno
 import platform
-import subprocess
 
 from . import px_terminal
 from . import px_exec_util

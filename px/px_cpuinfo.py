@@ -1,7 +1,5 @@
-import os
 import errno
 import platform
-import subprocess
 
 from . import px_exec_util
 

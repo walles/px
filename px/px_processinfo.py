@@ -15,7 +15,6 @@ from . import px_loginhistory
 
 if False:
     # For mypy PEP-484 static typing validation
-    import logging                 # NOQA
     from typing import MutableSet  # NOQA
     from typing import Optional    # NOQA
     from typing import Iterable    # NOQA

@@ -1,7 +1,6 @@
 import logging
 import datetime
 import operator
-import subprocess
 
 import os
 import re
