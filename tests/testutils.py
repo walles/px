@@ -17,7 +17,7 @@ if sys.version_info.major >= 3:
     from typing import List            # NOQA
 
 # An example time string that can be produced by ps
-TIMESTRING = "Mon Mar 7 09:33:11 2016"
+TIMESTRING = "Mon Mar  7 09:33:11 2016"
 TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
 
 

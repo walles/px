@@ -49,6 +49,40 @@ uid_to_username_cache = {}  # type: Dict[int, Text]
 get_command_cache = {}  # type: Dict[Text, Text]
 
 
+def _parse_time(time_s):
+    # type: (Text)->datetime.datetime
+    """
+    Parse a local date from ps into a datetime.datetime object.
+
+    Example inputs:
+      "Wed Dec 16 12:41:43 2020"
+      "Sat Jan  9 14:20:34 2021"
+    """
+
+    zero_based_month = [
+        u"Jan",
+        u"Feb",
+        u"Mar",
+        u"Apr",
+        u"May",
+        u"Jun",
+        u"Jul",
+        u"Aug",
+        u"Sep",
+        u"Oct",
+        u"Nov",
+        u"Dec"
+    ].index(time_s[4:7])
+
+    day_of_month = int(time_s[8:10])
+    hour = int(time_s[11:13])
+    minute = int(time_s[14:16])
+    second = int(time_s[17:19])
+    year = int(time_s[20:24])
+
+    return datetime.datetime(year, zero_based_month + 1, day_of_month, hour, minute, second, tzinfo=TIMEZONE)
+
+
 class PxProcess(object):
     def __init__(self,
                  cmdline,   # type: Text
@@ -69,8 +103,7 @@ class PxProcess(object):
         self.command = self._get_command()  # type: text_type
         self.lowercase_command = self.command.lower()  # type: text_type
 
-        time = datetime.datetime.strptime(start_time_string.strip(), "%c")
-        self.start_time = time.replace(tzinfo=TIMEZONE)  # type: datetime.datetime
+        self.start_time = _parse_time(start_time_string.strip())
         self.age_seconds = (now - self.start_time).total_seconds()  # type: float
         if self.age_seconds < 0:
             LOG.error("Process age < 0: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
