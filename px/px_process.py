@@ -7,6 +7,7 @@ import re
 import pwd
 import six
 import errno
+import subprocess
 import dateutil.tz
 
 from . import px_commandline
@@ -284,14 +285,6 @@ class PxProcessBuilder(object):
         )
 
 
-def call_ps():
-    """
-    Call ps and return the result in an iterable of one output line per process
-    """
-    stdout = px_exec_util.run(["ps", "-ax", "-o", "pid,ppid,lstart,uid,pcpu,time,%mem,command"])
-    return stdout.splitlines()[1:]
-
-
 def parse_time(timestring):
     # type: (Text) -> float
     """Convert a CPU time string returned by ps to a number of seconds"""
@@ -419,11 +412,38 @@ def remove_process_and_descendants(processes, pid):
 def get_all():
     # type: () -> List[PxProcess]
     processes = {}
-    ps_lines = call_ps()
-    now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
-    for ps_line in ps_lines:
-        process = ps_line_to_process(ps_line, now)
-        processes[process.pid] = process
+
+    # NOTE: Both the full path to ps and "close_fds = False" are important
+    # because they enable the use of _posix_spawn()...
+    #
+    # https://github.com/python/cpython/blob/998ae1fa3fb05a790071217cf8f6ae3a928da13f/Lib/subprocess.py#L1715
+    #
+    # ... and avoids prematurely waiting for ps to produce 50000 bytes:
+    #
+    # https://github.com/python/cpython/blob/998ae1fa3fb05a790071217cf8f6ae3a928da13f/Lib/subprocess.py#L1796
+    #
+    # If you want to change this, try benchmark_proc_get_all.py and make sure
+    # you don't regress.
+    close_fds = False
+    command = ["/bin/ps", "-ax", "-o", "pid=,ppid=,lstart=,uid=,pcpu=,time=,%mem=,command="]
+
+    with open(os.devnull, 'w') as DEVNULL:
+        ps = subprocess.Popen(command,
+            stdin=DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=DEVNULL,
+            close_fds=close_fds,
+            env=px_exec_util.ENV)
+
+        stdout = ps.stdout
+        assert stdout
+        now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
+        for ps_line in stdout:
+            process = ps_line_to_process(ps_line.decode('utf-8'), now)
+            processes[process.pid] = process
+
+        if ps.wait() != 0:
+            raise IOError("Exit code {} from {}".format(ps.returncode, command))
 
     resolve_links(processes, now)
     remove_process_and_descendants(processes, os.getpid())

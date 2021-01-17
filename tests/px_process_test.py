@@ -35,25 +35,6 @@ def test_create_process():
     assert test_me.age_seconds > 0
 
 
-def test_call_ps():
-    lines = list(px_process.call_ps())
-
-    # Running in devbin/tox-in-docker.sh we get 10 processes
-    assert len(lines) > 5
-
-    for line in lines:
-        # 20 is an arbitrary lowest limit, if there are cases where this test
-        # fails even though it shouldn't, just document the reason here and
-        # lower the limit
-        assert len(line) > 20
-
-        # We want these lines to be unicode, this is needed if we have unicode
-        # chars in command lines
-        assert isinstance(line, six.text_type)
-
-    assert "COMMAND" not in lines[0]
-
-
 def test_ps_line_to_process_unicode():
     process = testutils.create_process(cputime="2:14.15")
 
