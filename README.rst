@@ -230,6 +230,10 @@ To run it in a profiler, install `pyinstrument`_ and:
 
 * ``python3 -m pyinstrument ./devbin/benchmark_ipcmap.py lsof.txt``
 
+Or, to benchmark process listing:
+
+* ``pyinstrument -r html ./devbin/benchmark_proc_get_all.py``
+
 TODO ``top`` replacement
 ------------------------
 
