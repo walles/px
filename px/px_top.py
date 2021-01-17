@@ -446,7 +446,6 @@ def _top(search=""):
         global sort_by_memory
         toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(toplist, launchcounter, rows, columns)
-        break  # FIXME: Remove
 
         command = get_command(timeout_seconds=1)
 
