@@ -11,7 +11,7 @@ import os
 MYDIR = os.path.dirname(os.path.abspath(__file__))
 
 import sys
-sys.path.append(os.path.join(MYDIR, ".."))
+sys.path.insert(0, os.path.join(MYDIR, ".."))
 
 import time
 
