@@ -26,7 +26,7 @@ def main():
     t1 = time.time()
     dt_seconds = t1 - t0
 
-    print("Getting all processes takes {:.3f}s".format(dt_seconds/LAPS))
+    print("Getting all processes takes {:.0f}ms".format(1000*dt_seconds/LAPS))
 
 
 if __name__ == "__main__":
