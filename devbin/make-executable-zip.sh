@@ -7,8 +7,18 @@ ROOTDIR="$MYDIR/.."
 ZIPFILE="$ROOTDIR/px.exe"
 export ZIPOPT="-9 -q"
 
+ENVDIR="$(mktemp -d)"
+rmdir "$ENVDIR"
+
 WORKDIR="$(mktemp -d)"
-trap 'rm -rf "$WORKDIR" "$ZIPFILE.tmp"' EXIT
+trap 'rm -rf "$ENVDIR" "$WORKDIR" "$ZIPFILE.tmp"' EXIT
+
+# Create a virtualenv in a temporary location
+virtualenv -p python "$ENVDIR"
+
+# shellcheck source=/dev/null
+. "$ENVDIR/bin/activate"
+pip install -r "$ROOTDIR/requirements.txt"
 
 # Set up file structure in our temporary directory
 cp "$MYDIR/executable-zip-bootstrap.py" "$WORKDIR/__main__.py"
@@ -16,9 +26,9 @@ cp "$MYDIR/executable-zip-bootstrap.py" "$WORKDIR/__main__.py"
 # The main attraction!
 cp -a "$ROOTDIR/px" "$WORKDIR/"
 
-# FIXME: Where should we really get these from?
-cp -a "$ROOTDIR/env/lib/python3.9/site-packages/dateutil" "$WORKDIR/"
-cp -a "$ROOTDIR/env/lib/python3.9/site-packages/six.py" "$WORKDIR/"
+# Dependencies, must match list in requirements.txt
+cp -a "$ENVDIR/lib/python3.9/site-packages/dateutil" "$WORKDIR/"
+cp -a "$ENVDIR/lib/python3.9/site-packages/six.py" "$WORKDIR/"
 
 # Tidy up a bit
 find "$WORKDIR" -name '*.pyc' -delete
