@@ -22,6 +22,7 @@ __pycache__/
 
 # tox.sh end result
 /px.pex
+/px.exe
 
 # For regenerating the animated-gif ptop screenshot
 /node_modules/
