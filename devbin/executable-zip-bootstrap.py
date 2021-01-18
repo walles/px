@@ -3,4 +3,5 @@
 #
 # See devbin/make-executable-zip for how it gets there.
 
-print("Hej")
+import px.px
+px.px.main()
