@@ -14,7 +14,7 @@ WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$ENVDIR" "$WORKDIR" "$ZIPFILE.tmp"' EXIT
 
 # Create a virtualenv in a temporary location
-virtualenv -p "$(which python)" "$ENVDIR"
+virtualenv -p "$(command -v python)" "$ENVDIR"
 
 # shellcheck source=/dev/null
 . "$ENVDIR/bin/activate"
