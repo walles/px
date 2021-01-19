@@ -21,7 +21,7 @@ virtualenv -p python "$ENVDIR"
 pip install -r "$ROOTDIR/requirements.txt"
 
 # Set up file structure in our temporary directory
-cp "$MYDIR/executable-zip-bootstrap.py" "$WORKDIR/__main__.py"
+echo 'import px.px; px.px.main()' > "$WORKDIR/__main__.py"
 
 # The main attraction!
 cp -a "$ROOTDIR/px" "$WORKDIR/"
