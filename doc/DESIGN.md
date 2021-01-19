@@ -29,7 +29,10 @@ is available on all of our target platforms.
 And using [Pex](https://github.com/pantsbuild/pex) we can turn Python programs
 into [platform independent
 executables](https://pex.readthedocs.org/en/stable/whatispex.html#whatispex),
-which is excellent for distribution.
+which is excellent for distribution. Later replaced by our homegrown
+implementation of the same thing, see `make-executable-zip.sh`, that was a lot
+faster. I don't know what the requirements for `pex` proper are that makes it
+produce big binaries with long startup times.
 
 ## Installation
 It must be simple to install in a random directory on a vanilla
