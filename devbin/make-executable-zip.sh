@@ -4,7 +4,7 @@ set -e -o pipefail
 
 MYDIR="$(cd "$(dirname "$0")"; pwd)"
 ROOTDIR="$MYDIR/.."
-ZIPFILE="$ROOTDIR/px.py"
+ZIPFILE="$ROOTDIR/px.pex"
 export ZIPOPT="-9 -q"
 
 ENVDIR="$(mktemp -d)"
