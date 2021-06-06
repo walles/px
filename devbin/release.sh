@@ -140,6 +140,17 @@ EOM
 
 read -r -p "Press ENTER when done: "
 
+cat << EOM
+
+==
+Now, make a PR for bumping the homebrew packaging version to $NEW_VERSION_NUMBER:
+
+https://github.com/walles/homebrew-johan/blob/main/Formula/px.rb
+
+EOM
+
+read -r -p "Press ENTER when the PR has been merged: "
+
 echo
 echo "=="
 echo "Your release should now be available on Github and at https://pypi.python.org/pypi/pxpx"

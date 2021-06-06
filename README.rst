@@ -156,20 +156,23 @@ On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install
 
   sudo apt-get install px
 
-On other systems (macOs, other Linux distros, ...), install into ``/usr/local/bin`` by
-copy / pasting this command into a terminal::
+If you have `Homebrew`_ on your system (likely on macOS)::
+
+  brew install walles/johan/px
+
+On other systems, install into ``/usr/local/bin`` by copy / pasting this command
+into a terminal::
 
   curl -Ls https://github.com/walles/px/raw/python/install.sh | bash
 
-**Help wanted**: If somebody could `create a macOS Homebrew package`_ that would be super!
-
 Or you can install from Pypi. At least on macOS this can be problematic however,
-so the install script above is still preferred::
+so ``brew`` or the above install script is still preferred::
 
   sudo pip install --upgrade pxpx
 
-Now, you should be able to run ``px``, ``px --help`` or ``ptop`` from the command
-line. Otherwise please verify that ``/usr/local/bin`` is in your ``$PATH``.
+After installing you should be able to run ``px``, ``px --help`` or ``ptop``
+from the command line. Otherwise please verify that ``/usr/local/bin`` is in
+your ``$PATH``.
 
 To try ``px`` without installing it, just `download the latest px.pex`_,
 ``chmod a+x px.pex``, then run ``./px.pex``.
@@ -318,6 +321,7 @@ DONE
 .. _how to install: #installation
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
 .. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
+.. _Homebrew: https://brew.sh
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
