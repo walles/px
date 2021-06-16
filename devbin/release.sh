@@ -145,7 +145,7 @@ cat << EOM
 ==
 Now, make a PR for bumping the homebrew packaging version to $NEW_VERSION_NUMBER:
 
-https://github.com/walles/homebrew-johan/blob/main/Formula/px.rb
+https://github.com/Homebrew/homebrew-core/blob/master/Formula/px.rb
 
 EOM
 

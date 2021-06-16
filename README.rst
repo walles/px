@@ -158,7 +158,7 @@ On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install
 
 If you have `Homebrew`_ on your system (likely on macOS)::
 
-  brew install walles/johan/px
+  brew install px
 
 On other systems, install into ``/usr/local/bin`` by copy / pasting this command
 into a terminal::
@@ -328,7 +328,6 @@ DONE
 .. _moar: https://github.com/walles/moar
 .. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
-.. _create a macOS Homebrew package: https://github.com/walles/px/issues/52
 
 .. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
    :target: https://travis-ci.com/walles/px
