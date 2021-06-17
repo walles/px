@@ -16,6 +16,8 @@ LINUX_KERNEL_PROC = re.compile(u"^\\[[^/ ]+/?[^/ ]+\\]$")
 # Match "(python2.7)", no grouping
 OSX_PARENTHESIZED_PROC = re.compile(u"^\\([^()]+\\)$")
 
+# Name of the Perl interpreter
+PERL_BIN = re.compile(u"^perl[.0-9]*$")
 
 def to_array(commandline):
     # type: (text_type) -> List[text_type]
@@ -122,7 +124,10 @@ def get_command(commandline):
     if command == "node":
         return get_generic_script_command(commandline, ["--max_old_space_size"])
 
-    if command in ["bash", "sh", "perl"]:
+    if command in ["bash", "sh"]:
+        return get_generic_script_command(commandline)
+
+    if PERL_BIN.match(command):
         return get_generic_script_command(commandline)
 
     app_name_prefix = get_app_name_prefix(commandline)

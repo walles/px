@@ -248,6 +248,48 @@ def test_get_command_ruby_switches():
         "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust") == "brew.rb"
 
 
+def test_get_command_perl():
+    # Source: https://github.com/walles/px/issues/85
+    assert px_commandline.get_command(" ".join([
+        "/usr/bin/perl5.18",
+        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+        "build-system",
+        "build_number_offset",
+        "buildbox",
+        "Random.txt",
+        "README.md",
+        "submodules",
+        "Telegram",
+        "third-party",
+        "tools",
+        "versions.json",
+        "WORKSPACE",
+    ])) == "cloc"
+
+    # Variations on the same theme
+    assert px_commandline.get_command(" ".join([
+        "/usr/bin/perl",
+        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+    ])) == "cloc"
+    assert px_commandline.get_command(" ".join([
+        "perl",
+        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+    ])) == "cloc"
+    assert px_commandline.get_command(" ".join([
+        "/usr/bin/perl5",
+        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+    ])) == "cloc"
+    assert px_commandline.get_command(" ".join([
+        "/usr/bin/perl5.30",
+        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+    ])) == "cloc"
+
+    # Give up on command line switches
+    assert px_commandline.get_command(" ".join([
+        "/usr/bin/perl", "-S", "cloc",
+    ])) == "perl"
+
+
 def test_get_homebrew_commandline():
     # Source: https://github.com/walles/px/issues/72
     assert px_commandline.get_command(" ".join([
