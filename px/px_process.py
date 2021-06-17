@@ -106,15 +106,28 @@ class PxProcess(object):
 
         self.start_time = _parse_time(start_time_string.strip())
         self.age_seconds = (now - self.start_time).total_seconds()  # type: float
-        if self.age_seconds < 0:
-            LOG.error("Process age < 0: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
+        if self.age_seconds < -10:
+            # See: https://github.com/walles/px/issues/84
+            #
+            # We used to check for negative age, but since we look at the clock
+            # once to begin with, and then spend some milliseconds calling ps,
+            # we can sometimes find new processes with a timestamp that is newer
+            # than "now".
+            #
+            # If this is the cause, we should be well below 10s, since process
+            # listing doesn't take that long.
+            #
+            # If it takes more than 10s, something else is likely up.
+            LOG.error("Process age < -10: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
                 self.age_seconds,
                 now,
                 self.start_time,
                 start_time_string.strip(),
                 datetime.datetime.now(TIMEZONE).tzname())
             assert False
-        assert self.age_seconds >= 0
+        if self.age_seconds < 0:
+            self.age_seconds = 0
+
         self.age_s = seconds_to_str(self.age_seconds)  # type: text_type
 
         self.username = username  # type: text_type

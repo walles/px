@@ -1,4 +1,5 @@
 import getpass
+import datetime
 
 import os
 import six
@@ -33,6 +34,33 @@ def test_create_process():
 
     assert test_me.start_time == testutils.TIME
     assert test_me.age_seconds > 0
+
+
+def test_create_future_process():
+    """
+    Handle the case where we first look at the clock, then list processes.
+
+    Let's say that:
+    1. We look at the clock, and the clock is 12:34:56
+    2. We find a newly started process at     12:34:57
+
+    This case used to lead to crashes when we asserted for this:
+    https://github.com/walles/px/issues/84
+    """
+    process_builder = px_process.PxProcessBuilder()
+
+    # This is what we want to test
+    process_builder.start_time_string = testutils.TIMESTRING
+    before_the_process_was_started = testutils.TIME - datetime.timedelta(seconds=1)
+
+    # These values are required to not fail in other ways
+    process_builder.cmdline = "hej kontinent"
+    process_builder.pid = 1
+    process_builder.username = "johan"
+
+    # Test it!
+    test_me = process_builder.build(before_the_process_was_started)
+    assert test_me.age_seconds == 0
 
 
 def test_ps_line_to_process_unicode():
