@@ -145,12 +145,17 @@ cat << EOM
 ==
 Now, make a PR for bumping the homebrew packaging version to $NEW_VERSION_NUMBER:
 
-https://github.com/Homebrew/homebrew-core/blob/master/Formula/px.rb
+  brew bump-formula-pr --strict px --tag=$NEW_VERSION_NUMBER --revision=$(git rev-parse HEAD)
 
 EOM
 
-read -r -p "Press ENTER when the PR has been merged: "
+read -r -p "Press ENTER when the PR has been merged (should happen automatically): "
 
-echo
-echo "=="
-echo "Your release should now be available on Github and at https://pypi.python.org/pypi/pxpx"
+cat << EOM
+
+==
+Your release should now be visible here:
+* https://github.com/walles/px/releases/latest
+* https://formulae.brew.sh/formula/px
+* https://pypi.python.org/pypi/pxpx
+EOM
