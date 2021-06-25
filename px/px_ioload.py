@@ -5,6 +5,7 @@ Functions for visualizing where IO is bottlenecking.
 import datetime
 import math
 import six
+import re
 
 from . import px_exec_util
 
@@ -17,9 +18,33 @@ if sys.version_info.major >= 3:
     from typing import Optional
 
 
+# Matches output lines in "netstat -ib" on macOS.
+#
+# Extracted columns are interface name, incoming bytes count and outgoing bytes
+# count.
+#
+# If you look carefully at the output, this regex will only match lines with
+# error counts, which is only one line per interface.
+NETSTAT_IB_LINE_RE = re.compile(r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([0-9]+) +[0-9]+$")
+
 def parse_netstat_ib_output(netstat_ib_output):
     # type: (six.text_type) -> List[Sample]
-    return []
+    samples = []  # type: List[Sample]
+    for line in netstat_ib_output.splitlines()[1:]:
+        match = NETSTAT_IB_LINE_RE.match(line)
+        if not match:
+            continue
+
+        incoming_bytes = int(match[2])
+        outgoing_bytes = int(match[3])
+        if incoming_bytes == 0 and outgoing_bytes == 0:
+            # For our purposes this is just clutter
+            continue
+
+        samples.append(Sample(match[1] + " incoming", incoming_bytes))
+        samples.append(Sample(match[1] + " outgoing", outgoing_bytes))
+
+    return samples
 
 
 class Sample(object):
@@ -30,6 +55,9 @@ class Sample(object):
 
     def __repr__(self) -> str:
         return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
+
+    def __eq__(self, o):
+        return self.bytecount == o.bytecount and self.name == o.name
 
 
 class SystemState(object):
@@ -42,10 +70,16 @@ class SystemState(object):
 
     def sample_network_interfaces(self):
         # type: () -> List[Sample]
+        samples = []  # type: List[Sample]
 
+        # Append network interfaces byte counts
         # FIXME: This is macOS specific
         netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
-        return parse_netstat_ib_output(netstat_ib_output)
+        samples += parse_netstat_ib_output(netstat_ib_output)
+
+        # FIXME: Append hard drives / whatever drives byte counts
+
+        return samples
 
 
 class PxIoLoad(object):
