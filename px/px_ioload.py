@@ -7,6 +7,7 @@ import math
 import six
 import re
 
+from . import px_units
 from . import px_exec_util
 
 import sys
@@ -215,12 +216,12 @@ class PxIoLoad(object):
             assert percentage == 100
             percentage_s = "100%"
 
-        # "14%  [123B/s / 878B/s] eth0 outgoing"
+        # "14%  [123kB/s / 878kB/s] eth0 outgoing"
         # FIXME: At least the percentage should be in white, make this look nice
-        return "{} [{}B/s / {}B/s] {}".format(
+        return "{} [{}/s / {}/s] {}".format(
             percentage_s,
-            math.trunc(bottleneck[2]),
-            math.trunc(bottleneck[3]),
+            px_units.bytes_to_string(math.trunc(bottleneck[2])),
+            px_units.bytes_to_string(math.trunc(bottleneck[3])),
             bottleneck[0]
         )
 

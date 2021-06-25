@@ -1,4 +1,5 @@
 import re
+import os
 import random
 import datetime
 
@@ -15,10 +16,19 @@ if sys.version_info.major >= 3:
     from typing import MutableMapping  # NOQA
     from typing import Optional        # NOQA
     from typing import List            # NOQA
+    from six import text_type          # NOQA
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"
 TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
+
+
+def load(sample_file_name):
+    # type: (text_type) -> text_type
+    my_dir = os.path.dirname(__file__)
+    full_path = os.path.join(my_dir, sample_file_name)
+    with open(full_path) as sample_file:
+        return sample_file.read()
 
 
 def spaces(at_least=1, at_most=3):

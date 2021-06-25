@@ -58,19 +58,3 @@ def test_get_ram_numbers_from_proc_2020():
     # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
     available_kb = 294625460
     assert wanted_bytes == total_bytes - available_kb * 1024
-
-
-def test_bytes_to_string():
-    assert px_meminfo.bytes_to_string(1024*7 - 1) == "7167B"
-    assert px_meminfo.bytes_to_string(1024*7) == "7KB"
-
-    assert px_meminfo.bytes_to_string((1024 ** 2)*7 - 1) == "7168KB"
-    assert px_meminfo.bytes_to_string((1024 ** 2)*7) == "7MB"
-
-    assert px_meminfo.bytes_to_string((1024 ** 3)*7 - 1) == "7168MB"
-    assert px_meminfo.bytes_to_string((1024 ** 3)*7) == "7GB"
-
-    assert px_meminfo.bytes_to_string((1024 ** 4)*7 - 1) == "7168GB"
-    assert px_meminfo.bytes_to_string((1024 ** 4)*7) == "7TB"
-
-    assert px_meminfo.bytes_to_string((1024 ** 5)*10) == "10240TB"
