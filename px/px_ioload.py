@@ -35,14 +35,14 @@ def parse_netstat_ib_output(netstat_ib_output):
         if not match:
             continue
 
-        incoming_bytes = int(match[2])
-        outgoing_bytes = int(match[3])
+        incoming_bytes = int(match.group(2))
+        outgoing_bytes = int(match.group(3))
         if incoming_bytes == 0 and outgoing_bytes == 0:
             # For our purposes this is just clutter
             continue
 
-        samples.append(Sample(match[1] + " incoming", incoming_bytes))
-        samples.append(Sample(match[1] + " outgoing", outgoing_bytes))
+        samples.append(Sample(match.group(1) + " incoming", incoming_bytes))
+        samples.append(Sample(match.group(1) + " outgoing", outgoing_bytes))
 
     return samples
 
@@ -53,7 +53,7 @@ class Sample(object):
         self.name = name
         self.bytecount = bytecount
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
 
     def __eq__(self, o):
@@ -65,8 +65,12 @@ class SystemState(object):
         # type: () -> None
         self.timestamp = datetime.datetime.now()
 
-        # FIXME: Populate this list from the current system
-        self.samples = self.sample_network_interfaces()  # type: List[Sample]
+        self.samples = self.sample_network_interfaces() + self.sample_drives()  # type: List[Sample]
+
+        by_name = {}  # type: Dict[six.text_type, Sample]
+        for sample in self.samples:
+            by_name[sample.name] = sample
+        self.samples_by_name = by_name
 
     def sample_network_interfaces(self):
         # type: () -> List[Sample]
@@ -77,9 +81,13 @@ class SystemState(object):
         netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
         samples += parse_netstat_ib_output(netstat_ib_output)
 
-        # FIXME: Append hard drives / whatever drives byte counts
-
         return samples
+
+    def sample_drives(self):
+        # type: () -> List[Sample]
+
+        # FIXME: Query the system for this
+        return []
 
 
 class PxIoLoad(object):
@@ -103,7 +111,33 @@ class PxIoLoad(object):
         self.previous_system_state = self.most_recent_system_state
         self.most_recent_system_state = SystemState()
 
-        # FIXME: Update self.ios from the system states
+        dt = self.most_recent_system_state.timestamp - self.previous_system_state.timestamp
+        dt_seconds = dt.total_seconds()
+        assert dt_seconds > 0
+
+        # Update self.ios from the system states
+        updated_ios = {}  # type: Dict[six.text_type, Tuple[float, float]]
+        for sample in self.most_recent_system_state.samples:
+            name = sample.name
+            last_sample = self.previous_system_state.samples_by_name.get(name)
+            if not last_sample:
+                # Need two samples to make a metric
+                continue
+
+            delta_bytes = sample.bytecount - last_sample.bytecount
+            assert delta_bytes >= 0
+
+            bytes_per_second = delta_bytes / dt_seconds
+
+            io_entry = self.ios.get(name)
+            if not io_entry:
+                # New device
+                io_entry = (0.0, 0.0)
+            high_watermark = max(io_entry[1], bytes_per_second)
+
+            updated_ios[name] = (bytes_per_second, high_watermark)
+
+        self.ios = updated_ios
 
     def get_load_string(self):
         """
@@ -137,11 +171,16 @@ class PxIoLoad(object):
         collected_ios.sort(key=lambda collectee: collectee[1], reverse=True)
 
         bottleneck = collected_ios[0]
+        percentage = bottleneck[1]
+        if percentage == 0:
+            # FIXME: Color this somehow?
+            return "  0%"
 
         # "14%  [123B/s / 878B/s] eth0 outgoing"
         # FIXME: At least the percentage should be in white, make this look nice
-        return "{:3s}%  [{}B/s / {}B/s] {}".format(
-            bottleneck[1],
+        # FIXME: Make sure this looks OK with single, double and triple digit percentages
+        return "{:2d}%  [{}B/s / {}B/s] {}".format(
+            percentage,
             math.trunc(bottleneck[2]),
             math.trunc(bottleneck[3]),
             bottleneck[0]
