@@ -8,6 +8,7 @@ import unicodedata
 
 import os
 from . import px_load
+from . import px_ioload
 from . import px_process
 from . import px_terminal
 from . import px_meminfo
@@ -230,7 +231,8 @@ def get_screen_lines(
 
     meminfo = px_meminfo.get_meminfo()
 
-    ioloadstring = "14%  [123B/s / 878B/s] eth0 outgoing"
+    px_ioload.update()
+    ioloadstring = px_ioload.get_load_string()
     lines = [
         px_terminal.crop_ansi_string_at_length(
             px_terminal.bold(u"Sysload: ") + loadstring, columns),
