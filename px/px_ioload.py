@@ -6,6 +6,8 @@ import datetime
 import math
 import six
 
+from . import px_exec_util
+
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -15,11 +17,19 @@ if sys.version_info.major >= 3:
     from typing import Optional
 
 
+def parse_netstat_ib_output(netstat_ib_output):
+    # type: (six.text_type) -> List[Sample]
+    return []
+
+
 class Sample(object):
     def __init__(self, name, bytecount):
         # type: (six.text_type, int) -> None
         self.name = name
         self.bytecount = bytecount
+
+    def __repr__(self) -> str:
+        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
 
 
 class SystemState(object):
@@ -28,7 +38,14 @@ class SystemState(object):
         self.timestamp = datetime.datetime.now()
 
         # FIXME: Populate this list from the current system
-        self.samples = []  # type: List[Sample]
+        self.samples = self.sample_network_interfaces()  # type: List[Sample]
+
+    def sample_network_interfaces(self):
+        # type: () -> List[Sample]
+
+        # FIXME: This is macOS specific
+        netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
+        return parse_netstat_ib_output(netstat_ib_output)
 
 
 class PxIoLoad(object):
