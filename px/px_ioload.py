@@ -174,13 +174,20 @@ class PxIoLoad(object):
         percentage = bottleneck[1]
         if percentage == 0:
             # FIXME: Color this somehow?
-            return "  0%"
+            return " 0%"
+
+        if percentage < 10:
+            percentage_s = " " + str(percentage) + "% "
+        elif percentage < 100:
+            percentage_s = str(percentage) + "% "
+        else:
+            assert percentage == 100
+            percentage_s = "100%"
 
         # "14%  [123B/s / 878B/s] eth0 outgoing"
         # FIXME: At least the percentage should be in white, make this look nice
-        # FIXME: Make sure this looks OK with single, double and triple digit percentages
-        return "{:2d}%  [{}B/s / {}B/s] {}".format(
-            percentage,
+        return "{} [{}B/s / {}B/s] {}".format(
+            percentage_s,
             math.trunc(bottleneck[2]),
             math.trunc(bottleneck[3]),
             bottleneck[0]
