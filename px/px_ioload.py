@@ -47,6 +47,34 @@ def parse_netstat_ib_output(netstat_ib_output):
     return samples
 
 
+def parse_iostat_output(iostat_output):
+    # type: (six.text_type) -> List[Sample]
+    """
+    Parse output of "iostat -dKI -n 99".
+    """
+    lines = iostat_output.splitlines()
+
+    # Example: ["disk0"]
+    names = lines[0].split()
+
+    # Example: ["15.95", "2816998", "43889.27"]
+    #
+    # Numbers are: "KB/t", "xfrs" and "xfrs"
+    numbers = lines[2].split()
+
+    samples = []  # type: List[Sample]
+    for i in range(len(names)):
+        name = names[i]
+        mb_string = numbers[3 * i + 2]
+
+        # FIXME: Verify that iostat returns 1024*1024 as MB and not 1000*1000.
+        bytecount = math.trunc(float(mb_string) * 1024 * 1024)
+
+        samples.append(Sample(name, bytecount))
+
+    return samples
+
+
 class Sample(object):
     def __init__(self, name, bytecount):
         # type: (six.text_type, int) -> None
@@ -74,20 +102,23 @@ class SystemState(object):
 
     def sample_network_interfaces(self):
         # type: () -> List[Sample]
-        samples = []  # type: List[Sample]
+        """
+        Query system for network interfaces byte counts
+        """
 
-        # Append network interfaces byte counts
         # FIXME: This is macOS specific
         netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
-        samples += parse_netstat_ib_output(netstat_ib_output)
-
-        return samples
+        return parse_netstat_ib_output(netstat_ib_output)
 
     def sample_drives(self):
         # type: () -> List[Sample]
+        """
+        Query system for drive statistics
+        """
 
-        # FIXME: Query the system for this
-        return []
+        # FIXME: This is macOS specific
+        iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
+        return parse_iostat_output(iostat_output)
 
 
 class PxIoLoad(object):
