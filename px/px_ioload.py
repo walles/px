@@ -30,6 +30,9 @@ NETSTAT_IB_LINE_RE = re.compile(r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([
 
 def parse_netstat_ib_output(netstat_ib_output):
     # type: (six.text_type) -> List[Sample]
+    """
+    Parse output of "netstat -ib" on macOS.
+    """
     samples = []  # type: List[Sample]
     for line in netstat_ib_output.splitlines()[1:]:
         match = NETSTAT_IB_LINE_RE.match(line)
@@ -51,7 +54,7 @@ def parse_netstat_ib_output(netstat_ib_output):
 def parse_iostat_output(iostat_output):
     # type: (six.text_type) -> List[Sample]
     """
-    Parse output of "iostat -dKI -n 99".
+    Parse output of "iostat -dKI -n 99" on macOS.
     """
     lines = iostat_output.splitlines()
 
@@ -125,7 +128,8 @@ class SystemState(object):
 class PxIoLoad(object):
     def __init__(self):
         # type: () -> None
-        self.most_recent_system_state = SystemState()  # type: SystemState
+        self.initial_system_state = SystemState()  # type: SystemState
+        self.most_recent_system_state = self.initial_system_state  # type: SystemState
         self.previous_system_state = None  # type: Optional[SystemState]
 
         # Maps a subsystem name ("eth0 outgoing") to a current bytes-per-second
@@ -144,30 +148,43 @@ class PxIoLoad(object):
         self.most_recent_system_state = SystemState()
 
         dt = self.most_recent_system_state.timestamp - self.previous_system_state.timestamp
-        dt_seconds = dt.total_seconds()
-        assert dt_seconds > 0
+        seconds_since_previous = dt.total_seconds()
+        assert seconds_since_previous > 0
 
         # Update self.ios from the system states
         updated_ios = {}  # type: Dict[six.text_type, Tuple[float, float]]
         for sample in self.most_recent_system_state.samples:
             name = sample.name
-            last_sample = self.previous_system_state.samples_by_name.get(name)
-            if not last_sample:
+
+            initial_sample = self.initial_system_state.samples_by_name.get(name)
+            if not initial_sample:
+                # FIXME: New device added, we need to handle this case. Or do we?
+                continue
+            bytes_since_initial = sample.bytecount - initial_sample.bytecount
+            assert bytes_since_initial >= 0
+            seconds_since_initial = (
+                self.most_recent_system_state.timestamp - self.initial_system_state.timestamp
+            ).total_seconds()
+
+            previous_sample = self.previous_system_state.samples_by_name.get(name)
+            if not previous_sample:
                 # Need two samples to make a metric
                 continue
+            bytes_since_previous = sample.bytecount - previous_sample.bytecount
+            assert bytes_since_previous >= 0
 
-            delta_bytes = sample.bytecount - last_sample.bytecount
-            assert delta_bytes >= 0
-
-            bytes_per_second = delta_bytes / dt_seconds
+            bytes_per_second_since_initial = bytes_since_initial / seconds_since_initial
+            bytes_per_second_since_previous = bytes_since_previous / seconds_since_previous
 
             io_entry = self.ios.get(name)
             if not io_entry:
                 # New device
                 io_entry = (0.0, 0.0)
-            high_watermark = max(io_entry[1], bytes_per_second)
 
-            updated_ios[name] = (bytes_per_second, high_watermark)
+            # High watermark throughput should be measured vs the last sample...
+            high_watermark = max(io_entry[1], bytes_per_second_since_previous)
+            # ... but the current B/s should be measured vs the initial sample.
+            updated_ios[name] = (bytes_per_second_since_initial, high_watermark)
 
         self.ios = updated_ios
 
