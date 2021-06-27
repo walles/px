@@ -8,6 +8,7 @@ import six
 import re
 
 from . import px_units
+from . import px_terminal
 from . import px_exec_util
 
 import sys
@@ -277,8 +278,7 @@ class PxIoLoad(object):
         bottleneck = collected_ios[0]
         percentage = bottleneck[1]
         if percentage == 0:
-            # FIXME: Color this somehow?
-            return " 0%"
+            return " " + px_terminal.bold("0%")
 
         if percentage < 10:
             percentage_s = " " + str(percentage) + "% "
@@ -294,12 +294,11 @@ class PxIoLoad(object):
             percentage_s = "100%"
 
         # "14%  [123kB/s / 878kB/s] eth0 outgoing"
-        # FIXME: At least the percentage should be in white, make this look nice
-        return "{} [{}/s / {}/s] {}".format(
-            percentage_s,
-            px_units.bytes_to_string(math.trunc(bottleneck[2])),
-            px_units.bytes_to_string(math.trunc(bottleneck[3])),
-            bottleneck[0]
+        return "{} [{} / {}] {}".format(
+            px_terminal.bold(percentage_s),
+            px_terminal.bold(px_units.bytes_to_string(math.trunc(bottleneck[2])) + "/s"),
+            px_units.bytes_to_string(math.trunc(bottleneck[3])) + "/s",
+            px_terminal.bold(bottleneck[0])
         )
 
 _ioload = PxIoLoad()
