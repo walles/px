@@ -78,7 +78,8 @@ def parse_iostat_output(iostat_output):
         name = names[i]
         mb_string = numbers[3 * i + 2]
 
-        # FIXME: Verify that iostat returns 1024*1024 as MB and not 1000*1000.
+        # 1024 * 1024 mirrors what happens in iostat.c:
+        # https://opensource.apple.com/source/system_cmds/system_cmds-550.6/iostat.tproj/iostat.c.auto.html
         bytecount = math.trunc(float(mb_string) * 1024 * 1024)
 
         samples.append(Sample(name, bytecount))
