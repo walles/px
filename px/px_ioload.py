@@ -19,6 +19,12 @@ if sys.version_info.major >= 3:
     from typing import Optional
 
 
+# For each device, don't start displaying numbers for it until after 12s. This
+# duration comes from me watching the output and seeing when it stabilizes.
+# Better suggestions welcome.
+STABILIZATION_SECONDS = 12
+
+
 # Matches output lines in "netstat -ib" on macOS.
 #
 # Extracted columns are interface name, incoming bytes count and outgoing bytes
@@ -92,6 +98,18 @@ class Sample(object):
         return self.bytecount == o.bytecount and self.name == o.name
 
 
+class SubsystemStat(object):
+    def __init__(self, throughput, high_watermark):
+        # type: (float, float) -> None
+
+        if throughput > high_watermark:
+            raise ValueError(
+                "High watermark {} lower than throughput {}".format(high_watermark, throughput))
+
+        self.throughput = throughput
+        self.high_watermark = high_watermark
+
+
 class SystemState(object):
     def __init__(self):
         # type: () -> None
@@ -128,13 +146,39 @@ class SystemState(object):
 class PxIoLoad(object):
     def __init__(self):
         # type: () -> None
-        self.initial_system_state = SystemState()  # type: SystemState
-        self.most_recent_system_state = self.initial_system_state  # type: SystemState
+        self.most_recent_system_state = SystemState()  # type: SystemState
         self.previous_system_state = None  # type: Optional[SystemState]
 
         # Maps a subsystem name ("eth0 outgoing") to a current bytes-per-second
         # value and a high watermark for the same value.
-        self.ios = {}  # type: Dict[six.text_type, Tuple[float, float]]
+        self.ios = {}  # type: Dict[six.text_type, SubsystemStat]
+
+        # Per interface, keep track of when we first saw it and its byte count
+        # at that time.
+        self.baseline = {}  # type: Dict[six.text_type, Tuple[datetime.datetime, int]]
+        self.update_baseline_from_system(self.most_recent_system_state)
+
+    def update_baseline_from_system(self, system_state):
+        # type: (SystemState) -> None
+        """
+        Add new entries to the baseline, and remove those that aren't part of
+        the system state any more.
+        """
+        unseen = set(self.baseline.keys())
+        now = system_state.timestamp
+        for sample in system_state.samples:
+            if sample.name in unseen:
+                unseen.remove(sample.name)
+
+            if sample.name in self.baseline:
+                # Already in there, move along!
+                continue
+
+            self.baseline[sample.name] = (now, sample.bytecount)
+
+        # Garbage collect removed devices
+        for remove_me in unseen:
+            del self.baseline[remove_me]
 
     def update(self):
         # type: () -> None
@@ -146,25 +190,25 @@ class PxIoLoad(object):
 
         self.previous_system_state = self.most_recent_system_state
         self.most_recent_system_state = SystemState()
+        self.update_baseline_from_system(self.most_recent_system_state)
 
-        dt = self.most_recent_system_state.timestamp - self.previous_system_state.timestamp
-        seconds_since_previous = dt.total_seconds()
+        seconds_since_previous = (
+            self.most_recent_system_state.timestamp - self.previous_system_state.timestamp
+        ).total_seconds()
         assert seconds_since_previous > 0
 
         # Update self.ios from the system states
-        updated_ios = {}  # type: Dict[six.text_type, Tuple[float, float]]
+        updated_ios = {}  # type: Dict[six.text_type, SubsystemStat]
         for sample in self.most_recent_system_state.samples:
             name = sample.name
 
-            initial_sample = self.initial_system_state.samples_by_name.get(name)
-            if not initial_sample:
-                # FIXME: New device added, we need to handle this case. Or do we?
-                continue
-            bytes_since_initial = sample.bytecount - initial_sample.bytecount
-            assert bytes_since_initial >= 0
-            seconds_since_initial = (
-                self.most_recent_system_state.timestamp - self.initial_system_state.timestamp
+            baseline_sample = self.baseline[name]
+            bytes_since_baseline = sample.bytecount - baseline_sample[1]
+            assert bytes_since_baseline >= 0
+            seconds_since_baseline = (
+                self.most_recent_system_state.timestamp - baseline_sample[0]
             ).total_seconds()
+            assert seconds_since_baseline >= seconds_since_previous
 
             previous_sample = self.previous_system_state.samples_by_name.get(name)
             if not previous_sample:
@@ -173,18 +217,25 @@ class PxIoLoad(object):
             bytes_since_previous = sample.bytecount - previous_sample.bytecount
             assert bytes_since_previous >= 0
 
-            bytes_per_second_since_initial = bytes_since_initial / seconds_since_initial
+            assert bytes_since_baseline >= bytes_since_previous
+
+            bytes_per_second_since_baseline = bytes_since_baseline / seconds_since_baseline
             bytes_per_second_since_previous = bytes_since_previous / seconds_since_previous
 
             io_entry = self.ios.get(name)
             if not io_entry:
                 # New device
-                io_entry = (0.0, 0.0)
+                io_entry = SubsystemStat(throughput=0.0, high_watermark=0.0)
 
             # High watermark throughput should be measured vs the last sample...
-            high_watermark = max(io_entry[1], bytes_per_second_since_previous)
+            high_watermark = max(io_entry.high_watermark, bytes_per_second_since_previous)
+            assert high_watermark >= bytes_per_second_since_baseline
+
             # ... but the current B/s should be measured vs the initial sample.
-            updated_ios[name] = (bytes_per_second_since_initial, high_watermark)
+            # This makes the values more stable and easier on the eye.
+            updated_ios[name] = SubsystemStat(
+                throughput=bytes_per_second_since_baseline,
+                high_watermark=high_watermark)
 
         self.ios = updated_ios
 
@@ -203,18 +254,22 @@ class PxIoLoad(object):
         #
         # Then, we need to sort these by percentages, and render the top one.
 
-        if not self.ios:
-            # No load collected
-            return "..."
-
         # Values per entry: name, percentage, current value, high watermark
         collected_ios = []  # type: List[Tuple[six.text_type, int, float, float]]
         for name, loads in six.iteritems(self.ios):
-            percentage = 0  # type: int
-            if loads[1] > 0:
-                percentage = math.trunc((100 * loads[0]) / loads[1])
+            device_lifetime = self.most_recent_system_state.timestamp - self.baseline[name][0]
+            if device_lifetime.total_seconds() < STABILIZATION_SECONDS:
+                continue
 
-            collected_ios.append((name, percentage, loads[0], loads[1]))
+            percentage = 0  # type: int
+            if loads.high_watermark > 0:
+                percentage = math.trunc((100 * loads.throughput) / loads.high_watermark)
+
+            collected_ios.append((name, percentage, loads.throughput, loads.high_watermark))
+
+        if not collected_ios:
+            # No load collected
+            return "..."
 
         # Highest percentage first
         collected_ios.sort(key=lambda collectee: collectee[1], reverse=True)
@@ -230,7 +285,12 @@ class PxIoLoad(object):
         elif percentage < 100:
             percentage_s = str(percentage) + "% "
         else:
-            assert percentage == 100
+            if percentage != 100:
+                raise ValueError(
+                    "Percentage should have been 100 but was "
+                    + str(percentage)
+                    + " for "
+                    + str(bottleneck))
             percentage_s = "100%"
 
         # "14%  [123kB/s / 878kB/s] eth0 outgoing"
