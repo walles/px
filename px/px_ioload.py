@@ -204,20 +204,10 @@ class PxIoLoad(object):
             seconds_since_baseline = (
                 self.most_recent_system_state.timestamp - baseline_sample[0]
             ).total_seconds()
-            if seconds_since_baseline < seconds_since_previous:
-                raise ValueError(
-                    "seconds_since_previous ({}) cannot be larger than seconds_since_baseline ({}) for device {}: {}".format(
-                        seconds_since_previous,
-                        seconds_since_baseline,
-                        name,
-                        [
-                            baseline_sample[0],
-                            self.previous_system_state.timestamp,
-                            self.most_recent_system_state.timestamp
-                        ]
-                    )
-                )
-            assert seconds_since_baseline >= seconds_since_previous
+            if seconds_since_baseline == 0:
+                # Newly added device, need two samples to make a metric, try
+                # again next time
+                continue
 
             previous_sample = self.previous_system_state.samples_by_name.get(name)
             if not previous_sample:
