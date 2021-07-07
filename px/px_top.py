@@ -239,7 +239,7 @@ def get_screen_lines(
         px_terminal.crop_ansi_string_at_length(
             px_terminal.bold(u"RAM Use: ") + meminfo, columns),
         px_terminal.crop_ansi_string_at_length(
-            px_terminal.bold(u"IO Load: ") + ioloadstring, columns),
+            px_terminal.bold(u"IO Load:      ") + ioloadstring, columns),
         u""]
 
     # Create a launchers section

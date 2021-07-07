@@ -20,12 +20,6 @@ if sys.version_info.major >= 3:
     from typing import Optional
 
 
-# For each device, don't start displaying numbers for it until after 12s. This
-# duration comes from me watching the output and seeing when it stabilizes.
-# Better suggestions welcome.
-STABILIZATION_SECONDS = 12
-
-
 # Matches output lines in "netstat -ib" on macOS.
 #
 # Extracted columns are interface name, incoming bytes count and outgoing bytes
@@ -210,6 +204,19 @@ class PxIoLoad(object):
             seconds_since_baseline = (
                 self.most_recent_system_state.timestamp - baseline_sample[0]
             ).total_seconds()
+            if seconds_since_baseline < seconds_since_previous:
+                raise ValueError(
+                    "seconds_since_previous ({}) cannot be larger than seconds_since_baseline ({}) for device {}: {}".format(
+                        seconds_since_previous,
+                        seconds_since_baseline,
+                        name,
+                        [
+                            baseline_sample[0],
+                            self.previous_system_state.timestamp,
+                            self.most_recent_system_state.timestamp
+                        ]
+                    )
+                )
             assert seconds_since_baseline >= seconds_since_previous
 
             previous_sample = self.previous_system_state.samples_by_name.get(name)
@@ -243,7 +250,7 @@ class PxIoLoad(object):
 
     def get_load_string(self):
         """
-        Example return value: "14%  [123B/s / 878B/s] eth0 outgoing"
+        Example return value: "[123B/s / 878B/s] eth0 outgoing"
         """
 
         # NOTE: To compute this value, we need a collection of data points, with
@@ -254,51 +261,24 @@ class PxIoLoad(object):
         #
         # This data is available in self.ios.
         #
-        # Then, we need to sort these by percentages, and render the top one.
+        # Then, we need to sort these by current-bytes-per-second, and render the top one.
 
-        # Values per entry: name, percentage, current value, high watermark
-        collected_ios = []  # type: List[Tuple[six.text_type, int, float, float]]
+        # Values per entry: name, current value, high watermark
+        collected_ios = []  # type: List[Tuple[six.text_type, float, float]]
         for name, loads in six.iteritems(self.ios):
-            device_lifetime = self.most_recent_system_state.timestamp - self.baseline[name][0]
-            if device_lifetime.total_seconds() < STABILIZATION_SECONDS:
-                continue
-
-            percentage = 0  # type: int
-            if loads.high_watermark > 0:
-                percentage = math.trunc((100 * loads.throughput) / loads.high_watermark)
-
-            collected_ios.append((name, percentage, loads.throughput, loads.high_watermark))
+            collected_ios.append((name, loads.throughput, loads.high_watermark))
 
         if not collected_ios:
             # No load collected
             return "..."
 
-        # Highest percentage first
+        # Highest throughput first
         collected_ios.sort(key=lambda collectee: collectee[1], reverse=True)
 
         bottleneck = collected_ios[0]
-        percentage = bottleneck[1]
-        if percentage == 0:
-            return " " + px_terminal.bold("0%")
-
-        if percentage < 10:
-            percentage_s = " " + str(percentage) + "% "
-        elif percentage < 100:
-            percentage_s = str(percentage) + "% "
-        else:
-            if percentage != 100:
-                raise ValueError(
-                    "Percentage should have been 100 but was "
-                    + str(percentage)
-                    + " for "
-                    + str(bottleneck))
-            percentage_s = "100%"
-
-        # "14%  [123kB/s / 878kB/s] eth0 outgoing"
-        return "{} [{} / {}] {}".format(
-            px_terminal.bold(percentage_s),
-            px_terminal.bold(px_units.bytes_to_string(math.trunc(bottleneck[2])) + "/s"),
-            px_units.bytes_to_string(math.trunc(bottleneck[3])) + "/s",
+        return "[{} / {}] {}".format(
+            px_terminal.bold(px_units.bytes_to_string(math.trunc(bottleneck[1])) + "/s"),
+            px_units.bytes_to_string(math.trunc(bottleneck[2])) + "/s",
             px_terminal.bold(bottleneck[0])
         )
 
