@@ -260,7 +260,7 @@ class PxIoLoad(object):
 
         if not collected_ios:
             # No load collected
-            return "..."
+            return ""
 
         # Highest throughput first
         collected_ios.sort(key=lambda collectee: collectee[1], reverse=True)
