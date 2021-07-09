@@ -154,7 +154,12 @@ class SystemState(object):
         Query system for network interfaces byte counts
         """
 
-        # FIXME: This is macOS specific
+        if os.path.exists("/proc/net/dev"):
+            # We're on Linux
+            with open("/proc/net/dev") as proc_net_dev:
+                return parse_proc_net_dev(proc_net_dev.read())
+
+        # Assuming macOS, add support for more platforms on demand
         netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
         return parse_netstat_ib_output(netstat_ib_output)
 
@@ -164,12 +169,7 @@ class SystemState(object):
         Query system for drive statistics
         """
 
-        if os.path.exists("/proc/net/dev"):
-            # We're on Linux
-            with open("/proc/net/dev") as proc_net_dev:
-                return parse_proc_net_dev(proc_net_dev.read())
-
-        # Assuming macOS, add support for more platforms on demand
+        # FIXME: This is macOS specific
         iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
         return parse_iostat_output(iostat_output)
 
