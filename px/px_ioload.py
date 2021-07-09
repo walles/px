@@ -6,6 +6,7 @@ import datetime
 import math
 import six
 import re
+import os
 
 from . import px_units
 from . import px_terminal
@@ -28,6 +29,12 @@ if sys.version_info.major >= 3:
 # If you look carefully at the output, this regex will only match lines with
 # error counts, which is only one line per interface.
 NETSTAT_IB_LINE_RE = re.compile(r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([0-9]+) +[0-9]+$")
+
+# Parse a line from /proc/net/dev.
+#
+# Example input (includes leading whitespace):
+#   eth0: 29819439   19890    0    0    0     0          0         0   364327    6584    0    0    0     0       0          0
+PROC_NET_DEV_RE = re.compile(r"^ *([^:]+): +([0-9]+) +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +([0-9]+)[0-9 ]+$")
 
 def parse_netstat_ib_output(netstat_ib_output):
     # type: (six.text_type) -> List[Sample]
@@ -79,6 +86,29 @@ def parse_iostat_output(iostat_output):
         samples.append(Sample(name, bytecount))
 
     return samples
+
+
+def parse_proc_net_dev(proc_net_dev_contents):
+    # type: (six.text_type) -> List[Sample]
+    """
+    Parse /proc/net/dev contents into a list of samples.
+    """
+    return_me = []  # type: List[Sample]
+    for line in proc_net_dev_contents.splitlines():
+        match = PROC_NET_DEV_RE.match(line)
+        if not match:
+            continue
+
+        name = match.group(1)
+        incoming = int(match.group(2))
+        outgoing = int(match.group(3))
+        if incoming == 0 and outgoing == 0:
+            continue
+
+        return_me.append(Sample(name + " incoming", incoming))
+        return_me.append(Sample(name + " outgoing", outgoing))
+
+    return return_me
 
 
 class Sample(object):
@@ -134,7 +164,12 @@ class SystemState(object):
         Query system for drive statistics
         """
 
-        # FIXME: This is macOS specific
+        if os.path.exists("/proc/net/dev"):
+            # We're on Linux
+            with open("/proc/net/dev") as proc_net_dev:
+                return parse_proc_net_dev(proc_net_dev.read())
+
+        # Assuming macOS, add support for more platforms on demand
         iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
         return parse_iostat_output(iostat_output)
 

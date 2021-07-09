@@ -37,3 +37,16 @@ def test_parse_iostat_output():
     actual = px_ioload.parse_iostat_output(sample_iostat_output)
 
     assert actual == expected
+
+
+def test_parse_proc_net_dev():
+    proc_net_dev_contents = testutils.load("proc-net-dev.txt")
+
+    # No data expected for the all-zero interfaces lo, tunl0 and ip6tnl0
+    expected = [
+        px_ioload.Sample("eth0 incoming", 29819439),
+        px_ioload.Sample("eth0 outgoing", 364327),
+    ]
+    actual = px_ioload.parse_proc_net_dev(proc_net_dev_contents)
+
+    assert actual == expected
