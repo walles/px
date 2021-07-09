@@ -50,3 +50,10 @@ def test_parse_proc_net_dev():
     actual = px_ioload.parse_proc_net_dev(proc_net_dev_contents)
 
     assert actual == expected
+
+
+def test_system_state():
+    system_state = px_ioload.SystemState()
+
+    # We should get *something*
+    assert system_state.samples
