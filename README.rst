@@ -13,11 +13,13 @@ Output
 |ptop screenshot|
 
 * Note how the default sort order of CPU-usage-since-``ptop``-started makes the
-  display rather stable.
+  display mostly stable.
 * Note the core count right next to the system load number, for easy comparison.
 * Note the load history graph next to the load numbers. On this system the
-  load has been the same for the last fifteen minutes. This is a visualization of
-  the numbers you get from ``uptime``.
+  load went up during the last minute. This is a visualization of the numbers
+  you get from ``uptime``.
+* Note the ``IO Load`` number, this shows which IO device had the highest
+  average throughput since ``ptop`` launched.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
 * Selecting a process with Enter will offer you to see detailed information
