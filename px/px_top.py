@@ -8,6 +8,7 @@ import unicodedata
 
 import os
 from . import px_load
+from . import px_ioload
 from . import px_process
 from . import px_terminal
 from . import px_meminfo
@@ -219,7 +220,6 @@ def get_screen_lines(
         toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
 
     # Hand out different amount of lines to the different sections
-    header_height = 3  # System load, RAM load, empty line
     footer_height = 0
     cputop_minheight = 10
     if include_footer:
@@ -230,14 +230,20 @@ def get_screen_lines(
     loadstring = px_load.get_load_string(load)
 
     meminfo = px_meminfo.get_meminfo()
+
+    px_ioload.update()
+    ioloadstring = px_ioload.get_load_string()
     lines = [
         px_terminal.crop_ansi_string_at_length(
             px_terminal.bold(u"Sysload: ") + loadstring, columns),
         px_terminal.crop_ansi_string_at_length(
             px_terminal.bold(u"RAM Use: ") + meminfo, columns),
+        px_terminal.crop_ansi_string_at_length(
+            px_terminal.bold(u"IO Load:      ") + ioloadstring, columns),
         u""]
 
     # Create a launchers section
+    header_height = len(lines)
     launches_maxheight = rows - header_height - cputop_minheight - footer_height
     launchlines = []  # type: List[text_type]
     if launches_maxheight >= 3:

@@ -12,6 +12,14 @@ jobs:
 
       addons:
         homebrew:
+          # Updating is optional, but was suggested by support when I asked why
+          # this build failed:
+          # https://app.travis-ci.com/github/walles/px/jobs/526799997
+          #
+          # Docs:
+          # https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos
+          update: true
+
           packages:
           - python@2
           - shellcheck

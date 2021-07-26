@@ -3,6 +3,7 @@ import sys
 import errno
 import platform
 
+from . import px_units
 from . import px_terminal
 from . import px_exec_util
 
@@ -37,9 +38,9 @@ def get_meminfo():
         percentage_string = px_terminal.red(percentage_string)
 
     wanted_and_total_string = "".join([
-        px_terminal.bold(bytes_to_string(wanted_ram_bytes)),
+        px_terminal.bold(px_units.bytes_to_string(wanted_ram_bytes)),
         " / ",
-        px_terminal.bold(bytes_to_string(total_ram_bytes))
+        px_terminal.bold(px_units.bytes_to_string(total_ram_bytes))
         ])
 
     ram_text = "".join([
@@ -50,31 +51,6 @@ def get_meminfo():
         ])
 
     return ram_text
-
-
-def bytes_to_string(bytes_count):
-    # type: (int) -> text_type
-    """
-    Turn byte counts into strings like "14MB"
-    """
-    KB = 1024 ** 1
-    MB = 1024 ** 2
-    GB = 1024 ** 3
-    TB = 1024 ** 4
-
-    if bytes_count < 7 * KB:
-        return str(bytes_count) + "B"
-
-    if bytes_count < 7 * MB:
-        return str(int(round(float(bytes_count) / KB))) + "KB"
-
-    if bytes_count < 7 * GB:
-        return str(int(round(float(bytes_count) / MB))) + "MB"
-
-    if bytes_count < 7 * TB:
-        return str(int(round(float(bytes_count) / GB))) + "GB"
-
-    return str(int(round(float(bytes_count) / TB))) + "TB"
 
 
 def _get_ram_numbers():
