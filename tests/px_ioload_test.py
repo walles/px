@@ -52,6 +52,20 @@ def test_parse_proc_net_dev():
     assert actual == expected
 
 
+def test_parse_proc_diskstats():
+    proc_diskstats_contents = testutils.load("proc-diskstats.txt")
+
+    # No data expected for the all-zero disks ram*, loop* and nbd*. Get stats
+    # per partition (name ends in a number), not per drive.
+    expected = [
+        px_ioload.Sample("vda1 read", 804910 * 512),
+        px_ioload.Sample("vda1 write", 1852480 * 512),
+    ]
+    actual = px_ioload.parse_proc_diskstats(proc_diskstats_contents)
+
+    assert actual == expected
+
+
 def test_system_state():
     system_state = px_ioload.SystemState()
 

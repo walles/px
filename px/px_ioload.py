@@ -36,6 +36,17 @@ NETSTAT_IB_LINE_RE = re.compile(r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([
 #   eth0: 29819439   19890    0    0    0     0          0         0   364327    6584    0    0    0     0       0          0
 PROC_NET_DEV_RE = re.compile(r"^ *([^:]+): +([0-9]+) +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +([0-9]+)[0-9 ]+$")
 
+# Parse a line from /proc/diskstats
+#
+# First group is the name. To get partitions rather than disks we require the
+# name to end in a number.
+#
+# Second and third groups are sector reads and writes respectively.
+#
+# Line format documented here:
+# https://www.kernel.org/doc/Documentation/admin-guide/iostats.rst
+PROC_DISKSTATS_RE = re.compile(r"^ *[0-9]+ +[0-9]+ ([a-z]+[0-9]+) [0-9]+ [0-9]+ ([0-9]+) [0-9]+ [0-9]+ [0-9]+ ([0-9]+) .*")
+
 def parse_netstat_ib_output(netstat_ib_output):
     # type: (six.text_type) -> List[Sample]
     """
@@ -111,6 +122,31 @@ def parse_proc_net_dev(proc_net_dev_contents):
     return return_me
 
 
+def parse_proc_diskstats(proc_diskstats_contents):
+    # type: (six.text_type) -> List[Sample]
+    """
+    Parse /proc/net/dev contents into a list of samples.
+    """
+    return_me = []  # type: List[Sample]
+    for line in proc_diskstats_contents.splitlines():
+        match = PROC_DISKSTATS_RE.match(line)
+        if not match:
+            continue
+
+        name = match.group(1)
+        read_sectors = int(match.group(2))
+        write_sectors = int(match.group(3))
+        if read_sectors == 0 and write_sectors == 0:
+            continue
+
+        # Multiply by 512 to get bytes from sectors:
+        # https://stackoverflow.com/a/38136179/473672
+        return_me.append(Sample(name + " read", read_sectors * 512))
+        return_me.append(Sample(name + " write", write_sectors * 512))
+
+    return return_me
+
+
 class Sample(object):
     def __init__(self, name, bytecount):
         # type: (six.text_type, int) -> None
@@ -169,7 +205,12 @@ class SystemState(object):
         Query system for drive statistics
         """
 
-        # FIXME: This is macOS specific
+        if os.path.exists("/proc/diskstats"):
+            # We're on Linux
+            with open("/proc/diskstats") as proc_diskstats:
+                return parse_proc_diskstats(proc_diskstats.read())
+
+        # Assuming macOS, add support for more platforms on demand
         iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
         return parse_iostat_output(iostat_output)
 
