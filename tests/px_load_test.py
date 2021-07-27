@@ -37,6 +37,7 @@ def test_levels_to_graph():
 
 
 def test_get_load_string():
+    px_terminal._enable_color = True
     CSI = u"\x1b["
     assert "0.3" + CSI in px_load.get_load_string((0.3, 0.2, 0.1))
     assert "3.0" + CSI in px_load.get_load_string((3.0, 0.2, 0.1))

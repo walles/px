@@ -14,6 +14,7 @@ if sys.version_info.major >= 3:
 
 
 def test_to_screen_lines_unbounded():
+    px_terminal._enable_color = True
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
     assert px_terminal.to_screen_lines(procs, None, None, None) == [
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
@@ -28,6 +29,7 @@ def test_to_screen_lines_unbounded():
 
 
 def test_to_screen_lines_bounded():
+    px_terminal._enable_color = True
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
     assert px_terminal.to_screen_lines(procs, 50, None, None) == [
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
@@ -42,6 +44,7 @@ def test_to_screen_lines_bounded():
 
 
 def test_crop_heading_lines():
+    px_terminal._enable_color = True
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
     assert px_terminal.to_screen_lines(procs, 10, None, None) == [
         "\x1b[1m  PID COMM\x1b[22m",
@@ -65,6 +68,7 @@ def test_to_screen_lines_unicode():
 
 
 def test_get_string_of_length():
+    px_terminal._enable_color = True
     CSI = u"\x1b["
 
     assert px_terminal.get_string_of_length("12345", 3) == "123"
@@ -80,6 +84,7 @@ def test_get_string_of_length():
 
 
 def test_crop_ansi_string_at_length():
+    px_terminal._enable_color = True
     CSI = u"\x1b["
 
     # Non-formatted cropping
@@ -120,6 +125,7 @@ def test_getch():
 
 
 def test_tokenize():
+    px_terminal._enable_color = True
     input = u"ab" + px_terminal.bold(u"c") + u"de"
     parts = []  # type: List[text_type]
     for token in px_terminal._tokenize(input):
