@@ -24,6 +24,7 @@ def test_list_new_launches():
 
 
 def test_get_screen_lines_coalesces():
+    px_terminal._enable_color = True
     # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
     # they should be reported as just "init"->"iTerm"->"fish".
     launchcounter = px_launchcounter.Launchcounter()
@@ -55,6 +56,7 @@ def test_get_screen_lines_coalesces():
 
 
 def test_print_launch_counts():
+    px_terminal._enable_color = True
     launchcounter = px_launchcounter.Launchcounter()
     launchcounter._register_launches([
         testutils.fake_callchain('init', 'iTerm'),
@@ -73,6 +75,7 @@ def test_print_launch_counts():
 
 
 def test_ignore_surrounding_parentheses():
+    px_terminal._enable_color = True
     launchcounter = px_launchcounter.Launchcounter()
     launchcounter._register_launches([
         testutils.fake_callchain('init', 'iTerm'),
@@ -132,6 +135,7 @@ def test_sort_launchers_lists():
 
 
 def test_get_screen_lines_column_cutoff():
+    px_terminal._enable_color = True
     # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
     # they should be reported as just "init"->"iTerm"->"fish".
     launchcounter = px_launchcounter.Launchcounter()

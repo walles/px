@@ -1,4 +1,4 @@
-|Build Status|
+|Linux CI Status| |macOS CI Status|
 
 ``ps`` and ``top`` for Human Beings
 ===================================
@@ -331,6 +331,8 @@ DONE
 .. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
 
-.. |Build Status| image:: https://travis-ci.com/walles/px.svg?branch=python
-   :target: https://travis-ci.com/walles/px
+.. |Linux CI Status| image:: https://github.com/walles/px/actions/workflows/linux-ci.yml/badge.svg
+   :target: https://github.com/walles/px/actions/workflows/linux-ci.yml?query=branch%3Apython
+.. |macOS CI Status| image:: https://github.com/walles/px/actions/workflows/macos-ci.yml/badge.svg
+   :target: https://github.com/walles/px/actions/workflows/macos-ci.yml?query=branch%3Apython
 .. |ptop screenshot| image:: doc/ptop-screenshot.png
