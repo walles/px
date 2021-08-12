@@ -332,7 +332,7 @@ def redraw(
         toplist, launchcounter, rows, columns, include_footer,
         search=search_string)
 
-    px_terminal.draw_screen_lines(lines, clear)
+    px_terminal.draw_screen_lines(lines, columns, clear)
 
 
 def handle_search_keypresses(key_sequence):
@@ -461,6 +461,7 @@ def _top(search=""):
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
+                px_terminal.clear_screen()
                 redraw(toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
 

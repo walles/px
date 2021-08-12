@@ -42,12 +42,17 @@ intend to change these.
 """
 CLEAR_SCREEN = CSI + u"1J" + CSI + u"H"
 
+# First disable inverse video, then clear to EOL. This avoids reversing all
+# whitespace until the end of line.
+ERASE_TO_EOL = CSI + u"27m" + CSI + "K"
+
 # Actually this is "Move 998 down and 999 right", but as long as people's
 # terminal windows are smaller than that it will work fine.
 #
 # Inspired by: https://stackoverflow.com/a/53168713/473672
 CURSOR_TO_BOTTOM_RIGHT = CSI + u"998B" + CSI + u"999C"
 
+CURSOR_TO_TOP_LEFT = CSI + u"H"
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -191,14 +196,22 @@ def get_window_size():
     return (rows, columns)
 
 
-def draw_screen_lines(lines, clear=True):
-    # type: (List[text_type], bool) -> None
+def draw_screen_lines(lines, width, clear=True):
+    # type: (List[text_type], int, bool) -> None
 
     # We need both \r and \n when the TTY is in tty.setraw() mode
-    linestring = u"\r\n".join(lines)
+    line_separator = u"\r\n"
+
+    linestring = u""
+    for line in lines:
+        if linestring:
+            linestring += line_separator
+        if visual_length(line) < width:
+            linestring += ERASE_TO_EOL
+        linestring += line
 
     if clear:
-        screen_bytes = CLEAR_SCREEN + linestring
+        screen_bytes = CURSOR_TO_TOP_LEFT + linestring
     else:
         screen_bytes = linestring
 
@@ -210,6 +223,10 @@ def draw_screen_lines(lines, clear=True):
     for b in screen_bytes.encode('utf-8'):
         time.sleep(per_char_delay_seconds)
         os.write(sys.stdout.fileno(), b)
+
+
+def clear_screen():
+    os.write(sys.stdout.fileno(), CLEAR_SCREEN.encode('utf-8'))
 
 
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
