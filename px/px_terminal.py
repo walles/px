@@ -204,7 +204,12 @@ def draw_screen_lines(lines, clear=True):
 
     screen_bytes += CURSOR_TO_BOTTOM_RIGHT
 
-    os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
+    # FIXME: os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
+    import time
+    per_char_delay_seconds = 0.0001
+    for b in screen_bytes.encode('utf-8'):
+        time.sleep(per_char_delay_seconds)
+        os.write(sys.stdout.fileno(), b)
 
 
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
