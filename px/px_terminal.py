@@ -54,6 +54,9 @@ CURSOR_TO_BOTTOM_RIGHT = CSI + u"998B" + CSI + u"999C"
 
 CURSOR_TO_TOP_LEFT = CSI + u"H"
 
+HIDE_CURSOR = CSI + u"?25l"
+SHOW_CURSOR = CSI + u"?25h"
+
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
 
@@ -215,6 +218,9 @@ def draw_screen_lines(lines, width, clear=True):
     else:
         screen_bytes = linestring
 
+    screen_bytes = HIDE_CURSOR + screen_bytes + SHOW_CURSOR
+
+    # FIXME: This breaks preserving some lines after the user presses 'q'
     screen_bytes += CURSOR_TO_BOTTOM_RIGHT
 
     # FIXME: os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
