@@ -42,12 +42,8 @@ intend to change these.
 """
 CLEAR_SCREEN = CSI + u"1J" + CSI + u"H"
 
-# Actually this is "Move 998 down and 999 right", but as long as people's
-# terminal windows are smaller than that it will work fine.
-#
-# Inspired by: https://stackoverflow.com/a/53168713/473672
-CURSOR_TO_BOTTOM_RIGHT = CSI + u"998B" + CSI + u"999C"
-
+HIDE_CURSOR = CSI + u"?25l"
+SHOW_CURSOR = CSI + u"?25h"
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -201,8 +197,6 @@ def draw_screen_lines(lines, clear=True):
         screen_bytes = CLEAR_SCREEN + linestring
     else:
         screen_bytes = linestring
-
-    screen_bytes += CURSOR_TO_BOTTOM_RIGHT
 
     os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
 
@@ -494,12 +488,16 @@ def _enter_fullscreen():
 
     tty.setraw(fd)
 
+    os.write(fd, HIDE_CURSOR.encode('utf-8'))
+
 
 def _exit_fullscreen():
     global initial_termios_attr
     assert initial_termios_attr is not None
 
     fd = sys.stdin.fileno()
+    os.write(fd, SHOW_CURSOR.encode('utf-8'))
+
     tty.setcbreak(fd)
 
     # tty.setraw() disables local echo, so we have to re-enable it here.
