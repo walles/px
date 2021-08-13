@@ -214,10 +214,13 @@ def draw_screen_lines(lines, width, clear=True):
         linestring += line
 
     if clear:
+        # FIXME: Not actually clearing the screen breaks switching to the
+        # per-process menu
         screen_bytes = CURSOR_TO_TOP_LEFT + linestring
     else:
         screen_bytes = linestring
 
+    # FIXME: Maybe never show any cursor?
     screen_bytes = HIDE_CURSOR + screen_bytes + SHOW_CURSOR
 
     # FIXME: This breaks preserving some lines after the user presses 'q'
