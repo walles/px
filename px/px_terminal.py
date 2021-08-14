@@ -30,6 +30,8 @@ initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 
 CSI = "\x1b["
 
+CURSOR_TO_TOP_LEFT = CSI + u"H"
+
 """
 Clear the screen and move cursor to top left corner:
 https://en.wikipedia.org/wiki/ANSI_escape_code
@@ -40,10 +42,14 @@ for example, the contents of the previous screen gets added to the
 scrollback buffer, which isn't what we want. Tread carefully if you
 intend to change these.
 """
-CLEAR_SCREEN = CSI + u"1J" + CSI + u"H"
+CLEAR_SCREEN = CSI + u"1J" + CURSOR_TO_TOP_LEFT
 
 HIDE_CURSOR = CSI + u"?25l"
 SHOW_CURSOR = CSI + u"?25h"
+CLEAR_TO_EOL = CSI + u"0K"
+
+# Clear from cursor to end of screen
+CLEAR_TO_END_OF_SCREEN = CSI + "J"
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -195,12 +201,17 @@ def draw_screen_lines(lines, columns, clear=True):
         if linestring:
             # We need both \r and \n when the TTY is in tty.setraw() mode
             linestring += u"\r\n"
+
         linestring += crop_ansi_string_at_length(line, columns)
+        linestring += CLEAR_TO_EOL
 
     if clear:
-        screen_bytes = CLEAR_SCREEN + linestring
+        screen_bytes = CURSOR_TO_TOP_LEFT + linestring
     else:
         screen_bytes = linestring
+
+    # In case we got fewer lines than what fits on screen, clear the rest of it
+    screen_bytes += CLEAR_TO_END_OF_SCREEN
 
     os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
 
