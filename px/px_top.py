@@ -273,7 +273,7 @@ def get_screen_lines(
     if sort_by_memory:
         highlight_column = u"RAM"
     toplist_table_lines = \
-        px_terminal.to_screen_lines(toplist, highlight_row, highlight_column)
+        px_terminal.to_screen_lines(toplist[:max_process_count], highlight_row, highlight_column)
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes

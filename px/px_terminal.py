@@ -253,7 +253,6 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
 
     heading_line = format.format(
         headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
-    heading_line_length = len(heading_line)
 
     # Highlight the highlight_column
     if highlight_column is not None:
