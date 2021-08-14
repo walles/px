@@ -167,8 +167,8 @@ class Launchcounter(object):
 
         return coalesced
 
-    def get_screen_lines(self, columns):
-        # type: (int) -> List[text_type]
+    def get_screen_lines(self):
+        # type: () -> List[text_type]
 
         launchers_list = self._coalesce_launchers()
         launchers_list = sort_launchers_list(launchers_list)
@@ -176,6 +176,6 @@ class Launchcounter(object):
         lines = []  # type: List[text_type]
         for row in launchers_list:
             line = u' -> '.join(map(render_launch_tuple, row))
-            lines.append(px_terminal.crop_ansi_string_at_length(line, columns))
+            lines.append(line)
 
         return lines

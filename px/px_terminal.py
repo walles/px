@@ -187,11 +187,15 @@ def get_window_size():
     return (rows, columns)
 
 
-def draw_screen_lines(lines, clear=True):
-    # type: (List[text_type], bool) -> None
+def draw_screen_lines(lines, columns, clear=True):
+    # type: (List[text_type], int, bool) -> None
 
-    # We need both \r and \n when the TTY is in tty.setraw() mode
-    linestring = u"\r\n".join(lines)
+    linestring = u""
+    for line in lines:
+        if linestring:
+            # We need both \r and \n when the TTY is in tty.setraw() mode
+            linestring += u"\r\n"
+        linestring += crop_ansi_string_at_length(line, columns)
 
     if clear:
         screen_bytes = CLEAR_SCREEN + linestring
@@ -202,14 +206,13 @@ def draw_screen_lines(lines, clear=True):
 
 
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
-                    columns,  # type: Optional[int]
-                    row_to_highlight,  # type: Optional[int]
-                    highlight_heading  # type: Optional[text_type]
+                    row_to_highlight,   # type: Optional[int]
+                    highlight_heading,  # type: Optional[text_type]
                     ):
     # type: (...) -> List[text_type]
     """
-    Returns an array of lines that can be printed to screen. Each line is at
-    most columns wide.
+    Returns an array of lines that can be printed to screen. Lines are not
+    cropped, so they can be longer than the screen width.
 
     If columns is None, line lengths are unbounded.
 
@@ -251,22 +254,12 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
     heading_line = format.format(
         headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
     heading_line_length = len(heading_line)
-    heading_line_delta = 0
-    if columns is not None:
-        heading_line_delta = columns - heading_line_length
 
     # Highlight the highlight_column
     if highlight_column is not None:
         headings[highlight_column] = underline(headings[highlight_column])
     heading_line = format.format(
         headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
-
-    # Set heading line length
-    if heading_line_delta > 0:
-        heading_line += heading_line_delta * u' '
-    if heading_line_delta < 0:
-        new_length = heading_line_length + heading_line_delta
-        heading_line = crop_ansi_string_at_length(heading_line, new_length)
 
     heading_line = bold(heading_line)
     lines.append(heading_line)
@@ -310,13 +303,10 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
             cpu_percent_s, cpu_time_s,
             memory_percent_s, proc.cmdline)
 
-        cropped = line
         if row_to_highlight == line_number:
-            cropped = get_string_of_length(cropped, columns)
-            cropped = inverse_video(cropped)
-        elif columns is not None:
-            cropped = crop_ansi_string_at_length(line, columns)
-        lines.append(cropped)
+            # Highlight the whole screen line
+            line = inverse_video(line + u' ' * 999)
+        lines.append(line)
 
     lines[0] = heading_line
 

@@ -32,12 +32,11 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm'),
         testutils.fake_callchain('init', 'iTerm', 'fish'),
     ])
-    lines = launchcounter.get_screen_lines(100)
+    lines = launchcounter.get_screen_lines()
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)' +
-        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
+        px_terminal.bold('fish') + '(1)'
     ]
 
     # Then the same thing backwards
@@ -46,12 +45,11 @@ def test_get_screen_lines_coalesces():
         testutils.fake_callchain('init', 'iTerm', 'fish'),
         testutils.fake_callchain('init', 'iTerm'),
     ])
-    lines = launchcounter.get_screen_lines(100)
+    lines = launchcounter.get_screen_lines()
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(1) -> ' +
-        px_terminal.bold('fish') + '(1)' +
-        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
+        px_terminal.bold('fish') + '(1)'
     ]
 
 
@@ -65,12 +63,11 @@ def test_print_launch_counts():
         testutils.fake_callchain('init', 'iTerm'),
         testutils.fake_callchain('init', 'iTerm'),
     ])
-    lines = launchcounter.get_screen_lines(100)
+    lines = launchcounter.get_screen_lines()
     assert lines == [
         'init -> ' +
         px_terminal.bold('iTerm') + '(3) -> ' +
-        px_terminal.bold('fish') + '(2)' +
-        '\x1b[0m'  # This suffix is an artifact from how we cut ANSI formatted strings
+        px_terminal.bold('fish') + '(2)'
     ]
 
 
@@ -85,22 +82,15 @@ def test_ignore_surrounding_parentheses():
         testutils.fake_callchain('init', 'i(Term)'),
         testutils.fake_callchain('init', '(i)Term'),
     ])
-    lines = launchcounter.get_screen_lines(100)
+    lines = launchcounter.get_screen_lines()
 
     # Note that the ordering of the lines doesn't really matter here, just as
     # long as all of them are in there
     assert set(lines) == set([
-        'init -> ' + px_terminal.bold('iTerm') + '(3)' +
-        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
-
-        'init -> ' + px_terminal.bold('(i)Term') + '(1)' +
-        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
-
-        'init -> ' + px_terminal.bold('i(Term)') + '(1)' +
-        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
-
-        'init -> ' + px_terminal.bold('iTerm()') + '(1)' +
-        '\x1b[0m',  # This suffix is an artifact from how we cut ANSI formatted strings
+        'init -> ' + px_terminal.bold('iTerm') + '(3)',
+        'init -> ' + px_terminal.bold('(i)Term') + '(1)',
+        'init -> ' + px_terminal.bold('i(Term)') + '(1)',
+        'init -> ' + px_terminal.bold('iTerm()') + '(1)',
     ])
 
 
@@ -132,16 +122,3 @@ def test_sort_launchers_lists():
     # List with highest individual number should come first
     assert px_launchcounter.sort_launchers_list([l1, l2]) == [l2, l1]
     assert px_launchcounter.sort_launchers_list([l2, l1]) == [l2, l1]
-
-
-def test_get_screen_lines_column_cutoff():
-    px_terminal._enable_color = True
-    # If we have both "init"->"iTerm" and "init"->"iTerm"->"fish",
-    # they should be reported as just "init"->"iTerm"->"fish".
-    launchcounter = px_launchcounter.Launchcounter()
-    launchcounter._register_launches([
-        testutils.fake_callchain('init', 'iTerm'),
-        testutils.fake_callchain('init', 'iTerm', 'fish'),
-    ])
-    lines = launchcounter.get_screen_lines(10)
-    assert lines == ['init -> \x1b[1miT\x1b[0m']

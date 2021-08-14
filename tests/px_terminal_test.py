@@ -16,7 +16,7 @@ if sys.version_info.major >= 3:
 def test_to_screen_lines_unbounded():
     px_terminal._enable_color = True
     procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
-    assert px_terminal.to_screen_lines(procs, None, None, None) == [
+    assert px_terminal.to_screen_lines(procs, None, None) == [
         "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
         "47536 fluff   root     "
         + px_terminal.faint(" 0%")
@@ -28,33 +28,9 @@ def test_to_screen_lines_unbounded():
     ]
 
 
-def test_to_screen_lines_bounded():
-    px_terminal._enable_color = True
-    procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
-    assert px_terminal.to_screen_lines(procs, 50, None, None) == [
-        "\x1b[1m  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE\x1b[22m",
-        "47536 fluff   root     "
-        + px_terminal.faint(" 0%")
-        + " "
-        + px_terminal.bold("  0.03s")
-        + " "
-        + px_terminal.faint(" 0%")
-        + " /usr/bin/fl\x1b[0m"
-    ]
-
-
-def test_crop_heading_lines():
-    px_terminal._enable_color = True
-    procs = [testutils.create_process(commandline="/usr/bin/fluff 1234")]
-    assert px_terminal.to_screen_lines(procs, 10, None, None) == [
-        "\x1b[1m  PID COMM\x1b[22m",
-        "47536 fluf"
-    ]
-
-
 def test_to_screen_lines_unicode():
     procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
-    converted = px_terminal.to_screen_lines(procs, None, None, None)
+    converted = px_terminal.to_screen_lines(procs, None, None)
     if sys.version_info.major > 3:
         assert converted == [
             "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",

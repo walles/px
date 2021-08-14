@@ -208,7 +208,6 @@ def get_screen_lines(
     toplist,   # type: List[px_process.PxProcess]
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
-    columns,   # type: int
     include_footer=True,  # type: bool
     search=None,  # type: Optional[text_type]
 ):
@@ -234,12 +233,9 @@ def get_screen_lines(
     px_ioload.update()
     ioloadstring = px_ioload.get_load_string()
     lines = [
-        px_terminal.crop_ansi_string_at_length(
-            px_terminal.bold(u"Sysload: ") + loadstring, columns),
-        px_terminal.crop_ansi_string_at_length(
-            px_terminal.bold(u"RAM Use: ") + meminfo, columns),
-        px_terminal.crop_ansi_string_at_length(
-            px_terminal.bold(u"IO Load:      ") + ioloadstring, columns),
+        px_terminal.bold(u"Sysload: ") + loadstring,
+        px_terminal.bold(u"RAM Use: ") + meminfo,
+        px_terminal.bold(u"IO Load:      ") + ioloadstring,
         u""]
 
     # Create a launchers section
@@ -247,14 +243,13 @@ def get_screen_lines(
     launches_maxheight = rows - header_height - cputop_minheight - footer_height
     launchlines = []  # type: List[text_type]
     if launches_maxheight >= 3:
-        launchlines = launchcounter.get_screen_lines(columns)
+        launchlines = launchcounter.get_screen_lines()
         if len(launchlines) > 0:
             # Add a section header
             launchlines = [
                 '',
-                px_terminal.crop_ansi_string_at_length(
-                    px_terminal.bold(
-                        "Launched binaries, launch counts in (parentheses)"), columns)
+                px_terminal.bold(
+                    "Launched binaries, launch counts in (parentheses)")
             ] + launchlines
 
             # Cut if we got too many lines
@@ -278,7 +273,7 @@ def get_screen_lines(
     if sort_by_memory:
         highlight_column = u"RAM"
     toplist_table_lines = \
-        px_terminal.to_screen_lines(toplist, columns, highlight_row, highlight_column)
+        px_terminal.to_screen_lines(toplist, highlight_row, highlight_column)
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
@@ -288,8 +283,7 @@ def get_screen_lines(
     if sort_by_memory:
         top_what = "memory"
     lines += [
-        px_terminal.crop_ansi_string_at_length(
-            px_terminal.bold("Top " + top_what + " using processes"), columns)
+        px_terminal.bold("Top " + top_what + " using processes")
     ]
 
     if top_mode == MODE_SEARCH:
@@ -305,8 +299,8 @@ def get_screen_lines(
     if include_footer:
         footer_line = \
             u"  q - Quit  m - Sort order  / - Search  ↑↓ - Move  Enter - Select"
-        footer_line = px_terminal.get_string_of_length(footer_line, columns)
-        footer_line = px_terminal.inverse_video(footer_line)
+        # Inverse the whole footer line
+        footer_line = px_terminal.inverse_video(footer_line + 999 * u' ')
 
         lines += [footer_line]
 
@@ -329,10 +323,11 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, launchcounter, rows, columns, include_footer,
+        toplist, launchcounter, rows, include_footer,
         search=search_string)
 
-    px_terminal.draw_screen_lines(lines, clear)
+    px_terminal.draw_screen_lines(lines, columns, clear)
+
 
 
 def handle_search_keypresses(key_sequence):

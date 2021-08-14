@@ -74,20 +74,14 @@ def test_get_screen_lines_low_screen():
     launchcounter = px_launchcounter.Launchcounter()
 
     SCREEN_ROWS = 10
-    SCREEN_COLUMNS = 70
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(
-        baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
     assert u'CSI' in lines[0].replace(CSI, u'CSI')
 
     assert len(lines) == SCREEN_ROWS
-
-    # Lines should either be at most screen width long, or contain ANSI escapes
-    for line in lines:
-        assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
 
     # Last line should be decorated
     assert u'CSI' in lines[-1].replace(CSI, u'CSI')
@@ -98,20 +92,14 @@ def test_get_screen_lines_high_screen():
     launchcounter = px_launchcounter.Launchcounter()
 
     SCREEN_ROWS = 100
-    SCREEN_COLUMNS = 70
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(
-        baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
     assert u'CSI' in lines[0].replace(CSI, u'CSI')
 
     assert len(lines) == SCREEN_ROWS
-
-    # Lines should either be at most screen width long, or contain ANSI escapes
-    for line in lines:
-        assert (len(line) <= SCREEN_COLUMNS) or (u'CSI' in line.replace(CSI, u'CSI'))
 
     # Last line should be decorated
     assert u'CSI' in lines[-1].replace(CSI, u'CSI')
@@ -125,9 +113,7 @@ def test_get_screen_lines_with_many_launches():
         launchcounter._register_launches([testutils.fake_callchain('init', 'a' + str(i))])
 
     SCREEN_ROWS = 100
-    SCREEN_COLUMNS = 70
-    lines = px_top.get_screen_lines(
-        baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
 
     assert len(lines) == SCREEN_ROWS
 
@@ -137,8 +123,6 @@ def test_get_screen_lines_returns_enough_lines():
     launchcounter = px_launchcounter.Launchcounter()
 
     SCREEN_ROWS = 100000
-    SCREEN_COLUMNS = 70
-    lines = px_top.get_screen_lines(
-        baseline, launchcounter, SCREEN_ROWS, SCREEN_COLUMNS)
+    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
 
     assert len(lines) == SCREEN_ROWS
