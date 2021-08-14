@@ -31,8 +31,8 @@ SIGKILL = 9
 KILL_TIMEOUT_SECONDS = 5
 
 
-def get_header_line(process, columns):
-    # type: (px_process.PxProcess, int) -> text_type
+def get_header_line(process):
+    # type: (px_process.PxProcess) -> text_type
     header_line = u"Process: "
     header_line += str(process.pid) + u" " + process.command
     header_line = px_terminal.bold(header_line)
@@ -70,7 +70,7 @@ def sudo_kill(process, signo):
         # Print process screen heading followed by an empty line
         rows, columns = px_terminal.get_window_size()
 
-        print(get_header_line(process, columns))
+        print(px_terminal.crop_ansi_string_at_length(get_header_line(process), columns))
         print("")
 
         # Print "sudo kill 1234"
@@ -118,7 +118,7 @@ class PxProcessMenu(object):
 
         lines = []
 
-        lines += [get_header_line(self.process, columns)]
+        lines += [get_header_line(self.process)]
         lines += [u""]
 
         lines += [
@@ -148,7 +148,7 @@ class PxProcessMenu(object):
             lines += [u"", u'Status: ' + px_terminal.bold(self.status)]
 
 
-        px_terminal.draw_screen_lines(lines, True)
+        px_terminal.draw_screen_lines(lines, columns, clear=True)
 
     def await_and_handle_user_input(self):
         # type: () -> None
