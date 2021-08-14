@@ -256,7 +256,7 @@ class PxIoLoad(object):
         # type: () -> None
 
         since_last_update = datetime.datetime.now() - self.most_recent_system_state.timestamp
-        if since_last_update.total_seconds() < 0.5:
+        if since_last_update.total_seconds() < 0.8:
             # If we sample too close together the differences will be too unreliable
             return
 

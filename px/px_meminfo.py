@@ -1,5 +1,6 @@
 import re
 import sys
+import time
 import errno
 import platform
 
@@ -21,8 +22,21 @@ PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
 # "vm.swapusage: total = 2048.00M  used = 562.75M  free = 1485.25M  (encrypted)"
 SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
 
+# When we last polled the system for memory info, in seconds since the Epoch
+last_memory_poll = 0.0
+last_memory_poll_result = u""
+
+
 def get_meminfo():
     # type: () -> text_type
+
+    # For interactivity reasons, don't do this too often
+    global last_memory_poll
+    global last_memory_poll_result
+    now = time.time()
+    delta_seconds = now - last_memory_poll
+    if delta_seconds < 1.5:
+        return last_memory_poll_result
 
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
@@ -50,6 +64,8 @@ def get_meminfo():
         "]"
         ])
 
+    last_memory_poll = now
+    last_memory_poll_result = ram_text
     return ram_text
 
 
