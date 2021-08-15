@@ -149,7 +149,8 @@ Now, make a PR for bumping the homebrew packaging version to $NEW_VERSION_NUMBER
 
 EOM
 
-read -r -p "Press ENTER when the PR has been merged (should happen automatically): "
+# Ref: https://github.com/Homebrew/homebrew-core/actions/runs/1132207320
+read -r -p "Press ENTER when the PR CI has passed, this took 22 minutes for release 1.5.1: "
 
 cat << EOM
 
