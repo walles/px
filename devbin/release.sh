@@ -147,6 +147,9 @@ Now, make a PR for bumping the homebrew packaging version to $NEW_VERSION_NUMBER
 
   brew bump-formula-pr --strict px --tag=$NEW_VERSION_NUMBER --revision=$(git rev-parse HEAD)
 
+In that PR, make sure to bump the dateutil dependency as requested here:
+  https://github.com/Homebrew/homebrew-core/pull/83331#pullrequestreview-730162574
+
 EOM
 
 # Ref: https://github.com/Homebrew/homebrew-core/actions/runs/1132207320
