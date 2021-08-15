@@ -210,41 +210,53 @@ def raw_lines_to_screen_lines(raw_lines, columns):
     return screen_lines
 
 
+def filter_out_unchanged_screen_lines(all_screen_lines, columns):
+    # type: (List[text_type], int) -> List[Optional[text_type]]
+    """Compare lines to the cache and None out the ones that are the same"""
+    global previous_screen_lines
+    global previous_screen_columns
+
+    if len(previous_screen_lines) != len(all_screen_lines):
+        # Screen resized, never mind the cache
+        return all_screen_lines  # type: ignore
+    if previous_screen_columns != columns:
+        # Screen resized, never mind the cache
+        return all_screen_lines  # type: ignore
+
+    filtered = []  # type: List[Optional[text_type]]
+    for line_index, line in enumerate(all_screen_lines):
+        line_from_previous_screen = previous_screen_lines[line_index]
+        if line == line_from_previous_screen:
+            # Cache hit, don't draw this line
+            filtered.append(None)
+        else:
+            filtered.append(line)
+
+    return filtered
+
+
 def draw_screen_lines(lines, columns, clear=True):
     # type: (List[text_type], int, bool) -> None
 
     # FIXME: Spurious crashes reading processes if you resize the window frame
 
-    global previous_screen_lines
-    global previous_screen_columns
-    screen_lines = raw_lines_to_screen_lines(lines, columns)
-
-    screen_resized = False
-    if len(previous_screen_lines) != len(screen_lines):
-        screen_resized = True
-    if previous_screen_columns != columns:
-        screen_resized = True
-    if screen_resized:
-        # Screen resized, there might have been scrolling, ignore the cache
-        previous_screen_lines = []
+    unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
+    screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
 
     screenstring = u""
-    for line_index in range(len(screen_lines)):
+    for line_index, screen_line in enumerate(screen_lines):
         if line_index > 0:
             # We need both \r and \n when the TTY is in tty.setraw() mode
             screenstring += u"\r\n"
 
-        screen_line = screen_lines[line_index]
-        previous_screen_line = None
-        if line_index < len(previous_screen_lines):
-            previous_screen_line = previous_screen_lines[line_index]
-
-        if screen_line != previous_screen_line:
+        if screen_line is not None:
             # The line changed, update it!
             screenstring += screen_line
 
     # Keep the cache up to date
-    previous_screen_lines = screen_lines
+    global previous_screen_lines
+    global previous_screen_columns
+    previous_screen_lines = unfiltered_screen_lines
     previous_screen_columns = columns
 
     if clear:
