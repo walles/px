@@ -31,6 +31,7 @@ initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
 CSI = "\x1b["
 
 CURSOR_TO_TOP_LEFT = CSI + u"H"
+CURSOR_TO_RIGHT_EDGE = CSI + u"999C"  # Actually "999 steps to the right"
 
 """
 Clear the screen and move cursor to top left corner:
@@ -46,10 +47,9 @@ CLEAR_SCREEN = CSI + u"1J" + CURSOR_TO_TOP_LEFT
 
 HIDE_CURSOR = CSI + u"?25l"
 SHOW_CURSOR = CSI + u"?25h"
-CLEAR_TO_EOL = CSI + u"0K"
 
-# Clear from cursor to end of screen
-CLEAR_TO_END_OF_SCREEN = CSI + "J"
+CLEAR_TO_EOL = CSI + u"0K"
+CLEAR_TO_END_OF_SCREEN = CSI + "J"  # Clear from cursor to end of screen
 
 # Used for informing our getch() function that a window resize has occured
 SIGWINCH_PIPE = os.pipe()
@@ -212,8 +212,6 @@ def raw_lines_to_screen_lines(raw_lines, columns):
 def draw_screen_lines(lines, columns, clear=True):
     # type: (List[text_type], int, bool) -> None
 
-    # FIXME: Footer row isn't visible
-
     # FIXME: Spurious crashes reading processes if you resize the window frame
 
     global previous_screen_lines
@@ -243,8 +241,10 @@ def draw_screen_lines(lines, columns, clear=True):
     if clear:
         screenstring = CURSOR_TO_TOP_LEFT + screenstring
 
-    # In case we got fewer lines than what fits on screen, clear the rest of it
-    screenstring += CLEAR_TO_END_OF_SCREEN
+    # In case we got fewer lines than what fits on screen, clear the rest of it.
+    # We must start at the right edge of screen doing this in case differential
+    # rendering made us not do anything for the last screen line.
+    screenstring += CURSOR_TO_RIGHT_EDGE + CLEAR_TO_END_OF_SCREEN
 
     os.write(sys.stdout.fileno(), screenstring.encode('utf-8'))
 
