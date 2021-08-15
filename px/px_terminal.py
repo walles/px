@@ -241,23 +241,35 @@ def draw_screen_lines(lines, columns):
     unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
     screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
 
-    screenstring = u""
-    for line_index, screen_line in enumerate(screen_lines):
-        if line_index > 0:
-            # We need both \r and \n when the TTY is in tty.setraw() mode
-            screenstring += u"\r\n"
+    screenstring = CURSOR_TO_TOP_LEFT
+    skip_lines = 0
+    for screen_line in screen_lines:
+        if screen_line is None:
+            skip_lines += 1
+        else:
+            if skip_lines > 0:
+                # Move down the required number of lines
+                screenstring += CSI + str(skip_lines) + "E"
+                skip_lines = 0
 
-        if screen_line is not None:
             # The line changed, update it!
             screenstring += screen_line
+
+            # Move to next line
+            skip_lines = 1
+
+    if skip_lines > 1:
+        # Move down the required number of lines. "- 1" because if we skip after
+        # the last line, there'll be a leftover line when we enter the
+        # per-process menu.
+        screenstring += CSI + str(skip_lines - 1) + "E"
+        skip_lines = 0
 
     # Keep the cache up to date
     global previous_screen_lines
     global previous_screen_columns
     previous_screen_lines = unfiltered_screen_lines
     previous_screen_columns = columns
-
-    screenstring = CURSOR_TO_TOP_LEFT + screenstring
 
     # In case we got fewer lines than what fits on screen, clear the rest of it.
     # We must start at the right edge of screen doing this in case differential
