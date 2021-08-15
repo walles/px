@@ -62,6 +62,7 @@ SIGWINCH_KEY = u'\x00'
 _enable_color = True
 
 previous_screen_lines = []  # type: List[text_type]
+previous_screen_columns = 0  # type: int
 
 
 def disable_color():
@@ -215,9 +216,16 @@ def draw_screen_lines(lines, columns, clear=True):
     # FIXME: Spurious crashes reading processes if you resize the window frame
 
     global previous_screen_lines
+    global previous_screen_columns
     screen_lines = raw_lines_to_screen_lines(lines, columns)
+
+    screen_resized = False
     if len(previous_screen_lines) != len(screen_lines):
-        # Screen resized there might have been scrolling, ignore the cache
+        screen_resized = True
+    if previous_screen_columns != columns:
+        screen_resized = True
+    if screen_resized:
+        # Screen resized, there might have been scrolling, ignore the cache
         previous_screen_lines = []
 
     screenstring = u""
@@ -237,6 +245,7 @@ def draw_screen_lines(lines, columns, clear=True):
 
     # Keep the cache up to date
     previous_screen_lines = screen_lines
+    previous_screen_columns = columns
 
     if clear:
         screenstring = CURSOR_TO_TOP_LEFT + screenstring
