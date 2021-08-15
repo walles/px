@@ -148,7 +148,7 @@ class PxProcessMenu(object):
             lines += [u"", u'Status: ' + px_terminal.bold(self.status)]
 
 
-        px_terminal.draw_screen_lines(lines, columns, clear=True)
+        px_terminal.draw_screen_lines(lines, columns)
 
     def await_and_handle_user_input(self):
         # type: () -> None

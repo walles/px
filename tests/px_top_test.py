@@ -66,7 +66,7 @@ def test_redraw():
     # Just make sure it doesn't crash
     baseline = px_process.get_all()
     launchcounter = px_launchcounter.Launchcounter()
-    px_top.redraw(baseline, launchcounter, 100, 10, clear=False)
+    px_top.redraw(baseline, launchcounter, 100, 10)
 
 
 def test_get_screen_lines_low_screen():

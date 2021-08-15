@@ -235,8 +235,8 @@ def filter_out_unchanged_screen_lines(all_screen_lines, columns):
     return filtered
 
 
-def draw_screen_lines(lines, columns, clear=True):
-    # type: (List[text_type], int, bool) -> None
+def draw_screen_lines(lines, columns):
+    # type: (List[text_type], int) -> None
 
     unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
     screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
@@ -257,8 +257,7 @@ def draw_screen_lines(lines, columns, clear=True):
     previous_screen_lines = unfiltered_screen_lines
     previous_screen_columns = columns
 
-    if clear:
-        screenstring = CURSOR_TO_TOP_LEFT + screenstring
+    screenstring = CURSOR_TO_TOP_LEFT + screenstring
 
     # In case we got fewer lines than what fits on screen, clear the rest of it.
     # We must start at the right edge of screen doing this in case differential

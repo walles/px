@@ -312,7 +312,6 @@ def redraw(
     launchcounter,  # type: px_launchcounter.Launchcounter
     rows,      # type: int
     columns,   # type: int
-    clear=True,  # type: bool
     include_footer=True  # type: bool
 ):
     # type: (...) -> None
@@ -326,7 +325,7 @@ def redraw(
         toplist, launchcounter, rows, include_footer,
         search=search_string)
 
-    px_terminal.draw_screen_lines(lines, columns, clear)
+    px_terminal.draw_screen_lines(lines, columns)
 
 
 
