@@ -212,7 +212,7 @@ def raw_lines_to_screen_lines(raw_lines, columns):
 
 def filter_out_unchanged_screen_lines(all_screen_lines, columns):
     # type: (List[text_type], int) -> List[Optional[text_type]]
-    """Compare lines to the cache and None out the ones that are the same"""
+    """Compare lines to the cache and None out the ones that match the cache"""
     global previous_screen_lines
     global previous_screen_columns
 
@@ -237,8 +237,6 @@ def filter_out_unchanged_screen_lines(all_screen_lines, columns):
 
 def draw_screen_lines(lines, columns, clear=True):
     # type: (List[text_type], int, bool) -> None
-
-    # FIXME: Spurious crashes reading processes if you resize the window frame
 
     unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
     screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
