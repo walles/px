@@ -61,6 +61,9 @@ SIGWINCH_KEY = u'\x00'
 
 _enable_color = True
 
+previous_screen_lines = []  # type: List[text_type]
+
+
 def disable_color():
     global _enable_color
     _enable_color = False
@@ -193,27 +196,57 @@ def get_window_size():
     return (rows, columns)
 
 
+def raw_lines_to_screen_lines(raw_lines, columns):
+    # type: (List[text_type], int) -> List[text_type]
+    """Crop the lines to the right length and add clear-to-EOL at the end"""
+    screen_lines = []  # type: List[text_type]
+
+    for raw_line in raw_lines:
+        cooked = crop_ansi_string_at_length(raw_line, columns)
+        cooked += CLEAR_TO_EOL
+        screen_lines.append(cooked)
+
+    return screen_lines
+
+
 def draw_screen_lines(lines, columns, clear=True):
     # type: (List[text_type], int, bool) -> None
 
-    linestring = u""
-    for line in lines:
-        if linestring:
-            # We need both \r and \n when the TTY is in tty.setraw() mode
-            linestring += u"\r\n"
+    # FIXME: Footer row isn't visible
 
-        linestring += crop_ansi_string_at_length(line, columns)
-        linestring += CLEAR_TO_EOL
+    # FIXME: Spurious crashes reading processes if you resize the window frame
+
+    global previous_screen_lines
+    screen_lines = raw_lines_to_screen_lines(lines, columns)
+    if len(previous_screen_lines) != len(screen_lines):
+        # Screen resized there might have been scrolling, ignore the cache
+        previous_screen_lines = []
+
+    screenstring = u""
+    for line_index in range(len(screen_lines)):
+        if line_index > 0:
+            # We need both \r and \n when the TTY is in tty.setraw() mode
+            screenstring += u"\r\n"
+
+        screen_line = screen_lines[line_index]
+        previous_screen_line = None
+        if line_index < len(previous_screen_lines):
+            previous_screen_line = previous_screen_lines[line_index]
+
+        if screen_line != previous_screen_line:
+            # The line changed, update it!
+            screenstring += screen_line
+
+    # Keep the cache up to date
+    previous_screen_lines = screen_lines
 
     if clear:
-        screen_bytes = CURSOR_TO_TOP_LEFT + linestring
-    else:
-        screen_bytes = linestring
+        screenstring = CURSOR_TO_TOP_LEFT + screenstring
 
     # In case we got fewer lines than what fits on screen, clear the rest of it
-    screen_bytes += CLEAR_TO_END_OF_SCREEN
+    screenstring += CLEAR_TO_END_OF_SCREEN
 
-    os.write(sys.stdout.fileno(), screen_bytes.encode('utf-8'))
+    os.write(sys.stdout.fileno(), screenstring.encode('utf-8'))
 
 
 def to_screen_lines(procs,  # type: List[px_process.PxProcess]
