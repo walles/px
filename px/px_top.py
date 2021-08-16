@@ -210,7 +210,7 @@ def get_screen_lines(
 ):
     # type: (...) -> List[text_type]
 
-    if search is not None:
+    if search:
         # Note that we accept partial user name match, otherwise incrementally typing
         # a username becomes weird for the ptop user
         toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
