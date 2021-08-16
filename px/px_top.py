@@ -52,9 +52,6 @@ last_highlighted_row = 0  # type: int
 # row even if the tow PID moves away.
 highlight_has_moved = False  # type: bool
 
-# When we last polled the system for a process list, in seconds since the Epoch
-last_process_poll = 0.0
-
 # Order top list by memory usage. The opposite is by CPU usage.
 sort_by_memory = False
 
@@ -437,14 +434,20 @@ def _top(search=""):
     global search_string
     search_string = search
 
+    # When we last polled the system for a process list, in seconds since the Epoch
+    last_process_poll = 0.0
+
     baseline = px_process.get_all()
     current = baseline
+
+    global sort_by_memory
+    toplist = get_toplist(baseline, current, sort_by_memory)
+
     launchcounter = px_launchcounter.Launchcounter()
+
     while True:
         launchcounter.update(current)
         rows, columns = px_terminal.get_window_size()
-        global sort_by_memory
-        toplist = get_toplist(baseline, current, sort_by_memory)
         redraw(toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
@@ -461,11 +464,11 @@ def _top(search=""):
             command = get_command(timeout_seconds=0)
 
         # For interactivity reasons, don't do this too often
-        global last_process_poll
         now = time.time()
         delta_seconds = now - last_process_poll
         if delta_seconds >= 0.8:
             current = px_process.get_all()
+            toplist = get_toplist(baseline, current, sort_by_memory)
             last_process_poll = now
 
 
