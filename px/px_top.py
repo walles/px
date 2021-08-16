@@ -445,9 +445,10 @@ def _top(search=""):
 
     launchcounter = px_launchcounter.Launchcounter()
 
+    rows, columns = px_terminal.get_window_size()
+
     while True:
         launchcounter.update(current)
-        rows, columns = px_terminal.get_window_size()
         redraw(toplist, launchcounter, rows, columns)
 
         command = get_command(timeout_seconds=1)
@@ -460,6 +461,9 @@ def _top(search=""):
                 # update with somewhat fewer lines, and you'll get just that.
                 redraw(toplist, launchcounter, rows - 4, columns, include_footer=False)
                 return
+
+            if command == CMD_RESIZE:
+                rows, columns = px_terminal.get_window_size()
 
             command = get_command(timeout_seconds=0)
 
