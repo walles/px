@@ -1,5 +1,6 @@
 /env/
 /build/
+/dist/
 /dist2/
 /dist3/
 /.tox/
