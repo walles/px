@@ -4,12 +4,13 @@ import threading
 
 from . import px_process
 from . import px_ioload
+from . import px_launchcounter
 
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List        # NOQA
-    import six
+    from six import text_type
 
 
 # We'll report poll done as this key having been pressed.
@@ -26,9 +27,14 @@ class PxPoller(object):
         self.poll_complete_notification_fd = poll_complete_notification_fd
 
         self.lock = threading.Lock()
+
         self._ioload = px_ioload.PxIoLoad()
-        self._ioload_string = None  # type: six.text_type
+        self._ioload_string = None  # type: text_type
+
         self._all_processes = None  # type: List[px_process.PxProcess]  # type: ignore
+
+        self._launchcounter = px_launchcounter.Launchcounter()
+        self._launchcounter_screen_lines = None  # List[text_type]  # type: ignore
 
         # Ensure we have current data already at the start
         self.poll_once()
@@ -42,6 +48,12 @@ class PxPoller(object):
         all_processes = px_process.get_all()
         with self.lock:
             self._all_processes = all_processes
+
+        # Keep a launchcounter rendering up to date
+        self._launchcounter.update(all_processes)
+        launchcounter_screen_lines = self._launchcounter.get_screen_lines()
+        with self.lock:
+            self._launchcounter_screen_lines = launchcounter_screen_lines
 
         # FIXME: Poll memory
 
@@ -68,5 +80,11 @@ class PxPoller(object):
             return self._all_processes
 
     def get_ioload_string(self):
+        # type: () -> text_type
         with self.lock:
             return self._ioload_string
+
+    def get_launchcounter_lines(self):
+        # type: () -> List[text_type]
+        with self.lock:
+            return self._launchcounter_screen_lines

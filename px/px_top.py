@@ -12,7 +12,6 @@ from . import px_process
 from . import px_terminal
 from . import px_meminfo
 from . import px_processinfo
-from . import px_launchcounter
 from . import px_process_menu
 from . import px_poller
 
@@ -204,7 +203,6 @@ def get_line_to_highlight(toplist, max_process_count):
 
 def get_screen_lines(
     toplist,   # type: List[px_process.PxProcess]
-    launchcounter,  # type: px_launchcounter.Launchcounter
     poller,    # type: px_poller.PxPoller
     rows,      # type: int
     include_footer=True,  # type: bool
@@ -240,7 +238,7 @@ def get_screen_lines(
     launches_maxheight = rows - header_height - cputop_minheight - footer_height
     launchlines = []  # type: List[text_type]
     if launches_maxheight >= 3:
-        launchlines = launchcounter.get_screen_lines()
+        launchlines = poller.get_launchcounter_lines()
         if len(launchlines) > 0:
             # Add a section header
             launchlines = [
@@ -306,7 +304,6 @@ def get_screen_lines(
 
 def redraw(
     toplist,   # type: List[px_process.PxProcess]
-    launchcounter,  # type: px_launchcounter.Launchcounter
     poller,    # type: px_poller.PxPoller
     rows,      # type: int
     columns,   # type: int
@@ -320,7 +317,7 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, launchcounter, poller, rows, include_footer,
+        toplist, poller, rows, include_footer,
         search=search_string)
 
     px_terminal.draw_screen_lines(lines, columns)
@@ -444,13 +441,10 @@ def _top(search=""):
     global sort_by_memory
     toplist = get_toplist(baseline, current, sort_by_memory)
 
-    launchcounter = px_launchcounter.Launchcounter()
-
     rows, columns = px_terminal.get_window_size()
 
     while True:
-        launchcounter.update(current)
-        redraw(toplist, launchcounter, poller, rows, columns)
+        redraw(toplist, poller, rows, columns)
 
         command = get_command()
 
@@ -460,7 +454,7 @@ def _top(search=""):
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
-                redraw(toplist, launchcounter, poller, rows - 4, columns, include_footer=False)
+                redraw(toplist, poller, rows - 4, columns, include_footer=False)
                 return
 
             if command == CMD_RESIZE:
