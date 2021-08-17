@@ -6,6 +6,8 @@ import select
 import termios
 import tty
 
+from . import px_functools
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
@@ -495,6 +497,7 @@ def _tokenize(string):
     yield string[i:]
 
 
+@px_functools.cached(size=200)
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
     assert length >= 0
