@@ -8,15 +8,15 @@ import unicodedata
 
 import os
 from . import px_load
-from . import px_ioload
 from . import px_process
 from . import px_terminal
 from . import px_meminfo
 from . import px_processinfo
 from . import px_launchcounter
 from . import px_process_menu
+from . import px_poller
 
-if False:
+if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List      # NOQA
     from typing import Dict      # NOQA
@@ -30,6 +30,7 @@ CMD_WHATEVER = -1
 CMD_QUIT = 1
 CMD_RESIZE = 2
 CMD_HANDLED = 3
+CMD_POLL_COMPLETE = 4
 
 SEARCH_PROMPT_ACTIVE = px_terminal.inverse_video("Search (ENTER when done): ")
 SEARCH_PROMPT_INACTIVE = "Search ('/' to edit): "
@@ -204,6 +205,7 @@ def get_line_to_highlight(toplist, max_process_count):
 def get_screen_lines(
     toplist,   # type: List[px_process.PxProcess]
     launchcounter,  # type: px_launchcounter.Launchcounter
+    poller,    # type: px_poller.PxPoller
     rows,      # type: int
     include_footer=True,  # type: bool
     search=None,  # type: Optional[text_type]
@@ -227,12 +229,10 @@ def get_screen_lines(
 
     meminfo = px_meminfo.get_meminfo()
 
-    px_ioload.update()
-    ioloadstring = px_ioload.get_load_string()
     lines = [
         px_terminal.bold(u"Sysload: ") + loadstring,
         px_terminal.bold(u"RAM Use: ") + meminfo,
-        px_terminal.bold(u"IO Load:      ") + ioloadstring,
+        px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u""]
 
     # Create a launchers section
@@ -307,6 +307,7 @@ def get_screen_lines(
 def redraw(
     toplist,   # type: List[px_process.PxProcess]
     launchcounter,  # type: px_launchcounter.Launchcounter
+    poller,    # type: px_poller.PxPoller
     rows,      # type: int
     columns,   # type: int
     include_footer=True  # type: bool
@@ -319,11 +320,10 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, launchcounter, rows, include_footer,
+        toplist, launchcounter, poller, rows, include_footer,
         search=search_string)
 
     px_terminal.draw_screen_lines(lines, columns)
-
 
 
 def handle_search_keypresses(key_sequence):
@@ -421,6 +421,8 @@ def get_command(**kwargs):
             return CMD_QUIT
         elif input.consume(px_terminal.SIGWINCH_KEY):
             return CMD_RESIZE
+        elif input.consume(px_poller.POLL_COMPLETE_KEY):
+            return CMD_POLL_COMPLETE
         else:
             # Unable to consume anything, give up
             break
@@ -434,11 +436,10 @@ def _top(search=""):
     global search_string
     search_string = search
 
-    # When we last polled the system for a process list, in seconds since the Epoch
-    last_process_poll = 0.0
+    poller = px_poller.PxPoller(px_terminal.SIGWINCH_PIPE[1])
 
-    baseline = px_process.get_all()
-    current = baseline
+    baseline = poller.get_all_processes()
+    current = poller.get_all_processes()
 
     global sort_by_memory
     toplist = get_toplist(baseline, current, sort_by_memory)
@@ -449,9 +450,9 @@ def _top(search=""):
 
     while True:
         launchcounter.update(current)
-        redraw(toplist, launchcounter, rows, columns)
+        redraw(toplist, launchcounter, poller, rows, columns)
 
-        command = get_command(timeout_seconds=1)
+        command = get_command()
 
         # Handle all keypresses before refreshing the display
         while command is not None:
@@ -459,21 +460,17 @@ def _top(search=""):
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
                 # update with somewhat fewer lines, and you'll get just that.
-                redraw(toplist, launchcounter, rows - 4, columns, include_footer=False)
+                redraw(toplist, launchcounter, poller, rows - 4, columns, include_footer=False)
                 return
 
             if command == CMD_RESIZE:
                 rows, columns = px_terminal.get_window_size()
 
-            command = get_command(timeout_seconds=0)
+            if command == CMD_POLL_COMPLETE:
+                current = poller.get_all_processes()
+                toplist = get_toplist(baseline, current, sort_by_memory)
 
-        # For interactivity reasons, don't do this too often
-        now = time.time()
-        delta_seconds = now - last_process_poll
-        if delta_seconds >= 0.8:
-            current = px_process.get_all()
-            toplist = get_toplist(baseline, current, sort_by_memory)
-            last_process_poll = now
+            command = get_command(timeout_seconds=0)
 
 
 def top(search=""):

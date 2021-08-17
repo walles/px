@@ -255,11 +255,6 @@ class PxIoLoad(object):
     def update(self):
         # type: () -> None
 
-        since_last_update = datetime.datetime.now() - self.most_recent_system_state.timestamp
-        if since_last_update.total_seconds() < 0.8:
-            # If we sample too close together the differences will be too unreliable
-            return
-
         self.previous_system_state = self.most_recent_system_state
         self.most_recent_system_state = SystemState()
         self.update_baseline_from_system(self.most_recent_system_state)
@@ -315,6 +310,7 @@ class PxIoLoad(object):
         self.ios = updated_ios
 
     def get_load_string(self):
+        # type: () -> six.text_type
         """
         Example return value: "[123B/s / 878B/s] eth0 outgoing"
         """
