@@ -11,7 +11,7 @@ F = TypeVar('F', bound=Callable[..., Any])
 
 def cached(size=200):
     # type: (int) -> Callable[[F], F]
-    cache = {}  # type: Dict[Tuple, Any]
+    cache = {}  # type: Dict[Tuple[Any, ...], Any]
     def decorator(function):
         def wrapper(*args, **kwargs):
             args_tuple = tuple(args)
