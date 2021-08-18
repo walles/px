@@ -1,17 +1,18 @@
 import os
-from px import px_meminfo
 import time
 import threading
 
 from . import px_load
 from . import px_ioload
+from . import px_meminfo
 from . import px_process
 from . import px_launchcounter
 
 import sys
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List        # NOQA
+    from typing import Optional  # NOQA
+    from typing import List      # NOQA
     from six import text_type
 
 
@@ -21,11 +22,14 @@ if sys.version_info.major >= 3:
 POLL_COMPLETE_KEY = u'\x01'
 
 class PxPoller(object):
-    def __init__(self, poll_complete_notification_fd):
+    def __init__(self, poll_complete_notification_fd=None):
+        # type: (Optional[int]) -> None
         """
         After a poll is done and there is new data, a POLL_COMPLETE_KEY will be
         written to the poll_complete_notification_fd file descriptor.
         """
+        self.thread = None  # type: Optional[threading.Thread]
+
         self.poll_complete_notification_fd = poll_complete_notification_fd
 
         self.lock = threading.Lock()
@@ -40,10 +44,13 @@ class PxPoller(object):
         self._all_processes = []  # type: List[px_process.PxProcess]
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines = []  # List[text_type]
+        self._launchcounter_screen_lines = []  # type: List[text_type]
 
         # Ensure we have current data already at the start
         self.poll_once()
+
+    def start(self):
+        assert not self.thread
 
         self.thread = threading.Thread(name="Poller", target=self.poller)
         self.thread.daemon = True
@@ -79,9 +86,10 @@ class PxPoller(object):
             self._ioload_string = ioload_string
 
         # Notify fd that we have new data
-        os.write(
-            self.poll_complete_notification_fd,
-            POLL_COMPLETE_KEY.encode("utf-8"))
+        if self.poll_complete_notification_fd is not None:
+            os.write(
+                self.poll_complete_notification_fd,
+                POLL_COMPLETE_KEY.encode("utf-8"))
 
 
     def poller(self):

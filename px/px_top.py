@@ -7,7 +7,6 @@ import logging
 import unicodedata
 
 import os
-from . import px_load
 from . import px_process
 from . import px_terminal
 from . import px_processinfo
@@ -311,8 +310,7 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, poller, rows, include_footer,
-        search=search_string)
+        toplist, poller, rows, include_footer, search=search_string)
 
     px_terminal.draw_screen_lines(lines, columns)
 
@@ -428,6 +426,7 @@ def _top(search=""):
     search_string = search
 
     poller = px_poller.PxPoller(px_terminal.SIGWINCH_PIPE[1])
+    poller.start()
 
     baseline = poller.get_all_processes()
     current = poller.get_all_processes()
