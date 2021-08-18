@@ -1,6 +1,7 @@
 import os
 
 from px import px_top
+from px import px_poller
 from px import px_process
 from px import px_terminal
 from px import px_launchcounter
@@ -65,17 +66,17 @@ def test_sigwinch_handler():
 def test_redraw():
     # Just make sure it doesn't crash
     baseline = px_process.get_all()
-    launchcounter = px_launchcounter.Launchcounter()
-    px_top.redraw(baseline, launchcounter, 100, 10)
+    poller = px_poller.PxPoller()
+    px_top.redraw(baseline, poller, 100, 10)
 
 
 def test_get_screen_lines_low_screen():
     baseline = px_process.get_all()
-    launchcounter = px_launchcounter.Launchcounter()
+    poller = px_poller.PxPoller()
 
     SCREEN_ROWS = 10
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -89,11 +90,11 @@ def test_get_screen_lines_low_screen():
 
 def test_get_screen_lines_high_screen():
     baseline = px_process.get_all()
-    launchcounter = px_launchcounter.Launchcounter()
+    poller = px_poller.PxPoller()
 
     SCREEN_ROWS = 100
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -112,17 +113,21 @@ def test_get_screen_lines_with_many_launches():
     for i in range(1, 100):
         launchcounter._register_launches([testutils.fake_callchain('init', 'a' + str(i))])
 
+    poller = px_poller.PxPoller()
+    poller._launchcounter = launchcounter
+    poller._launchcounter_screen_lines = launchcounter.get_screen_lines()
+
     SCREEN_ROWS = 100
-    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
 
     assert len(lines) == SCREEN_ROWS
 
 
 def test_get_screen_lines_returns_enough_lines():
     baseline = px_process.get_all()
-    launchcounter = px_launchcounter.Launchcounter()
+    poller = px_poller.PxPoller()
 
     SCREEN_ROWS = 100000
-    lines = px_top.get_screen_lines(baseline, launchcounter, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
 
     assert len(lines) == SCREEN_ROWS
