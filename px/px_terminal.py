@@ -9,6 +9,7 @@ import tty
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type    # NOQA
+    from typing import Dict      # NOQA
     from typing import List      # NOQA
     from typing import Tuple     # NOQA
     from typing import Union     # NOQA
@@ -495,11 +496,19 @@ def _tokenize(string):
     yield string[i:]
 
 
+crop_cache = {}  # type: Dict[Tuple[text_type, int], text_type]
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
     assert length >= 0
-    if length == 0:
-        return ''
+
+    global crop_cache
+    cache_key = (string, length)
+    cache_hit = crop_cache.get(cache_key, None)
+    if cache_hit is not None:
+        return cache_hit
+    if len(crop_cache) > 400:
+        # LRU would be better but this is easier to implement
+        crop_cache.clear()
 
     result = u""
     char_count = 0
@@ -524,7 +533,9 @@ def crop_ansi_string_at_length(string, length):
         result += token
         char_count += len(token)
 
-    return result + reset_sequence
+    cache_hit = result + reset_sequence
+    crop_cache[cache_key] = cache_hit
+    return cache_hit
 
 
 def visual_length(string):
