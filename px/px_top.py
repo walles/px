@@ -10,7 +10,6 @@ import os
 from . import px_load
 from . import px_process
 from . import px_terminal
-from . import px_meminfo
 from . import px_processinfo
 from . import px_process_menu
 from . import px_poller
@@ -225,11 +224,9 @@ def get_screen_lines(
     load = px_load.get_load_values()
     loadstring = px_load.get_load_string(load)
 
-    meminfo = px_meminfo.get_meminfo()
-
     lines = [
         px_terminal.bold(u"Sysload: ") + loadstring,
-        px_terminal.bold(u"RAM Use: ") + meminfo,
+        px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u""]
 

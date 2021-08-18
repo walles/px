@@ -1,4 +1,5 @@
 import os
+from px import px_meminfo
 import time
 import threading
 
@@ -29,12 +30,14 @@ class PxPoller(object):
         self.lock = threading.Lock()
 
         self._ioload = px_ioload.PxIoLoad()
-        self._ioload_string = None  # type: text_type
+        self._ioload_string = u"None"
+
+        self._meminfo = u"None"
 
         self._all_processes = None  # type: List[px_process.PxProcess]  # type: ignore
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines = None  # List[text_type]  # type: ignore
+        self._launchcounter_screen_lines = []  # List[text_type]  # type: ignore
 
         # Ensure we have current data already at the start
         self.poll_once()
@@ -55,7 +58,12 @@ class PxPoller(object):
         with self.lock:
             self._launchcounter_screen_lines = launchcounter_screen_lines
 
-        # FIXME: Poll memory
+        # Poll memory
+        meminfo = px_meminfo.get_meminfo()
+        with self.lock:
+            self._meminfo = meminfo
+
+        # FIXME: Poll system load
 
         # Poll IO
         self._ioload.update()
@@ -88,3 +96,8 @@ class PxPoller(object):
         # type: () -> List[text_type]
         with self.lock:
             return self._launchcounter_screen_lines
+
+    def get_meminfo(self):
+        # type: () -> text_type
+        with self.lock:
+            return self._meminfo
