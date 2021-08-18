@@ -38,7 +38,7 @@ MODE_BASE = 0
 MODE_SEARCH = 1
 
 top_mode = MODE_BASE  # type: int
-search_string = ""  # type: text_type
+search_string = u""
 
 # Which pid were we last hovering?
 last_highlighted_pid = None  # type: Optional[int]
@@ -221,11 +221,8 @@ def get_screen_lines(
         footer_height = 1
 
     # Print header
-    load = px_load.get_load_values()
-    loadstring = px_load.get_load_string(load)
-
     lines = [
-        px_terminal.bold(u"Sysload: ") + loadstring,
+        px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
         px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u""]

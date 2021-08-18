@@ -3,8 +3,9 @@ from px import px_meminfo
 import time
 import threading
 
-from . import px_process
+from . import px_load
 from . import px_ioload
+from . import px_process
 from . import px_launchcounter
 
 import sys
@@ -32,12 +33,14 @@ class PxPoller(object):
         self._ioload = px_ioload.PxIoLoad()
         self._ioload_string = u"None"
 
+        self._loadstring = u"None"
+
         self._meminfo = u"None"
 
-        self._all_processes = None  # type: List[px_process.PxProcess]  # type: ignore
+        self._all_processes = []  # type: List[px_process.PxProcess]
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines = []  # List[text_type]  # type: ignore
+        self._launchcounter_screen_lines = []  # List[text_type]
 
         # Ensure we have current data already at the start
         self.poll_once()
@@ -63,7 +66,11 @@ class PxPoller(object):
         with self.lock:
             self._meminfo = meminfo
 
-        # FIXME: Poll system load
+        # Poll system load
+        load = px_load.get_load_values()
+        loadstring = px_load.get_load_string(load)
+        with self.lock:
+            self._loadstring = loadstring
 
         # Poll IO
         self._ioload.update()
@@ -101,3 +108,8 @@ class PxPoller(object):
         # type: () -> text_type
         with self.lock:
             return self._meminfo
+
+    def get_loadstring(self):
+        # type: () -> text_type
+        with self.lock:
+            return self._loadstring
