@@ -21,6 +21,8 @@ if sys.version_info.major >= 3:
 # NOTE: This must be detected as non-printable by handle_search_keypress().
 POLL_COMPLETE_KEY = u'\x01'
 
+# Key repeat speed is about one every 30+ms, and this pause needs to be longer
+# than that for the pause to be useful while scrolling.
 SHORT_PAUSE_SECONDS = 0.1
 
 class PxPoller(object):
