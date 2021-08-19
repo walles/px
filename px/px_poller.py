@@ -21,6 +21,8 @@ if sys.version_info.major >= 3:
 # NOTE: This must be detected as non-printable by handle_search_keypress().
 POLL_COMPLETE_KEY = u'\x01'
 
+SHORT_PAUSE_SECONDS = 0.1
+
 class PxPoller(object):
     def __init__(self, poll_complete_notification_fd=None):
         # type: (Optional[int]) -> None
@@ -46,8 +48,15 @@ class PxPoller(object):
         self._launchcounter = px_launchcounter.Launchcounter()
         self._launchcounter_screen_lines = []  # type: List[text_type]
 
+        # No process polling until this timestamp, timestamp from time.time()
+        self._pause_process_updates_until = 0.0
+
         # Ensure we have current data already at the start
         self.poll_once()
+
+    def pause_process_updates_a_bit(self):
+        with self.lock:
+            self._pause_process_updates_until = time.time() + SHORT_PAUSE_SECONDS
 
     def start(self):
         assert not self.thread
@@ -57,10 +66,14 @@ class PxPoller(object):
         self.thread.start()
 
     def poll_once(self):
+        with self.lock:
+            if time.time() < self._pause_process_updates_until:
+                return
+
         # Poll processes
         all_processes = px_process.get_all()
         with self.lock:
-            self._all_processes = all_processes
+                self._all_processes = all_processes
 
         # Keep a launchcounter rendering up to date
         self._launchcounter.update(all_processes)
@@ -94,7 +107,11 @@ class PxPoller(object):
 
     def poller(self):
         while True:
-            time.sleep(1.0)
+            with self.lock:
+                sleeptime = self._pause_process_updates_until - time.time()
+            if sleeptime < 0.0:
+                sleeptime = 1.0
+            time.sleep(sleeptime)
             self.poll_once()
 
     def get_all_processes(self):

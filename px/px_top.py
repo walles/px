@@ -442,7 +442,8 @@ def _top(search=""):
         command = get_command()
 
         # Handle all keypresses before refreshing the display
-        while command is not None:
+        if command is not None:
+            poller.pause_process_updates_a_bit()
             if command == CMD_QUIT:
                 # The idea here is that if you terminate with "q" you still
                 # probably want the heading line on screen. So just do another
@@ -456,8 +457,6 @@ def _top(search=""):
             if command == CMD_POLL_COMPLETE:
                 current = poller.get_all_processes()
                 toplist = get_toplist(baseline, current, sort_by_memory)
-
-            command = get_command(timeout_seconds=0)
 
 
 def top(search=""):
