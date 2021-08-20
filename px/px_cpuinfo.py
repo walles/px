@@ -54,7 +54,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
                     processor_no = int(line[len(PROCESSOR_NO_PREFIX):])
                     max_processor_no = max(processor_no, max_processor_no)
                 elif line.startswith(CORE_ID_PREFIX):
-                    core_id = int(line[len(CORE_ID_PREFIX)])
+                    core_id = int(line[len(CORE_ID_PREFIX):])
                     core_ids.add(core_id)
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:

@@ -11,31 +11,27 @@ def test_get_core_count():
     assert logical % physical == 0
 
 
-def test_get_core_count_from_proc_cpuinfo():
+def assert_core_counts_from_file(filename, expected_physical, expected_logical):
     my_dir = os.path.dirname(__file__)
 
     info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-2p4l.txt"))
+        os.path.join(my_dir, filename))
     assert info
     physical, logical = info
-    assert physical == 2
-    assert logical == 4
+    assert physical == expected_physical
+    assert logical == expected_logical
 
-    info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-1p1l.txt"))
-    assert info
-    physical, logical = info
-    assert physical == 1
-    assert logical == 1
+
+def test_get_core_count_from_proc_cpuinfo():
+    my_dir = os.path.dirname(__file__)
+
+    assert_core_counts_from_file("proc-cpuinfo-1p1l.txt", 1, 1)
+    assert_core_counts_from_file("proc-cpuinfo-2p4l.txt", 2, 4)
+    assert_core_counts_from_file("proc-cpuinfo-24p96l.txt", 24, 96)
 
     # This one is from my cell phone, just to provide a weird corner case example of things
     # we may have to handle.
-    info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, "proc-cpuinfo-8p8l.txt"))
-    assert info
-    physical, logical = info
-    assert physical == 8
-    assert logical == 8
+    assert_core_counts_from_file("proc-cpuinfo-8p8l.txt", 8, 8)
 
     assert px_cpuinfo.get_core_count_from_proc_cpuinfo("/does/not/exist") is None
 
