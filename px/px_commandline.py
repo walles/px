@@ -7,7 +7,7 @@ import os.path
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type  # NOQA
-    from typing import List    # NOQA
+    from typing import List  # NOQA
 
 
 # Match "[kworker/0:0H]", no grouping
@@ -18,6 +18,7 @@ OSX_PARENTHESIZED_PROC = re.compile(u"^\\([^()]+\\)$")
 
 # Name of the Perl interpreter
 PERL_BIN = re.compile(u"^perl[.0-9]*$")
+
 
 def to_array(commandline):
     # type: (text_type) -> List[text_type]
@@ -34,7 +35,7 @@ def to_array(commandline):
             return base_split
 
         # Merge the two first elements: http://stackoverflow.com/a/1142879/473672
-        merged_split[0:2] = [' '.join(merged_split[0:2])]
+        merged_split[0:2] = [" ".join(merged_split[0:2])]
 
     return merged_split
 
@@ -58,7 +59,7 @@ def get_app_name_prefix(commandline):
     command_with_path = to_array(commandline)[0]
     command = os.path.basename(command_with_path)
     for part in command_with_path.split("/"):
-        if '.' not in part:
+        if "." not in part:
             continue
 
         name, suffix = part.rsplit(".", 1)
@@ -92,7 +93,7 @@ def get_command(commandline):
 
     command = os.path.basename(to_array(commandline)[0])
 
-    if command.startswith('python') or command == 'Python':
+    if command.startswith("python") or command == "Python":
         return get_python_command(commandline)
 
     if command == "java":
@@ -100,23 +101,26 @@ def get_command(commandline):
 
     if command == "ruby":
         # Switches list inspired by ruby 2.3.7p456 --help output
-        return get_generic_script_command(commandline, [
-            '-a',
-            '-d',
-            '--debug',
-            '--disable',
-            '-l',
-            '-n',
-            '-p',
-            '-s',
-            '-S',
-            '-v',
-            '--verbose',
-            '-w',
-            '-W0',
-            '-W1',
-            '-W2'
-        ])
+        return get_generic_script_command(
+            commandline,
+            [
+                "-a",
+                "-d",
+                "--debug",
+                "--disable",
+                "-l",
+                "-n",
+                "-p",
+                "-s",
+                "-S",
+                "-v",
+                "--verbose",
+                "-w",
+                "-W0",
+                "-W1",
+                "-W2",
+            ],
+        )
 
     if command == "sudo":
         return get_sudo_command(commandline)
@@ -159,22 +163,24 @@ def get_python_command(commandline):
 
     # Ignore some switches, list inspired by 'python2.7 --help'
     IGNORE_SWITCHES = [
-        '-b', '-bb',
-        '-B',
-        '-d',
-        '-E',
-        '-i',
-        '-O',
-        '-OO',
-        '-R',
-        '-s',
-        '-S',
-        '-t', '-tt',
-        '-u',
-        '-v',
-        '-Werror',
-        '-x',
-        '-3'
+        "-b",
+        "-bb",
+        "-B",
+        "-d",
+        "-E",
+        "-i",
+        "-O",
+        "-OO",
+        "-R",
+        "-s",
+        "-S",
+        "-t",
+        "-tt",
+        "-u",
+        "-v",
+        "-Werror",
+        "-x",
+        "-3",
     ]
     while len(array) > 1 and array[1] in IGNORE_SWITCHES:
         del array[1]
@@ -183,11 +189,11 @@ def get_python_command(commandline):
     if len(array) == 1:
         return python
 
-    if not array[1].startswith('-'):
+    if not array[1].startswith("-"):
         return os.path.basename(array[1])
 
     if len(array) > 2:
-        if array[1] == '-m' and not array[2].startswith('-'):
+        if array[1] == "-m" and not array[2].startswith("-"):
             return os.path.basename(array[2])
 
     return python
@@ -199,7 +205,7 @@ def get_sudo_command(commandline):
     if not without_sudo:
         return "sudo"
 
-    if without_sudo.startswith('-'):
+    if without_sudo.startswith("-"):
         # Give up on options
         return "sudo"
 
@@ -208,13 +214,13 @@ def get_sudo_command(commandline):
 
 def prettify_fully_qualified_java_class(class_name):
     # type: (text_type) -> text_type
-    split = class_name.split('.')
+    split = class_name.split(".")
     if len(split) == 1:
         return split[-1]
 
-    if split[-1] == 'Main':
+    if split[-1] == "Main":
         # Attempt to make "Main" class names more meaningful
-        return split[-2] + '.' + split[-1]
+        return split[-2] + "." + split[-1]
 
     return split[-1]
 
@@ -246,41 +252,41 @@ def get_java_command(commandline):
                 return java
             return os.path.basename(component)
         elif state == "scanning":
-            if component.startswith('-X'):
+            if component.startswith("-X"):
                 continue
-            if component.startswith('-D'):
+            if component.startswith("-D"):
                 continue
-            if component.startswith('-ea'):
+            if component.startswith("-ea"):
                 continue
-            if component.startswith('-da'):
+            if component.startswith("-da"):
                 continue
-            if component.startswith('-agentlib:'):
+            if component.startswith("-agentlib:"):
                 continue
-            if component.startswith('-javaagent:'):
+            if component.startswith("-javaagent:"):
                 continue
-            if component.startswith('--add-modules='):
+            if component.startswith("--add-modules="):
                 continue
-            if component == '--add-modules':
+            if component == "--add-modules":
                 state = "skip next"
                 continue
-            if component.startswith('--add-opens='):
+            if component.startswith("--add-opens="):
                 continue
-            if component == '--add-opens':
+            if component == "--add-opens":
                 state = "skip next"
                 continue
-            if component.startswith('--add-exports='):
+            if component.startswith("--add-exports="):
                 continue
-            if component == '--add-exports':
+            if component == "--add-exports":
                 state = "skip next"
                 continue
-            if component.startswith('--add-reads='):
+            if component.startswith("--add-reads="):
                 continue
-            if component == '--add-reads':
+            if component == "--add-reads":
                 state = "skip next"
                 continue
-            if component.startswith('--patch-module='):
+            if component.startswith("--patch-module="):
                 continue
-            if component == '--patch-module':
+            if component == "--patch-module":
                 state = "skip next"
                 continue
             if component == "-server":
@@ -290,15 +296,17 @@ def get_java_command(commandline):
             if component == "-cp" or component == "-classpath":
                 state = "skip next"
                 continue
-            if component == '-jar':
+            if component == "-jar":
                 state = "return next"
                 continue
-            if component.startswith('-'):
+            if component.startswith("-"):
                 # Unsupported switch, give up
                 return java
             return prettify_fully_qualified_java_class(component)
         else:
-            raise ValueError("Unhandled state <{}> at <{}> for: {}".format(state, component, array))
+            raise ValueError(
+                "Unhandled state <{}> at <{}> for: {}".format(state, component, array)
+            )
 
     # We got to the end without being able to come up with a better name, give up
     return java
@@ -315,7 +323,7 @@ def get_generic_script_command(commandline, ignore_switches=[]):
     if len(array) == 1:
         return vm
 
-    if array[1].startswith('-'):
+    if array[1].startswith("-"):
         # This is some option, we don't do options
         return vm
 

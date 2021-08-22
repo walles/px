@@ -9,21 +9,23 @@ from . import px_process
 from . import px_launchcounter
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
-    from typing import List      # NOQA
+    from typing import List  # NOQA
     from six import text_type
 
 
 # We'll report poll done as this key having been pressed.
 #
 # NOTE: This must be detected as non-printable by handle_search_keypress().
-POLL_COMPLETE_KEY = u'\x01'
+POLL_COMPLETE_KEY = u"\x01"
 
 # Key repeat speed is about one every 30+ms, and this pause needs to be longer
 # than that for the pause to be useful while scrolling.
 SHORT_PAUSE_SECONDS = 0.1
+
 
 class PxPoller(object):
     def __init__(self, poll_complete_notification_fd=None):
@@ -75,7 +77,7 @@ class PxPoller(object):
         # Poll processes
         all_processes = px_process.get_all()
         with self.lock:
-                self._all_processes = all_processes
+            self._all_processes = all_processes
 
         # Keep a launchcounter rendering up to date
         self._launchcounter.update(all_processes)
@@ -103,9 +105,8 @@ class PxPoller(object):
         # Notify fd that we have new data
         if self.poll_complete_notification_fd is not None:
             os.write(
-                self.poll_complete_notification_fd,
-                POLL_COMPLETE_KEY.encode("utf-8"))
-
+                self.poll_complete_notification_fd, POLL_COMPLETE_KEY.encode("utf-8")
+            )
 
     def poller(self):
         while True:

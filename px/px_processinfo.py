@@ -16,11 +16,11 @@ from . import px_loginhistory
 if False:
     # For mypy PEP-484 static typing validation
     from typing import MutableSet  # NOQA
-    from typing import Optional    # NOQA
-    from typing import Iterable    # NOQA
-    from typing import List        # NOQA
-    from typing import Tuple       # NOQA
-    from six import text_type      # NOQA
+    from typing import Optional  # NOQA
+    from typing import Iterable  # NOQA
+    from typing import List  # NOQA
+    from typing import Tuple  # NOQA
+    from six import text_type  # NOQA
 
 
 def println(fd, string):
@@ -56,7 +56,9 @@ def print_command_line(fd, process):
 def print_process_subtree(fd, process, indentation, lines):
     # type: (int, px_process.PxProcess, int, List[Tuple[str, px_process.PxProcess]]) -> None
     lines.append(("  " * indentation + str(process), process))
-    for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
+    for child in sorted(
+        process.children, key=operator.attrgetter("lowercase_command", "pid")
+    ):
         print_process_subtree(fd, child, indentation + 1, lines)
 
 
@@ -81,17 +83,23 @@ def print_process_tree(fd, process):
 
     # Print ourselves
     bold_process = str(px_terminal.bold(str(process)))
-    lines_and_processes.append(("--" * (indentation - 1) + "> " + bold_process, process))
+    lines_and_processes.append(
+        ("--" * (indentation - 1) + "> " + bold_process, process)
+    )
     indentation += 1
 
     # Print all our child trees
-    for child in sorted(process.children, key=operator.attrgetter("lowercase_command", "pid")):
+    for child in sorted(
+        process.children, key=operator.attrgetter("lowercase_command", "pid")
+    ):
         print_process_subtree(fd, child, indentation, lines_and_processes)
 
     # Add an owners column to the right of the tree
-    tree_width = max(map(lambda lp: px_terminal.visual_length(lp[0]), lines_and_processes))
+    tree_width = max(
+        map(lambda lp: px_terminal.visual_length(lp[0]), lines_and_processes)
+    )
     lines = []
-    current_user = os.environ.get('SUDO_USER') or getpass.getuser()
+    current_user = os.environ.get("SUDO_USER") or getpass.getuser()
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
         owner = line_and_process[1].username
@@ -104,12 +112,12 @@ def print_process_tree(fd, process):
         if line_and_process[1].pid == process.pid:
             sudo_user = process.get_sudo_user()
             if sudo_user:
-                owner += ', $SUDO_USER=' + sudo_user
+                owner += ", $SUDO_USER=" + sudo_user
 
-        padding = " " * (tree_width + 2 -px_terminal.visual_length(line))
+        padding = " " * (tree_width + 2 - px_terminal.visual_length(line))
         lines.append(line + padding + owner)
 
-    println(fd, '\n'.join(lines))
+    println(fd, "\n".join(lines))
 
 
 def to_relative_start_string(base, relative):
@@ -122,7 +130,9 @@ def to_relative_start_string(base, relative):
         delta_string = "just"
         if relative.pid > base.pid:
             before_or_after = "after"
-    return "{} was started {} {} {}".format(relative, delta_string, before_or_after, base)
+    return "{} was started {} {} {}".format(
+        relative, delta_string, before_or_after, base
+    )
 
 
 def get_closest_starts(process, all_processes):
@@ -134,8 +144,8 @@ def get_closest_starts(process, all_processes):
     five closest if not at least five were that close.
     """
     by_temporal_vicinity = sorted(
-        all_processes,
-        key=lambda p: abs(p.age_seconds - process.age_seconds))
+        all_processes, key=lambda p: abs(p.age_seconds - process.age_seconds)
+    )
 
     closest_raw = set()
     for close in by_temporal_vicinity:
@@ -152,12 +162,13 @@ def get_closest_starts(process, all_processes):
         closest_raw.add(close)
 
     # Remove ourselves from the closest processes list
-    closest = \
-        filter(lambda p: p is not process, closest_raw)  # type: Iterable[px_process.PxProcess]
+    closest = filter(
+        lambda p: p is not process, closest_raw
+    )  # type: Iterable[px_process.PxProcess]
 
     # Sort closest processes by age, command and PID in that order
-    closest = sorted(closest, key=operator.attrgetter('command', 'pid'))
-    closest = sorted(closest, key=operator.attrgetter('age_seconds'), reverse=True)
+    closest = sorted(closest, key=operator.attrgetter("command", "pid"))
+    closest = sorted(closest, key=operator.attrgetter("age_seconds"), reverse=True)
     return closest
 
 
@@ -174,7 +185,8 @@ def print_users_when_process_started(fd, process):
     if not users:
         println(
             fd,
-            '  <Nobody found, either nobody was logged in or the wtmp logs have been rotated>')
+            "  <Nobody found, either nobody was logged in or the wtmp logs have been rotated>",
+        )
         return
 
     for user in sorted(users):
@@ -191,7 +203,9 @@ def to_ipc_lines(ipc_map):
         for channel_name in map(lambda c: str(c), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
-            return_me.append("{}: {}".format(px_terminal.bold(str(target)), channel_name))
+            return_me.append(
+                "{}: {}".format(px_terminal.bold(str(target)), channel_name)
+            )
 
     return return_me
 
@@ -205,11 +219,12 @@ def print_cwd_friends(fd, process, all_processes, all_files):
     println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
         sudo_px = px_terminal.bold("sudo px {}".format(process.pid))
-        println(fd,
-            '  Working directory unknown, try again or try "{}"'.format(sudo_px))
+        println(
+            fd, '  Working directory unknown, try again or try "{}"'.format(sudo_px)
+        )
         return
 
-    if friends.cwd == '/':
+    if friends.cwd == "/":
         println(fd, "  Working directory too common, never mind.")
         return
 
@@ -225,8 +240,11 @@ def print_fds(fd, process, processes):
     # type: (int, px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
 
     # It's true, I measured it myself /johan.walles@gmail.com
-    println(fd, datetime.datetime.now().isoformat() +
-            ": Now invoking lsof, this can take over a minute on a big system...")
+    println(
+        fd,
+        datetime.datetime.now().isoformat()
+        + ": Now invoking lsof, this can take over a minute on a big system...",
+    )
 
     # Flush what we have so far so the user has something to read during the pause.
     # This is useful when piping output into a pager like moar or less.
@@ -240,7 +258,7 @@ def print_fds(fd, process, processes):
     println(fd, "")
     print_cwd_friends(fd, process, processes, files)
 
-    is_root = (os.geteuid() == 0)
+    is_root = os.geteuid() == 0
     ipc_map = px_ipc_map.IpcMap(process, files, processes, is_root=is_root)
 
     println(fd, "")
@@ -256,7 +274,9 @@ def print_fds(fd, process, processes):
     println(fd, "Network connections:")
     # FIXME: Print "nothing found" or something if we don't find anything to put
     # here, maybe with a hint to run as root if we think that would help.
-    for connection in sorted(ipc_map.network_connections, key=operator.attrgetter("name")):
+    for connection in sorted(
+        ipc_map.network_connections, key=operator.attrgetter("name")
+    ):
         println(fd, "  " + str(connection))
 
     println(fd, "")
@@ -267,30 +287,42 @@ def print_fds(fd, process, processes):
     println(fd, "")
     lsof = px_terminal.bold("sudo lsof -p {}".format(process.pid))
     watch_lsof = px_terminal.bold("sudo watch lsof -p {}".format(process.pid))
-    println(fd, "For a list of all open files, do \"{}\", "
-            "or \"{}\" for a live view.".format(lsof, watch_lsof))
+    println(
+        fd,
+        'For a list of all open files, do "{}", '
+        'or "{}" for a live view.'.format(lsof, watch_lsof),
+    )
 
     if os.getuid() != 0:
         println(fd, "")
-        println(fd, "NOTE: This information might be incomplete, "
-                "running as root sometimes produces better results.")
+        println(
+            fd,
+            "NOTE: This information might be incomplete, "
+            "running as root sometimes produces better results.",
+        )
 
 
 def print_start_time(fd, process):
     # type: (int, px_process.PxProcess) -> None
-    println(fd, "{} {} was started, at {}.".format(
-        px_terminal.bold(process.age_s + " ago"),
-        process.command,
-        px_terminal.bold(process.start_time.isoformat()),
-    ))
+    println(
+        fd,
+        "{} {} was started, at {}.".format(
+            px_terminal.bold(process.age_s + " ago"),
+            process.command,
+            px_terminal.bold(process.start_time.isoformat()),
+        ),
+    )
 
     if process.cpu_time_seconds and process.age_seconds:
-        cpu_percent = (100.0 * process.cpu_time_seconds / process.age_seconds)
-        println(fd, "{} has been its average CPU usage since then, or {}/{}".format(
-            px_terminal.bold("{:.1f}%".format(cpu_percent)),
-            px_terminal.bold(process.cpu_time_s),
-            px_terminal.bold(process.age_s),
-        ))
+        cpu_percent = 100.0 * process.cpu_time_seconds / process.age_seconds
+        println(
+            fd,
+            "{} has been its average CPU usage since then, or {}/{}".format(
+                px_terminal.bold("{:.1f}%".format(cpu_percent)),
+                px_terminal.bold(process.cpu_time_s),
+                px_terminal.bold(process.age_s),
+            ),
+        )
 
 
 def print_pid_info(fd, pid):
@@ -331,4 +363,5 @@ def print_process_info(fd, process, processes):
             raise
         println(
             fd,
-            "Can't list IPC / network sockets, make sure \"lsof\" is installed and in your $PATH")
+            'Can\'t list IPC / network sockets, make sure "lsof" is installed and in your $PATH',
+        )

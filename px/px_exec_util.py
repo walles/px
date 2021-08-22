@@ -2,6 +2,7 @@ import os
 import subprocess
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type  # NOQA
@@ -20,11 +21,10 @@ for name, value in os.environ.items():
 
 def run(command, check_exitcode=False):
     # type: (List[str], bool) -> text_type
-    run = subprocess.Popen(command,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           env=ENV)
-    stdout = run.communicate()[0].decode('utf-8')
+    run = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV
+    )
+    stdout = run.communicate()[0].decode("utf-8")
 
     if check_exitcode and run.returncode != 0:
         raise subprocess.CalledProcessError(run.returncode, command)

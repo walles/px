@@ -11,13 +11,13 @@ if sys.version_info.major >= 3:
 def test_lsof_to_files():
     lsof = ""
 
-    lsof += '\0'.join(["p123", "\n"])
-    lsof += '\0'.join(["fcwd", "a ", "tDIR", "n/", "\n"])
-    lsof += '\0'.join(["f5", "ar", "tREG", "ncontains\nnewline", "\n"])
-    lsof += '\0'.join(["f6", "aw", "tREG", "d0x42", "n/somefile", "\n"])
-    lsof += '\0'.join(["p456", "\n"])
-    lsof += '\0'.join(["f7", "au", "tREG", "n/someotherfile", "\n"])
-    lsof += '\0'.join(["f7", "a ", "n(revoked)", "\n"])
+    lsof += "\0".join(["p123", "\n"])
+    lsof += "\0".join(["fcwd", "a ", "tDIR", "n/", "\n"])
+    lsof += "\0".join(["f5", "ar", "tREG", "ncontains\nnewline", "\n"])
+    lsof += "\0".join(["f6", "aw", "tREG", "d0x42", "n/somefile", "\n"])
+    lsof += "\0".join(["p456", "\n"])
+    lsof += "\0".join(["f7", "au", "tREG", "n/someotherfile", "\n"])
+    lsof += "\0".join(["f7", "a ", "n(revoked)", "\n"])
 
     files = px_file.lsof_to_files(lsof)
 
@@ -73,14 +73,14 @@ def test_get_all():
 
     cwd_count = 0
     for file in files:
-        if file.fdtype == 'cwd':
+        if file.fdtype == "cwd":
             cwd_count += 1
     assert cwd_count > 0
 
 
 def lsof_to_file(shard_array):
     # type: (List[str]) -> px_file.PxFile
-    return px_file.lsof_to_files('\0'.join(shard_array + ["\n"]))[0]
+    return px_file.lsof_to_files("\0".join(shard_array + ["\n"]))[0]
 
 
 def test_listen_name():
@@ -102,51 +102,95 @@ def test_setability():
 
 
 def test_local_endpoint():
-    local_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                                   "nlocalhost:postgres->localhost:33331"]).get_endpoints()[0]
+    local_endpoint = lsof_to_file(
+        ["p123", "f6", "au", "tIPv4", "d0x42", "nlocalhost:postgres->localhost:33331"]
+    ).get_endpoints()[0]
     assert local_endpoint == "localhost:postgres"
 
-    local_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
-                                   "nlocalhost:39252->localhost:39252"]).get_endpoints()[0]
+    local_endpoint = lsof_to_file(
+        ["p123", "f6", "au", "tIPv6", "d0x42", "nlocalhost:39252->localhost:39252"]
+    ).get_endpoints()[0]
     assert local_endpoint == "localhost:39252"
 
-    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).get_endpoints()[0] == "localhost:19091"
-    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                         "nlocalhost:ipp (LISTEN)"]).get_endpoints()[0] == "localhost:ipp"
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv6", "d0x42", "nlocalhost:19091"]
+        ).get_endpoints()[0]
+        == "localhost:19091"
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv4", "d0x42", "nlocalhost:ipp (LISTEN)"]
+        ).get_endpoints()[0]
+        == "localhost:ipp"
+    )
 
     # We can't match against endpoint address "*"
-    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).get_endpoints()[0] is None
-    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).get_endpoints()[0] is None
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv6", "d0x42", "n*:57919"]
+        ).get_endpoints()[0]
+        is None
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv4", "d0x42", "n*:57919"]
+        ).get_endpoints()[0]
+        is None
+    )
 
-    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).get_endpoints()[0] is None
-    assert lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).get_endpoints()[0] is None
+    assert (
+        lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42", "n*:*"]).get_endpoints()[0]
+        is None
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"]
+        ).get_endpoints()[0]
+        is None
+    )
 
 
 def test_remote_endpoint():
-    remote_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->localhost:3331"]).get_endpoints()[1]
+    remote_endpoint = lsof_to_file(
+        ["p123", "f6", "au", "tIPv4", "d0x42", "nlocalhost:postgresql->localhost:3331"]
+    ).get_endpoints()[1]
     assert remote_endpoint == "localhost:3331"
 
-    remote_endpoint = lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                                    "nlocalhost:postgresql->otherhost:3331"]).get_endpoints()[1]
+    remote_endpoint = lsof_to_file(
+        ["p123", "f6", "au", "tIPv4", "d0x42", "nlocalhost:postgresql->otherhost:3331"]
+    ).get_endpoints()[1]
     assert remote_endpoint == "otherhost:3331"
 
-    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
-                         "nlocalhost:19091"]).get_endpoints()[1] is None
-    assert lsof_to_file(["p123", "f6", "au", "tIPv6", "d0x42",
-                         "n*:57919"]).get_endpoints()[1] is None
-    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                         "n*:57919"]).get_endpoints()[1] is None
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv6", "d0x42", "nlocalhost:19091"]
+        ).get_endpoints()[1]
+        is None
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv6", "d0x42", "n*:57919"]
+        ).get_endpoints()[1]
+        is None
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "au", "tIPv4", "d0x42", "n*:57919"]
+        ).get_endpoints()[1]
+        is None
+    )
 
-    assert lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42",
-                         "n*:*"]).get_endpoints()[1] is None
-    assert lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42",
-                         "n/somefile"]).get_endpoints()[1] is None
+    assert (
+        lsof_to_file(["p123", "f6", "au", "tIPv4", "d0x42", "n*:*"]).get_endpoints()[1]
+        is None
+    )
+    assert (
+        lsof_to_file(
+            ["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"]
+        ).get_endpoints()[1]
+        is None
+    )
 
 
 def test_str_resolve():

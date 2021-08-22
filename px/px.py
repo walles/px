@@ -49,6 +49,7 @@ from . import px_terminal
 from . import px_processinfo
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import Optional, List  # NOQA
@@ -84,8 +85,8 @@ def main():
     argv = list(sys.argv)
 
     loglevel = logging.ERROR
-    while '--debug' in argv:
-        argv.remove('--debug')
+    while "--debug" in argv:
+        argv.remove("--debug")
         loglevel = logging.DEBUG
 
     stringIO = six.StringIO()
@@ -115,8 +116,9 @@ def configureLogging(loglevel, stringIO):
         rootLogger.removeHandler(handler)
 
     handler = logging.StreamHandler(stringIO)
-    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S%Z')
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S%Z"
+    )
     handler.setFormatter(formatter)
 
     rootLogger.addHandler(handler)
@@ -131,6 +133,7 @@ def handleLogMessages(messages):
     sys.stderr.write("\n")
 
     from . import version
+
     sys.stderr.write("px version: " + version.VERSION + "\n")
 
     sys.stderr.write("\n")
@@ -146,15 +149,15 @@ def handleLogMessages(messages):
 def _main(argv):
     # type: (List[str]) -> None
 
-    if '--install' in argv:
+    if "--install" in argv:
         install(argv)
         return
 
-    if '--help' in argv:
+    if "--help" in argv:
         print(__doc__)
         return
 
-    if '--version' in argv:
+    if "--version" in argv:
         # If this fails, run "tox.sh" once and the "version.py" file will be created for you.
         #
         # NOTE: If we "import version" at the top of this file, we will depend on it even if
@@ -169,23 +172,23 @@ def _main(argv):
     with_color = None  # type: Optional[bool]
     top = False  # type: bool
 
-    while '--no-pager' in argv:
+    while "--no-pager" in argv:
         with_pager = False
-        argv.remove('--no-pager')
+        argv.remove("--no-pager")
     if with_pager is None:
         with_pager = sys.stdout.isatty()
 
-    while '--color' in argv:
+    while "--color" in argv:
         with_color = True
-        argv.remove('--color')
+        argv.remove("--color")
     if with_color is None:
         with_color = sys.stdout.isatty()
     if not with_color:
         px_terminal.disable_color()
 
-    while '--top' in argv:
+    while "--top" in argv:
         top = True
-        argv.remove('--top')
+        argv.remove("--top")
     if os.path.basename(argv[0]).endswith("top"):
         top = True
 
@@ -201,6 +204,7 @@ def _main(argv):
     if top:
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top
+
         px_top.top(search=search)
         return
 

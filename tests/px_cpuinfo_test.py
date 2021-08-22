@@ -14,8 +14,7 @@ def test_get_core_count():
 def assert_core_counts_from_file(filename, expected_physical, expected_logical):
     my_dir = os.path.dirname(__file__)
 
-    info = px_cpuinfo.get_core_count_from_proc_cpuinfo(
-        os.path.join(my_dir, filename))
+    info = px_cpuinfo.get_core_count_from_proc_cpuinfo(os.path.join(my_dir, filename))
     assert info
     physical, logical = info
     assert physical == expected_physical
@@ -53,17 +52,11 @@ def test_parse_sysctl_output():
     result = px_cpuinfo.parse_sysctl_output([])
     assert result == (None, None)
 
-    result = px_cpuinfo.parse_sysctl_output(['gurka'])
+    result = px_cpuinfo.parse_sysctl_output(["gurka"])
     assert result == (None, None)
 
-    result = px_cpuinfo.parse_sysctl_output([
-        'hw.physicalcpu: 1',
-        'hw.logicalcpu: 2'
-    ])
+    result = px_cpuinfo.parse_sysctl_output(["hw.physicalcpu: 1", "hw.logicalcpu: 2"])
     assert result == (1, 2)
 
-    result = px_cpuinfo.parse_sysctl_output([
-        'hw.physicalcpu: 12',
-        'hw.logicalcpu: 34'
-    ])
+    result = px_cpuinfo.parse_sysctl_output(["hw.physicalcpu: 12", "hw.logicalcpu: 34"])
     assert result == (12, 34)

@@ -73,45 +73,48 @@ def test_get_command_java():
 
 def test_get_command_java_gradled():
     commandline = (
-        "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java " +
-        "-XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Xmx1024m " +
-        "-Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp " +
-        "/Users/johan/.gradle/wrapper/dists/gradle-2.8-all/gradle-2.8/lib/gradle-launcher-2.8.jar" +
-        " org.gradle.launcher.daemon.bootstrap.GradleDaemon 2.8")
+        "/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/bin/java "
+        + "-XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Xmx1024m "
+        + "-Dfile.encoding=UTF-8 -Duser.country=SE -Duser.language=sv -Duser.variant -cp "
+        + "/Users/johan/.gradle/wrapper/dists/gradle-2.8-all/gradle-2.8/lib/gradle-launcher-2.8.jar"
+        + " org.gradle.launcher.daemon.bootstrap.GradleDaemon 2.8"
+    )
     assert px_commandline.get_command(commandline) == "GradleDaemon"
 
 
 def test_get_command_java_teamcity():
     commandline = (
-        "/usr/lib/jvm/jdk-8-oracle-x64/jre/bin/java " +
-        "-Djava.util.logging.config.file=/teamcity/conf/logging.properties " +
-        "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
-        "-Dsun.net.inetaddr.ttl=60 -server -Xms31g -Xmx31g " +
-        "-Dteamcity.configuration.path=../conf/teamcity-startup.properties " +
-        "-Dlog4j.configuration=file:/teamcity/bin/../conf/teamcity-server-log4j.xml " +
-        "-Dteamcity_logs=../logs/ -Djsse.enableSNIExtension=false -Djava.awt.headless=true " +
-        "-Djava.endorsed.dirs=/teamcity/endorsed " +
-        "-classpath /teamcity/bin/bootstrap.jar:/teamcity/bin/tomcat-juli.jar " +
-        "-Dcatalina.base=/teamcity -Dcatalina.home=/teamcity " +
-        "-Djava.io.tmpdir=/teamcity/temp org.apache.catalina.startup.Bootstrap start")
+        "/usr/lib/jvm/jdk-8-oracle-x64/jre/bin/java "
+        + "-Djava.util.logging.config.file=/teamcity/conf/logging.properties "
+        + "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager "
+        + "-Dsun.net.inetaddr.ttl=60 -server -Xms31g -Xmx31g "
+        + "-Dteamcity.configuration.path=../conf/teamcity-startup.properties "
+        + "-Dlog4j.configuration=file:/teamcity/bin/../conf/teamcity-server-log4j.xml "
+        + "-Dteamcity_logs=../logs/ -Djsse.enableSNIExtension=false -Djava.awt.headless=true "
+        + "-Djava.endorsed.dirs=/teamcity/endorsed "
+        + "-classpath /teamcity/bin/bootstrap.jar:/teamcity/bin/tomcat-juli.jar "
+        + "-Dcatalina.base=/teamcity -Dcatalina.home=/teamcity "
+        + "-Djava.io.tmpdir=/teamcity/temp org.apache.catalina.startup.Bootstrap start"
+    )
     assert px_commandline.get_command(commandline) == "Bootstrap"
 
 
 def test_get_command_java_logstash():
     # From: https://github.com/elastic/logstash/issues/3315
     commandline = (
-        "/usr/bin/java -XX:+UseParNewGC -XX:+UseConcMarkSweepGC " +
-        "-Djava.awt.headless=true -XX:CMSInitiatingOccupancyFraction=75 " +
-        "-XX:+UseCMSInitiatingOccupancyOnly -Djava.io.tmpdir=/var/lib/logstash " +
-        "-Xmx128m -Xss2048k -Djffi.boot.library.path=/opt/logstash/vendor/jruby/lib/jni " +
-        "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -Djava.awt.headless=true " +
-        "-XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly " +
-        "-Djava.io.tmpdir=/var/lib/logstash " +
-        "-Xbootclasspath/a:/opt/logstash/vendor/jruby/lib/jruby.jar -classpath : " +
-        "-Djruby.home=/opt/logstash/vendor/jruby " +
-        "-Djruby.lib=/opt/logstash/vendor/jruby/lib -Djruby.script=jruby " +
-        "-Djruby.shell=/bin/sh org.jruby.Main --1.9 /opt/logstash/lib/bootstrap/environment.rb " +
-        "logstash/runner.rb agent -f /etc/logstash/conf.d -l /var/log/logstash/logstash.log")
+        "/usr/bin/java -XX:+UseParNewGC -XX:+UseConcMarkSweepGC "
+        + "-Djava.awt.headless=true -XX:CMSInitiatingOccupancyFraction=75 "
+        + "-XX:+UseCMSInitiatingOccupancyOnly -Djava.io.tmpdir=/var/lib/logstash "
+        + "-Xmx128m -Xss2048k -Djffi.boot.library.path=/opt/logstash/vendor/jruby/lib/jni "
+        + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -Djava.awt.headless=true "
+        + "-XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly "
+        + "-Djava.io.tmpdir=/var/lib/logstash "
+        + "-Xbootclasspath/a:/opt/logstash/vendor/jruby/lib/jruby.jar -classpath : "
+        + "-Djruby.home=/opt/logstash/vendor/jruby "
+        + "-Djruby.lib=/opt/logstash/vendor/jruby/lib -Djruby.script=jruby "
+        + "-Djruby.shell=/bin/sh org.jruby.Main --1.9 /opt/logstash/lib/bootstrap/environment.rb "
+        + "logstash/runner.rb agent -f /etc/logstash/conf.d -l /var/log/logstash/logstash.log"
+    )
     assert px_commandline.get_command(commandline) == "jruby.Main"
 
 
@@ -173,7 +176,10 @@ def test_get_command_java_equinox():
         "/Users/walles/Library/Application "
         "Support/Code/User/workspaceStorage/b8c3a38f62ce0fc92ce4edfb836480db/redhat.java/jdt_ws "
     )
-    assert px_commandline.get_command(commandline) == "org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar"
+    assert (
+        px_commandline.get_command(commandline)
+        == "org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar"
+    )
 
 
 def test_get_command_resque():
@@ -184,7 +190,10 @@ def test_get_command_resque():
 
 def test_get_command_sudo():
     assert px_commandline.get_command("sudo") == "sudo"
-    assert px_commandline.get_command("sudo python /usr/bin/hej gris --flaska") == "sudo hej"
+    assert (
+        px_commandline.get_command("sudo python /usr/bin/hej gris --flaska")
+        == "sudo hej"
+    )
 
     # We could support flags at some point, but until proven necessary we'll
     # fall back on just "sudo" when we get flags.
@@ -201,8 +210,10 @@ def test_get_command_sudo_with_space_in_command_name(tmpdir):
     assert px_commandline.get_command("sudo " + spaced_name) == "sudo i contain spaces"
 
     # Verify splitting with more parameters on the line
-    assert px_commandline.get_command("sudo " + spaced_name + " parameter") == \
-        "sudo i contain spaces"
+    assert (
+        px_commandline.get_command("sudo " + spaced_name + " parameter")
+        == "sudo i contain spaces"
+    )
 
 
 def test_get_command_sudo_with_space_in_path(tmpdir):
@@ -218,7 +229,9 @@ def test_get_command_sudo_with_space_in_path(tmpdir):
     assert px_commandline.get_command("sudo " + spaced_name) == "sudo runme"
 
     # Verify splitting with more parameters on the line
-    assert px_commandline.get_command("sudo " + spaced_name + " parameter") == "sudo runme"
+    assert (
+        px_commandline.get_command("sudo " + spaced_name + " parameter") == "sudo runme"
+    )
 
 
 def test_get_command_interpreters():
@@ -244,119 +257,207 @@ def test_get_command_unicode():
 
 
 def test_get_command_ruby_switches():
-    assert px_commandline.get_command(
-        "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust") == "brew.rb"
+    assert (
+        px_commandline.get_command(
+            "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust"
+        )
+        == "brew.rb"
+    )
 
 
 def test_get_command_perl():
     # Source: https://github.com/walles/px/issues/85
-    assert px_commandline.get_command(" ".join([
-        "/usr/bin/perl5.18",
-        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
-        "build-system",
-        "build_number_offset",
-        "buildbox",
-        "Random.txt",
-        "README.md",
-        "submodules",
-        "Telegram",
-        "third-party",
-        "tools",
-        "versions.json",
-        "WORKSPACE",
-    ])) == "cloc"
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/bin/perl5.18",
+                    "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+                    "build-system",
+                    "build_number_offset",
+                    "buildbox",
+                    "Random.txt",
+                    "README.md",
+                    "submodules",
+                    "Telegram",
+                    "third-party",
+                    "tools",
+                    "versions.json",
+                    "WORKSPACE",
+                ]
+            )
+        )
+        == "cloc"
+    )
 
     # Variations on the same theme
-    assert px_commandline.get_command(" ".join([
-        "/usr/bin/perl",
-        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
-    ])) == "cloc"
-    assert px_commandline.get_command(" ".join([
-        "perl",
-        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
-    ])) == "cloc"
-    assert px_commandline.get_command(" ".join([
-        "/usr/bin/perl5",
-        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
-    ])) == "cloc"
-    assert px_commandline.get_command(" ".join([
-        "/usr/bin/perl5.30",
-        "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
-    ])) == "cloc"
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/bin/perl",
+                    "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+                ]
+            )
+        )
+        == "cloc"
+    )
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "perl",
+                    "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+                ]
+            )
+        )
+        == "cloc"
+    )
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/bin/perl5",
+                    "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+                ]
+            )
+        )
+        == "cloc"
+    )
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/bin/perl5.30",
+                    "/usr/local/Cellar/cloc/1.90/libexec/bin/cloc",
+                ]
+            )
+        )
+        == "cloc"
+    )
 
     # Give up on command line switches
-    assert px_commandline.get_command(" ".join([
-        "/usr/bin/perl", "-S", "cloc",
-    ])) == "perl"
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/bin/perl",
+                    "-S",
+                    "cloc",
+                ]
+            )
+        )
+        == "perl"
+    )
 
 
 def test_get_homebrew_commandline():
     # Source: https://github.com/walles/px/issues/72
-    assert px_commandline.get_command(" ".join([
-        "/usr/local/Homebrew/Library/Homebrew/vendor/portable-ruby/current/bin/ruby",
-        "-W0",
-        "--disable=gems,did_you_mean,rubyopt",
-        "/usr/local/Homebrew/Library/Homebrew/brew.rb",
-        "upgrade"
-    ])) == "brew.rb"
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "/usr/local/Homebrew/Library/Homebrew/vendor/portable-ruby/current/bin/ruby",
+                    "-W0",
+                    "--disable=gems,did_you_mean,rubyopt",
+                    "/usr/local/Homebrew/Library/Homebrew/brew.rb",
+                    "upgrade",
+                ]
+            )
+        )
+        == "brew.rb"
+    )
 
 
 def test_node_max_old_space():
-    assert px_commandline.get_command(
-        "node --max_old_space_size=4096 scripts/start.js") == "start.js"
+    assert (
+        px_commandline.get_command("node --max_old_space_size=4096 scripts/start.js")
+        == "start.js"
+    )
 
 
 def test_macos_app():
-    assert px_commandline.get_command("/".join([
-        "/System",
-        "Library",
-        "CoreServices",
-        "Dock.app",
-        "Contents",
-        "XPCServices",
-        "com.apple.dock.external.extra.xpc",
-        "Contents",
-        "MacOS",
-        "com.apple.dock.external.extra"
-    ])) == "Dock/extra"
+    assert (
+        px_commandline.get_command(
+            "/".join(
+                [
+                    "/System",
+                    "Library",
+                    "CoreServices",
+                    "Dock.app",
+                    "Contents",
+                    "XPCServices",
+                    "com.apple.dock.external.extra.xpc",
+                    "Contents",
+                    "MacOS",
+                    "com.apple.dock.external.extra",
+                ]
+            )
+        )
+        == "Dock/extra"
+    )
 
     # https://github.com/walles/px/issues/73
-    assert px_commandline.get_command("/".join([
-        "/Applications",
-        "Firefox.app",
-        "Contents",
-        "MacOS",
-        "plugin-container.app",
-        "Contents",
-        "MacOS",
-        "plugin-container"
-    ])) == "Firefox/plugin-container"
+    assert (
+        px_commandline.get_command(
+            "/".join(
+                [
+                    "/Applications",
+                    "Firefox.app",
+                    "Contents",
+                    "MacOS",
+                    "plugin-container.app",
+                    "Contents",
+                    "MacOS",
+                    "plugin-container",
+                ]
+            )
+        )
+        == "Firefox/plugin-container"
+    )
 
     # Note that if we have spaces inside of the path, the path in
     # question needs to be valid on the local system for it to
     # be deciphered properly by px. So this path is from an actual
     # path, but with all spaces removed.
-    assert px_commandline.get_command("/".join([
-        "/Applications",
-        "VisualStudioCode.app",
-        "Contents",
-        "Frameworks",
-        "CodeHelper(Renderer).app",
-        "Contents",
-        "MacOS",
-        "CodeHelper(Renderer)"
-    ])) == "CodeHelper(Renderer)"
+    assert (
+        px_commandline.get_command(
+            "/".join(
+                [
+                    "/Applications",
+                    "VisualStudioCode.app",
+                    "Contents",
+                    "Frameworks",
+                    "CodeHelper(Renderer).app",
+                    "Contents",
+                    "MacOS",
+                    "CodeHelper(Renderer)",
+                ]
+            )
+        )
+        == "CodeHelper(Renderer)"
+    )
 
-    assert px_commandline.get_command("/Applications/iTerm.app/Contents/MacOS/iTerm2") == "iTerm2"
+    assert (
+        px_commandline.get_command("/Applications/iTerm.app/Contents/MacOS/iTerm2")
+        == "iTerm2"
+    )
 
     # Don't duplicate the .app name
-    assert px_commandline.get_command("/".join([
-        "/System",
-        "Library",
-        "PrivateFrameworks",
-        "IDS.framework",
-        "identityservicesd.app",
-        "Contents",
-        "MacOS",
-        "identityservicesd"
-    ])) == "IDS/identityservicesd"
+    assert (
+        px_commandline.get_command(
+            "/".join(
+                [
+                    "/System",
+                    "Library",
+                    "PrivateFrameworks",
+                    "IDS.framework",
+                    "identityservicesd.app",
+                    "Contents",
+                    "MacOS",
+                    "identityservicesd",
+                ]
+            )
+        )
+        == "IDS/identityservicesd"
+    )

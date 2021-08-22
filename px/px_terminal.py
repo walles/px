@@ -8,14 +8,14 @@ import tty
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from six import text_type    # NOQA
-    from typing import Dict      # NOQA
-    from typing import List      # NOQA
-    from typing import Tuple     # NOQA
-    from typing import Union     # NOQA
+    from six import text_type  # NOQA
+    from typing import Dict  # NOQA
+    from typing import List  # NOQA
+    from typing import Tuple  # NOQA
+    from typing import Union  # NOQA
     from typing import Optional  # NOQA
     from typing import Iterable  # NOQA
-    from . import px_process     # NOQA
+    from . import px_process  # NOQA
 
 
 KEY_ESC = "\x1b"
@@ -58,7 +58,7 @@ SIGWINCH_PIPE = os.pipe()
 # We'll report window resize as this key having been pressed.
 #
 # NOTE: This must be detected as non-printable by handle_search_keypress().
-SIGWINCH_KEY = u'\x00'
+SIGWINCH_KEY = u"\x00"
 
 _enable_color = True
 
@@ -70,14 +70,14 @@ def disable_color():
     global _enable_color
     _enable_color = False
 
+
 def sigwinch_handler(signum, frame):
     """Handle window resize signals by telling our getch() function to return"""
     # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
     # doesn't collide with anything with some meaning other than "please
     # redraw".
-    os.write(
-        SIGWINCH_PIPE[1],
-        SIGWINCH_KEY.encode("utf-8"))
+    os.write(SIGWINCH_PIPE[1], SIGWINCH_KEY.encode("utf-8"))
+
 
 # Subscribe to window size change signals
 signal.signal(signal.SIGWINCH, sigwinch_handler)
@@ -96,13 +96,13 @@ class ConsumableString(object):
         if not self._string.startswith(to_consume):
             return False
 
-        self._string = self._string[len(to_consume):]
+        self._string = self._string[len(to_consume) :]
         return True
 
 
 def read_select(
     fds,  # type: List[int]
-    timeout_seconds=None  # type: Optional[int]
+    timeout_seconds=None,  # type: Optional[int]
 ):
     # type: (...) -> List[int]
     """Select on any of the fds becoming ready for read, retry on EINTR"""
@@ -142,8 +142,7 @@ def getch(timeout_seconds=None, fd=None):
     if fd is None:
         fd = sys.stdin.fileno()
 
-    can_read_from = (
-        read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds))
+    can_read_from = read_select([fd, SIGWINCH_PIPE[0]], timeout_seconds)
 
     # Read all(ish) bytes from the first ready-for-read stream. If more than one
     # stream is ready, we'll catch the second one on the next call to this
@@ -177,7 +176,7 @@ def get_window_size():
         raise TerminalError("Not a TTY, window size not available")
 
     result = None
-    with os.popen('stty size', 'r') as stty_size:
+    with os.popen("stty size", "r") as stty_size:
         result = stty_size.read().split()
     if len(result) < 2:
         # Getting the terminal window width failed, don't truncate
@@ -277,13 +276,14 @@ def draw_screen_lines(lines, columns):
     # rendering made us not do anything for the last screen line.
     screenstring += CURSOR_TO_RIGHT_EDGE + CLEAR_TO_END_OF_SCREEN
 
-    os.write(sys.stdout.fileno(), screenstring.encode('utf-8'))
+    os.write(sys.stdout.fileno(), screenstring.encode("utf-8"))
 
 
-def to_screen_lines(procs,  # type: List[px_process.PxProcess]
-                    row_to_highlight,   # type: Optional[int]
-                    highlight_heading,  # type: Optional[text_type]
-                    ):
+def to_screen_lines(
+    procs,  # type: List[px_process.PxProcess]
+    row_to_highlight,  # type: Optional[int]
+    highlight_heading,  # type: Optional[text_type]
+):
     # type: (...) -> List[text_type]
     """
     Returns an array of lines that can be printed to screen. Lines are not
@@ -295,7 +295,15 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
     The column name must be from the hard coded list in this function, see below.
     """
 
-    headings = [u"PID", u"COMMAND", u"USERNAME", u"CPU", u"CPUTIME", u"RAM", u"COMMANDLINE"]
+    headings = [
+        u"PID",
+        u"COMMAND",
+        u"USERNAME",
+        u"CPU",
+        u"CPUTIME",
+        u"RAM",
+        u"COMMANDLINE",
+    ]
     highlight_column = None  # type: Optional[int]
     if highlight_heading is not None:
         highlight_column = headings.index(highlight_heading)
@@ -316,24 +324,46 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     format = (
-        u'{:>' + str(pid_width) +
-        u'} {:' + str(command_width) +
-        u'} {:' + str(username_width) +
-        u'} {:>' + str(cpu_width) +
-        u'} {:>' + str(cputime_width) +
-        u'} {:>' + str(mem_width) + u'} {}')
+        u"{:>"
+        + str(pid_width)
+        + u"} {:"
+        + str(command_width)
+        + u"} {:"
+        + str(username_width)
+        + u"} {:>"
+        + str(cpu_width)
+        + u"} {:>"
+        + str(cputime_width)
+        + u"} {:>"
+        + str(mem_width)
+        + u"} {}"
+    )
 
     # Print process list using the computed column widths
     lines = []
 
     heading_line = format.format(
-        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
+        headings[0],
+        headings[1],
+        headings[2],
+        headings[3],
+        headings[4],
+        headings[5],
+        headings[6],
+    )
 
     # Highlight the highlight_column
     if highlight_column is not None:
         headings[highlight_column] = underline(headings[highlight_column])
     heading_line = format.format(
-        headings[0], headings[1], headings[2], headings[3], headings[4], headings[5], headings[6])
+        headings[0],
+        headings[1],
+        headings[2],
+        headings[3],
+        headings[4],
+        headings[5],
+        headings[6],
+    )
 
     heading_line = bold(heading_line)
     lines.append(heading_line)
@@ -373,13 +403,18 @@ def to_screen_lines(procs,  # type: List[px_process.PxProcess]
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
 
         line = format.format(
-            proc.pid, proc.command, proc.username,
-            cpu_percent_s, cpu_time_s,
-            memory_percent_s, proc.cmdline)
+            proc.pid,
+            proc.command,
+            proc.username,
+            cpu_percent_s,
+            cpu_time_s,
+            memory_percent_s,
+            proc.cmdline,
+        )
 
         if row_to_highlight == line_number:
             # Highlight the whole screen line
-            line = inverse_video(line + u' ' * 999)
+            line = inverse_video(line + u" " * 999)
         lines.append(line)
 
     lines[0] = heading_line
@@ -453,7 +488,7 @@ def get_string_of_length(string, length):
         return string
 
     if initial_length < length:
-        return string + u' ' * (length - initial_length)
+        return string + u" " * (length - initial_length)
 
     if initial_length > length:
         return crop_ansi_string_at_length(string, length)
@@ -481,7 +516,7 @@ def _tokenize(string):
 
         # We are at a CSI marker
         try:
-            next_m_index = string.index('m', i)
+            next_m_index = string.index("m", i)
         except ValueError:
             # No end-of-escape sequence found
             break
@@ -497,6 +532,8 @@ def _tokenize(string):
 
 
 crop_cache = {}  # type: Dict[Tuple[text_type, int], text_type]
+
+
 def crop_ansi_string_at_length(string, length):
     # type: (text_type, int) -> text_type
     assert length >= 0
@@ -517,7 +554,7 @@ def crop_ansi_string_at_length(string, length):
 
     for token in _tokenize(string):
         if token.startswith(CSI):
-            reset_sequence = CSI + '0m'
+            reset_sequence = CSI + "0m"
             if token == reset_sequence:
                 # Already reset
                 reset_sequence = ""
@@ -552,6 +589,7 @@ def visual_length(string):
 
     return count
 
+
 def _enter_fullscreen():
     global initial_termios_attr
     assert initial_termios_attr is None
@@ -562,7 +600,7 @@ def _enter_fullscreen():
 
     tty.setraw(fd)
 
-    os.write(fd, HIDE_CURSOR.encode('utf-8'))
+    os.write(fd, HIDE_CURSOR.encode("utf-8"))
 
 
 def _exit_fullscreen():
@@ -570,7 +608,7 @@ def _exit_fullscreen():
     assert initial_termios_attr is not None
 
     fd = sys.stdin.fileno()
-    os.write(fd, SHOW_CURSOR.encode('utf-8'))
+    os.write(fd, SHOW_CURSOR.encode("utf-8"))
 
     tty.setcbreak(fd)
 

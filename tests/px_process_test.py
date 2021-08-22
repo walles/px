@@ -9,6 +9,7 @@ from px import px_process
 from . import testutils
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import MutableSet  # NOQA
@@ -104,8 +105,7 @@ def test_ps_line_to_process_3():
         "  5328"
         "   4432"
         " Thu Feb 25 07:42:36 2016"
-        " " + str(os.getuid()) +
-        " 5.5"
+        " " + str(os.getuid()) + " 5.5"
         "    1-19:31:31"
         " 19.7"
         " /usr/sbin/mysqld"
@@ -116,7 +116,9 @@ def test_ps_line_to_process_3():
         " --log-error=/var/log/mysql/mysql.err"
         " --pid-file=/var/run/mysqld/mysqld.pid"
         " --socket=/var/run/mysqld/mysqld.sock"
-        " --port=3306", testutils.now())
+        " --port=3306",
+        testutils.now(),
+    )
     assert process.username == getpass.getuser()
     assert process.cpu_percent_s == "6%"
     assert process.memory_percent_s == "20%"
@@ -171,8 +173,9 @@ def _test_get_all():
         seen_pids.add(pid)
 
     # Assert that there are processes with the current user name
-    current_users_processes = (
-        filter(lambda process: process.username == getpass.getuser(), all))
+    current_users_processes = filter(
+        lambda process: process.username == getpass.getuser(), all
+    )
     assert current_users_processes
 
     _validate_references(all)
@@ -234,8 +237,12 @@ def test_parse_time():
 
 def test_order_best_last():
     p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
-    p1 = testutils.create_process(commandline="awk", cputime="0:11.00", mempercent="1.0")
-    p2 = testutils.create_process(commandline="bash", cputime="0:01.00", mempercent="11.0")
+    p1 = testutils.create_process(
+        commandline="awk", cputime="0:11.00", mempercent="1.0"
+    )
+    p2 = testutils.create_process(
+        commandline="bash", cputime="0:01.00", mempercent="11.0"
+    )
 
     # P0 should be last because its score is the highest, and p1 and p2 should
     # be ordered alphabetically
@@ -245,8 +252,12 @@ def test_order_best_last():
 
 def test_order_best_first():
     p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
-    p1 = testutils.create_process(commandline="awk", cputime="0:11.00", mempercent="1.0")
-    p2 = testutils.create_process(commandline="bash", cputime="0:01.00", mempercent="11.0")
+    p1 = testutils.create_process(
+        commandline="awk", cputime="0:11.00", mempercent="1.0"
+    )
+    p2 = testutils.create_process(
+        commandline="bash", cputime="0:01.00", mempercent="11.0"
+    )
 
     # P0 should be first because its score is the highest, then p1 and p2 should
     # be ordered alphabetically
@@ -317,16 +328,19 @@ def test_command_dotted_prefix():
     # If there's a dot with a lot of text after it we should drop everything
     # before the dot.
     p = testutils.create_process(
-        commandline="/.../com.apple.InputMethodKit.TextReplacementService")
+        commandline="/.../com.apple.InputMethodKit.TextReplacementService"
+    )
     assert p.command == "TextReplacementService"
 
     # If there's a dot with four characters or less after it, assume it's a file
     # suffix and take the next to last section
     p = testutils.create_process(
-        commandline="/.../com.apple.InputMethodKit.TextReplacementService.1234")
+        commandline="/.../com.apple.InputMethodKit.TextReplacementService.1234"
+    )
     assert p.command == "TextReplacementService"
     p = testutils.create_process(
-        commandline="/.../com.apple.InputMethodKit.TextReplacementService.12345")
+        commandline="/.../com.apple.InputMethodKit.TextReplacementService.12345"
+    )
     assert p.command == "12345"
 
 
@@ -361,9 +375,9 @@ def test_resolve_links():
     UNKNOWN_PID = 1323532
     p1 = testutils.create_process(pid=1, ppid=UNKNOWN_PID)
     p2 = testutils.create_process(pid=2, ppid=1)
-    processes = { p1.pid: p1, p2.pid: p2 }
+    processes = {p1.pid: p1, p2.pid: p2}
     px_process.resolve_links(processes, testutils.now())
 
     assert p1.parent is None
     assert p2.parent is p1
-    assert p1.children == { p2 }
+    assert p1.children == {p2}

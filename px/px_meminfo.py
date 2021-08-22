@@ -9,9 +9,9 @@ from . import px_exec_util
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from six import text_type    # NOQA
-    from typing import List      # NOQA
-    from typing import Tuple     # NOQA
+    from six import text_type  # NOQA
+    from typing import List  # NOQA
+    from typing import Tuple  # NOQA
     from typing import Optional  # NOQA
 
 
@@ -38,18 +38,15 @@ def get_meminfo():
     else:
         percentage_string = px_terminal.red(percentage_string)
 
-    wanted_and_total_string = "".join([
-        px_terminal.bold(px_units.bytes_to_string(wanted_ram_bytes)),
-        " / ",
-        px_terminal.bold(px_units.bytes_to_string(total_ram_bytes))
-        ])
+    wanted_and_total_string = "".join(
+        [
+            px_terminal.bold(px_units.bytes_to_string(wanted_ram_bytes)),
+            " / ",
+            px_terminal.bold(px_units.bytes_to_string(total_ram_bytes)),
+        ]
+    )
 
-    ram_text = "".join([
-        percentage_string,
-        "  [",
-        wanted_and_total_string,
-        "]"
-        ])
+    ram_text = "".join([percentage_string, "  [", wanted_and_total_string, "]"])
 
     return ram_text
 
@@ -82,7 +79,7 @@ def _update_from_meminfo(base, line, name):
     if not line.startswith(name + ":"):
         return base
 
-    just_the_number = line[len(name) + 1:len(line) - 3]
+    just_the_number = line[len(name) + 1 : len(line) - 3]
 
     return int(just_the_number)
 
@@ -178,7 +175,7 @@ def _get_vmstat_output_lines():
 
 def _get_used_swap_bytes_sysctl():
     # type: () -> int
-    stdout = px_exec_util.run(['sysctl', 'vm.swapusage'], check_exitcode=True)
+    stdout = px_exec_util.run(["sysctl", "vm.swapusage"], check_exitcode=True)
     match = SWAPUSAGE_RE.match(stdout.strip())
     if not match:
         raise IOError("No swap usage in 'sysctl vm.swapusage' output: " + stdout)
@@ -193,7 +190,7 @@ def _update_if_prefix(base, line, prefix):
 
     no_ending_dot = line.rstrip(".")
 
-    return int(no_ending_dot[len(prefix):])
+    return int(no_ending_dot[len(prefix) :])
 
 
 def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
@@ -220,12 +217,18 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
         pages_free = _update_if_prefix(pages_free, line, "Pages free:")
         pages_active = _update_if_prefix(pages_active, line, "Pages active:")
         pages_inactive = _update_if_prefix(pages_inactive, line, "Pages inactive:")
-        pages_speculative = _update_if_prefix(pages_speculative, line, "Pages speculative:")
+        pages_speculative = _update_if_prefix(
+            pages_speculative, line, "Pages speculative:"
+        )
         pages_wired = _update_if_prefix(pages_wired, line, "Pages wired down:")
         pages_anonymous = _update_if_prefix(pages_anonymous, line, "Anonymous pages:")
         pages_purgeable = _update_if_prefix(pages_purgeable, line, "Pages purgeable:")
-        pages_compressed = _update_if_prefix(pages_compressed, line, "Pages occupied by compressor:")
-        pages_uncompressed = _update_if_prefix(pages_uncompressed, line, "Pages stored in compressor:")
+        pages_compressed = _update_if_prefix(
+            pages_compressed, line, "Pages occupied by compressor:"
+        )
+        pages_uncompressed = _update_if_prefix(
+            pages_uncompressed, line, "Pages stored in compressor:"
+        )
 
     if page_size_bytes is None:
         return None
@@ -249,8 +252,14 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
         return None
 
     # In experiments, this has added up well to the amount of physical RAM in my machine
-    total_ram_pages = \
-        pages_free + pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed
+    total_ram_pages = (
+        pages_free
+        + pages_active
+        + pages_inactive
+        + pages_speculative
+        + pages_wired
+        + pages_compressed
+    )
 
     # This matches what the Activity Monitor shows in macOS 10.15.6
     #
@@ -258,8 +267,9 @@ def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
     #
     # FIXME: We want to add swapped out pages to this as well, since those also
     # represent a want for pages.
-    wanted_ram_pages = \
+    wanted_ram_pages = (
         pages_anonymous - pages_purgeable + pages_wired + pages_compressed
+    )
 
     total_ram_bytes = total_ram_pages * page_size_bytes
     wanted_ram_bytes = wanted_ram_pages * page_size_bytes

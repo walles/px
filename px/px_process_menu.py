@@ -20,8 +20,8 @@ if False:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
     from typing import Callable  # NOQA
-    from typing import Union     # NOQA
-    from six import text_type    # NOQA
+    from typing import Union  # NOQA
+    from six import text_type  # NOQA
 
 # Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
 # Make our own guaranteed-to-be-int constants.
@@ -75,7 +75,7 @@ def sudo_kill(process, signo):
 
         # Print "sudo kill 1234"
         command = ["sudo", "kill"]
-        if (signo != SIGTERM):
+        if signo != SIGTERM:
             command += ["-" + str(signo)]
         command += [str(process.pid)]
 
@@ -97,7 +97,7 @@ class PxProcessMenu(object):
         u"Show info",
         u"Kill process",
         u"Kill process as root",
-        u"Back to process listing"
+        u"Back to process listing",
     ]
 
     def __init__(self, process):
@@ -111,7 +111,6 @@ class PxProcessMenu(object):
         # Index into MENU_ENTRIES
         self.active_entry = 0
 
-
     def refresh_display(self):
         # type: () -> None
         rows, columns = px_terminal.get_window_size()
@@ -122,31 +121,31 @@ class PxProcessMenu(object):
         lines += [u""]
 
         lines += [
-            px_terminal.bold("Arrow keys") +
-            " move up and down, " +
-            px_terminal.bold("RETURN") +
-            " selects, " +
-            px_terminal.bold("ESC") +
-            " to go back."]
+            px_terminal.bold("Arrow keys")
+            + " move up and down, "
+            + px_terminal.bold("RETURN")
+            + " selects, "
+            + px_terminal.bold("ESC")
+            + " to go back."
+        ]
         lines += [u""]
 
         last_entry_no = len(self.MENU_ENTRIES) - 1
         for entry_no, text in enumerate(self.MENU_ENTRIES):
-            prefix = u'    '
+            prefix = u"    "
             arrow = u"⇵"
             if entry_no == 0:
                 arrow = u"↓"
             elif entry_no == last_entry_no:
                 arrow = u"↑"
             if entry_no == self.active_entry:
-                prefix = arrow + u' ->'
+                prefix = arrow + u" ->"
                 text = px_terminal.inverse_video(text)
 
             lines += [prefix + text]
 
         if self.status:
-            lines += [u"", u'Status: ' + px_terminal.bold(self.status)]
-
+            lines += [u"", u"Status: " + px_terminal.bold(self.status)]
 
         px_terminal.draw_screen_lines(lines, columns)
 
@@ -157,7 +156,7 @@ class PxProcessMenu(object):
             return
         assert len(input) > 0
 
-        self.status = u''
+        self.status = u""
         while len(input) > 0:
             if input.consume(px_terminal.KEY_UPARROW):
                 self.active_entry -= 1
@@ -169,7 +168,7 @@ class PxProcessMenu(object):
                     self.active_entry = len(self.MENU_ENTRIES) - 1
             elif input.consume(px_terminal.KEY_ENTER):
                 self.execute_menu_entry()
-            elif input.consume(u'q'):
+            elif input.consume(u"q"):
                 self.done = True
                 return
             elif input.consume(px_terminal.SIGWINCH_KEY):
@@ -206,7 +205,6 @@ class PxProcessMenu(object):
         with px_terminal.normal_display():
             px_pager.page_process_info(process, processes)
 
-
     def await_death(self, message):
         # type(text_type) -> None
         """
@@ -232,7 +230,6 @@ class PxProcessMenu(object):
 
             time.sleep(0.1)
 
-
     def kill_process(self, signal_process):
         # type: (Callable[[px_process.PxProcess, int], bool]) -> None
         """
@@ -243,21 +240,28 @@ class PxProcessMenu(object):
 
         # Please go away
         if not signal_process(self.process, SIGTERM):
-            self.status = u"Not allowed to kill <" + self.process.command + ">, try again as root!"
+            self.status = (
+                u"Not allowed to kill <"
+                + self.process.command
+                + ">, try again as root!"
+            )
             return
-        self.await_death(u"Waiting for %s to shut down after SIGTERM" % self.process.command)
+        self.await_death(
+            u"Waiting for %s to shut down after SIGTERM" % self.process.command
+        )
         if not self.process.is_alive():
             return
 
         # Die!!
         assert signal_process(self.process, SIGKILL)
-        self.await_death(u"Waiting for %s to shut down after kill -9" % self.process.command)
+        self.await_death(
+            u"Waiting for %s to shut down after kill -9" % self.process.command
+        )
         if not self.process.is_alive():
             return
 
         self.status = u"<" + self.process.command + "> did not die!"
         return
-
 
     def execute_menu_entry(self):
         # NOTE: Constants here must match lines in self.MENU_ENTRIES

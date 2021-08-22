@@ -3,22 +3,23 @@ import socket
 from . import px_exec_util
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import Set       # NOQA
-    from typing import List      # NOQA
-    from typing import Tuple     # NOQA
+    from typing import Set  # NOQA
+    from typing import List  # NOQA
+    from typing import Tuple  # NOQA
     from typing import Iterable  # NOQA
     from typing import Optional  # NOQA
 
 
-class PxFileBuilder():
+class PxFileBuilder:
     def __init__(self):
         self.fd = None  # type: Optional[int]
         self.pid = None  # type: Optional[int]
         self.name = None  # type: Optional[str]
         self.type = None  # type: Optional[str]
-        self.inode = None   # type: Optional[str]
+        self.inode = None  # type: Optional[str]
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
 
@@ -41,7 +42,8 @@ class PxFileBuilder():
 
     def __repr__(self):
         return "PxFileBuilder(pid={}, name={}, type={})".format(
-            self.pid, self.name, self.type)
+            self.pid, self.name, self.type
+        )
 
 
 class PxFile(object):
@@ -50,8 +52,8 @@ class PxFile(object):
         self.fd = None  # type: Optional[int]
         self.pid = pid
         self.type = filetype
-        self.name = None    # type: Optional[str]
-        self.inode = None   # type: Optional[str]
+        self.name = None  # type: Optional[str]
+        self.inode = None  # type: Optional[str]
         self.device = None  # type: Optional[str]
         self.access = None  # type: Optional[str]
 
@@ -77,11 +79,11 @@ class PxFile(object):
             return self.name
 
         name = self.name
-        listen_suffix = ''
-        if self.type in ['IPv4', 'IPv6']:
+        listen_suffix = ""
+        if self.type in ["IPv4", "IPv6"]:
             local, remote_endpoint = self.get_endpoints()
             if not remote_endpoint:
-                listen_suffix = ' (LISTEN)'
+                listen_suffix = " (LISTEN)"
 
             name = self._resolve_name()
 
@@ -119,12 +121,12 @@ class PxFile(object):
             # per-pipe inodes, so we use them as IDs.
             return self.inode
 
-        if self.type == 'FIFO' and self.name == 'pipe':
+        if self.type == "FIFO" and self.name == "pipe":
             # This is just a label that can be shared by several pipes on Linux,
             # we can't use it to identify a pipe.
             return None
 
-        if self.type == 'PIPE' and self.name == '(none)':
+        if self.type == "PIPE" and self.name == "(none)":
             # This is just a label that can be shared by several pipes on OS X,
             # we can't use it to identify a pipe.
             return None
@@ -145,18 +147,18 @@ class PxFile(object):
         if not self.name:
             return (None, None)
 
-        if self.type not in ['IPv4', 'IPv6']:
+        if self.type not in ["IPv4", "IPv6"]:
             return (None, None)
 
         local = None
         remote = None
 
-        split_name = self.name.split('->')
+        split_name = self.name.split("->")
         local = split_name[0]
 
         # Turn "localhost:ipp (LISTEN)" into "ipp" and nothing else
-        local = local.split(' ')[0]
-        if '*' in local:
+        local = local.split(" ")[0]
+        if "*" in local:
             # We can't match against this endpoint
             local = None
 
@@ -172,16 +174,16 @@ def resolve_endpoint(endpoint):
     Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
     """
     # Find the rightmost :, necessary for IPv6 addresses
-    splitindex = endpoint.rfind(':')
+    splitindex = endpoint.rfind(":")
     if splitindex == -1:
         return endpoint
 
     address = endpoint[0:splitindex]
-    if address[0] == '[' and address[-1] == ']':
+    if address[0] == "[" and address[-1] == "]":
         # This is how lsof presents IPv6 addresses
         address = address[1:-1]
 
-    port = endpoint[splitindex + 1:]
+    port = endpoint[splitindex + 1 :]
     host = None
 
     try:
@@ -205,7 +207,7 @@ def call_lsof():
     # Output lines can be in one of two formats:
     # 1. "pPID@" (with @ meaning NUL)
     # 2. "fFD@aACCESSMODE@tTYPE@nNAME@"
-    return px_exec_util.run(["lsof", '-n', '-F', 'fnaptd0i'])
+    return px_exec_util.run(["lsof", "-n", "-F", "fnaptd0i"])
 
 
 def lsof_to_files(lsof):
@@ -217,7 +219,7 @@ def lsof_to_files(lsof):
     pid = None
     file_builder = None  # type: Optional[PxFileBuilder]
     files = []  # type: List[PxFile]
-    for shard in lsof.split('\0'):
+    for shard in lsof.split("\0"):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the
             # lsof output in moar, but makes the parsing code have to deal with
@@ -231,9 +233,9 @@ def lsof_to_files(lsof):
         infotype = shard[0]
         value = shard[1:]
 
-        if infotype == 'p':
+        if infotype == "p":
             pid = int(value)
-        elif infotype == 'f':
+        elif infotype == "f":
             if file_builder:
                 files.append(file_builder.build())
             else:
@@ -251,29 +253,27 @@ def lsof_to_files(lsof):
             assert pid is not None
             file_builder.pid = pid
             file_builder.type = "??"
-        elif infotype == 'a':
+        elif infotype == "a":
             assert file_builder is not None
-            access = {
-                ' ': None,
-                'r': "r",
-                'w': "w",
-                'u': "rw"}[value]
+            access = {" ": None, "r": "r", "w": "w", "u": "rw"}[value]
             file_builder.access = access
-        elif infotype == 't':
+        elif infotype == "t":
             assert file_builder is not None
             file_builder.type = value
-        elif infotype == 'd':
+        elif infotype == "d":
             assert file_builder is not None
             file_builder.device = value
-        elif infotype == 'n':
+        elif infotype == "n":
             assert file_builder is not None
             file_builder.name = value
-        elif infotype == 'i':
+        elif infotype == "i":
             assert file_builder is not None
             file_builder.inode = value
 
         else:
-            raise Exception("Unhandled type <{}> for shard <{}>".format(infotype, shard))
+            raise Exception(
+                "Unhandled type <{}> for shard <{}>".format(infotype, shard)
+            )
 
     if file_builder:
         # Don't forget the last file
