@@ -8,8 +8,8 @@ from . import px_processinfo
 
 if False:
     # For mypy PEP-484 static typing validation
-    from . import px_process     # NOQA
-    from typing import List      # NOQA
+    from . import px_process  # NOQA
+    from typing import List  # NOQA
     from typing import Optional  # NOQA
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +35,9 @@ def _pump_info_to_fd(with_fileno, process, processes):
             # call above (this is likely), we may want to kill that particular lsof instance.
             # It will use a bunch of CPU for some time, and we will never use its result anyway.
         else:
-            LOG.warning("Unexpected OSError pumping process info into pager", exc_info=True)
+            LOG.warning(
+                "Unexpected OSError pumping process info into pager", exc_info=True
+            )
     except Exception:
         # Logging exceptions on warning level will make them visible to somebody
         # who changes the LOGLEVEL in px.py, but not to ordinary users.
@@ -87,29 +89,29 @@ def launch_pager():
     env = os.environ.copy()
 
     # Prevent --quit-if-one-screen, we always want a pager
-    env['LESS'] = ''
+    env["LESS"] = ""
 
     # Git sets this to "FRX", but "F" means "don't page if output is too short"
     # and we always want to page, so we go for "RX" only.
     #
     # "F" might work when somebody does "px 1234", but when ptop wants to show
     # process info it w
-    env['LESS'] = 'RX'
+    env["LESS"] = "RX"
 
     # Git does this as well
-    env['LV'] = '-c'
+    env["LV"] = "-c"
 
-    pager_cmd = to_command_line(env.get('PAGER', None))
+    pager_cmd = to_command_line(env.get("PAGER", None))
     if not pager_cmd:
         # Prefer moar: https://github.com/walles/moar
-        pager_cmd = to_command_line('moar')
+        pager_cmd = to_command_line("moar")
     if not pager_cmd:
-        pager_cmd = to_command_line('less')
+        pager_cmd = to_command_line("less")
 
     # FIXME: What should we do if we don't find anything to page with?
     assert pager_cmd is not None
 
-    if pager_cmd[0].split(os.sep)[-1] == 'less':
+    if pager_cmd[0].split(os.sep)[-1] == "less":
         # Prevent --quit-if-one-screen, we always want a pager
         pager_cmd = pager_cmd[0:1]
 
@@ -125,8 +127,8 @@ def page_process_info(process, processes):
 
     # Do this in a thread to avoid problems with pipe buffers filling up and blocking
     info_thread = threading.Thread(
-        target=_pump_info_to_fd,
-        args=(pager_stdin, process, processes))
+        target=_pump_info_to_fd, args=(pager_stdin, process, processes)
+    )
     info_thread.setDaemon(True)  # Terminating ptop while this is running is fine
     info_thread.start()
 

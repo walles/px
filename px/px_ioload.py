@@ -13,6 +13,7 @@ from . import px_terminal
 from . import px_exec_util
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List
@@ -28,13 +29,17 @@ if sys.version_info.major >= 3:
 #
 # If you look carefully at the output, this regex will only match lines with
 # error counts, which is only one line per interface.
-NETSTAT_IB_LINE_RE = re.compile(r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([0-9]+) +[0-9]+$")
+NETSTAT_IB_LINE_RE = re.compile(
+    r"^([^ ]+).*[0-9]+ +([0-9]+) +[0-9]+ +[0-9]+ +([0-9]+) +[0-9]+$"
+)
 
 # Parse a line from /proc/net/dev.
 #
 # Example input (includes leading whitespace):
 #   eth0: 29819439   19890    0    0    0     0          0         0   364327    6584    0    0    0     0       0          0
-PROC_NET_DEV_RE = re.compile(r"^ *([^:]+): +([0-9]+) +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +([0-9]+)[0-9 ]+$")
+PROC_NET_DEV_RE = re.compile(
+    r"^ *([^:]+): +([0-9]+) +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +[0-9]+ +([0-9]+)[0-9 ]+$"
+)
 
 # Parse a line from /proc/diskstats
 #
@@ -45,7 +50,10 @@ PROC_NET_DEV_RE = re.compile(r"^ *([^:]+): +([0-9]+) +[0-9]+ +[0-9]+ +[0-9]+ +[0
 #
 # Line format documented here:
 # https://www.kernel.org/doc/Documentation/admin-guide/iostats.rst
-PROC_DISKSTATS_RE = re.compile(r"^ *[0-9]+ +[0-9]+ ([a-z]+[0-9]+) [0-9]+ [0-9]+ ([0-9]+) [0-9]+ [0-9]+ [0-9]+ ([0-9]+) .*")
+PROC_DISKSTATS_RE = re.compile(
+    r"^ *[0-9]+ +[0-9]+ ([a-z]+[0-9]+) [0-9]+ [0-9]+ ([0-9]+) [0-9]+ [0-9]+ [0-9]+ ([0-9]+) .*"
+)
+
 
 def parse_netstat_ib_output(netstat_ib_output):
     # type: (six.text_type) -> List[Sample]
@@ -166,7 +174,10 @@ class SubsystemStat(object):
 
         if throughput > high_watermark:
             raise ValueError(
-                "High watermark {} lower than throughput {}".format(high_watermark, throughput))
+                "High watermark {} lower than throughput {}".format(
+                    high_watermark, throughput
+                )
+            )
 
         self.throughput = throughput
         self.high_watermark = high_watermark
@@ -177,7 +188,9 @@ class SystemState(object):
         # type: () -> None
         self.timestamp = datetime.datetime.now()
 
-        self.samples = self.sample_network_interfaces() + self.sample_drives()  # type: List[Sample]
+        self.samples = (
+            self.sample_network_interfaces() + self.sample_drives()
+        )  # type: List[Sample]
 
         by_name = {}  # type: Dict[six.text_type, Sample]
         for sample in self.samples:
@@ -196,7 +209,7 @@ class SystemState(object):
                 return parse_proc_net_dev(proc_net_dev.read())
 
         # Assuming macOS, add support for more platforms on demand
-        netstat_ib_output = px_exec_util.run(["netstat", '-ib'])
+        netstat_ib_output = px_exec_util.run(["netstat", "-ib"])
         return parse_netstat_ib_output(netstat_ib_output)
 
     def sample_drives(self):
@@ -260,7 +273,8 @@ class PxIoLoad(object):
         self.update_baseline_from_system(self.most_recent_system_state)
 
         seconds_since_previous = (
-            self.most_recent_system_state.timestamp - self.previous_system_state.timestamp
+            self.most_recent_system_state.timestamp
+            - self.previous_system_state.timestamp
         ).total_seconds()
         assert seconds_since_previous > 0
 
@@ -289,8 +303,12 @@ class PxIoLoad(object):
 
             assert bytes_since_baseline >= bytes_since_previous
 
-            bytes_per_second_since_baseline = bytes_since_baseline / seconds_since_baseline
-            bytes_per_second_since_previous = bytes_since_previous / seconds_since_previous
+            bytes_per_second_since_baseline = (
+                bytes_since_baseline / seconds_since_baseline
+            )
+            bytes_per_second_since_previous = (
+                bytes_since_previous / seconds_since_previous
+            )
 
             io_entry = self.ios.get(name)
             if not io_entry:
@@ -298,14 +316,17 @@ class PxIoLoad(object):
                 io_entry = SubsystemStat(throughput=0.0, high_watermark=0.0)
 
             # High watermark throughput should be measured vs the last sample...
-            high_watermark = max(io_entry.high_watermark, bytes_per_second_since_previous)
+            high_watermark = max(
+                io_entry.high_watermark, bytes_per_second_since_previous
+            )
             assert high_watermark >= bytes_per_second_since_baseline
 
             # ... but the current B/s should be measured vs the initial sample.
             # This makes the values more stable and easier on the eye.
             updated_ios[name] = SubsystemStat(
                 throughput=bytes_per_second_since_baseline,
-                high_watermark=high_watermark)
+                high_watermark=high_watermark,
+            )
 
         self.ios = updated_ios
 
@@ -339,10 +360,13 @@ class PxIoLoad(object):
 
         bottleneck = collected_ios[0]
         return "[{} / {}] {}".format(
-            px_terminal.bold(px_units.bytes_to_string(math.trunc(bottleneck[1])) + "/s"),
+            px_terminal.bold(
+                px_units.bytes_to_string(math.trunc(bottleneck[1])) + "/s"
+            ),
             px_units.bytes_to_string(math.trunc(bottleneck[2])) + "/s",
-            px_terminal.bold(bottleneck[0])
+            px_terminal.bold(bottleneck[0]),
         )
+
 
 _ioload = PxIoLoad()
 

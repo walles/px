@@ -22,19 +22,19 @@ LAST_TO = "[^(]*"
 LAST_DURATION = "([0-9+:]+)"
 
 LAST_RE = re.compile(
-    LAST_USERNAME +
-    " +" +
-    LAST_DEVICE +
-    " +" +
-    LAST_ADDRESS +
-    LAST_PID +
-    " +" +
-    LAST_FROM +
-    LAST_DASH +
-    LAST_TO +
-    r" *(\(" +
-    LAST_DURATION +
-    r"\))?"
+    LAST_USERNAME
+    + " +"
+    + LAST_DEVICE
+    + " +"
+    + LAST_ADDRESS
+    + LAST_PID
+    + " +"
+    + LAST_FROM
+    + LAST_DASH
+    + LAST_TO
+    + r" *(\("
+    + LAST_DURATION
+    + r"\))?"
 )
 
 TIMEDELTA_RE = re.compile(r"(([0-9]+)\+)?([0-9][0-9]):([0-9][0-9])")
@@ -59,7 +59,7 @@ MONTHS = {
 def get_users_at(
     timestamp,  # type: datetime.datetime
     last_output=None,  # type: Optional[str]
-    now=None  # type: Optional[datetime.datetime]
+    now=None,  # type: Optional[datetime.datetime]
 ):
     # type: (...) -> Set[str]
     """
@@ -160,7 +160,8 @@ def _to_timestamp(string, now):
 
     try:
         timestamp = datetime.datetime(
-            now.year, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal())
+            now.year, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal()
+        )
         if timestamp <= now:
             return timestamp
     except ValueError:
@@ -171,7 +172,8 @@ def _to_timestamp(string, now):
             raise
 
     return datetime.datetime(
-        now.year - 1, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal())
+        now.year - 1, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal()
+    )
 
 
 def _to_timedelta(string):

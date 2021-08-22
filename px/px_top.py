@@ -15,11 +15,11 @@ from . import px_poller
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List      # NOQA
-    from typing import Dict      # NOQA
-    from typing import Union     # NOQA
+    from typing import List  # NOQA
+    from typing import Dict  # NOQA
+    from typing import Union  # NOQA
     from typing import Optional  # NOQA
-    from six import text_type    # NOQA
+    from six import text_type  # NOQA
 
 LOG = logging.getLogger(__name__)
 
@@ -92,7 +92,8 @@ def adjust_cpu_times(baseline, current):
         current_proc = copy.copy(current_proc)
         if current_proc.cpu_time_seconds and baseline_proc.cpu_time_seconds:
             current_proc.set_cpu_time_seconds(
-                current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds)
+                current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds
+            )
         pid2proc[current_proc.pid] = current_proc
 
     return list(pid2proc.values())
@@ -133,10 +134,11 @@ def sort_by_cpu_usage(toplist):
     return sorted(toplist, key=lambda process: process.cpu_percent or 0, reverse=True)
 
 
-def get_toplist(baseline,  # type: List[px_process.PxProcess]
-                current,   # type: List[px_process.PxProcess]
-                by_memory=False  # type: bool
-                ):
+def get_toplist(
+    baseline,  # type: List[px_process.PxProcess]
+    current,  # type: List[px_process.PxProcess]
+    by_memory=False,  # type: bool
+):
     # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
 
@@ -186,7 +188,8 @@ def get_line_to_highlight(toplist, max_process_count):
 
     # Bound highlight to toplist length and screen height
     last_highlighted_row = min(
-        last_highlighted_row, max_process_count - 1, len(toplist) - 1)
+        last_highlighted_row, max_process_count - 1, len(toplist) - 1
+    )
     if last_highlighted_row < 0:
         last_highlighted_row = 0
 
@@ -200,9 +203,9 @@ def get_line_to_highlight(toplist, max_process_count):
 
 
 def get_screen_lines(
-    toplist,   # type: List[px_process.PxProcess]
-    poller,    # type: px_poller.PxPoller
-    rows,      # type: int
+    toplist,  # type: List[px_process.PxProcess]
+    poller,  # type: px_poller.PxPoller
+    rows,  # type: int
     include_footer=True,  # type: bool
     search=None,  # type: Optional[text_type]
 ):
@@ -211,7 +214,9 @@ def get_screen_lines(
     if search:
         # Note that we accept partial user name match, otherwise incrementally typing
         # a username becomes weird for the ptop user
-        toplist = list(filter(lambda p: p.match(search, require_exact_user=False), toplist))
+        toplist = list(
+            filter(lambda p: p.match(search, require_exact_user=False), toplist)
+        )
 
     # Hand out different amount of lines to the different sections
     footer_height = 0
@@ -224,7 +229,8 @@ def get_screen_lines(
         px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
         px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
-        u""]
+        u"",
+    ]
 
     # Create a launchers section
     header_height = len(lines)
@@ -235,9 +241,8 @@ def get_screen_lines(
         if len(launchlines) > 0:
             # Add a section header
             launchlines = [
-                '',
-                px_terminal.bold(
-                    "Launched binaries, launch counts in (parentheses)")
+                "",
+                px_terminal.bold("Launched binaries, launch counts in (parentheses)"),
             ] + launchlines
 
             # Cut if we got too many lines
@@ -260,19 +265,18 @@ def get_screen_lines(
     highlight_column = u"CPUTIME"
     if sort_by_memory:
         highlight_column = u"RAM"
-    toplist_table_lines = \
-        px_terminal.to_screen_lines(toplist[:max_process_count], highlight_row, highlight_column)
+    toplist_table_lines = px_terminal.to_screen_lines(
+        toplist[:max_process_count], highlight_row, highlight_column
+    )
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
-    toplist_table_lines += rows * ['']
+    toplist_table_lines += rows * [""]
 
     top_what = "CPU"
     if sort_by_memory:
         top_what = "memory"
-    lines += [
-        px_terminal.bold("Top " + top_what + " using processes")
-    ]
+    lines += [px_terminal.bold("Top " + top_what + " using processes")]
 
     if top_mode == MODE_SEARCH:
         lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]
@@ -280,15 +284,18 @@ def get_screen_lines(
         assert top_mode == MODE_BASE
         lines += [SEARCH_PROMPT_INACTIVE + px_terminal.bold(search or "")]
 
-    lines += toplist_table_lines[0:max_process_count + 1]  # +1 for the column headings
+    lines += toplist_table_lines[
+        0 : max_process_count + 1
+    ]  # +1 for the column headings
 
     lines += launchlines
 
     if include_footer:
-        footer_line = \
+        footer_line = (
             u"  q - Quit  m - Sort order  / - Search  ↑↓ - Move  Enter - Select"
+        )
         # Inverse the whole footer line
-        footer_line = px_terminal.inverse_video(footer_line + 999 * u' ')
+        footer_line = px_terminal.inverse_video(footer_line + 999 * u" ")
 
         lines += [footer_line]
 
@@ -296,11 +303,11 @@ def get_screen_lines(
 
 
 def redraw(
-    toplist,   # type: List[px_process.PxProcess]
-    poller,    # type: px_poller.PxPoller
-    rows,      # type: int
-    columns,   # type: int
-    include_footer=True  # type: bool
+    toplist,  # type: List[px_process.PxProcess]
+    poller,  # type: px_poller.PxPoller
+    rows,  # type: int
+    columns,  # type: int
+    include_footer=True,  # type: bool
 ):
     # type: (...) -> None
     """
@@ -310,7 +317,8 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, poller, rows, include_footer, search=search_string)
+        toplist, poller, rows, include_footer, search=search_string
+    )
 
     px_terminal.draw_screen_lines(lines, columns)
 
@@ -339,7 +347,10 @@ def handle_search_keypresses(key_sequence):
         elif key_sequence.consume(px_terminal.KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
-        elif key_sequence.consume(px_terminal.KEY_ENTER) or key_sequence._string == px_terminal.KEY_ESC:
+        elif (
+            key_sequence.consume(px_terminal.KEY_ENTER)
+            or key_sequence._string == px_terminal.KEY_ESC
+        ):
             # Exit search mode
             global top_mode
             top_mode = MODE_BASE
@@ -396,17 +407,19 @@ def get_command(**kwargs):
             if last_highlighted_pid is None:
                 continue
             processes = px_process.get_all()
-            process = px_processinfo.find_process_by_pid(last_highlighted_pid, processes)
+            process = px_processinfo.find_process_by_pid(
+                last_highlighted_pid, processes
+            )
             if not process:
                 continue
             px_process_menu.PxProcessMenu(process).start()
-        elif input.consume(u'/'):
+        elif input.consume(u"/"):
             global search_string
             top_mode = MODE_SEARCH
             return None
-        elif input.consume(u'm') or input.consume(u'M'):
+        elif input.consume(u"m") or input.consume(u"M"):
             sort_by_memory = not sort_by_memory
-        elif input.consume(u'q'):
+        elif input.consume(u"q"):
             return CMD_QUIT
         elif input.consume(px_terminal.SIGWINCH_KEY):
             return CMD_RESIZE
@@ -463,7 +476,9 @@ def top(search=""):
     # type: (str) -> None
 
     if not sys.stdout.isatty():
-        sys.stderr.write('Top mode only works on TTYs, try running just "px" instead.\n')
+        sys.stderr.write(
+            'Top mode only works on TTYs, try running just "px" instead.\n'
+        )
         exit(1)
 
     with px_terminal.fullscreen_display():

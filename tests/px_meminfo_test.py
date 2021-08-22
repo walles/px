@@ -24,7 +24,8 @@ def test_get_ram_numbers_from_proc_none():
     my_dir = os.path.dirname(__file__)
 
     info = px_meminfo._get_ram_numbers_from_proc(
-        os.path.join(my_dir, "file name that doesn't exist"))
+        os.path.join(my_dir, "file name that doesn't exist")
+    )
     assert info is None
 
 
@@ -32,7 +33,8 @@ def test_get_ram_numbers_from_proc_2010():
     my_dir = os.path.dirname(__file__)
 
     info = px_meminfo._get_ram_numbers_from_proc(
-        os.path.join(my_dir, "proc-meminfo-2010.txt"))
+        os.path.join(my_dir, "proc-meminfo-2010.txt")
+    )
     assert info is not None
 
     total_bytes, wanted_bytes = info
@@ -48,7 +50,8 @@ def test_get_ram_numbers_from_proc_2020():
     my_dir = os.path.dirname(__file__)
 
     info = px_meminfo._get_ram_numbers_from_proc(
-        os.path.join(my_dir, "proc-meminfo-2020.txt"))
+        os.path.join(my_dir, "proc-meminfo-2020.txt")
+    )
     assert info is not None
 
     total_bytes, wanted_bytes = info

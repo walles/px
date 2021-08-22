@@ -5,6 +5,7 @@ from . import testutils
 from px import px_ioload
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type
@@ -33,7 +34,7 @@ def test_parse_netstat_ib_output():
 def test_parse_iostat_output():
     sample_iostat_output = testutils.load("iostat-dki-n-99.txt")
 
-    expected = [ px_ioload.Sample("disk0", 46066166661) ]
+    expected = [px_ioload.Sample("disk0", 46066166661)]
     actual = px_ioload.parse_iostat_output(sample_iostat_output)
 
     assert actual == expected

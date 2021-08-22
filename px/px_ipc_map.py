@@ -3,22 +3,22 @@ import sys
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from . import px_file              # NOQA
-    from . import px_process           # NOQA
-    from typing import Set             # NOQA
-    from typing import List            # NOQA
-    from typing import Dict            # NOQA
-    from typing import Text            # NOQA
-    from typing import AbstractSet     # NOQA
+    from . import px_file  # NOQA
+    from . import px_process  # NOQA
+    from typing import Set  # NOQA
+    from typing import List  # NOQA
+    from typing import Dict  # NOQA
+    from typing import Text  # NOQA
+    from typing import AbstractSet  # NOQA
     from typing import MutableMapping  # NOQA
-    from typing import Iterable        # NOQA
-    from typing import TypeVar         # NOQA
-    from typing import Optional        # NOQA
+    from typing import Iterable  # NOQA
+    from typing import TypeVar  # NOQA
+    from typing import Optional  # NOQA
 
-    T = TypeVar('T')
-    S = TypeVar('S')
+    T = TypeVar("T")
+    S = TypeVar("S")
 
-FILE_TYPES = ['PIPE', 'FIFO', 'unix', 'IPv4', 'IPv6']
+FILE_TYPES = ["PIPE", "FIFO", "unix", "IPv4", "IPv6"]
 
 
 class IpcMap(object):
@@ -34,26 +34,31 @@ class IpcMap(object):
       px_process
     """
 
-    def __init__(self,
-                 process,    # type: px_process.PxProcess
-                 files,      # type: Iterable[px_file.PxFile]
-                 processes,  # type: Iterable[px_process.PxProcess]
-                 is_root     # type: bool
-                 ):
+    def __init__(
+        self,
+        process,  # type: px_process.PxProcess
+        files,  # type: Iterable[px_file.PxFile]
+        processes,  # type: Iterable[px_process.PxProcess]
+        is_root,  # type: bool
+    ):
         # type: (...) -> None
 
         # On Linux, lsof reports the same open file once per thread of a
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
 
-        self._own_files = list(filter(lambda f: f.pid == process.pid and f.fd is not None, files))
+        self._own_files = list(
+            filter(lambda f: f.pid == process.pid and f.fd is not None, files)
+        )
 
         # Only deal with IPC related files
         self.files = list(filter(lambda f: f.type in FILE_TYPES, files))
 
         self.process = process
         self.processes = processes
-        self.ipc_files_for_process = list(filter(lambda f: f.pid == self.process.pid, self.files))
+        self.ipc_files_for_process = list(
+            filter(lambda f: f.pid == self.process.pid, self.files)
+        )
 
         self._map = {}  # type: MutableMapping[PeerProcess, Set[px_file.PxFile]]
         self._create_mapping()
@@ -96,7 +101,7 @@ class IpcMap(object):
                 name = file.name  # type: Optional[str]
                 if not name:
                     name = file.device
-                if name and name.startswith('->'):
+                if name and name.startswith("->"):
                     name = name[2:]
                 fds[file.fd] = "[{}] <{}> ({})".format(
                     file.type,
@@ -125,13 +130,9 @@ class IpcMap(object):
                 # FIXME: If this is an unconnected PIPE/FIFO, we should say that
 
                 name = link.name
-                if name and name.startswith('->'):
+                if name and name.startswith("->"):
                     name = name[2:]
-                fds[link.fd] = "[{}] -> {} ({})".format(
-                    link.type,
-                    str(target),
-                    name
-                )
+                fds[link.fd] = "[{}] -> {} ({})".format(link.type, str(target), name)
 
         return fds
 
@@ -140,17 +141,18 @@ class IpcMap(object):
         self._create_indices()
 
         unknown = PeerProcess(
-            name="UNKNOWN destinations: Running with sudo might help find out where these go")
+            name="UNKNOWN destinations: Running with sudo might help find out where these go"
+        )
 
         network_connections = set()
         for file in self.ipc_files_for_process:
-            if file.type in ['FIFO', 'PIPE'] and not file.fifo_id():
+            if file.type in ["FIFO", "PIPE"] and not file.fifo_id():
                 # Unidentifiable FIFO, just ignore this
                 continue
 
             other_end_pids = self._get_other_end_pids(file)
             if not other_end_pids:
-                if file.type in ['IPv4', 'IPv6']:
+                if file.type in ["IPv4", "IPv6"]:
                     # This is a remote connection
                     network_connections.add(file)
                     continue
@@ -179,11 +181,13 @@ class IpcMap(object):
         self._pid2process = create_pid2process(self.processes)
 
         self._device_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._name_to_pids = {}    # type: MutableMapping[str, List[int]]
-        self._name_to_files = {}   # type: MutableMapping[str, List[px_file.PxFile]]
-        self._device_number_to_files = {}  # type: MutableMapping[int, List[px_file.PxFile]]
+        self._name_to_pids = {}  # type: MutableMapping[str, List[int]]
+        self._name_to_files = {}  # type: MutableMapping[str, List[px_file.PxFile]]
+        self._device_number_to_files = (
+            {}
+        )  # type: MutableMapping[int, List[px_file.PxFile]]
         self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._local_endpoint_to_pid = {}   # type: MutableMapping[str, int]
+        self._local_endpoint_to_pid = {}  # type: MutableMapping[str, int]
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -200,16 +204,19 @@ class IpcMap(object):
             if device_number is not None:
                 add_arraymapping(self._device_number_to_files, device_number, file)
 
-            if file.access is not None and file.type == 'FIFO':
+            if file.access is not None and file.type == "FIFO":
                 fifo_id = file.fifo_id()
                 if fifo_id:
-                    add_arraymapping(self._fifo_id_and_access_to_pids,
-                                     fifo_id + file.access, file.pid)
+                    add_arraymapping(
+                        self._fifo_id_and_access_to_pids,
+                        fifo_id + file.access,
+                        file.pid,
+                    )
 
     def _get_other_end_pids(self, file):
         # type: (px_file.PxFile) -> Iterable[int]
         """Locate the other end of a pipe / domain socket"""
-        if file.type in ['IPv4', 'IPv6']:
+        if file.type in ["IPv4", "IPv6"]:
             local, remote = file.get_endpoints()
             if remote is None:
                 return []
@@ -256,12 +263,14 @@ class IpcMap(object):
                     pids.add(candidate.pid)
 
         fifo_id = file.fifo_id()
-        if fifo_id and file.access and file.type == 'FIFO':
+        if fifo_id and file.access and file.type == "FIFO":
             # On Linux, this is how we trace FIFOs
-            opposing_access = {'r': 'w', 'w': 'r'}.get(file.access)
+            opposing_access = {"r": "w", "w": "r"}.get(file.access)
             if opposing_access:
                 name_and_opposing_access = fifo_id + opposing_access
-                matching_pids = self._fifo_id_and_access_to_pids.get(name_and_opposing_access)
+                matching_pids = self._fifo_id_and_access_to_pids.get(
+                    name_and_opposing_access
+                )
                 if matching_pids:
                     pids.update(matching_pids)
 
@@ -304,7 +313,7 @@ class PeerProcess(object):
                 name += "(" + str(pid) + ")"
 
         self.name = name  # type: Text
-        self.pid = pid    # type: Optional[int]
+        self.pid = pid  # type: Optional[int]
 
     def __repr__(self):
         return self.name

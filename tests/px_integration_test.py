@@ -13,11 +13,10 @@ def test_run_on_pid(capfd):
     """
     argv = [
         sys.argv[0],
-        '--no-pager',  # Paging causes problems on Travis CI
-
+        "--no-pager",  # Paging causes problems on Travis CI
         # Note that px hides our own PID by design, so we look for our
         # parent PID in this test.
-        str(os.getppid())
+        str(os.getppid()),
     ]
 
     # Enable manual inspection of the output:

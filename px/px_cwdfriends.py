@@ -2,12 +2,12 @@ import sys
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from . import px_process     # NOQA
-    from . import px_file        # NOQA
-    from typing import List      # NOQA
-    from typing import Dict      # NOQA
+    from . import px_process  # NOQA
+    from . import px_file  # NOQA
+    from typing import List  # NOQA
+    from typing import Dict  # NOQA
     from typing import Optional  # NOQA
-    from six import text_type    # NOQA
+    from six import text_type  # NOQA
 
 
 def _strip_leading_dash(process):
@@ -34,13 +34,13 @@ class PxCwdFriends(object):
             if not current_file.name:
                 continue
 
-            if current_file.fdtype != 'cwd':
+            if current_file.fdtype != "cwd":
                 continue
 
             if current_file.pid == process.pid:
                 self.cwd = current_file.name
 
-            if current_file.name == '/':
+            if current_file.name == "/":
                 # This is too common, no point in doing this one
                 continue
 

@@ -9,7 +9,7 @@ from . import testutils
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import List    # NOQA
+    from typing import List  # NOQA
     from six import text_type  # NOQA
 
 
@@ -24,7 +24,7 @@ def test_to_screen_lines_unbounded():
         + px_terminal.bold("  0.03s")
         + " "
         + px_terminal.faint(" 0%")
-        + " /usr/bin/fluff 1234"
+        + " /usr/bin/fluff 1234",
     ]
 
 
@@ -34,7 +34,7 @@ def test_to_screen_lines_unicode():
     if sys.version_info.major > 3:
         assert converted == [
             "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
-            "47536 😀       root     0.03s  0% /usr/bin/😀"
+            "47536 😀       root     0.03s  0% /usr/bin/😀",
         ]
     else:
         # Unicode string widths are difficult before Python 3.3, don't test
@@ -55,8 +55,9 @@ def test_get_string_of_length():
     # Test with escaped strings
     mid_bold = "1" + px_terminal.bold("234") + "5"
     assert px_terminal.get_string_of_length(mid_bold, 6) == mid_bold + " "
-    assert px_terminal.get_string_of_length(mid_bold, 3) == \
-        "1" + CSI + "1m23" + CSI + "0m"
+    assert (
+        px_terminal.get_string_of_length(mid_bold, 3) == "1" + CSI + "1m23" + CSI + "0m"
+    )
 
 
 def test_crop_ansi_string_at_length():
@@ -76,28 +77,32 @@ def test_crop_ansi_string_at_length():
 
     # Note that we expect the string cutter to add an end-marker when
     # breaking inside a formatted section
-    assert px_terminal.crop_ansi_string_at_length(bold_end, 5) == \
-        u"1234[1m5[0m".replace('[', CSI)
+    assert px_terminal.crop_ansi_string_at_length(
+        bold_end, 5
+    ) == u"1234[1m5[0m".replace("[", CSI)
 
-    assert px_terminal.crop_ansi_string_at_length(bold_end, 8) == \
-        u"1234[1m5678[0m".replace('[', CSI)
+    assert px_terminal.crop_ansi_string_at_length(
+        bold_end, 8
+    ) == u"1234[1m5678[0m".replace("[", CSI)
 
     bold_middle = u"123" + px_terminal.bold("456") + u"789"
-    assert px_terminal.crop_ansi_string_at_length(bold_middle, 6) == \
-        u"123[1m456[0m".replace('[', CSI)
-    assert px_terminal.crop_ansi_string_at_length(bold_middle, 7) == \
-        u"123[1m456[22m7[0m".replace('[', CSI)
+    assert px_terminal.crop_ansi_string_at_length(
+        bold_middle, 6
+    ) == u"123[1m456[0m".replace("[", CSI)
+    assert px_terminal.crop_ansi_string_at_length(
+        bold_middle, 7
+    ) == u"123[1m456[22m7[0m".replace("[", CSI)
 
 
 def test_getch():
     pipe = os.pipe()
     read, write = pipe
-    os.write(write, b'q')
+    os.write(write, b"q")
 
     # We should get unicode responses from getch()
     sequence = px_terminal.getch(timeout_seconds=0, fd=read)
     assert sequence is not None
-    assert sequence._string == u'q'
+    assert sequence._string == u"q"
 
 
 def test_tokenize():
@@ -107,10 +112,4 @@ def test_tokenize():
     for token in px_terminal._tokenize(input):
         parts.append(token)
 
-    assert parts == [
-        'ab',
-        '\x1b[1m',
-        'c',
-        '\x1b[22m',
-        'de'
-    ]
+    assert parts == ["ab", "\x1b[1m", "c", "\x1b[22m", "de"]

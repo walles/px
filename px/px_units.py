@@ -1,7 +1,9 @@
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from six import text_type    # NOQA
+    from six import text_type  # NOQA
+
 
 def bytes_to_string(bytes_count):
     # type: (int) -> text_type

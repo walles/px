@@ -15,15 +15,16 @@ from . import px_exec_util
 
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from typing import Dict        # NOQA
+    from typing import Dict  # NOQA
     from typing import MutableSet  # NOQA
-    from typing import Text        # NOQA
-    from typing import Optional    # NOQA
-    from typing import List        # NOQA
-    from typing import Iterable    # NOQA
-    from six import text_type      # NOQA
+    from typing import Text  # NOQA
+    from typing import Optional  # NOQA
+    from typing import List  # NOQA
+    from typing import Iterable  # NOQA
+    from six import text_type  # NOQA
 
 
 LOG = logging.getLogger(__name__)
@@ -31,7 +32,8 @@ LOG = logging.getLogger(__name__)
 
 # Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
 PS_LINE = re.compile(
-    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)")
+    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)"
+)
 
 # Match + group: "1:02.03"
 CPUTIME_OSX = re.compile(r"^([0-9]+):([0-9][0-9]\.[0-9]+)$")
@@ -72,7 +74,7 @@ def _parse_time(time_s):
         u"Sep",
         u"Oct",
         u"Nov",
-        u"Dec"
+        u"Dec",
     ].index(time_s[4:7])
 
     day_of_month = int(time_s[8:10])
@@ -81,21 +83,24 @@ def _parse_time(time_s):
     second = int(time_s[17:19])
     year = int(time_s[20:24])
 
-    return datetime.datetime(year, zero_based_month + 1, day_of_month, hour, minute, second, tzinfo=TIMEZONE)
+    return datetime.datetime(
+        year, zero_based_month + 1, day_of_month, hour, minute, second, tzinfo=TIMEZONE
+    )
 
 
 class PxProcess(object):
-    def __init__(self,
-                 cmdline,   # type: Text
-                 pid,       # type: int
-                 start_time_string,  # type: Text
-                 username,  # type: Text
-                 now,       # type: datetime.datetime
-                 ppid,      # type: Optional[int]
-                 memory_percent=None,  # type: Optional[float]
-                 cpu_percent=None,     # type: Optional[float]
-                 cpu_time=None,        # type: Optional[float]
-                 ):
+    def __init__(
+        self,
+        cmdline,  # type: Text
+        pid,  # type: int
+        start_time_string,  # type: Text
+        username,  # type: Text
+        now,  # type: datetime.datetime
+        ppid,  # type: Optional[int]
+        memory_percent=None,  # type: Optional[float]
+        cpu_percent=None,  # type: Optional[float]
+        cpu_time=None,  # type: Optional[float]
+    ):
         # type: (...) -> None
         self.pid = pid  # type: int
         self.ppid = ppid  # type: Optional[int]
@@ -118,12 +123,14 @@ class PxProcess(object):
             # listing doesn't take that long.
             #
             # If it takes more than 10s, something else is likely up.
-            LOG.error("Process age < -10: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
+            LOG.error(
+                "Process age < -10: age_seconds=%r now=%r start_time=%r start_time_string=%r timezone=%r",
                 self.age_seconds,
                 now,
                 self.start_time,
                 start_time_string.strip(),
-                datetime.datetime.now(TIMEZONE).tzname())
+                datetime.datetime.now(TIMEZONE).tzname(),
+            )
             assert False
         if self.age_seconds < 0:
             self.age_seconds = 0
@@ -135,14 +142,12 @@ class PxProcess(object):
         self.memory_percent = memory_percent
         self.memory_percent_s = "--"  # type: text_type
         if memory_percent is not None:
-            self.memory_percent_s = (
-                "{:.0f}%".format(memory_percent))
+            self.memory_percent_s = "{:.0f}%".format(memory_percent)
 
         self.cpu_percent = cpu_percent
         self.cpu_percent_s = "--"  # type: text_type
         if cpu_percent is not None:
-            self.cpu_percent_s = (
-                "{:.0f}%".format(cpu_percent))
+            self.cpu_percent_s = "{:.0f}%".format(cpu_percent)
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(cpu_time)
@@ -178,8 +183,10 @@ class PxProcess(object):
             return
 
         self.score = (
-            (self.cpu_time_seconds + 1.0) *
-            (self.memory_percent + 1.0) / (self.age_seconds + 1.0))
+            (self.cpu_time_seconds + 1.0)
+            * (self.memory_percent + 1.0)
+            / (self.age_seconds + 1.0)
+        )
 
     def set_cpu_time_seconds(self, seconds):
         # type: (Optional[float]) -> None
@@ -254,12 +261,11 @@ class PxProcess(object):
         return True
 
 
-
 class PxProcessBuilder(object):
     def __init__(self):
-        self.cmdline = None   # type: Optional[Text]
-        self.pid = None       # type: Optional[int]
-        self.ppid = None      # type: Optional[int]
+        self.cmdline = None  # type: Optional[Text]
+        self.pid = None  # type: Optional[int]
+        self.ppid = None  # type: Optional[int]
         self.start_time_string = None  # type: Optional[Text]
         self.username = None  # type: Optional[Text]
         self.cpu_percent = None  # type: Optional[float]
@@ -267,17 +273,16 @@ class PxProcessBuilder(object):
         self.memory_percent = None  # type: Optional[float]
 
     def __repr__(self):
-        return \
-            "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>" % (
-                self.start_time_string,
-                self.pid,
-                self.ppid,
-                self.username,
-                self.cpu_percent,
-                self.cpu_time,
-                self.memory_percent,
-                self.cmdline
-            )
+        return "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>" % (
+            self.start_time_string,
+            self.pid,
+            self.ppid,
+            self.username,
+            self.cpu_percent,
+            self.cpu_time,
+            self.memory_percent,
+            self.cmdline,
+        )
 
     def build(self, now):
         # type: (datetime.datetime) -> PxProcess
@@ -294,7 +299,7 @@ class PxProcessBuilder(object):
             now=now,
             memory_percent=self.memory_percent,
             cpu_percent=self.cpu_percent,
-            cpu_time=self.cpu_time
+            cpu_time=self.cpu_time,
         )
 
 
@@ -370,7 +375,9 @@ def create_kernel_process(now):
     process_builder.ppid = None
 
     # FIXME: This should be the system boot timestamp, not the epoch
-    process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime("%c")
+    process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime(
+        "%c"
+    )
 
     process_builder.username = u"root"
     process_builder.cpu_time = None
@@ -438,21 +445,28 @@ def get_all():
     # If you want to change this, try benchmark_proc_get_all.py and make sure
     # you don't regress.
     close_fds = False
-    command = ["/bin/ps", "-ax", "-o", "pid=,ppid=,lstart=,uid=,pcpu=,time=,%mem=,command="]
+    command = [
+        "/bin/ps",
+        "-ax",
+        "-o",
+        "pid=,ppid=,lstart=,uid=,pcpu=,time=,%mem=,command=",
+    ]
 
-    with open(os.devnull, 'w') as DEVNULL:
-        ps = subprocess.Popen(command,
+    with open(os.devnull, "w") as DEVNULL:
+        ps = subprocess.Popen(
+            command,
             stdin=DEVNULL,
             stdout=subprocess.PIPE,
             stderr=DEVNULL,
             close_fds=close_fds,
-            env=px_exec_util.ENV)
+            env=px_exec_util.ENV,
+        )
 
         stdout = ps.stdout
         assert stdout
         now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
         for ps_line in stdout:
-            process = ps_line_to_process(ps_line.decode('utf-8'), now)
+            process = ps_line_to_process(ps_line.decode("utf-8"), now)
             processes[process.pid] = process
 
         if ps.wait() != 0:
@@ -467,14 +481,14 @@ def get_all():
 def order_best_last(processes):
     # type: (Iterable[PxProcess]) -> List[PxProcess]
     """Returns process list ordered with the most interesting one last"""
-    return sorted(processes, key=operator.attrgetter('score', 'cmdline'))
+    return sorted(processes, key=operator.attrgetter("score", "cmdline"))
 
 
 def order_best_first(processes):
     # type: (Iterable[PxProcess]) -> List[PxProcess]
     """Returns process list ordered with the most interesting one first"""
-    ordered = sorted(processes, key=operator.attrgetter('cmdline'))
-    ordered = sorted(ordered, key=operator.attrgetter('score'), reverse=True)
+    ordered = sorted(processes, key=operator.attrgetter("cmdline"))
+    ordered = sorted(ordered, key=operator.attrgetter("score"), reverse=True)
     return ordered
 
 
@@ -482,10 +496,10 @@ def seconds_to_str(seconds):
     # type: (float) -> Text
     if seconds < 60:
         seconds_s = str(seconds)
-        decimal_index = seconds_s.rfind('.')
+        decimal_index = seconds_s.rfind(".")
         if decimal_index > -1:
             # Chop to at most two decimals
-            seconds_s = seconds_s[0:decimal_index + 3]
+            seconds_s = seconds_s[0 : decimal_index + 3]
         return seconds_s + "s"
 
     if seconds < 3600:

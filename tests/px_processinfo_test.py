@@ -6,6 +6,7 @@ from px import px_processinfo
 from . import testutils
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import List, Tuple  # NOQA
@@ -14,18 +15,24 @@ if sys.version_info.major >= 3:
 def test_to_relative_start_string():
     base = testutils.create_process(pid=100, timestring="Mon Mar  7 09:33:11 2016")
     close = testutils.create_process(pid=101, timestring="Mon Mar  7 09:33:12 2016")
-    assert ("cupsd(101) was started 1.0s after cupsd(100)" ==
-            px_processinfo.to_relative_start_string(base, close))
+    assert (
+        "cupsd(101) was started 1.0s after cupsd(100)"
+        == px_processinfo.to_relative_start_string(base, close)
+    )
 
     base = testutils.create_process(pid=100, timestring="Mon Mar  7 09:33:11 2016")
     close = testutils.create_process(pid=101, timestring="Mon Mar  7 09:33:10 2016")
-    assert ("cupsd(101) was started 1.0s before cupsd(100)" ==
-            px_processinfo.to_relative_start_string(base, close))
+    assert (
+        "cupsd(101) was started 1.0s before cupsd(100)"
+        == px_processinfo.to_relative_start_string(base, close)
+    )
 
     base = testutils.create_process(pid=100, timestring="Mon Mar  7 09:33:11 2016")
     close = testutils.create_process(pid=101, timestring="Mon Mar  7 09:33:11 2016")
-    assert ("cupsd(101) was started just after cupsd(100)" ==
-            px_processinfo.to_relative_start_string(base, close))
+    assert (
+        "cupsd(101) was started just after cupsd(100)"
+        == px_processinfo.to_relative_start_string(base, close)
+    )
 
 
 def test_get_closests_starts_all_within_1s():
@@ -104,13 +111,13 @@ def test_print_process_subtree():
     child_proc.children = set()
 
     parent_proc = testutils.create_process(pid=1, commandline="parent")
-    parent_proc.children = { child_proc }
+    parent_proc.children = {child_proc}
 
     px_processinfo.print_process_subtree(sys.stdout.fileno(), parent_proc, 0, lines)
 
     assert lines == [
-        ('' + str(parent_proc), parent_proc),
-        ('  ' + str(child_proc), child_proc)
+        ("" + str(parent_proc), parent_proc),
+        ("  " + str(child_proc), child_proc),
     ]
 
 
@@ -126,5 +133,5 @@ def test_to_ipc_lines():
     lines = px_processinfo.to_ipc_lines(ipcmap)  # type: ignore
     assert lines == [
         px_terminal.bold("bar(47536)") + ": [PIPE] ->0xAda",
-        px_terminal.bold("foo(47536)") + ": [PIPE] ->0xAda"
+        px_terminal.bold("foo(47536)") + ": [PIPE] ->0xAda",
     ]

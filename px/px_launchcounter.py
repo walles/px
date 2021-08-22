@@ -4,11 +4,11 @@ from . import px_terminal
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
-    from . import px_process   # NOQA
+    from . import px_process  # NOQA
     from six import text_type  # NOQA
-    from typing import List    # NOQA
-    from typing import Tuple   # NOQA
-    from typing import Dict    # NOQA
+    from typing import List  # NOQA
+    from typing import Tuple  # NOQA
+    from typing import Dict  # NOQA
     from typing import Optional  # NOQA
 
 
@@ -46,9 +46,9 @@ class Launchcounter(object):
         # type: (text_type) -> text_type
         if not s:
             return s
-        if s[0] != '(':
+        if s[0] != "(":
             return s
-        if s[-1] != ')':
+        if s[-1] != ")":
             return s
         return s[1:-1]
 
@@ -77,7 +77,7 @@ class Launchcounter(object):
     def _list_new_launches(
         self,
         before,  # type: List[px_process.PxProcess]
-        after    # type: List[px_process.PxProcess]
+        after,  # type: List[px_process.PxProcess]
     ):
         # type: (...) -> List[px_process.PxProcess]
         pid2oldProc = {}  # type: Dict[int,px_process.PxProcess]
@@ -126,7 +126,7 @@ class Launchcounter(object):
     def _merge_tuple_lists(
         self,
         tl1,  # type: List[Tuple[text_type, int]]
-        tl2   # type: List[Tuple[text_type, int]]
+        tl2,  # type: List[Tuple[text_type, int]]
     ):
         # type: (...) -> Optional[List[Tuple[text_type, int]]]
         if len(tl1) > len(tl2):
@@ -175,7 +175,7 @@ class Launchcounter(object):
 
         lines = []  # type: List[text_type]
         for row in launchers_list:
-            line = u' -> '.join(map(render_launch_tuple, row))
+            line = u" -> ".join(map(render_launch_tuple, row))
             lines.append(line)
 
         return lines

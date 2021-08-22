@@ -4,12 +4,14 @@ import platform
 from . import px_exec_util
 
 import sys
+
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from typing import Optional  # NOQA
-    from typing import Tuple # NOQA
-    from typing import List # NOQA
-    from six import text_type # NOQA
+    from typing import Tuple  # NOQA
+    from typing import List  # NOQA
+    from six import text_type  # NOQA
+
 
 def get_core_count():
     # type: () -> Tuple[int,int]
@@ -42,8 +44,8 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
     cores.
     """
     # Note the ending spaces, they must be there for number extraction to work!
-    PROCESSOR_NO_PREFIX = 'processor\t: '
-    CORE_ID_PREFIX = 'core id\t\t: '
+    PROCESSOR_NO_PREFIX = "processor\t: "
+    CORE_ID_PREFIX = "core id\t\t: "
 
     core_ids = set()
     max_processor_no = 0
@@ -51,10 +53,10 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
         with open(proc_cpuinfo) as f:
             for line in f:
                 if line.startswith(PROCESSOR_NO_PREFIX):
-                    processor_no = int(line[len(PROCESSOR_NO_PREFIX):])
+                    processor_no = int(line[len(PROCESSOR_NO_PREFIX) :])
                     max_processor_no = max(processor_no, max_processor_no)
                 elif line.startswith(CORE_ID_PREFIX):
-                    core_id = int(line[len(CORE_ID_PREFIX):])
+                    core_id = int(line[len(CORE_ID_PREFIX) :])
                     core_ids.add(core_id)
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
@@ -74,7 +76,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
 def get_core_count_from_sysctl():
     # type: () -> Optional[Tuple[int,int]]
     try:
-        stdout = px_exec_util.run(["sysctl", 'hw'])
+        stdout = px_exec_util.run(["sysctl", "hw"])
     except (IOError, OSError) as e:
         if e.errno == errno.ENOENT:
             # sysctl not found, we're probably not on OSX
@@ -96,15 +98,15 @@ def parse_sysctl_output(sysctl_lines):
     # type: (List[text_type]) -> Tuple[Optional[int],Optional[int]]
 
     # Note the ending spaces, they must be there for number extraction to work!
-    PHYSICAL_PREFIX = 'hw.physicalcpu: '
-    LOGICAL_PREFIX = 'hw.logicalcpu: '
+    PHYSICAL_PREFIX = "hw.physicalcpu: "
+    LOGICAL_PREFIX = "hw.logicalcpu: "
 
     physical = None
     logical = None
     for line in sysctl_lines:
         if line.startswith(PHYSICAL_PREFIX):
-            physical = int(line[len(PHYSICAL_PREFIX):])
+            physical = int(line[len(PHYSICAL_PREFIX) :])
         elif line.startswith(LOGICAL_PREFIX):
-            logical = int(line[len(LOGICAL_PREFIX):])
+            logical = int(line[len(LOGICAL_PREFIX) :])
 
     return (physical, logical)
