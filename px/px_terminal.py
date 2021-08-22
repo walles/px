@@ -12,7 +12,6 @@ if sys.version_info.major >= 3:
     from typing import Dict  # NOQA
     from typing import List  # NOQA
     from typing import Tuple  # NOQA
-    from typing import Union  # NOQA
     from typing import Optional  # NOQA
     from typing import Iterable  # NOQA
     from . import px_process  # NOQA
@@ -26,7 +25,7 @@ KEY_DOWNARROW = "\x1b[B"
 KEY_ENTER = "\x0d"
 
 
-initial_termios_attr = None  # type: Optional[List[Union[int, List[bytes]]]]
+initial_termios_attr = None
 
 
 CSI = "\x1b["
