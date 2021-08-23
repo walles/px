@@ -4,7 +4,7 @@
      https://github.com/walles/px
 
 Usage:
-  px [--debug] [filter string]
+  px [--debug] [--sort=cpupercent] [filter string]
   px [--debug] [--no-pager] [--color] <PID>
   px [--debug] --top [filter string]
   px --install
@@ -31,11 +31,13 @@ of which processes are most active right now.
 --debug: Print debug logs (if any) after running
 --install: Install /usr/local/bin/px and /usr/local/bin/ptop
 --no-pager: Print PID info to stdout rather than to a pager
+--sort=cpupercent: Order processes by CPU percentage only
 --color: Force color output even when piping
 --help: Print this help
 --version: Print version information
 """
 
+import operator
 import platform
 import logging
 import six
@@ -171,6 +173,7 @@ def _main(argv):
     with_pager = None  # type: Optional[bool]
     with_color = None  # type: Optional[bool]
     top = False  # type: bool
+    sort_cpupercent = False  # type: bool
 
     while "--no-pager" in argv:
         with_pager = False
@@ -191,6 +194,10 @@ def _main(argv):
         argv.remove("--top")
     if os.path.basename(argv[0]).endswith("top"):
         top = True
+
+    while "--sort=cpupercent" in argv:
+        sort_cpupercent = True
+        argv.remove("--sort=cpupercent")
 
     if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
@@ -226,7 +233,7 @@ def _main(argv):
         # It's a search filter and not a PID, keep moving
         pass
 
-    procs = filter(lambda p: p.match(search), px_process.get_all())
+    procs = list(filter(lambda p: p.match(search), px_process.get_all()))
 
     columns = None  # type: Optional[int]
     try:
@@ -236,7 +243,10 @@ def _main(argv):
 
     # Print the most interesting processes last; there are lots of processes and
     # the end of the list is where your eyes will be when you get the prompt back.
-    lines = px_terminal.to_screen_lines(px_process.order_best_last(procs), None, None)
+    procs = px_process.order_best_last(procs)
+    if sort_cpupercent:
+        procs = sorted(procs, key=operator.attrgetter("cpu_percent"))
+    lines = px_terminal.to_screen_lines(procs, None, None)
 
     if columns:
         for line in lines:
