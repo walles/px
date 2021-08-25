@@ -41,6 +41,10 @@ def test_cmdline_top_with_search(mock):
     assert kwargs.get("search") == "kalas"
 
 
+def test_px_sort_cpupercent():
+    px._main(["px", "--sort=cpupercent"])
+
+
 @patch("px.px_top.top")
 def test_cmdline_ptop_with_search(mock):
     px._main(["ptop", "kalas"])

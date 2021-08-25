@@ -245,6 +245,7 @@ def _main(argv):
     # the end of the list is where your eyes will be when you get the prompt back.
     procs = px_process.order_best_last(procs)
     if sort_cpupercent:
+        procs = list(filter(lambda p: p.cpu_percent is not None, procs))
         procs = sorted(procs, key=operator.attrgetter("cpu_percent"))
     lines = px_terminal.to_screen_lines(procs, None, None)
 
