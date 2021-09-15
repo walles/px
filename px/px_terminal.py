@@ -17,9 +17,11 @@ if sys.version_info.major >= 3:
     from . import px_process  # NOQA
 
 
+# NOTE: To work with this list it can be useful to find the text "Uncomment to
+# debug input characters" in handle_search_keypresses() in px_top.py.
 KEY_ESC = "\x1b"
-KEY_BACKSPACE = "\x1b[3~"
-KEY_DELETE = "\x7f"
+KEY_DELETE = "\x1b[3~"
+KEY_BACKSPACE = "\x7f"
 KEY_UPARROW = "\x1b[A"
 KEY_DOWNARROW = "\x1b[B"
 KEY_ENTER = "\x0d"
