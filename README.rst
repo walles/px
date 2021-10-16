@@ -152,6 +152,21 @@ This shows detailed info about PID 80727.
 The IPC data comes from ``lsof``. ``sudo`` helps ``lsof`` get more detailed
 information; the command will work without it but might miss some information.
 
+Killing processes
+-----------------
+If you want an interactive process killer using ``px`` and `fzf`_, you can make
+a shell alias out of this:
+
+::
+
+  px --sort=cpupercent | fzf --bind 'ctrl-r:reload(px --sort=cpupercent)' --height=20 --no-hscroll --tac --no-sort --header-lines=1 | awk '{print $1}' | xargs kill -9
+
+Type for fuzzy process search, use arrow keys to pick a process, Enter to kill,
+CTRL-R to refresh the process list.
+
+You can also add process previews by adding ``--preview='px {1}'`` to the
+``fzf`` invocation, see if you like it!
+
 Installation
 ------------
 On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install using::
@@ -330,6 +345,7 @@ DONE
 .. _moar: https://github.com/walles/moar
 .. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
+.. _fzf: https://github.com/junegunn/fzf
 
 .. |Linux CI Status| image:: https://github.com/walles/px/actions/workflows/linux-ci.yml/badge.svg
    :target: https://github.com/walles/px/actions/workflows/linux-ci.yml?query=branch%3Apython
