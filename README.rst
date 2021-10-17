@@ -164,8 +164,8 @@ a shell alias out of this:
 Type for fuzzy process search, use arrow keys to pick a process, Enter to kill,
 CTRL-R to refresh the process list.
 
-You can also add process previews by adding ``--preview='px {1}'`` to the
-``fzf`` invocation, see if you like it!
+You can also add process previews by adding ``--preview='px --color {1}'`` to
+the ``fzf`` invocation, see if you like it!
 
 Installation
 ------------
