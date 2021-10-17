@@ -4,7 +4,7 @@
      https://github.com/walles/px
 
 Usage:
-  px [--debug] [--sort=cpupercent] [filter string]
+  px [--debug] [--sort=cpupercent] [--no-username] [filter string]
   px [--debug] [--no-pager] [--color] <PID>
   px [--debug] --top [filter string]
   px --install
@@ -32,6 +32,7 @@ of which processes are most active right now.
 --install: Install /usr/local/bin/px and /usr/local/bin/ptop
 --no-pager: Print PID info to stdout rather than to a pager
 --sort=cpupercent: Order processes by CPU percentage only
+--no-username: Don't show the username column in px output
 --color: Force color output even when piping
 --help: Print this help
 --version: Print version information
@@ -172,6 +173,7 @@ def _main(argv):
 
     with_pager = None  # type: Optional[bool]
     with_color = None  # type: Optional[bool]
+    with_username = True
     top = False  # type: bool
     sort_cpupercent = False  # type: bool
 
@@ -198,6 +200,11 @@ def _main(argv):
     while "--sort=cpupercent" in argv:
         sort_cpupercent = True
         argv.remove("--sort=cpupercent")
+
+    while "--no-username" in argv:
+        # Ref: https://github.com/walles/px/issues/88#issuecomment-945099485
+        with_username = False
+        argv.remove("--no-username")
 
     if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
@@ -247,7 +254,7 @@ def _main(argv):
     if sort_cpupercent:
         procs = list(filter(lambda p: p.cpu_percent is not None, procs))
         procs = sorted(procs, key=operator.attrgetter("cpu_percent"))
-    lines = px_terminal.to_screen_lines(procs, None, None)
+    lines = px_terminal.to_screen_lines(procs, None, None, with_username)
 
     if columns:
         for line in lines:
