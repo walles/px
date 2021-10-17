@@ -306,9 +306,10 @@ def print_start_time(fd, process):
     # type: (int, px_process.PxProcess) -> None
     println(
         fd,
-        "{} {} was started, at {}.".format(
+        "{} {} was started by {}, at {}.".format(
             px_terminal.bold(process.age_s + " ago"),
             process.command,
+            px_terminal.bold(process.username),
             px_terminal.bold(process.start_time.isoformat()),
         ),
     )

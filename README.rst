@@ -164,8 +164,11 @@ a shell alias out of this:
 Type for fuzzy process search, use arrow keys to pick a process, Enter to kill,
 CTRL-R to refresh the process list.
 
-You can also add process previews by adding ``--preview='px {1}'`` to the
-``fzf`` invocation, see if you like it!
+Or with previews for the currently selected process:
+
+::
+
+  px --sort=cpupercent --no-username | fzf --preview='px --color {1}' --bind 'ctrl-r:reload(px --sort=cpupercent --no-username)' --height=20 --no-hscroll --tac --no-sort --header-lines=1 | awk '{print $1}' | xargs kill -9
 
 Installation
 ------------

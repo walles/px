@@ -280,17 +280,29 @@ def draw_screen_lines(lines, columns):
     os.write(sys.stdout.fileno(), screenstring.encode("utf-8"))
 
 
+def width_specifier(width, right_align=False):
+    # type: (int, bool) -> text_type
+    return_me = u"{:"
+
+    if right_align:
+        return_me += u">"
+
+    return_me += str(width)
+    return_me += u"}"
+
+    return return_me
+
+
 def to_screen_lines(
     procs,  # type: List[px_process.PxProcess]
     row_to_highlight,  # type: Optional[int]
     highlight_heading,  # type: Optional[text_type]
+    with_username=True,  # type: bool
 ):
     # type: (...) -> List[text_type]
     """
     Returns an array of lines that can be printed to screen. Lines are not
     cropped, so they can be longer than the screen width.
-
-    If columns is None, line lengths are unbounded.
 
     If highligh_heading contains a column name, that column will be highlighted.
     The column name must be from the hard coded list in this function, see below.
@@ -324,48 +336,31 @@ def to_screen_lines(
         cputime_width = max(cputime_width, len(proc.cpu_time_s))
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
-    format = (
-        u"{:>"
-        + str(pid_width)
-        + u"} {:"
-        + str(command_width)
-        + u"} {:"
-        + str(username_width)
-        + u"} {:>"
-        + str(cpu_width)
-        + u"} {:>"
-        + str(cputime_width)
-        + u"} {:>"
-        + str(mem_width)
-        + u"} {}"
-    )
+    format_specifiers = [
+        width_specifier(pid_width, right_align=True),
+        width_specifier(command_width),
+        width_specifier(username_width),
+        width_specifier(cpu_width, right_align=True),
+        width_specifier(cputime_width, right_align=True),
+        width_specifier(mem_width, right_align=True),
+        "{}",  # The command line can have any length
+    ]
+
+    if not with_username:
+        username_index = headings.index("USERNAME")
+        del headings[username_index]
+        del format_specifiers[username_index]
+
+    format = " ".join(format_specifiers)
 
     # Print process list using the computed column widths
     lines = []
 
-    heading_line = format.format(
-        headings[0],
-        headings[1],
-        headings[2],
-        headings[3],
-        headings[4],
-        headings[5],
-        headings[6],
-    )
-
     # Highlight the highlight_column
     if highlight_column is not None:
         headings[highlight_column] = underline(headings[highlight_column])
-    heading_line = format.format(
-        headings[0],
-        headings[1],
-        headings[2],
-        headings[3],
-        headings[4],
-        headings[5],
-        headings[6],
-    )
 
+    heading_line = format.format(*headings)
     heading_line = bold(heading_line)
     lines.append(heading_line)
 
@@ -403,15 +398,18 @@ def to_screen_lines(
         if proc.cpu_time_s == max_cpu_time_s:
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
 
-        line = format.format(
-            proc.pid,
+        columns = [
+            str(proc.pid),
             proc.command,
             proc.username,
             cpu_percent_s,
             cpu_time_s,
             memory_percent_s,
             proc.cmdline,
-        )
+        ]
+        if not with_username:
+            del columns[username_index]
+        line = format.format(*columns)
 
         if row_to_highlight == line_number:
             # Highlight the whole screen line
