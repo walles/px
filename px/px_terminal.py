@@ -1,3 +1,4 @@
+import getpass
 import os
 import sys
 import errno
@@ -293,6 +294,47 @@ def width_specifier(width, right_align=False):
     return return_me
 
 
+def format_with_widths(widths, strings):
+    # type: (List[int], List[text_type]) -> text_type
+    """
+    Put strings next to each other with a space between each.
+
+    Negative column widths means right aligned text.
+
+    Zero width columns are unlimited.
+    """
+
+    assert len(widths) == len(strings)
+
+    result = u""
+    for i in range(len(widths)):
+        if i > 0:
+            result += " "
+
+        width = widths[i]
+        string = strings[i]
+
+        if width == 0:
+            result += string
+            continue
+
+        padding_amount = abs(width) - visual_length(string)
+        if padding_amount <= 0:
+            # NOTE: Future improvement: Crop here rather than just pretending
+            # everything is fine
+            result += string
+            continue
+
+        padding = padding_amount * u" "
+        if width > 0:
+            result += string + padding
+        else:
+            # Right align
+            result += padding + string
+
+    return result
+
+
 def to_screen_lines(
     procs,  # type: List[px_process.PxProcess]
     row_to_highlight,  # type: Optional[int]
@@ -336,22 +378,20 @@ def to_screen_lines(
         cputime_width = max(cputime_width, len(proc.cpu_time_s))
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
-    format_specifiers = [
-        width_specifier(pid_width, right_align=True),
-        width_specifier(command_width),
-        width_specifier(username_width),
-        width_specifier(cpu_width, right_align=True),
-        width_specifier(cputime_width, right_align=True),
-        width_specifier(mem_width, right_align=True),
-        "{}",  # The command line can have any length
+    column_widths = [
+        -pid_width,
+        command_width,
+        username_width,
+        -cpu_width,
+        -cputime_width,
+        -mem_width,
+        0,  # The command line can have any length
     ]
 
     if not with_username:
         username_index = headings.index("USERNAME")
         del headings[username_index]
-        del format_specifiers[username_index]
-
-    format = " ".join(format_specifiers)
+        del column_widths[username_index]
 
     # Print process list using the computed column widths
     lines = []
@@ -360,7 +400,7 @@ def to_screen_lines(
     if highlight_column is not None:
         headings[highlight_column] = underline(headings[highlight_column])
 
-    heading_line = format.format(*headings)
+    heading_line = format_with_widths(column_widths, headings)
     heading_line = bold(heading_line)
     lines.append(heading_line)
 
@@ -368,8 +408,7 @@ def to_screen_lines(
     max_cpu_percent = 0.0
     max_memory_percent_s = None  # type: Optional[text_type]
     max_memory_percent = 0.0
-    max_cpu_time_s = None  # type: Optional[text_type]
-    max_cpu_time = 0.0
+    max_cpu_time_seconds = 0.0
     for proc in procs:
         if proc.cpu_percent is not None and proc.cpu_percent > max_cpu_percent:
             max_cpu_percent = proc.cpu_percent
@@ -377,10 +416,13 @@ def to_screen_lines(
         if proc.memory_percent is not None and proc.memory_percent > max_memory_percent:
             max_memory_percent = proc.memory_percent
             max_memory_percent_s = proc.memory_percent_s
-        if proc.cpu_time_seconds is not None and proc.cpu_time_seconds > max_cpu_time:
-            max_cpu_time = proc.cpu_time_seconds
-            max_cpu_time_s = proc.cpu_time_s
+        if (
+            proc.cpu_time_seconds is not None
+            and proc.cpu_time_seconds > max_cpu_time_seconds
+        ):
+            max_cpu_time_seconds = proc.cpu_time_seconds
 
+    current_user = os.environ.get("SUDO_USER") or getpass.getuser()
     for line_number, proc in enumerate(procs):
         cpu_percent_s = proc.cpu_percent_s
         if proc.cpu_percent_s == "0%":
@@ -395,13 +437,27 @@ def to_screen_lines(
             memory_percent_s = bold(memory_percent_s.rjust(mem_width))
 
         cpu_time_s = proc.cpu_time_s
-        if proc.cpu_time_s == max_cpu_time_s:
+        if not proc.cpu_time_seconds:
+            # Zero or undefined
+            cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
+        elif proc.cpu_time_seconds > 0.75 * max_cpu_time_seconds:
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
+        elif proc.cpu_time_seconds < 0.1 * max_cpu_time_seconds:
+            cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
+
+        # NOTE: This logic should match its friend in
+        # px_processinfo.py/print_process_tree()
+        owner = proc.username
+        if owner == "root":
+            owner = faint(owner)
+        elif owner != current_user:
+            # Neither root nor ourselves, highlight!
+            owner = bold(owner)
 
         columns = [
             str(proc.pid),
             proc.command,
-            proc.username,
+            owner,
             cpu_percent_s,
             cpu_time_s,
             memory_percent_s,
@@ -409,7 +465,7 @@ def to_screen_lines(
         ]
         if not with_username:
             del columns[username_index]
-        line = format.format(*columns)
+        line = format_with_widths(column_widths, columns)
 
         if row_to_highlight == line_number:
             # Highlight the whole screen line

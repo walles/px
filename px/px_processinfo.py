@@ -102,6 +102,9 @@ def print_process_tree(fd, process):
     current_user = os.environ.get("SUDO_USER") or getpass.getuser()
     for line_and_process in lines_and_processes:
         line = line_and_process[0]
+
+        # NOTE: This logic should match its friend in
+        # px_terminal.py/to_screen_lines()
         owner = line_and_process[1].username
         if owner == "root":
             owner = px_terminal.faint(owner)
