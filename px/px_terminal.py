@@ -368,8 +368,7 @@ def to_screen_lines(
     max_cpu_percent = 0.0
     max_memory_percent_s = None  # type: Optional[text_type]
     max_memory_percent = 0.0
-    max_cpu_time_s = None  # type: Optional[text_type]
-    max_cpu_time = 0.0
+    max_cpu_time_seconds = 0.0
     for proc in procs:
         if proc.cpu_percent is not None and proc.cpu_percent > max_cpu_percent:
             max_cpu_percent = proc.cpu_percent
@@ -377,9 +376,11 @@ def to_screen_lines(
         if proc.memory_percent is not None and proc.memory_percent > max_memory_percent:
             max_memory_percent = proc.memory_percent
             max_memory_percent_s = proc.memory_percent_s
-        if proc.cpu_time_seconds is not None and proc.cpu_time_seconds > max_cpu_time:
-            max_cpu_time = proc.cpu_time_seconds
-            max_cpu_time_s = proc.cpu_time_s
+        if (
+            proc.cpu_time_seconds is not None
+            and proc.cpu_time_seconds > max_cpu_time_seconds
+        ):
+            max_cpu_time_seconds = proc.cpu_time_seconds
 
     for line_number, proc in enumerate(procs):
         cpu_percent_s = proc.cpu_percent_s
@@ -395,8 +396,13 @@ def to_screen_lines(
             memory_percent_s = bold(memory_percent_s.rjust(mem_width))
 
         cpu_time_s = proc.cpu_time_s
-        if proc.cpu_time_s == max_cpu_time_s:
+        if not proc.cpu_time_seconds:
+            # Zero or undefined
+            cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
+        elif proc.cpu_time_seconds > 0.75 * max_cpu_time_seconds:
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
+        elif proc.cpu_time_seconds < 0.1 * max_cpu_time_seconds:
+            cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
 
         columns = [
             str(proc.pid),
