@@ -1,15 +1,16 @@
 # Design Decisions
 
 # Implementation Language (Python 2.7)
+
 Language requirements:
 
-1. There must be a useable way to list processes for OS X and Linux
+1. There must be a usable way to list processes for OS X and Linux
 2. It must be available on a vanilla Ubuntu 12.4 Precise system
 3. It must be available on a vanilla OS X 10.11 system
 4. It must be possible to install the resulting product together with all its
-dependencies in a single directory / executable file
+   dependencies in a single directory / executable file
 5. It must be possible to get as much information as `ps` without being root, on
-both OS X and Linux.
+   both OS X and Linux.
 
 Regarding the last requirement of being able to match `ps` without being root,
 the only way to do that on OS X is to actually call `ps` and parse its output.
@@ -35,18 +36,21 @@ faster. I don't know what the requirements for `pex` proper are that makes it
 produce big binaries with long startup times.
 
 ## Installation
+
 It must be simple to install in a random directory on a vanilla
 Ubuntu 12.4 Precise system. In this case that's because what Github Enterprise
 2.3.3 is running on.
 
 "Simple to install" in this case means:
-* no root access required
-* single command line install (most likely `curl` based)
-* everything should end up in one single directory of the user's choosing
-* the install process should end with printing the path to the binary
-* it should be possible to make symlinks to this binary and execute it through
-those
+
+- no root access required
+- single command line install (most likely `curl` based)
+- everything should end up in one single directory of the user's choosing
+- the install process should end with printing the path to the binary
+- it should be possible to make symlinks to this binary and execute it through
+  those
 
 Candidates are:
-* Python 2.7 + build with [Pex](https://github.com/pantsbuild/pex) and parse
-`ps` output manually.
+
+- Python 2.7 + build with [Pex](https://github.com/pantsbuild/pex) and parse
+  `ps` output manually.

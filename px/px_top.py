@@ -59,7 +59,7 @@ def adjust_cpu_times(baseline, current):
     """
     Identify processes in current that are also in baseline.
 
-    For all matches, substract the baseline process' CPU time usage from the
+    For all matches, subtract the baseline process' CPU time usage from the
     current process' one.
 
     This way we get CPU times computed from when "px --top" was started, rather
@@ -82,11 +82,11 @@ def adjust_cpu_times(baseline, current):
             continue
 
         if current_proc.cpu_time_seconds is None:
-            # We can't substract from None
+            # We can't subtract from None
             continue
 
         if baseline_proc.cpu_time_seconds is None:
-            # We can't substract None
+            # We can't subtract None
             continue
 
         current_proc = copy.copy(current_proc)

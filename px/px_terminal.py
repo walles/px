@@ -54,7 +54,7 @@ SHOW_CURSOR = CSI + u"?25h"
 CLEAR_TO_EOL = CSI + u"0K"
 CLEAR_TO_END_OF_SCREEN = CSI + "J"  # Clear from cursor to end of screen
 
-# Used for informing our getch() function that a window resize has occured
+# Used for informing our getch() function that a window resize has occurred
 SIGWINCH_PIPE = os.pipe()
 
 # We'll report window resize as this key having been pressed.
