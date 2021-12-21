@@ -229,11 +229,17 @@ def get_screen_lines(
 
     memory_line = px_terminal.bold(u"RAM Use: ") + poller.get_meminfo()
     assert columns > 0
-    ram_bar_length = columns - px_terminal.visual_length(memory_line) - 8
-    if ram_bar_length > 20:
+    ram_bar_length = columns - px_terminal.visual_length(memory_line) - 22
+    if ram_bar_length > 30:
         # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
         # feel free to change it if you have a better number.
-        memory_line += "  [ " + px_rambar.rambar(ram_bar_length, all_processes) + " ]"
+        memory_line += (
+            "  Top "
+            + px_terminal.bold("RAM Users")
+            + ": [ "
+            + px_rambar.rambar(ram_bar_length, all_processes)
+            + " ]"
+        )
 
     # Print header
     lines = [
