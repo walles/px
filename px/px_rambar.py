@@ -68,7 +68,7 @@ def rambar(ram_bar_length, all_processes):
             # Use all remaining chars
             chars = ram_bar_length - px_terminal.visual_length(bar)
 
-        add_to_bar = px_terminal.get_string_of_length(name, chars)
+        add_to_bar = px_terminal.get_string_of_length(" " + name, chars)
         if i == 0:
             # First red
             add_to_bar = px_terminal.red(add_to_bar)
