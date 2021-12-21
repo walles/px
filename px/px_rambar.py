@@ -54,7 +54,19 @@ def rambar(ram_bar_length, all_processes):
     # type: (int, List[px_process.PxProcess]) -> text_type
 
     categories = get_categories(all_processes)
+    total_kilobytes = 0
+    for category in categories:
+        total_kilobytes += category[1]
 
-    return px_terminal.get_string_of_length(
-        " | ".join(map(lambda t: t[0], categories)), ram_bar_length
-    )
+    bar = u""
+    for i in range(0, len(categories) - 1):
+        category = categories[i]
+        name = category[0]
+        kilobytes = category[1]
+        chars = int(round(ram_bar_length * kilobytes * 1.0 / total_kilobytes))
+        bar += px_terminal.get_string_of_length(name, chars)
+
+    remaining_chars = ram_bar_length - px_terminal.visual_length(bar)
+    bar += px_terminal.get_string_of_length("other", remaining_chars)
+
+    return bar
