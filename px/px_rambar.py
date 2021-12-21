@@ -15,7 +15,7 @@ if sys.version_info.major >= 3:
 GROUPS_COUNT = 4
 
 
-def get_categories(processes):
+def get_categories(all_processes):
     # type: (List[px_process.PxProcess]) -> List[Tuple[text_type, int]]
     """
     Group processes by pretty names, keeping track of the total rss_kb in each
@@ -26,7 +26,7 @@ def get_categories(processes):
     """
 
     names_to_kilobytes = {}  # type: Dict[text_type, int]
-    for process in processes:
+    for process in all_processes:
         base_kb = 0
         if process.command in names_to_kilobytes:
             base_kb = names_to_kilobytes[process.command]
@@ -50,10 +50,10 @@ def get_categories(processes):
     return return_me
 
 
-def rambar(ram_bar_length, processes):
+def rambar(ram_bar_length, all_processes):
     # type: (int, List[px_process.PxProcess]) -> text_type
 
-    categories = get_categories(processes)
+    categories = get_categories(all_processes)
 
     return px_terminal.get_string_of_length(
         " | ".join(map(lambda t: t[0], categories)), ram_bar_length

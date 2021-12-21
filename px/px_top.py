@@ -213,6 +213,7 @@ def get_screen_lines(
 ):
     # type: (...) -> List[text_type]
 
+    all_processes = toplist
     if search:
         # Note that we accept partial user name match, otherwise incrementally typing
         # a username becomes weird for the ptop user
@@ -232,7 +233,7 @@ def get_screen_lines(
     if ram_bar_length > 20:
         # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
         # feel free to change it if you have a better number.
-        memory_line += "  [ " + px_rambar.rambar(ram_bar_length, toplist) + " ]"
+        memory_line += "  [ " + px_rambar.rambar(ram_bar_length, all_processes) + " ]"
 
     # Print header
     lines = [
