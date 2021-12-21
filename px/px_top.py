@@ -12,6 +12,7 @@ from . import px_terminal
 from . import px_processinfo
 from . import px_process_menu
 from . import px_poller
+from . import px_rambar
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -206,6 +207,7 @@ def get_screen_lines(
     toplist,  # type: List[px_process.PxProcess]
     poller,  # type: px_poller.PxPoller
     rows,  # type: int
+    columns,  # type: int
     include_footer=True,  # type: bool
     search=None,  # type: Optional[text_type]
 ):
@@ -224,10 +226,15 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
+    memory_line = px_terminal.bold(u"RAM Use: ") + poller.get_meminfo()
+    assert columns > 0
+    ram_bar_length = columns - px_terminal.visual_length(memory_line) - 8
+    memory_line += "  [ " + px_rambar.rambar(ram_bar_length, toplist) + " ]"
+
     # Print header
     lines = [
         px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
-        px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
+        memory_line,
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u"",
     ]
@@ -317,7 +324,7 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, poller, rows, include_footer, search=search_string
+        toplist, poller, rows, columns, include_footer, search=search_string
     )
 
     px_terminal.draw_screen_lines(lines, columns)

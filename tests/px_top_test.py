@@ -102,7 +102,7 @@ def test_get_screen_lines_low_screen():
 
     SCREEN_ROWS = 10
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -120,7 +120,7 @@ def test_get_screen_lines_high_screen():
 
     SCREEN_ROWS = 100
     px_terminal._enable_color = True
-    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     # Top row should contain ANSI escape codes
     CSI = u"\x1b["
@@ -146,7 +146,7 @@ def test_get_screen_lines_with_many_launches():
     poller._launchcounter_screen_lines = launchcounter.get_screen_lines()
 
     SCREEN_ROWS = 100
-    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     assert len(lines) == SCREEN_ROWS
 
@@ -156,6 +156,6 @@ def test_get_screen_lines_returns_enough_lines():
     poller = px_poller.PxPoller()
 
     SCREEN_ROWS = 100000
-    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS)
+    lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     assert len(lines) == SCREEN_ROWS
