@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 
 # Match + group: " 7708 1 Mon Mar  7 09:33:11 2016  netbios 0.1 0:00.08  0.0 /usr/sbin/netbiosd hj"
 PS_LINE = re.compile(
-    " *([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)"
+    " *([0-9]+) +([0-9]+) +([0-9]+) +([A-Za-z0-9: ]+) +([^ ]+) +([0-9.]+) +([-0-9.:]+) +([0-9.]+) +(.*)"
 )
 
 # Match + group: "1:02.03"
@@ -93,6 +93,7 @@ class PxProcess(object):
         self,
         cmdline,  # type: Text
         pid,  # type: int
+        rss_kb,  # type: int
         start_time_string,  # type: Text
         username,  # type: Text
         now,  # type: datetime.datetime
@@ -104,6 +105,7 @@ class PxProcess(object):
         # type: (...) -> None
         self.pid = pid  # type: int
         self.ppid = ppid  # type: Optional[int]
+        self.rss_kb = rss_kb  # type: int
 
         self.cmdline = cmdline  # type: text_type
         self.command = self._get_command()  # type: text_type
@@ -266,6 +268,7 @@ class PxProcessBuilder(object):
         self.cmdline = None  # type: Optional[Text]
         self.pid = None  # type: Optional[int]
         self.ppid = None  # type: Optional[int]
+        self.rss_kb = None  # type: Optional[int]
         self.start_time_string = None  # type: Optional[Text]
         self.username = None  # type: Optional[Text]
         self.cpu_percent = None  # type: Optional[float]
@@ -288,12 +291,14 @@ class PxProcessBuilder(object):
         # type: (datetime.datetime) -> PxProcess
         assert self.cmdline
         assert self.pid is not None
+        assert self.rss_kb is not None
         assert self.start_time_string
         assert self.username
         return PxProcess(
             cmdline=self.cmdline,
             pid=self.pid,
             ppid=self.ppid,
+            rss_kb=self.rss_kb,
             start_time_string=self.start_time_string,
             username=self.username,
             now=now,
@@ -354,12 +359,13 @@ def ps_line_to_process(ps_line, now):
     process_builder = PxProcessBuilder()
     process_builder.pid = int(match.group(1))
     process_builder.ppid = int(match.group(2))
-    process_builder.start_time_string = match.group(3)
-    process_builder.username = uid_to_username(int(match.group(4)))
-    process_builder.cpu_percent = float(match.group(5))
-    process_builder.cpu_time = parse_time(match.group(6))
-    process_builder.memory_percent = float(match.group(7))
-    process_builder.cmdline = match.group(8)
+    process_builder.rss_kb = int(match.group(3))
+    process_builder.start_time_string = match.group(4)
+    process_builder.username = uid_to_username(int(match.group(5)))
+    process_builder.cpu_percent = float(match.group(6))
+    process_builder.cpu_time = parse_time(match.group(7))
+    process_builder.memory_percent = float(match.group(8))
+    process_builder.cmdline = match.group(9)
 
     return process_builder.build(now)
 
@@ -379,6 +385,7 @@ def create_kernel_process(now):
         "%c"
     )
 
+    process_builder.rss_kb = 0
     process_builder.username = u"root"
     process_builder.cpu_time = None
     process_builder.memory_percent = None
@@ -449,7 +456,7 @@ def get_all():
         "/bin/ps",
         "-ax",
         "-o",
-        "pid=,ppid=,lstart=,uid=,pcpu=,time=,%mem=,command=",
+        "pid=,ppid=,rss=,lstart=,uid=,pcpu=,time=,%mem=,command=",
     ]
 
     with open(os.devnull, "w") as DEVNULL:
