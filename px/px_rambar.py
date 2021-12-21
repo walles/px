@@ -59,14 +59,26 @@ def rambar(ram_bar_length, all_processes):
         total_kilobytes += category[1]
 
     bar = u""
-    for i in range(0, len(categories) - 1):
-        category = categories[i]
+    for i, category in enumerate(categories):
         name = category[0]
         kilobytes = category[1]
-        chars = int(round(ram_bar_length * kilobytes * 1.0 / total_kilobytes))
-        bar += px_terminal.get_string_of_length(name, chars)
 
-    remaining_chars = ram_bar_length - px_terminal.visual_length(bar)
-    bar += px_terminal.get_string_of_length("other", remaining_chars)
+        chars = int(round(ram_bar_length * kilobytes * 1.0 / total_kilobytes))
+        if i == len(categories) - 1:
+            # Use all remaining chars
+            chars = ram_bar_length - px_terminal.visual_length(bar)
+
+        add_to_bar = px_terminal.get_string_of_length(name, chars)
+        if i == 0:
+            # First red
+            add_to_bar = px_terminal.red(add_to_bar)
+        elif i == 1:
+            # Second yellow
+            add_to_bar = px_terminal.yellow(add_to_bar)
+        elif i % 2 == 1:
+            # Then alternating between normal and inverse video
+            add_to_bar = px_terminal.inverse_video(add_to_bar)
+
+        bar += add_to_bar
 
     return bar
