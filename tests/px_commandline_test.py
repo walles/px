@@ -282,6 +282,11 @@ def test_get_command_ruby_switches():
         == "brew.rb"
     )
 
+    assert (
+        px_commandline.get_command("/usr/bin/ruby -W1 -- /apa/build.rb /bepa/cmake.rb")
+        == "build.rb"
+    )
+
 
 def test_get_command_perl():
     # Source: https://github.com/walles/px/issues/85

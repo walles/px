@@ -134,6 +134,7 @@ def get_command(commandline):
                 "-W0",
                 "-W1",
                 "-W2",
+                "--",
             ],
         )
 
