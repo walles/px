@@ -212,6 +212,11 @@ def get_screen_lines(
     search=None,  # type: Optional[text_type]
 ):
     # type: (...) -> List[text_type]
+    """
+    Note that the columns parameter is only used for layout purposes. Lines
+    returned from this function will still need to be cropped before being
+    printed to screen.
+    """
 
     all_processes = toplist
     if search:
