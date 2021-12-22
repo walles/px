@@ -43,6 +43,7 @@ def now():
 def create_process(
     pid=47536,
     ppid=1234,
+    rss_kb=12345,
     timestring=TIMESTRING,
     uid=0,
     cpuusage="0.0",
@@ -57,6 +58,8 @@ def create_process(
         + str(pid)
         + spaces()
         + str(ppid)
+        + spaces()
+        + str(rss_kb)
         + spaces()
         + timestring
         + spaces()

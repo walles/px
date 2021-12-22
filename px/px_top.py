@@ -12,6 +12,7 @@ from . import px_terminal
 from . import px_processinfo
 from . import px_process_menu
 from . import px_poller
+from . import px_rambar
 
 if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
@@ -206,11 +207,18 @@ def get_screen_lines(
     toplist,  # type: List[px_process.PxProcess]
     poller,  # type: px_poller.PxPoller
     rows,  # type: int
+    columns,  # type: int
     include_footer=True,  # type: bool
     search=None,  # type: Optional[text_type]
 ):
     # type: (...) -> List[text_type]
+    """
+    Note that the columns parameter is only used for layout purposes. Lines
+    returned from this function will still need to be cropped before being
+    printed to screen.
+    """
 
+    all_processes = toplist
     if search:
         # Note that we accept partial user name match, otherwise incrementally typing
         # a username becomes weird for the ptop user
@@ -224,10 +232,23 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
+    memory_line = px_terminal.bold(u"RAM Use: ") + poller.get_meminfo()
+    assert columns > 0
+    ram_bar_length = columns - px_terminal.visual_length(memory_line) - 18
+    if ram_bar_length > 30:
+        # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
+        # feel free to change it if you have a better number.
+        memory_line += (
+            px_terminal.bold("  RAM Users")
+            + ": [ "
+            + px_rambar.rambar(ram_bar_length, all_processes)
+            + " ]"
+        )
+
     # Print header
     lines = [
         px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
-        px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
+        memory_line,
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u"",
     ]
@@ -317,7 +338,7 @@ def redraw(
     """
     global search_string
     lines = get_screen_lines(
-        toplist, poller, rows, include_footer, search=search_string
+        toplist, poller, rows, columns, include_footer, search=search_string
     )
 
     px_terminal.draw_screen_lines(lines, columns)

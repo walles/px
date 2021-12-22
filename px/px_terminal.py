@@ -514,7 +514,7 @@ def red(string):
     global _enable_color
     if not _enable_color:
         return string
-    return CSI + "1;30;41m" + string + CSI + "49;39;22m"
+    return CSI + "1;97;41m" + string + CSI + "49;39;22m"
 
 
 def yellow(string):

@@ -19,6 +19,7 @@ def test_create_process():
     process_builder = px_process.PxProcessBuilder()
     process_builder.pid = 7
     process_builder.ppid = 1
+    process_builder.rss_kb = 123
     process_builder.start_time_string = testutils.TIMESTRING
     process_builder.username = "usernamex"
     process_builder.cpu_time = 1.3
@@ -28,6 +29,7 @@ def test_create_process():
 
     assert test_me.pid == 7
     assert test_me.ppid == 1
+    assert test_me.rss_kb == 123
     assert test_me.username == "usernamex"
     assert test_me.cpu_time_s == "1.3s"
     assert test_me.memory_percent_s == "43%"
@@ -57,6 +59,7 @@ def test_create_future_process():
     # These values are required to not fail in other ways
     process_builder.cmdline = "hej kontinent"
     process_builder.pid = 1
+    process_builder.rss_kb = 123
     process_builder.username = "johan"
 
     # Test it!
@@ -104,6 +107,7 @@ def test_ps_line_to_process_3():
     process = px_process.ps_line_to_process(
         "  5328"
         "   4432"
+        "   123"
         " Thu Feb 25 07:42:36 2016"
         " " + str(os.getuid()) + " 5.5"
         "    1-19:31:31"
