@@ -45,7 +45,7 @@ def get_categories(all_processes):
             return_me.append(name_and_kilobytes)
         else:
             other_total_kb += name_and_kilobytes[1]
-    return_me.append(("...", other_total_kb))
+    return_me.append(("... other programs...", other_total_kb))
 
     return return_me
 
