@@ -182,6 +182,24 @@ def test_get_command_java_equinox():
     )
 
 
+def test_get_command_electron_macos():
+    # Note that if we have spaces inside of the path, the path in
+    # question needs to be valid on the local system for it to
+    # be deciphered properly by px. So this path is from an actual
+    # path, but with all spaces removed.
+    assert (
+        px_commandline.get_command(
+            "/Applications/VisualStudioCode.app/Contents/MacOS/Electron "
+            "--ms-enable-electron-run-as-node "
+            "/Users/johan/.vscode/extensions/ms-python.vscode-pylance-2021.12.2/dist/server.bundle.js "
+            "--cancellationReceive=file:d6fe53594ec46a8bb986ad058c985f56d309e7bf19 "
+            "--node-ipc "
+            "--clientProcessId=42516 "
+        )
+        == "VisualStudioCode"
+    )
+
+
 def test_get_command_resque():
     # These command names are from a real-world system
     assert px_commandline.get_command("resque-1.20.0: x y z") == "resque-1.20.0:"

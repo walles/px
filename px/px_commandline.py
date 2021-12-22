@@ -8,6 +8,7 @@ if sys.version_info.major >= 3:
     # For mypy PEP-484 static typing validation
     from six import text_type  # NOQA
     from typing import List  # NOQA
+    from typing import Optional  # NOQA
 
 
 # Match "[kworker/0:0H]", no grouping
@@ -74,6 +75,15 @@ def get_app_name_prefix(commandline):
     return ""
 
 
+def try_clarify_electron(commandline):
+    # type: (text_type) -> Optional[text_type]
+    for path_component in to_array(commandline)[0].split("/"):
+        if path_component.endswith(".app"):
+            return path_component[:-4]
+
+    return None
+
+
 def get_command(commandline):
     # type: (text_type) -> text_type
     """
@@ -95,6 +105,11 @@ def get_command(commandline):
 
     if command.startswith("python") or command == "Python":
         return get_python_command(commandline)
+
+    if command == "Electron":
+        clarified = try_clarify_electron(commandline)
+        if clarified:
+            return clarified
 
     if command == "java":
         return get_java_command(commandline)
