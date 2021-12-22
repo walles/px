@@ -123,6 +123,11 @@ def get_command(commandline):
                 "-d",
                 "--debug",
                 "--disable",
+                #
+                # Quickfix for #74, better implementations welcome!
+                # https://github.com/walles/px/issues/74
+                "-Eascii-8bit:ascii-8bit",
+                #
                 "-l",
                 "-n",
                 "-p",

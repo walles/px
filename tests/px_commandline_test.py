@@ -282,9 +282,18 @@ def test_get_command_ruby_switches():
         == "brew.rb"
     )
 
+    # https://github.com/walles/px/issues/87
     assert (
         px_commandline.get_command("/usr/bin/ruby -W1 -- /apa/build.rb /bepa/cmake.rb")
         == "build.rb"
+    )
+
+    # https://github.com/walles/px/issues/74
+    assert (
+        px_commandline.get_command(
+            "/usr/bin/ruby -Eascii-8bit:ascii-8bit /usr/sbin/google-fluentd"
+        )
+        == "google-fluentd"
     )
 
 
