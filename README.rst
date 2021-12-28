@@ -22,8 +22,8 @@ Output
   average throughput since ``ptop`` launched.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
-* Note the visualization of which programs are using your memory next to the
-  memory numbers
+* Note the visualization of which programs / users are using your memory below
+  the memory numbers
 * Selecting a process with Enter will offer you to see detailed information
   about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
 * After you press ``q`` to quit, the display is retained and some lines at the

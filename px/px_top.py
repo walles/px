@@ -232,23 +232,27 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
-    memory_line = px_terminal.bold(u"RAM Use: ") + poller.get_meminfo()
     assert columns > 0
-    ram_bar_length = columns - px_terminal.visual_length(memory_line) - 18
-    if ram_bar_length > 30:
+    ram_bar_length = columns - 16
+    if ram_bar_length > 20:
         # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
         # feel free to change it if you have a better number.
-        memory_line += (
-            px_terminal.bold("  RAM Users")
-            + ": [ "
-            + px_rambar.rambar(ram_bar_length, all_processes)
-            + " ]"
+        rambar_by_process = (
+            "[" + px_rambar.rambar_by_process(ram_bar_length, all_processes) + "]"
         )
+        rambar_by_user = (
+            "[" + px_rambar.rambar_by_user(ram_bar_length, all_processes) + "]"
+        )
+    else:
+        rambar_by_process = "[ ... ]"
+        rambar_by_user = "[ ... ]"
 
     # Print header
     lines = [
         px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
-        memory_line,
+        px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
+        u"  By process: " + rambar_by_process,
+        u"     By user: " + rambar_by_user,
         px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
         u"",
     ]
