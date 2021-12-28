@@ -12,17 +12,12 @@ if sys.version_info.major >= 3:
     from typing import Tuple  # NOQA
     from six import text_type  # NOQA
 
-GROUPS_COUNT = 4
-
 
 def get_categories(all_processes):
     # type: (List[px_process.PxProcess]) -> List[Tuple[text_type, int]]
     """
     Group processes by pretty names, keeping track of the total rss_kb in each
     group.
-
-    Return the top groups in order plus one "other" which is the sum of the
-    rest. The total number of returned groups will be GROUPS_COUNT.
     """
 
     names_to_kilobytes = {}  # type: Dict[text_type, int]
@@ -35,50 +30,63 @@ def get_categories(all_processes):
 
         names_to_kilobytes[process.command] = base_kb + process.rss_kb
 
-    sorted_names = sorted(
-        names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True
-    )
-    other_total_kb = 0
-    return_me = []  # type: List[Tuple[text_type, int]]
-    for i, name_and_kilobytes in enumerate(sorted_names):
-        if i < GROUPS_COUNT - 1:
-            return_me.append(name_and_kilobytes)
-        else:
-            other_total_kb += name_and_kilobytes[1]
-    return_me.append(("... other programs...", other_total_kb))
+    return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
-    return return_me
+
+def render_bar(bar_length, names_and_numbers):
+    # type: (int, List[Tuple[text_type, int]]) -> text_type
+    """
+    You probably want to use rambar() instead, this is just utility function.
+    """
+
+    sum = 0
+    for category in names_and_numbers:
+        sum += category[1]
+    assert sum > 0
+
+    bar = u""
+    chunk_number = -1
+    should_alternate = False
+    # FIXME: Don't do visual_length() here over and over, it's probably too slow
+    while px_terminal.visual_length(bar) < bar_length:
+        chunk_number += 1
+
+        if chunk_number >= len(names_and_numbers):
+            # Ran out of names_and_numbers, just start alternating
+            should_alternate = True
+
+        if not should_alternate:
+            # Show some real data
+            name_and_number = names_and_numbers[chunk_number]
+            name = name_and_number[0]
+            number = name_and_number[1]
+
+            chars = int(round(bar_length * number * 1.0 / sum))
+            if chars > 1:
+                add_to_bar = px_terminal.get_string_of_length(u" " + name, chars)
+            else:
+                should_alternate = True
+
+        if should_alternate:
+            add_to_bar = u" "
+
+        if chunk_number == 0:
+            # First red
+            add_to_bar = px_terminal.red(add_to_bar)
+        elif chunk_number == 1:
+            # Second yellow
+            add_to_bar = px_terminal.yellow(add_to_bar)
+        elif chunk_number % 2 == 1:
+            # Then alternating between normal and inverse video
+            # FIXME: Inverse video and blue!!
+            add_to_bar = px_terminal.inverse_video(add_to_bar)
+
+        assert len(add_to_bar) > 0
+        bar += add_to_bar
+
+    return bar
 
 
 def rambar(ram_bar_length, all_processes):
     # type: (int, List[px_process.PxProcess]) -> text_type
-
-    categories = get_categories(all_processes)
-    total_kilobytes = 0
-    for category in categories:
-        total_kilobytes += category[1]
-
-    bar = u""
-    for i, category in enumerate(categories):
-        name = category[0]
-        kilobytes = category[1]
-
-        chars = int(round(ram_bar_length * kilobytes * 1.0 / total_kilobytes))
-        if i == len(categories) - 1:
-            # Use all remaining chars
-            chars = ram_bar_length - px_terminal.visual_length(bar)
-
-        add_to_bar = px_terminal.get_string_of_length(" " + name, chars)
-        if i == 0:
-            # First red
-            add_to_bar = px_terminal.red(add_to_bar)
-        elif i == 1:
-            # Second yellow
-            add_to_bar = px_terminal.yellow(add_to_bar)
-        elif i % 2 == 1:
-            # Then alternating between normal and inverse video
-            add_to_bar = px_terminal.inverse_video(add_to_bar)
-
-        bar += add_to_bar
-
-    return bar
+    return render_bar(ram_bar_length, get_categories(all_processes))
