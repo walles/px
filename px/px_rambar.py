@@ -77,9 +77,11 @@ def render_bar(bar_length, names_and_numbers):
             # Second yellow
             add_to_bar = px_terminal.yellow(add_to_bar)
         elif chunk_number % 2 == 1:
-            # Then alternating between normal and inverse video
-            # FIXME: Inverse video and blue!!
+            # Then alternating between inverse video and blue
             add_to_bar = px_terminal.inverse_video(add_to_bar)
+        else:
+            # chunk_number % 2 == 0
+            add_to_bar = px_terminal.blue(add_to_bar)
 
         assert len(add_to_bar) > 0
         bar += add_to_bar

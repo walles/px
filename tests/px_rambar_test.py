@@ -12,6 +12,6 @@ def test_render_bar_happy_path():
     assert px_rambar.render_bar(10, names_and_numbers) == (
         px_terminal.red(u" apa  ")
         + px_terminal.yellow(u" b")
-        + u" "
-        + px_terminal.inverse_video(" ")
+        + px_terminal.blue(u" ")
+        + px_terminal.inverse_video(u" ")
     )
