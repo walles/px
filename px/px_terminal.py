@@ -533,6 +533,14 @@ def green(string):
     return CSI + "1;32m" + string + CSI + "39;22m"
 
 
+def blue(string):
+    # type: (text_type) -> text_type
+    global _enable_color
+    if not _enable_color:
+        return string
+    return CSI + "1;97;44m" + string + CSI + "49;39;22m"
+
+
 def get_string_of_length(string, length):
     # type: (text_type, Optional[int]) -> text_type
     if length is None:
