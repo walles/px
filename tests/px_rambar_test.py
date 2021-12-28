@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import os
 import sys
 
@@ -11,6 +13,18 @@ def test_render_bar_happy_path():
     ] * 300
     assert px_rambar.render_bar(10, names_and_numbers) == (
         px_terminal.red(u" apa  ")
+        + px_terminal.yellow(u" b")
+        + px_terminal.blue(u" ")
+        + px_terminal.inverse_video(u" ")
+    )
+
+
+def test_render_bar_happy_path_unicode():
+    names_and_numbers = [(u"åpa", 1000), (u"bäpa", 300), (u"cäpa", 50)] + [
+        (u"lång svans", 1)
+    ] * 300
+    assert px_rambar.render_bar(10, names_and_numbers) == (
+        px_terminal.red(u" åpa  ")
         + px_terminal.yellow(u" b")
         + px_terminal.blue(u" ")
         + px_terminal.inverse_video(u" ")
