@@ -45,10 +45,10 @@ def render_bar(bar_length, names_and_numbers):
     assert sum > 0
 
     bar = u""
+    bar_chars = 0
     chunk_number = -1
     should_alternate = False
-    # FIXME: Don't do visual_length() here over and over, it's probably too slow
-    while px_terminal.visual_length(bar) < bar_length:
+    while bar_chars < bar_length:
         chunk_number += 1
 
         if chunk_number >= len(names_and_numbers):
@@ -69,6 +69,7 @@ def render_bar(bar_length, names_and_numbers):
 
         if should_alternate:
             add_to_bar = u" "
+        add_to_bar_chars = len(add_to_bar)
 
         if chunk_number == 0:
             # First red
@@ -85,6 +86,7 @@ def render_bar(bar_length, names_and_numbers):
 
         assert len(add_to_bar) > 0
         bar += add_to_bar
+        bar_chars += add_to_bar_chars
 
     return bar
 
