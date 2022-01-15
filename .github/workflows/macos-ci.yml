@@ -1,5 +1,12 @@
 name: macOS CI
-on: [push, pull_request]
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [python]
+  pull_request:
+    branches: [python]
+
 jobs:
   tox:
     runs-on: macos-10.15
@@ -7,7 +14,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # For getting tags from the repo
+          fetch-depth: 0 # For getting tags from the repo
       - name: Create a virtualenv
         run: |
           python3 -m venv env
