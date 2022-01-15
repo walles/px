@@ -1,13 +1,20 @@
 name: Linux CI
-on: [push, pull_request]
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [python]
+  pull_request:
+    branches: [python]
+
 jobs:
   shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Run ShellCheck
-      uses: ludeeus/action-shellcheck@master
+      - uses: actions/checkout@v2
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
   tox:
     runs-on: ubuntu-20.04
     env:
@@ -21,7 +28,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # For getting tags from the repo
+          fetch-depth: 0 # For getting tags from the repo
       - name: Create a virtualenv
         run: |
           python3 -m venv env
