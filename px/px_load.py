@@ -11,10 +11,8 @@ from . import px_terminal
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
-    from typing import Tuple  # NOQA
+from six import text_type  # NOQA
+from typing import Tuple  # NOQA
 
 
 physical, logical = px_cpuinfo.get_core_count()

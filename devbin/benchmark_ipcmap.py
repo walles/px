@@ -25,9 +25,7 @@ import time
 from tests import testutils
 from px import px_file
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableMapping  # NOQA
+from typing import MutableMapping  # NOQA
 
 
 # For how long should we do the benchmarking run (in seconds)

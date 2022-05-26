@@ -1,22 +1,20 @@
 import sys
 
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from . import px_file  # NOQA
-    from . import px_process  # NOQA
-    from typing import Set  # NOQA
-    from typing import List  # NOQA
-    from typing import Dict  # NOQA
-    from typing import Text  # NOQA
-    from typing import AbstractSet  # NOQA
-    from typing import MutableMapping  # NOQA
-    from typing import Iterable  # NOQA
-    from typing import TypeVar  # NOQA
-    from typing import Optional  # NOQA
+from . import px_file  # NOQA
+from . import px_process  # NOQA
+from typing import Set  # NOQA
+from typing import List  # NOQA
+from typing import Dict  # NOQA
+from typing import Text  # NOQA
+from typing import AbstractSet  # NOQA
+from typing import MutableMapping  # NOQA
+from typing import Iterable  # NOQA
+from typing import TypeVar  # NOQA
+from typing import Optional  # NOQA
 
-    T = TypeVar("T")
-    S = TypeVar("S")
+T = TypeVar("T")
+S = TypeVar("S")
 
 FILE_TYPES = ["PIPE", "FIFO", "unix", "IPv4", "IPv6"]
 

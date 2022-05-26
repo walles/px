@@ -14,12 +14,10 @@ from . import px_exec_util
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List
-    from typing import Dict
-    from typing import Tuple
-    from typing import Optional
+from typing import List
+from typing import Dict
+from typing import Tuple
+from typing import Optional
 
 
 # Matches output lines in "netstat -ib" on macOS.

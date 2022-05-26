@@ -4,11 +4,9 @@ import re
 import sys
 import os.path
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
-    from typing import List  # NOQA
-    from typing import Optional  # NOQA
+from six import text_type  # NOQA
+from typing import List  # NOQA
+from typing import Optional  # NOQA
 
 
 # Match "[kworker/0:0H]", no grouping

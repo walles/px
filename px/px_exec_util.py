@@ -3,11 +3,9 @@ import subprocess
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
-    from typing import List  # NOQA
-    from typing import Dict  # NOQA
+from six import text_type  # NOQA
+from typing import List  # NOQA
+from typing import Dict  # NOQA
 
 
 ENV = {}  # type: Dict[str, str]

@@ -10,9 +10,7 @@ from . import testutils
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableSet  # NOQA
+from typing import MutableSet  # NOQA
 
 
 def test_create_process():

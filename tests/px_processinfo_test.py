@@ -7,9 +7,7 @@ from . import testutils
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List, Tuple  # NOQA
+from typing import List, Tuple  # NOQA
 
 
 def test_to_relative_start_string():

@@ -14,13 +14,11 @@ from . import px_process_menu
 from . import px_poller
 from . import px_rambar
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
-    from typing import Dict  # NOQA
-    from typing import Union  # NOQA
-    from typing import Optional  # NOQA
-    from six import text_type  # NOQA
+from typing import List  # NOQA
+from typing import Dict  # NOQA
+from typing import Union  # NOQA
+from typing import Optional  # NOQA
+from six import text_type  # NOQA
 
 LOG = logging.getLogger(__name__)
 

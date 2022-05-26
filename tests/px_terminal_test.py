@@ -7,10 +7,8 @@ from px import px_terminal
 
 from . import testutils
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
-    from six import text_type  # NOQA
+from typing import List  # NOQA
+from six import text_type  # NOQA
 
 
 def test_to_screen_lines_unbounded():
@@ -33,16 +31,10 @@ def test_to_screen_lines_unbounded():
 def test_to_screen_lines_unicode():
     procs = [testutils.create_process(commandline="/usr/bin/😀")]
     converted = px_terminal.to_screen_lines(procs, None, None)
-    if sys.version_info.major > 3:
-        assert converted == [
-            "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
-            "47536 😀       root     0.03s  0% /usr/bin/😀",
-        ]
-    else:
-        # Unicode string widths are difficult before Python 3.3, don't test
-        # the actual layout in this case:
-        # https://stackoverflow.com/q/29109944/473672
-        pass
+    assert converted == [
+        "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
+        "47536 😀       root     0.03s  0% /usr/bin/😀",
+    ]
 
 
 def test_get_string_of_length():

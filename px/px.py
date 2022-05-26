@@ -53,9 +53,7 @@ from . import px_processinfo
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional, List  # NOQA
+from typing import Optional, List  # NOQA
 
 
 ERROR_REPORTING_HEADER = """

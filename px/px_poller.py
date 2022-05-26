@@ -10,11 +10,9 @@ from . import px_launchcounter
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from six import text_type
+from typing import Optional  # NOQA
+from typing import List  # NOQA
+from six import text_type
 
 
 # We'll report poll done as this key having been pressed.

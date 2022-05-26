@@ -5,12 +5,10 @@ from px import px_terminal
 
 from . import px_process
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
-    from typing import Dict  # NOQA
-    from typing import Tuple  # NOQA
-    from six import text_type  # NOQA
+from typing import List  # NOQA
+from typing import Dict  # NOQA
+from typing import Tuple  # NOQA
+from six import text_type  # NOQA
 
 
 def get_process_categories(all_processes):

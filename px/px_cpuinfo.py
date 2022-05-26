@@ -5,12 +5,10 @@ from . import px_exec_util
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
-    from typing import Tuple  # NOQA
-    from typing import List  # NOQA
-    from six import text_type  # NOQA
+from typing import Optional  # NOQA
+from typing import Tuple  # NOQA
+from typing import List  # NOQA
+from six import text_type  # NOQA
 
 
 def get_core_count():

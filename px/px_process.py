@@ -16,15 +16,13 @@ from . import px_exec_util
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Dict  # NOQA
-    from typing import MutableSet  # NOQA
-    from typing import Text  # NOQA
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from typing import Iterable  # NOQA
-    from six import text_type  # NOQA
+from typing import Dict  # NOQA
+from typing import MutableSet  # NOQA
+from typing import Text  # NOQA
+from typing import Optional  # NOQA
+from typing import List  # NOQA
+from typing import Iterable  # NOQA
+from six import text_type  # NOQA
 
 
 LOG = logging.getLogger(__name__)

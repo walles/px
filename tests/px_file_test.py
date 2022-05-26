@@ -3,9 +3,7 @@ import sys
 
 from px import px_file
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
+from typing import List  # NOQA
 
 
 def test_lsof_to_files():

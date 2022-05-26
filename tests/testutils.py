@@ -12,12 +12,10 @@ import dateutil.parser
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableMapping  # NOQA
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from six import text_type  # NOQA
+from typing import MutableMapping  # NOQA
+from typing import Optional  # NOQA
+from typing import List  # NOQA
+from six import text_type  # NOQA
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"

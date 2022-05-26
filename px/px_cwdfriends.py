@@ -1,13 +1,11 @@
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from . import px_process  # NOQA
-    from . import px_file  # NOQA
-    from typing import List  # NOQA
-    from typing import Dict  # NOQA
-    from typing import Optional  # NOQA
-    from six import text_type  # NOQA
+from . import px_process  # NOQA
+from . import px_file  # NOQA
+from typing import List  # NOQA
+from typing import Dict  # NOQA
+from typing import Optional  # NOQA
+from six import text_type  # NOQA
 
 
 def _strip_leading_dash(process):
