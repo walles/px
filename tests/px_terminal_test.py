@@ -28,11 +28,12 @@ def test_to_screen_lines_unbounded():
 
 
 def test_to_screen_lines_unicode():
+    px_terminal._enable_color = False
     procs = [testutils.create_process(commandline="/usr/bin/😀")]
     converted = px_terminal.to_screen_lines(procs, None, None)
     assert converted == [
-        "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
-        "47536 😀       root     0.03s  0% /usr/bin/😀",
+        r"  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE",
+        r"47536 😀       root      0%   0.03s  0% /usr/bin/😀",
     ]
 
 
