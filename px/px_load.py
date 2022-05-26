@@ -54,15 +54,6 @@ def levels_to_graph(levels):
         # Left pad uneven-length arrays with an empty column
         levels = [-1] + levels
 
-    # From: http://stackoverflow.com/a/19177754/473672
-    unicodify = chr
-    try:
-        # Python 2
-        unicodify = unichr  # type: ignore
-    except NameError:
-        # Python 3
-        pass
-
     # https://en.wikipedia.org/wiki/Braille_Patterns#Identifying.2C_naming_and_ordering
     LEFT_BAR = [0x00, 0x40, 0x44, 0x46, 0x47]
     RIGHT_BAR = [0x00, 0x80, 0xA0, 0xB0, 0xB8]
@@ -72,7 +63,7 @@ def levels_to_graph(levels):
         left_level = levels[index] + 1
         right_level = levels[index + 1] + 1
         code = 0x2800 + LEFT_BAR[left_level] + RIGHT_BAR[right_level]
-        graph += unicodify(code)
+        graph += chr(code)
 
     return graph
 
