@@ -53,6 +53,18 @@ PROC_DISKSTATS_RE = re.compile(
 )
 
 
+class Sample(object):
+    def __init__(self, name: six.text_type, bytecount: int) -> None:
+        self.name = name
+        self.bytecount = bytecount
+
+    def __repr__(self):
+        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
+
+    def __eq__(self, o):
+        return self.bytecount == o.bytecount and self.name == o.name
+
+
 def parse_netstat_ib_output(netstat_ib_output: six.text_type) -> List[Sample]:
     """
     Parse output of "netstat -ib" on macOS.
@@ -147,18 +159,6 @@ def parse_proc_diskstats(proc_diskstats_contents: six.text_type) -> List[Sample]
         return_me.append(Sample(name + " write", write_sectors * 512))
 
     return return_me
-
-
-class Sample(object):
-    def __init__(self, name: six.text_type, bytecount: int) -> None:
-        self.name = name
-        self.bytecount = bytecount
-
-    def __repr__(self):
-        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
-
-    def __eq__(self, o):
-        return self.bytecount == o.bytecount and self.name == o.name
 
 
 class SubsystemStat(object):

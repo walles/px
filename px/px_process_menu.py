@@ -16,12 +16,8 @@ from . import px_process
 from . import px_terminal
 from . import px_processinfo
 
-if False:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional
-    from typing import Callable
-    from typing import Union
-    from six import text_type
+from typing import Callable
+from six import text_type
 
 # Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
 # Make our own guaranteed-to-be-int constants.

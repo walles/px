@@ -7,7 +7,6 @@ from typing import Set
 from typing import List
 from typing import Dict
 from typing import Text
-from typing import AbstractSet
 from typing import MutableMapping
 from typing import Iterable
 from typing import TypeVar
@@ -17,6 +16,29 @@ T = TypeVar("T")
 S = TypeVar("S")
 
 FILE_TYPES = ["PIPE", "FIFO", "unix", "IPv4", "IPv6"]
+
+
+class PeerProcess(object):
+    def __init__(self, name: Optional[Text] = None, pid: Optional[int] = None) -> None:
+        if not name:
+            if pid is None:
+                raise ValueError("Either pid, name or both must be set")
+            name = "PID " + str(pid)
+        else:
+            if pid is not None:
+                name += "(" + str(pid) + ")"
+
+        self.name: Text = name
+        self.pid: Optional[int] = pid
+
+    def __repr__(self):
+        return self.name
+
+    def __hash__(self):
+        return self.name.__hash__()
+
+    def __str__(self):
+        return self.name
 
 
 class IpcMap(object):
@@ -287,29 +309,6 @@ class IpcMap(object):
         Returns a set of px_files through which we're connected to the px_process
         """
         return self._map.__getitem__(process)
-
-
-class PeerProcess(object):
-    def __init__(self, name: Optional[Text] = None, pid: Optional[int] = None) -> None:
-        if not name:
-            if pid is None:
-                raise ValueError("Either pid, name or both must be set")
-            name = "PID " + str(pid)
-        else:
-            if pid is not None:
-                name += "(" + str(pid) + ")"
-
-        self.name: Text = name
-        self.pid: Optional[int] = pid
-
-    def __repr__(self):
-        return self.name
-
-    def __hash__(self):
-        return self.name.__hash__()
-
-    def __str__(self):
-        return self.name
 
 
 def create_pid2process(

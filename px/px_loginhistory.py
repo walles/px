@@ -6,8 +6,7 @@ import dateutil.tz
 
 from . import px_exec_util
 
-if False:
-    from typing import Set, Optional
+from typing import Optional, Set
 
 LOG = logging.getLogger(__name__)
 

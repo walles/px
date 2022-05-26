@@ -6,11 +6,9 @@ import subprocess
 
 from . import px_processinfo
 
-if False:
-    # For mypy PEP-484 static typing validation
-    from . import px_process
-    from typing import List
-    from typing import Optional
+from . import px_process
+from typing import List
+from typing import Optional
 
 LOG = logging.getLogger(__name__)
 

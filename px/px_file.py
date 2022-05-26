@@ -2,45 +2,10 @@ import socket
 
 from . import px_exec_util
 
-import sys
-
 from typing import Set
 from typing import List
 from typing import Tuple
-from typing import Iterable
 from typing import Optional
-
-
-class PxFileBuilder:
-    def __init__(self):
-        self.fd: Optional[int] = None
-        self.pid: Optional[int] = None
-        self.name: Optional[str] = None
-        self.type: Optional[str] = None
-        self.inode: Optional[str] = None
-        self.device: Optional[str] = None
-        self.access: Optional[str] = None
-
-        # Example values: "cwd", "txt" and probably others as well
-        self.fdtype: Optional[str] = None
-
-    def build(self) -> PxFile:
-        assert self.pid is not None
-        assert self.type
-        pxFile = PxFile(self.pid, self.type)
-        pxFile.name = self.name
-        pxFile.fd = self.fd
-        pxFile.inode = self.inode
-        pxFile.device = self.device
-        pxFile.access = self.access
-        pxFile.fdtype = self.fdtype
-
-        return pxFile
-
-    def __repr__(self):
-        return "PxFileBuilder(pid={}, name={}, type={})".format(
-            self.pid, self.name, self.type
-        )
 
 
 class PxFile(object):
@@ -161,6 +126,38 @@ class PxFile(object):
             remote = split_name[1]
 
         return (local, remote)
+
+
+class PxFileBuilder:
+    def __init__(self):
+        self.fd: Optional[int] = None
+        self.pid: Optional[int] = None
+        self.name: Optional[str] = None
+        self.type: Optional[str] = None
+        self.inode: Optional[str] = None
+        self.device: Optional[str] = None
+        self.access: Optional[str] = None
+
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype: Optional[str] = None
+
+    def build(self) -> PxFile:
+        assert self.pid is not None
+        assert self.type
+        pxFile = PxFile(self.pid, self.type)
+        pxFile.name = self.name
+        pxFile.fd = self.fd
+        pxFile.inode = self.inode
+        pxFile.device = self.device
+        pxFile.access = self.access
+        pxFile.fdtype = self.fdtype
+
+        return pxFile
+
+    def __repr__(self):
+        return "PxFileBuilder(pid={}, name={}, type={})".format(
+            self.pid, self.name, self.type
+        )
 
 
 def resolve_endpoint(endpoint: str) -> str:
