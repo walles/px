@@ -5,10 +5,9 @@ from . import px_file
 from typing import List
 from typing import Dict
 from typing import Optional
-from six import text_type
 
 
-def _strip_leading_dash(process: px_process.PxProcess) -> text_type:
+def _strip_leading_dash(process: px_process.PxProcess) -> str:
     key = process.command
     if key.startswith("-"):
         key = key[1:]
@@ -28,9 +27,9 @@ class PxCwdFriends(object):
             pid_to_process[p.pid] = p
 
         # Cwd can be None if lsof and process listing are out of sync
-        self.cwd: Optional[text_type] = None
+        self.cwd: Optional[str] = None
 
-        cwd_to_processes: Dict[text_type, List[px_process.PxProcess]] = {}
+        cwd_to_processes: Dict[str, List[px_process.PxProcess]] = {}
         for current_file in all_files:
             if not current_file.name:
                 continue

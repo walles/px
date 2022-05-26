@@ -10,19 +10,16 @@ from px import px_ipc_map
 import dateutil.tz
 import dateutil.parser
 
-import sys
-
 from typing import MutableMapping
 from typing import Optional
 from typing import List
-from six import text_type
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"
 TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
 
 
-def load(sample_file_name: text_type) -> text_type:
+def load(sample_file_name: str) -> str:
     my_dir = os.path.dirname(__file__)
     full_path = os.path.join(my_dir, sample_file_name)
     with open(full_path) as sample_file:

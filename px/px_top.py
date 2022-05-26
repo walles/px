@@ -18,7 +18,6 @@ from typing import List
 from typing import Dict
 from typing import Union
 from typing import Optional
-from six import text_type
 
 LOG = logging.getLogger(__name__)
 
@@ -206,8 +205,8 @@ def get_screen_lines(
     rows: int,
     columns: int,
     include_footer: bool = True,
-    search: Optional[text_type] = None,
-) -> List[text_type]:
+    search: Optional[str] = None,
+) -> List[str]:
     """
     Note that the columns parameter is only used for layout purposes. Lines
     returned from this function will still need to be cropped before being
@@ -256,7 +255,7 @@ def get_screen_lines(
     # Create a launchers section
     header_height = len(lines)
     launches_maxheight = rows - header_height - cputop_minheight - footer_height
-    launchlines: List[text_type] = []
+    launchlines: List[str] = []
     if launches_maxheight >= 3:
         launchlines = poller.get_launchcounter_lines()
         if len(launchlines) > 0:

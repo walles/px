@@ -4,7 +4,6 @@ import re
 import sys
 import os.path
 
-from six import text_type
 from typing import List
 from typing import Optional
 
@@ -19,7 +18,7 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
-def to_array(commandline: text_type) -> List[text_type]:
+def to_array(commandline: str) -> List[str]:
     """Splits a command line string into components"""
     base_split = commandline.split(" ")
     if len(base_split) == 1:
@@ -38,7 +37,7 @@ def to_array(commandline: text_type) -> List[text_type]:
     return merged_split
 
 
-def is_human_friendly(command: text_type) -> bool:
+def is_human_friendly(command: str) -> bool:
     """
     AKA "Does this command contain any capital letters?"
     """
@@ -48,7 +47,7 @@ def is_human_friendly(command: text_type) -> bool:
     return False
 
 
-def get_app_name_prefix(commandline: text_type) -> text_type:
+def get_app_name_prefix(commandline: str) -> str:
     """
     On macOS, get which app this command is part of.
     """
@@ -70,7 +69,7 @@ def get_app_name_prefix(commandline: text_type) -> text_type:
     return ""
 
 
-def try_clarify_electron(commandline: text_type) -> Optional[text_type]:
+def try_clarify_electron(commandline: str) -> Optional[str]:
     for path_component in to_array(commandline)[0].split("/"):
         if path_component.endswith(".app"):
             return path_component[:-4]
@@ -78,7 +77,7 @@ def try_clarify_electron(commandline: text_type) -> Optional[text_type]:
     return None
 
 
-def get_command(commandline: text_type) -> text_type:
+def get_command(commandline: str) -> str:
     """
     Extracts the command from the command line.
 
@@ -170,7 +169,7 @@ def get_command(commandline: text_type) -> text_type:
     return app_name_prefix + command
 
 
-def get_python_command(commandline: text_type) -> text_type:
+def get_python_command(commandline: str) -> str:
     array = to_array(commandline)
     array = list(filter(lambda s: s, array))
 
@@ -212,7 +211,7 @@ def get_python_command(commandline: text_type) -> text_type:
     return python
 
 
-def get_sudo_command(commandline: text_type) -> text_type:
+def get_sudo_command(commandline: str) -> str:
     without_sudo = commandline[5:].strip()
     if not without_sudo:
         return "sudo"
@@ -224,7 +223,7 @@ def get_sudo_command(commandline: text_type) -> text_type:
     return "sudo " + get_command(without_sudo)
 
 
-def prettify_fully_qualified_java_class(class_name: text_type) -> text_type:
+def prettify_fully_qualified_java_class(class_name: str) -> str:
     split = class_name.split(".")
     if len(split) == 1:
         return split[-1]
@@ -236,7 +235,7 @@ def prettify_fully_qualified_java_class(class_name: text_type) -> text_type:
     return split[-1]
 
 
-def get_java_command(commandline: text_type) -> text_type:
+def get_java_command(commandline: str) -> str:
     array = to_array(commandline)
     java = os.path.basename(array[0])
     if len(array) == 1:
@@ -323,8 +322,8 @@ def get_java_command(commandline: text_type) -> text_type:
 
 
 def get_generic_script_command(
-    commandline: text_type, ignore_switches: List[text_type] = []
-) -> text_type:
+    commandline: str, ignore_switches: List[str] = []
+) -> str:
     array = to_array(commandline)
 
     while len(array) > 1 and array[1].split("=")[0] in ignore_switches:

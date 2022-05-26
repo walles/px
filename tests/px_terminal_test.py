@@ -8,7 +8,6 @@ from px import px_terminal
 from . import testutils
 
 from typing import List
-from six import text_type
 
 
 def test_to_screen_lines_unbounded():
@@ -102,7 +101,7 @@ def test_getch():
 def test_tokenize():
     px_terminal._enable_color = True
     input = "ab" + px_terminal.bold("c") + "de"
-    parts: List[text_type] = []
+    parts: List[str] = []
     for token in px_terminal._tokenize(input):
         parts.append(token)
 

@@ -12,7 +12,6 @@ import sys
 
 from typing import Optional
 from typing import List
-from six import text_type
 
 
 # We'll report poll done as this key having been pressed.
@@ -47,7 +46,7 @@ class PxPoller(object):
         self._all_processes: List[px_process.PxProcess] = []
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines: List[text_type] = []
+        self._launchcounter_screen_lines: List[str] = []
 
         # No process polling until this timestamp, timestamp from time.time()
         self._pause_process_updates_until = 0.0
@@ -118,18 +117,18 @@ class PxPoller(object):
         with self.lock:
             return self._all_processes
 
-    def get_ioload_string(self) -> text_type:
+    def get_ioload_string(self) -> str:
         with self.lock:
             return self._ioload_string
 
-    def get_launchcounter_lines(self) -> List[text_type]:
+    def get_launchcounter_lines(self) -> List[str]:
         with self.lock:
             return self._launchcounter_screen_lines
 
-    def get_meminfo(self) -> text_type:
+    def get_meminfo(self) -> str:
         with self.lock:
             return self._meminfo
 
-    def get_loadstring(self) -> text_type:
+    def get_loadstring(self) -> str:
         with self.lock:
             return self._loadstring

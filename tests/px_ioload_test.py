@@ -4,10 +4,6 @@ from . import testutils
 
 from px import px_ioload
 
-import sys
-
-from six import text_type
-
 
 def test_parse_netstat_ib_output():
     sample_netstat_ib_output = testutils.load("netstat-ib.txt")

@@ -8,7 +8,6 @@ import sys
 from typing import Optional
 from typing import Tuple
 from typing import List
-from six import text_type
 
 
 def get_core_count() -> Tuple[int, int]:
@@ -92,7 +91,7 @@ def get_core_count_from_sysctl() -> Optional[Tuple[int, int]]:
 
 
 def parse_sysctl_output(
-    sysctl_lines: List[text_type],
+    sysctl_lines: List[str],
 ) -> Tuple[Optional[int], Optional[int]]:
 
     # Note the ending spaces, they must be there for number extraction to work!

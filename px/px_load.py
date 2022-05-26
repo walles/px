@@ -9,9 +9,6 @@ import os
 from . import px_cpuinfo
 from . import px_terminal
 
-import sys
-
-from six import text_type
 from typing import Tuple
 
 
@@ -96,7 +93,7 @@ def get_load_values() -> Tuple[float, float, float]:
     return (avg0to1, avg1to5, avg5to15)
 
 
-def get_load_string(load_values: Tuple[float, float, float] = None) -> text_type:
+def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     """
     Example return string, underlines indicate bold:
     "1.5  [4 cores | 8 virtual]  [15m load history: GRAPH]"

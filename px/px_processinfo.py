@@ -18,10 +18,9 @@ from typing import Optional
 from typing import Iterable
 from typing import List
 from typing import Tuple
-from six import text_type
 
 
-def println(fd: int, string: text_type) -> None:
+def println(fd: int, string: str) -> None:
     os.write(fd, string.encode() + b"\n")
 
 

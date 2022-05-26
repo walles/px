@@ -3,14 +3,13 @@ import sys
 from . import px_terminal
 
 from . import px_process
-from six import text_type
 from typing import List
 from typing import Tuple
 from typing import Dict
 from typing import Optional
 
 
-def render_launch_tuple(launch_tuple: Tuple[text_type, int]) -> text_type:
+def render_launch_tuple(launch_tuple: Tuple[str, int]) -> str:
     binary = launch_tuple[0]
     count = launch_tuple[1]
     if count == 0:
@@ -19,7 +18,7 @@ def render_launch_tuple(launch_tuple: Tuple[text_type, int]) -> text_type:
         return px_terminal.bold(binary) + "(" + str(count) + ")"
 
 
-def _get_minus_max_score(tuples_list: List[Tuple[text_type, int]]) -> int:
+def _get_minus_max_score(tuples_list: List[Tuple[str, int]]) -> int:
     max_score = 0
     for tuple in tuples_list:
         max_score = max(max_score, tuple[1])
@@ -27,19 +26,19 @@ def _get_minus_max_score(tuples_list: List[Tuple[text_type, int]]) -> int:
 
 
 def sort_launchers_list(
-    launchers_list: List[List[Tuple[text_type, int]]]
-) -> List[List[Tuple[text_type, int]]]:
+    launchers_list: List[List[Tuple[str, int]]]
+) -> List[List[Tuple[str, int]]]:
     return sorted(launchers_list, key=_get_minus_max_score)
 
 
 class Launchcounter(object):
     def __init__(self):
-        self._hierarchies: Dict[Tuple[text_type, ...], int] = {}
+        self._hierarchies: Dict[Tuple[str, ...], int] = {}
 
         # Most recent process snapshot
         self._last_processlist: Optional[List[px_process.PxProcess]] = None
 
-    def _strip_parentheses(self, s: text_type) -> text_type:
+    def _strip_parentheses(self, s: str) -> str:
         if not s:
             return s
         if s[0] != "(":
@@ -48,9 +47,9 @@ class Launchcounter(object):
             return s
         return s[1:-1]
 
-    def _callchain(self, process: px_process.PxProcess) -> Tuple[text_type, ...]:
+    def _callchain(self, process: px_process.PxProcess) -> Tuple[str, ...]:
 
-        reverse_callchain: List[text_type] = []
+        reverse_callchain: List[str] = []
 
         current: Optional[px_process.PxProcess] = process
         while current is not None:
@@ -104,13 +103,13 @@ class Launchcounter(object):
         self._last_processlist = procs_snapshot
 
     def _to_tuple_list(
-        self, launcher_list: Tuple[text_type, ...], count: int
-    ) -> List[Tuple[text_type, int]]:
+        self, launcher_list: Tuple[str, ...], count: int
+    ) -> List[Tuple[str, int]]:
         """
         Converts from: (("a", "b", "c"), 5)
                  to  : [("a", 0), ("b", 0), ("c", 5)]
         """
-        tuple_list: List[Tuple[text_type, int]] = []
+        tuple_list: List[Tuple[str, int]] = []
         for launcher in launcher_list:
             tuple_list.append((launcher, 0))
         tuple_list[-1] = (launcher_list[-1], count)
@@ -118,9 +117,9 @@ class Launchcounter(object):
 
     def _merge_tuple_lists(
         self,
-        tl1: List[Tuple[text_type, int]],
-        tl2: List[Tuple[text_type, int]],
-    ) -> Optional[List[Tuple[text_type, int]]]:
+        tl1: List[Tuple[str, int]],
+        tl2: List[Tuple[str, int]],
+    ) -> Optional[List[Tuple[str, int]]]:
         if len(tl1) > len(tl2):
             longer = tl1
             shorter = tl2
@@ -139,8 +138,8 @@ class Launchcounter(object):
 
         return merged
 
-    def _coalesce_launchers(self) -> List[List[Tuple[text_type, int]]]:
-        coalesced: List[List[Tuple[text_type, int]]] = []
+    def _coalesce_launchers(self) -> List[List[Tuple[str, int]]]:
+        coalesced: List[List[Tuple[str, int]]] = []
 
         for launcher_list in sorted(self._hierarchies.keys()):
             count = self._hierarchies[launcher_list]
@@ -158,12 +157,12 @@ class Launchcounter(object):
 
         return coalesced
 
-    def get_screen_lines(self) -> List[text_type]:
+    def get_screen_lines(self) -> List[str]:
 
         launchers_list = self._coalesce_launchers()
         launchers_list = sort_launchers_list(launchers_list)
 
-        lines: List[text_type] = []
+        lines: List[str] = []
         for row in launchers_list:
             line = " -> ".join(map(render_launch_tuple, row))
             lines.append(line)

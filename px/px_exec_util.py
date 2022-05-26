@@ -3,7 +3,6 @@ import subprocess
 
 import sys
 
-from six import text_type
 from typing import List
 from typing import Dict
 
@@ -17,7 +16,7 @@ for name, value in os.environ.items():
     ENV[name] = value
 
 
-def run(command: List[str], check_exitcode: bool = False) -> text_type:
+def run(command: List[str], check_exitcode: bool = False) -> str:
     run = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV
     )

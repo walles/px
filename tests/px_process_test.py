@@ -2,7 +2,6 @@ import getpass
 import datetime
 
 import os
-import six
 import pytest
 
 from px import px_process
@@ -191,8 +190,8 @@ def _test_get_all():
         assert process.start_time < now
 
     for process in all:
-        assert isinstance(process.cmdline, six.text_type)
-        assert isinstance(process.username, six.text_type)
+        assert isinstance(process.cmdline, str)
+        assert isinstance(process.username, str)
 
 
 def test_get_all_swedish():
@@ -364,11 +363,11 @@ def test_command_in_parentheses():
 def test_uid_to_username():
     username = px_process.uid_to_username(os.getuid())
     assert username == getpass.getuser()
-    assert isinstance(username, six.text_type)
+    assert isinstance(username, str)
 
     username = px_process.uid_to_username(456789)
     assert username == "456789"
-    assert isinstance(username, six.text_type)
+    assert isinstance(username, str)
 
 
 def test_resolve_links():

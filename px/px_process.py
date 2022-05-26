@@ -5,7 +5,6 @@ import operator
 import os
 import re
 import pwd
-import six
 import errno
 import subprocess
 import dateutil.tz
@@ -22,7 +21,6 @@ from typing import Text
 from typing import Optional
 from typing import List
 from typing import Iterable
-from six import text_type
 
 
 LOG = logging.getLogger(__name__)
@@ -103,9 +101,9 @@ class PxProcess(object):
         self.ppid: Optional[int] = ppid
         self.rss_kb: int = rss_kb
 
-        self.cmdline: text_type = cmdline
-        self.command: text_type = self._get_command()
-        self.lowercase_command: text_type = self.command.lower()
+        self.cmdline: str = cmdline
+        self.command: str = self._get_command()
+        self.lowercase_command: str = self.command.lower()
 
         self.start_time = _parse_time(start_time_string.strip())
         self.age_seconds: float = (now - self.start_time).total_seconds()
@@ -133,17 +131,17 @@ class PxProcess(object):
         if self.age_seconds < 0:
             self.age_seconds = 0
 
-        self.age_s: text_type = seconds_to_str(self.age_seconds)
+        self.age_s: str = seconds_to_str(self.age_seconds)
 
-        self.username: text_type = username
+        self.username: str = username
 
         self.memory_percent = memory_percent
-        self.memory_percent_s: text_type = "--"
+        self.memory_percent_s: str = "--"
         if memory_percent is not None:
             self.memory_percent_s = "{:.0f}%".format(memory_percent)
 
         self.cpu_percent = cpu_percent
-        self.cpu_percent_s: text_type = "--"
+        self.cpu_percent_s: str = "--"
         if cpu_percent is not None:
             self.cpu_percent_s = "{:.0f}%".format(cpu_percent)
 
@@ -338,9 +336,9 @@ def uid_to_username(uid: int) -> Text:
 
     # Populate cache
     try:
-        uid_to_username_cache[uid] = six.text_type(pwd.getpwuid(uid).pw_name)
+        uid_to_username_cache[uid] = str(pwd.getpwuid(uid).pw_name)
     except KeyError:
-        uid_to_username_cache[uid] = six.text_type(uid)
+        uid_to_username_cache[uid] = str(uid)
 
     return uid_to_username_cache[uid]
 

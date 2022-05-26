@@ -17,7 +17,6 @@ from . import px_terminal
 from . import px_processinfo
 
 from typing import Callable
-from six import text_type
 
 # Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
 # Make our own guaranteed-to-be-int constants.
@@ -27,7 +26,7 @@ SIGKILL = 9
 KILL_TIMEOUT_SECONDS = 5
 
 
-def get_header_line(process: px_process.PxProcess) -> text_type:
+def get_header_line(process: px_process.PxProcess) -> str:
     header_line = "Process: "
     header_line += str(process.pid) + " " + process.command
     header_line = px_terminal.bold(header_line)
@@ -194,7 +193,7 @@ class PxProcessMenu(object):
             px_pager.page_process_info(process, processes)
 
     def await_death(self, message):
-        # type(text_type) -> None
+        # type(str) -> None
         """
         Wait KILL_TIMEOUT_SECONDS for process to die.
 

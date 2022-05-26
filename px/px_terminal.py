@@ -7,7 +7,6 @@ import select
 import termios
 import tty
 
-from six import text_type
 from typing import Dict
 from typing import List
 from typing import Tuple
@@ -62,7 +61,7 @@ SIGWINCH_KEY = "\x00"
 
 _enable_color = True
 
-previous_screen_lines: List[text_type] = []
+previous_screen_lines: List[str] = []
 previous_screen_columns: int = 0
 
 
@@ -84,13 +83,13 @@ signal.signal(signal.SIGWINCH, sigwinch_handler)
 
 
 class ConsumableString(object):
-    def __init__(self, string: text_type) -> None:
+    def __init__(self, string: str) -> None:
         self._string = string
 
     def __len__(self):
         return len(self._string)
 
-    def consume(self, to_consume: text_type) -> bool:
+    def consume(self, to_consume: str) -> bool:
         if not self._string.startswith(to_consume):
             return False
 
@@ -194,11 +193,9 @@ def get_window_size() -> Tuple[int, int]:
     return (rows, columns)
 
 
-def raw_lines_to_screen_lines(
-    raw_lines: List[text_type], columns: int
-) -> List[text_type]:
+def raw_lines_to_screen_lines(raw_lines: List[str], columns: int) -> List[str]:
     """Crop the lines to the right length and add clear-to-EOL at the end"""
-    screen_lines: List[text_type] = []
+    screen_lines: List[str] = []
 
     for raw_line in raw_lines:
         cooked = crop_ansi_string_at_length(raw_line, columns)
@@ -209,8 +206,8 @@ def raw_lines_to_screen_lines(
 
 
 def filter_out_unchanged_screen_lines(
-    all_screen_lines: List[text_type], columns: int
-) -> List[Optional[text_type]]:
+    all_screen_lines: List[str], columns: int
+) -> List[Optional[str]]:
     """Compare lines to the cache and None out the ones that match the cache"""
     global previous_screen_lines
     global previous_screen_columns
@@ -222,7 +219,7 @@ def filter_out_unchanged_screen_lines(
         # Screen resized, never mind the cache
         return all_screen_lines  # type: ignore
 
-    filtered: List[Optional[text_type]] = []
+    filtered: List[Optional[str]] = []
     for line_index, line in enumerate(all_screen_lines):
         line_from_previous_screen = previous_screen_lines[line_index]
         if line == line_from_previous_screen:
@@ -234,7 +231,7 @@ def filter_out_unchanged_screen_lines(
     return filtered
 
 
-def draw_screen_lines(lines: List[text_type], columns: int) -> None:
+def draw_screen_lines(lines: List[str], columns: int) -> None:
 
     unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
     screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
@@ -277,7 +274,7 @@ def draw_screen_lines(lines: List[text_type], columns: int) -> None:
     os.write(sys.stdout.fileno(), screenstring.encode("utf-8"))
 
 
-def width_specifier(width: int, right_align: bool = False) -> text_type:
+def width_specifier(width: int, right_align: bool = False) -> str:
     return_me = "{:"
 
     if right_align:
@@ -289,7 +286,7 @@ def width_specifier(width: int, right_align: bool = False) -> text_type:
     return return_me
 
 
-def format_with_widths(widths: List[int], strings: List[text_type]) -> text_type:
+def format_with_widths(widths: List[int], strings: List[str]) -> str:
     """
     Put strings next to each other with a space between each.
 
@@ -332,9 +329,9 @@ def format_with_widths(widths: List[int], strings: List[text_type]) -> text_type
 def to_screen_lines(
     procs: List[px_process.PxProcess],
     row_to_highlight: Optional[int],
-    highlight_heading: Optional[text_type],
+    highlight_heading: Optional[str],
     with_username: bool = True,
-) -> List[text_type]:
+) -> List[str]:
     """
     Returns an array of lines that can be printed to screen. Lines are not
     cropped, so they can be longer than the screen width.
@@ -397,9 +394,9 @@ def to_screen_lines(
     heading_line = bold(heading_line)
     lines.append(heading_line)
 
-    max_cpu_percent_s: Optional[text_type] = None
+    max_cpu_percent_s: Optional[str] = None
     max_cpu_percent = 0.0
-    max_memory_percent_s: Optional[text_type] = None
+    max_memory_percent_s: Optional[str] = None
     max_memory_percent = 0.0
     max_cpu_time_seconds = 0.0
     for proc in procs:
@@ -470,63 +467,63 @@ def to_screen_lines(
     return lines
 
 
-def inverse_video(string: text_type) -> text_type:
+def inverse_video(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "7m" + string + CSI + "27m"
 
 
-def bold(string: text_type) -> text_type:
+def bold(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "1m" + string + CSI + "22m"
 
 
-def faint(string: text_type) -> text_type:
+def faint(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "2m" + string + CSI + "22m"
 
 
-def underline(string: text_type) -> text_type:
+def underline(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "4m" + string + CSI + "24m"
 
 
-def red(string: text_type) -> text_type:
+def red(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;97;41m" + string + CSI + "49;39;22m"
 
 
-def yellow(string: text_type) -> text_type:
+def yellow(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "30;103m" + string + CSI + "49;39m"
 
 
-def green(string: text_type) -> text_type:
+def green(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;32m" + string + CSI + "39;22m"
 
 
-def blue(string: text_type) -> text_type:
+def blue(string: str) -> str:
     global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;97;44m" + string + CSI + "49;39;22m"
 
 
-def get_string_of_length(string: text_type, length: Optional[int]) -> text_type:
+def get_string_of_length(string: str, length: Optional[int]) -> str:
     if length is None:
         return string
 
@@ -543,7 +540,7 @@ def get_string_of_length(string: text_type, length: Optional[int]) -> text_type:
     assert False  # How did we end up here?
 
 
-def _tokenize(string: text_type) -> Iterable[text_type]:
+def _tokenize(string: str) -> Iterable[str]:
     """
     Tokenizes string into character sequences and ANSI sequences.
     """
@@ -577,10 +574,10 @@ def _tokenize(string: text_type) -> Iterable[text_type]:
     yield string[i:]
 
 
-crop_cache: Dict[Tuple[text_type, int], text_type] = {}
+crop_cache: Dict[Tuple[str, int], str] = {}
 
 
-def crop_ansi_string_at_length(string: text_type, length: int) -> text_type:
+def crop_ansi_string_at_length(string: str, length: int) -> str:
     assert length >= 0
 
     global crop_cache
@@ -620,7 +617,7 @@ def crop_ansi_string_at_length(string: text_type, length: int) -> text_type:
     return cache_hit
 
 
-def visual_length(string: text_type) -> int:
+def visual_length(string: str) -> int:
     """
     If we print this string, possibly containing ANSI characters, to
     screen, how many characters wide will it be?

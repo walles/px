@@ -6,7 +6,6 @@ import sys
 
 from typing import List
 from px import px_process
-from six import text_type
 
 
 def test_current_cwd_unknown():
@@ -55,7 +54,7 @@ def test_find_friends():
     assert test_me.friends == [friend]
 
 
-def _get_friends_in_order(*args: text_type) -> List[text_type]:
+def _get_friends_in_order(*args: str) -> List[str]:
     procs = []
     files = []
     for index, arg in enumerate(args):

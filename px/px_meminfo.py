@@ -7,7 +7,6 @@ from . import px_units
 from . import px_terminal
 from . import px_exec_util
 
-from six import text_type
 from typing import List
 from typing import Tuple
 from typing import Optional
@@ -20,7 +19,7 @@ PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
 SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
 
 
-def get_meminfo() -> text_type:
+def get_meminfo() -> str:
 
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
@@ -70,9 +69,7 @@ def _get_ram_numbers() -> Tuple[int, int]:
     raise IOError("Unable to get memory info " + platform_s)
 
 
-def _update_from_meminfo(
-    base: Optional[int], line: text_type, name: text_type
-) -> Optional[int]:
+def _update_from_meminfo(base: Optional[int], line: str, name: str) -> Optional[int]:
     if not line.startswith(name + ":"):
         return base
 
@@ -158,7 +155,7 @@ def _get_ram_numbers_macos() -> Optional[Tuple[int, int]]:
     return (total_ram_bytes, used_ram_bytes + used_swap_bytes)
 
 
-def _get_vmstat_output_lines() -> Optional[List[text_type]]:
+def _get_vmstat_output_lines() -> Optional[List[str]]:
     try:
         return px_exec_util.run(["vm_stat"]).splitlines()
     except (IOError, OSError) as e:
@@ -178,9 +175,7 @@ def _get_used_swap_bytes_sysctl() -> int:
     return int(float(match.group(1)) * 1024 * 1024)
 
 
-def _update_if_prefix(
-    base: Optional[int], line: text_type, prefix: text_type
-) -> Optional[int]:
+def _update_if_prefix(base: Optional[int], line: str, prefix: str) -> Optional[int]:
     if not line.startswith(prefix):
         return base
 
@@ -190,7 +185,7 @@ def _update_if_prefix(
 
 
 def _get_ram_numbers_from_vm_stat_output(
-    vm_stat_lines: List[text_type],
+    vm_stat_lines: List[str],
 ) -> Optional[Tuple[int, int]]:
 
     # List based on https://apple.stackexchange.com/a/196925/182882

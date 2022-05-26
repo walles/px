@@ -8,18 +8,17 @@ from . import px_process
 from typing import List
 from typing import Dict
 from typing import Tuple
-from six import text_type
 
 
 def get_process_categories(
     all_processes: List[px_process.PxProcess],
-) -> List[Tuple[text_type, int]]:
+) -> List[Tuple[str, int]]:
     """
     Group processes by pretty names, keeping track of the total rss_kb in each
     group.
     """
 
-    names_to_kilobytes: Dict[text_type, int] = {}
+    names_to_kilobytes: Dict[str, int] = {}
     for process in all_processes:
         base_kb = 0
         if process.command in names_to_kilobytes:
@@ -34,13 +33,13 @@ def get_process_categories(
 
 def get_user_categories(
     all_processes: List[px_process.PxProcess],
-) -> List[Tuple[text_type, int]]:
+) -> List[Tuple[str, int]]:
     """
     Group processes by user names, keeping track of the total rss_kb in each
     group.
     """
 
-    names_to_kilobytes: Dict[text_type, int] = {}
+    names_to_kilobytes: Dict[str, int] = {}
     for process in all_processes:
         base_kb = 0
         if process.username in names_to_kilobytes:
@@ -53,9 +52,7 @@ def get_user_categories(
     return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def render_bar(
-    bar_length: int, names_and_numbers: List[Tuple[text_type, int]]
-) -> text_type:
+def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str:
     """
     You probably want to use rambar() instead, this is just utility function.
     """
@@ -114,11 +111,11 @@ def render_bar(
 
 def rambar_by_process(
     ram_bar_length: int, all_processes: List[px_process.PxProcess]
-) -> text_type:
+) -> str:
     return render_bar(ram_bar_length, get_process_categories(all_processes))
 
 
 def rambar_by_user(
     ram_bar_length: int, all_processes: List[px_process.PxProcess]
-) -> text_type:
+) -> str:
     return render_bar(ram_bar_length, get_user_categories(all_processes))
