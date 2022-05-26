@@ -5,7 +5,7 @@ set -euo pipefail
 DOCKERFILE="
 FROM python:3.6-alpine
 
-RUN apk add sudo py3-tox shellcheck python2 bash git zip unzip lsof gcc python3-dev procps acct musl-dev
+RUN apk add sudo py3-tox shellcheck bash git zip unzip lsof gcc python3-dev procps acct musl-dev
 RUN echo 'root    ALL=(ALL:ALL) ALL' > /etc/sudoers
 RUN adduser -u $(id -u) -g $(id -g) -D $USER
 "

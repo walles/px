@@ -13,23 +13,20 @@ from . import px_cwdfriends
 from . import px_loginhistory
 
 
-if False:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableSet  # NOQA
-    from typing import Optional  # NOQA
-    from typing import Iterable  # NOQA
-    from typing import List  # NOQA
-    from typing import Tuple  # NOQA
-    from six import text_type  # NOQA
+from typing import MutableSet
+from typing import Optional
+from typing import Iterable
+from typing import List
+from typing import Tuple
 
 
-def println(fd, string):
-    # type: (int, text_type) -> None
+def println(fd: int, string: str) -> None:
     os.write(fd, string.encode() + b"\n")
 
 
-def find_process_by_pid(pid, processes):
-    # type: (int, List[px_process.PxProcess]) -> Optional[px_process.PxProcess]
+def find_process_by_pid(
+    pid: int, processes: List[px_process.PxProcess]
+) -> Optional[px_process.PxProcess]:
     for process in processes:
         if process.pid == pid:
             return process
@@ -37,8 +34,7 @@ def find_process_by_pid(pid, processes):
     return None
 
 
-def print_command_line(fd, process):
-    # type: (int, px_process.PxProcess) -> None
+def print_command_line(fd: int, process: px_process.PxProcess) -> None:
     """
     Print command line separated by linefeeds rather than space, this adds
     readability to long command lines
@@ -53,8 +49,12 @@ def print_command_line(fd, process):
         println(fd, "  " + parameter)
 
 
-def print_process_subtree(fd, process, indentation, lines):
-    # type: (int, px_process.PxProcess, int, List[Tuple[str, px_process.PxProcess]]) -> None
+def print_process_subtree(
+    fd: int,
+    process: px_process.PxProcess,
+    indentation: int,
+    lines: List[Tuple[str, px_process.PxProcess]],
+) -> None:
     lines.append(("  " * indentation + str(process), process))
     for child in sorted(
         process.children, key=operator.attrgetter("lowercase_command", "pid")
@@ -62,10 +62,9 @@ def print_process_subtree(fd, process, indentation, lines):
         print_process_subtree(fd, child, indentation + 1, lines)
 
 
-def print_process_tree(fd, process):
-    # type: (int, px_process.PxProcess) -> None
+def print_process_tree(fd: int, process: px_process.PxProcess) -> None:
     # Contains tuples; the line to print and the process that line is for
-    lines_and_processes = []  # type: List[Tuple[str, px_process.PxProcess]]
+    lines_and_processes: List[Tuple[str, px_process.PxProcess]] = []
 
     # List all parents up to the top
     parents = []
@@ -138,8 +137,9 @@ def to_relative_start_string(base, relative):
     )
 
 
-def get_closest_starts(process, all_processes):
-    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> List[px_process.PxProcess]
+def get_closest_starts(
+    process: px_process.PxProcess, all_processes: List[px_process.PxProcess]
+) -> List[px_process.PxProcess]:
     """
     Return the processes that were started closest in time to the base process.
 
@@ -165,9 +165,9 @@ def get_closest_starts(process, all_processes):
         closest_raw.add(close)
 
     # Remove ourselves from the closest processes list
-    closest = filter(
+    closest: Iterable[px_process.PxProcess] = filter(
         lambda p: p is not process, closest_raw
-    )  # type: Iterable[px_process.PxProcess]
+    )
 
     # Sort closest processes by age, command and PID in that order
     closest = sorted(closest, key=operator.attrgetter("command", "pid"))
@@ -181,8 +181,7 @@ def print_processes_started_at_the_same_time(fd, process, all_processes):
         println(fd, "  " + to_relative_start_string(process, close))
 
 
-def print_users_when_process_started(fd, process):
-    # type: (int, px_process.PxProcess) -> None
+def print_users_when_process_started(fd: int, process: px_process.PxProcess) -> None:
     println(fd, "Users logged in when " + str(process) + " started:")
     users = px_loginhistory.get_users_at(process.start_time)
     if not users:
@@ -196,13 +195,12 @@ def print_users_when_process_started(fd, process):
         println(fd, "  " + user)
 
 
-def to_ipc_lines(ipc_map):
-    # type: (px_ipc_map.IpcMap) -> Iterable[str]
+def to_ipc_lines(ipc_map: px_ipc_map.IpcMap) -> Iterable[str]:
 
     return_me = []
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("name", "pid")):
         channels = ipc_map[target]
-        channel_names = set()  # type: MutableSet[str]
+        channel_names: MutableSet[str] = set()
         for channel_name in map(lambda c: str(c), channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
@@ -216,9 +214,9 @@ def to_ipc_lines(ipc_map):
 def print_cwd_friends(fd, process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
-    cwd_suffix = u""
+    cwd_suffix = ""
     if friends.cwd:
-        cwd_suffix = u" (" + px_terminal.bold(friends.cwd) + ")"
+        cwd_suffix = " (" + px_terminal.bold(friends.cwd) + ")"
     println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
         sudo_px = px_terminal.bold("sudo px {}".format(process.pid))
@@ -239,8 +237,9 @@ def print_cwd_friends(fd, process, all_processes, all_files):
         println(fd, "  " + str(friend))
 
 
-def print_fds(fd, process, processes):
-    # type: (int, px_process.PxProcess, Iterable[px_process.PxProcess]) -> None
+def print_fds(
+    fd: int, process: px_process.PxProcess, processes: Iterable[px_process.PxProcess]
+) -> None:
 
     # It's true, I measured it myself /johan.walles@gmail.com
     println(
@@ -305,8 +304,7 @@ def print_fds(fd, process, processes):
         )
 
 
-def print_start_time(fd, process):
-    # type: (int, px_process.PxProcess) -> None
+def print_start_time(fd: int, process: px_process.PxProcess) -> None:
     println(
         fd,
         "{} {} was started by {}, at {}.".format(
@@ -329,8 +327,7 @@ def print_start_time(fd, process):
         )
 
 
-def print_pid_info(fd, pid):
-    # type: (int, int) -> None
+def print_pid_info(fd: int, pid: int) -> None:
     processes = px_process.get_all()
 
     process = find_process_by_pid(pid, processes)
@@ -341,8 +338,9 @@ def print_pid_info(fd, pid):
     print_process_info(fd, process, processes)
 
 
-def print_process_info(fd, process, processes):
-    # type: (int, px_process.PxProcess, List[px_process.PxProcess]) -> None
+def print_process_info(
+    fd: int, process: px_process.PxProcess, processes: List[px_process.PxProcess]
+) -> None:
     print_command_line(fd, process)
 
     # Print a process tree with all PID's parents and all its children

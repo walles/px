@@ -1,14 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from . import testutils
 
 from px import px_ioload
-
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type
 
 
 def test_parse_netstat_ib_output():

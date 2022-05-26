@@ -41,8 +41,8 @@ of which processes are most active right now.
 import operator
 import platform
 import logging
-import six
 import sys
+import io
 import os
 
 from . import px_pager
@@ -53,9 +53,7 @@ from . import px_processinfo
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional, List  # NOQA
+from typing import Optional, List
 
 
 ERROR_REPORTING_HEADER = """
@@ -67,8 +65,7 @@ Problems detected, please send this text to one of:
 """
 
 
-def install(argv):
-    # type: (List[str]) -> None
+def install(argv: List[str]) -> None:
     """Find full path to self"""
     if not argv:
         sys.stderr.write("ERROR: Can't find myself, can't install\n")
@@ -92,7 +89,7 @@ def main():
         argv.remove("--debug")
         loglevel = logging.DEBUG
 
-    stringIO = six.StringIO()
+    stringIO = io.StringIO()
     configureLogging(loglevel, stringIO)
 
     try:
@@ -104,11 +101,8 @@ def main():
     handleLogMessages(stringIO.getvalue())
 
 
-def configureLogging(loglevel, stringIO):
-    # type: (int, six.StringIO) -> None
-
-    # This method inspired by: https://stackoverflow.com/a/9534960/473672
-
+# This method inspired by: https://stackoverflow.com/a/9534960/473672
+def configureLogging(loglevel: int, stringIO: io.StringIO) -> None:
     rootLogger = logging.getLogger()
     rootLogger.setLevel(loglevel)
 
@@ -127,8 +121,7 @@ def configureLogging(loglevel, stringIO):
     rootLogger.addHandler(handler)
 
 
-def handleLogMessages(messages):
-    # type: (Optional[str]) -> None
+def handleLogMessages(messages: Optional[str]) -> None:
     if not messages:
         return
 
@@ -149,8 +142,7 @@ def handleLogMessages(messages):
     sys.exit(1)
 
 
-def _main(argv):
-    # type: (List[str]) -> None
+def _main(argv: List[str]) -> None:
 
     if "--install" in argv:
         install(argv)
@@ -171,11 +163,11 @@ def _main(argv):
         print(version.VERSION)
         return
 
-    with_pager = None  # type: Optional[bool]
-    with_color = None  # type: Optional[bool]
+    with_pager: Optional[bool] = None
+    with_color: Optional[bool] = None
     with_username = True
-    top = False  # type: bool
-    sort_cpupercent = False  # type: bool
+    top: bool = False
+    sort_cpupercent: bool = False
 
     while "--no-pager" in argv:
         with_pager = False
@@ -242,7 +234,7 @@ def _main(argv):
 
     procs = list(filter(lambda p: p.match(search), px_process.get_all()))
 
-    columns = None  # type: Optional[int]
+    columns: Optional[int] = None
     try:
         rows, columns = px_terminal.get_window_size()
     except px_terminal.TerminalError:

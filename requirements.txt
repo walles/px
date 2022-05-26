@@ -5,7 +5,8 @@
 # NOTE: If you change something here, you must update make-executable-zip.sh as
 # well, search for "requirements.txt"!
 
-# We're six simpletons, any version works
+# NOTE: We don't use six ourselves, but python-dateutil does. Do remove once
+# we're on a Python-3-only python-dateutil!
 six
 
 # 2.6.1 is what we started out using, older is probably fine

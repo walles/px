@@ -8,24 +8,24 @@ from px import px_terminal
 
 
 def test_render_bar_happy_path():
-    names_and_numbers = [(u"apa", 1000), (u"bepa", 300), (u"cepa", 50)] + [
-        (u"long tail", 1)
+    names_and_numbers = [("apa", 1000), ("bepa", 300), ("cepa", 50)] + [
+        ("long tail", 1)
     ] * 300
     assert px_rambar.render_bar(10, names_and_numbers) == (
-        px_terminal.red(u" apa  ")
-        + px_terminal.yellow(u" b")
-        + px_terminal.blue(u" ")
-        + px_terminal.inverse_video(u" ")
+        px_terminal.red(" apa  ")
+        + px_terminal.yellow(" b")
+        + px_terminal.blue(" ")
+        + px_terminal.inverse_video(" ")
     )
 
 
 def test_render_bar_happy_path_unicode():
-    names_and_numbers = [(u"åpa", 1000), (u"bäpa", 300), (u"cäpa", 50)] + [
-        (u"lång svans", 1)
+    names_and_numbers = [("åpa", 1000), ("bäpa", 300), ("cäpa", 50)] + [
+        ("lång svans", 1)
     ] * 300
     assert px_rambar.render_bar(10, names_and_numbers) == (
-        px_terminal.red(u" åpa  ")
-        + px_terminal.yellow(u" b")
-        + px_terminal.blue(u" ")
-        + px_terminal.inverse_video(u" ")
+        px_terminal.red(" åpa  ")
+        + px_terminal.yellow(" b")
+        + px_terminal.blue(" ")
+        + px_terminal.inverse_video(" ")
     )

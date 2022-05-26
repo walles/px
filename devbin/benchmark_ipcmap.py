@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """Benchmark loading the output of "lsof -F fnaptd0i" from a big system
 
@@ -25,9 +24,7 @@ import time
 from tests import testutils
 from px import px_file
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableMapping  # NOQA
+from typing import MutableMapping
 
 
 # For how long should we do the benchmarking run (in seconds)
@@ -35,7 +32,7 @@ DURATION_S = 30
 
 
 def get_most_common_pid(files):
-    counts = {}  # type: MutableMapping[int, int]
+    counts: MutableMapping[int, int] = {}
     for file in files:
         pid = file.pid
         if pid not in counts:

@@ -5,7 +5,6 @@ import operator
 import os
 import re
 import pwd
-import six
 import errno
 import subprocess
 import dateutil.tz
@@ -16,15 +15,12 @@ from . import px_exec_util
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Dict  # NOQA
-    from typing import MutableSet  # NOQA
-    from typing import Text  # NOQA
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from typing import Iterable  # NOQA
-    from six import text_type  # NOQA
+from typing import Dict
+from typing import MutableSet
+from typing import Text
+from typing import Optional
+from typing import List
+from typing import Iterable
 
 
 LOG = logging.getLogger(__name__)
@@ -48,12 +44,11 @@ CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9]
 TIMEZONE = dateutil.tz.tzlocal()
 
 
-uid_to_username_cache = {}  # type: Dict[int, Text]
-get_command_cache = {}  # type: Dict[Text, Text]
+uid_to_username_cache: Dict[int, Text] = {}
+get_command_cache: Dict[Text, Text] = {}
 
 
-def _parse_time(time_s):
-    # type: (Text)->datetime.datetime
+def _parse_time(time_s: Text) -> datetime.datetime:
     """
     Parse a local date from ps into a datetime.datetime object.
 
@@ -63,18 +58,18 @@ def _parse_time(time_s):
     """
 
     zero_based_month = [
-        u"Jan",
-        u"Feb",
-        u"Mar",
-        u"Apr",
-        u"May",
-        u"Jun",
-        u"Jul",
-        u"Aug",
-        u"Sep",
-        u"Oct",
-        u"Nov",
-        u"Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
     ].index(time_s[4:7])
 
     day_of_month = int(time_s[8:10])
@@ -91,28 +86,27 @@ def _parse_time(time_s):
 class PxProcess(object):
     def __init__(
         self,
-        cmdline,  # type: Text
-        pid,  # type: int
-        rss_kb,  # type: int
-        start_time_string,  # type: Text
-        username,  # type: Text
-        now,  # type: datetime.datetime
-        ppid,  # type: Optional[int]
-        memory_percent=None,  # type: Optional[float]
-        cpu_percent=None,  # type: Optional[float]
-        cpu_time=None,  # type: Optional[float]
-    ):
-        # type: (...) -> None
-        self.pid = pid  # type: int
-        self.ppid = ppid  # type: Optional[int]
-        self.rss_kb = rss_kb  # type: int
+        cmdline: Text,
+        pid: int,
+        rss_kb: int,
+        start_time_string: Text,
+        username: Text,
+        now: datetime.datetime,
+        ppid: Optional[int],
+        memory_percent: Optional[float] = None,
+        cpu_percent: Optional[float] = None,
+        cpu_time: Optional[float] = None,
+    ) -> None:
+        self.pid: int = pid
+        self.ppid: Optional[int] = ppid
+        self.rss_kb: int = rss_kb
 
-        self.cmdline = cmdline  # type: text_type
-        self.command = self._get_command()  # type: text_type
-        self.lowercase_command = self.command.lower()  # type: text_type
+        self.cmdline: str = cmdline
+        self.command: str = self._get_command()
+        self.lowercase_command: str = self.command.lower()
 
         self.start_time = _parse_time(start_time_string.strip())
-        self.age_seconds = (now - self.start_time).total_seconds()  # type: float
+        self.age_seconds: float = (now - self.start_time).total_seconds()
         if self.age_seconds < -10:
             # See: https://github.com/walles/px/issues/84
             #
@@ -137,25 +131,25 @@ class PxProcess(object):
         if self.age_seconds < 0:
             self.age_seconds = 0
 
-        self.age_s = seconds_to_str(self.age_seconds)  # type: text_type
+        self.age_s: str = seconds_to_str(self.age_seconds)
 
-        self.username = username  # type: text_type
+        self.username: str = username
 
         self.memory_percent = memory_percent
-        self.memory_percent_s = "--"  # type: text_type
+        self.memory_percent_s: str = "--"
         if memory_percent is not None:
             self.memory_percent_s = "{:.0f}%".format(memory_percent)
 
         self.cpu_percent = cpu_percent
-        self.cpu_percent_s = "--"  # type: text_type
+        self.cpu_percent_s: str = "--"
         if cpu_percent is not None:
             self.cpu_percent_s = "{:.0f}%".format(cpu_percent)
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(cpu_time)
 
-        self.children = set()  # type: MutableSet[PxProcess]
-        self.parent = None  # type: Optional[PxProcess]
+        self.children: MutableSet[PxProcess] = set()
+        self.parent: Optional[PxProcess] = None
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -190,9 +184,8 @@ class PxProcess(object):
             / (self.age_seconds + 1.0)
         )
 
-    def set_cpu_time_seconds(self, seconds):
-        # type: (Optional[float]) -> None
-        self.cpu_time_s = "--"  # type: Text
+    def set_cpu_time_seconds(self, seconds: Optional[float]) -> None:
+        self.cpu_time_s: Text = "--"
         self.cpu_time_seconds = None
         if seconds is not None:
             self.cpu_time_s = seconds_to_str(seconds)
@@ -265,30 +258,32 @@ class PxProcess(object):
 
 class PxProcessBuilder(object):
     def __init__(self):
-        self.cmdline = None  # type: Optional[Text]
-        self.pid = None  # type: Optional[int]
-        self.ppid = None  # type: Optional[int]
-        self.rss_kb = None  # type: Optional[int]
-        self.start_time_string = None  # type: Optional[Text]
-        self.username = None  # type: Optional[Text]
-        self.cpu_percent = None  # type: Optional[float]
-        self.cpu_time = None  # type: Optional[float]
-        self.memory_percent = None  # type: Optional[float]
+        self.cmdline: Optional[Text] = None
+        self.pid: Optional[int] = None
+        self.ppid: Optional[int] = None
+        self.rss_kb: Optional[int] = None
+        self.start_time_string: Optional[Text] = None
+        self.username: Optional[Text] = None
+        self.cpu_percent: Optional[float] = None
+        self.cpu_time: Optional[float] = None
+        self.memory_percent: Optional[float] = None
 
     def __repr__(self):
-        return "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>" % (
-            self.start_time_string,
-            self.pid,
-            self.ppid,
-            self.username,
-            self.cpu_percent,
-            self.cpu_time,
-            self.memory_percent,
-            self.cmdline,
+        return (
+            "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
+            % (
+                self.start_time_string,
+                self.pid,
+                self.ppid,
+                self.username,
+                self.cpu_percent,
+                self.cpu_time,
+                self.memory_percent,
+                self.cmdline,
+            )
         )
 
-    def build(self, now):
-        # type: (datetime.datetime) -> PxProcess
+    def build(self, now: datetime.datetime) -> PxProcess:
         assert self.cmdline
         assert self.pid is not None
         assert self.rss_kb is not None
@@ -308,8 +303,7 @@ class PxProcessBuilder(object):
         )
 
 
-def parse_time(timestring):
-    # type: (Text) -> float
+def parse_time(timestring: Text) -> float:
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)
@@ -336,22 +330,20 @@ def parse_time(timestring):
     raise ValueError("Unparsable timestamp: <" + timestring + ">")
 
 
-def uid_to_username(uid):
-    # type: (int)->Text
+def uid_to_username(uid: int) -> Text:
     if uid in uid_to_username_cache:
         return uid_to_username_cache[uid]
 
     # Populate cache
     try:
-        uid_to_username_cache[uid] = six.text_type(pwd.getpwuid(uid).pw_name)
+        uid_to_username_cache[uid] = str(pwd.getpwuid(uid).pw_name)
     except KeyError:
-        uid_to_username_cache[uid] = six.text_type(uid)
+        uid_to_username_cache[uid] = str(uid)
 
     return uid_to_username_cache[uid]
 
 
-def ps_line_to_process(ps_line, now):
-    # type: (Text, datetime.datetime) -> PxProcess
+def ps_line_to_process(ps_line: Text, now: datetime.datetime) -> PxProcess:
     match = PS_LINE.match(ps_line)
     if not match:
         raise Exception("Failed to match ps line <%r>" % ps_line)
@@ -370,8 +362,7 @@ def ps_line_to_process(ps_line, now):
     return process_builder.build(now)
 
 
-def create_kernel_process(now):
-    # type: (datetime.datetime) -> PxProcess
+def create_kernel_process(now: datetime.datetime) -> PxProcess:
     """
     Fake a process 0, this one isn't returned by ps. More info about PID 0:
     https://en.wikipedia.org/wiki/Process_identifier
@@ -386,17 +377,16 @@ def create_kernel_process(now):
     )
 
     process_builder.rss_kb = 0
-    process_builder.username = u"root"
+    process_builder.username = "root"
     process_builder.cpu_time = None
     process_builder.memory_percent = None
-    process_builder.cmdline = u"kernel PID 0"
+    process_builder.cmdline = "kernel PID 0"
     process = process_builder.build(now)
 
     return process
 
 
-def resolve_links(processes, now):
-    # type: (Dict[int, PxProcess], datetime.datetime) -> None
+def resolve_links(processes: Dict[int, PxProcess], now: datetime.datetime) -> None:
     """
     On entry, this function assumes that all processes have a "ppid" field
     containing the PID of their parent process.
@@ -423,8 +413,7 @@ def resolve_links(processes, now):
             process.parent.children.add(process)
 
 
-def remove_process_and_descendants(processes, pid):
-    # type: (Dict[int, PxProcess], int) -> None
+def remove_process_and_descendants(processes: Dict[int, PxProcess], pid: int) -> None:
     process = processes[pid]
     if process.parent is not None:
         process.parent.children.remove(process)
@@ -436,8 +425,7 @@ def remove_process_and_descendants(processes, pid):
             toexclude.append(child)
 
 
-def get_all():
-    # type: () -> List[PxProcess]
+def get_all() -> List[PxProcess]:
     processes = {}
 
     # NOTE: Both the full path to ps and "close_fds = False" are important
@@ -485,22 +473,19 @@ def get_all():
     return list(processes.values())
 
 
-def order_best_last(processes):
-    # type: (Iterable[PxProcess]) -> List[PxProcess]
+def order_best_last(processes: Iterable[PxProcess]) -> List[PxProcess]:
     """Returns process list ordered with the most interesting one last"""
     return sorted(processes, key=operator.attrgetter("score", "cmdline"))
 
 
-def order_best_first(processes):
-    # type: (Iterable[PxProcess]) -> List[PxProcess]
+def order_best_first(processes: Iterable[PxProcess]) -> List[PxProcess]:
     """Returns process list ordered with the most interesting one first"""
     ordered = sorted(processes, key=operator.attrgetter("cmdline"))
     ordered = sorted(ordered, key=operator.attrgetter("score"), reverse=True)
     return ordered
 
 
-def seconds_to_str(seconds):
-    # type: (float) -> Text
+def seconds_to_str(seconds: float) -> Text:
     if seconds < 60:
         seconds_s = str(seconds)
         decimal_index = seconds_s.rfind(".")

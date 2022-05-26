@@ -7,10 +7,7 @@ from px import px_terminal
 
 from . import testutils
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
-    from six import text_type  # NOQA
+from typing import List
 
 
 def test_to_screen_lines_unbounded():
@@ -31,23 +28,18 @@ def test_to_screen_lines_unbounded():
 
 
 def test_to_screen_lines_unicode():
-    procs = [testutils.create_process(commandline=u"/usr/bin/😀")]
+    px_terminal._enable_color = False
+    procs = [testutils.create_process(commandline="/usr/bin/😀")]
     converted = px_terminal.to_screen_lines(procs, None, None)
-    if sys.version_info.major > 3:
-        assert converted == [
-            "  PID COMMAND USERNAME   CPU RAM COMMANDLINE",
-            "47536 😀       root     0.03s  0% /usr/bin/😀",
-        ]
-    else:
-        # Unicode string widths are difficult before Python 3.3, don't test
-        # the actual layout in this case:
-        # https://stackoverflow.com/q/29109944/473672
-        pass
+    assert converted == [
+        r"  PID COMMAND USERNAME CPU CPUTIME RAM COMMANDLINE",
+        r"47536 😀       root      0%   0.03s  0% /usr/bin/😀",
+    ]
 
 
 def test_get_string_of_length():
     px_terminal._enable_color = True
-    CSI = u"\x1b["
+    CSI = "\x1b["
 
     assert px_terminal.get_string_of_length("12345", 3) == "123"
     assert px_terminal.get_string_of_length("12345", 5) == "12345"
@@ -64,7 +56,7 @@ def test_get_string_of_length():
 
 def test_crop_ansi_string_at_length():
     px_terminal._enable_color = True
-    CSI = u"\x1b["
+    CSI = "\x1b["
 
     # Non-formatted cropping
     assert px_terminal.crop_ansi_string_at_length("", 0) == ""
@@ -73,27 +65,27 @@ def test_crop_ansi_string_at_length():
     assert px_terminal.crop_ansi_string_at_length("1234", 3) == "123"
     assert px_terminal.crop_ansi_string_at_length("1234", 5) == "1234"
 
-    bold_end = u"1234" + px_terminal.bold("5678")
+    bold_end = "1234" + px_terminal.bold("5678")
     assert px_terminal.crop_ansi_string_at_length(bold_end, 3) == "123"
     assert px_terminal.crop_ansi_string_at_length(bold_end, 4) == "1234"
 
     # Note that we expect the string cutter to add an end-marker when
     # breaking inside a formatted section
-    assert px_terminal.crop_ansi_string_at_length(
-        bold_end, 5
-    ) == u"1234[1m5[0m".replace("[", CSI)
+    assert px_terminal.crop_ansi_string_at_length(bold_end, 5) == "1234[1m5[0m".replace(
+        "[", CSI
+    )
 
     assert px_terminal.crop_ansi_string_at_length(
         bold_end, 8
-    ) == u"1234[1m5678[0m".replace("[", CSI)
+    ) == "1234[1m5678[0m".replace("[", CSI)
 
-    bold_middle = u"123" + px_terminal.bold("456") + u"789"
+    bold_middle = "123" + px_terminal.bold("456") + "789"
     assert px_terminal.crop_ansi_string_at_length(
         bold_middle, 6
-    ) == u"123[1m456[0m".replace("[", CSI)
+    ) == "123[1m456[0m".replace("[", CSI)
     assert px_terminal.crop_ansi_string_at_length(
         bold_middle, 7
-    ) == u"123[1m456[22m7[0m".replace("[", CSI)
+    ) == "123[1m456[22m7[0m".replace("[", CSI)
 
 
 def test_getch():
@@ -104,13 +96,13 @@ def test_getch():
     # We should get unicode responses from getch()
     sequence = px_terminal.getch(timeout_seconds=0, fd=read)
     assert sequence is not None
-    assert sequence._string == u"q"
+    assert sequence._string == "q"
 
 
 def test_tokenize():
     px_terminal._enable_color = True
-    input = u"ab" + px_terminal.bold(u"c") + u"de"
-    parts = []  # type: List[text_type]
+    input = "ab" + px_terminal.bold("c") + "de"
+    parts: List[str] = []
     for token in px_terminal._tokenize(input):
         parts.append(token)
 

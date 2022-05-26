@@ -16,31 +16,24 @@ from . import px_process
 from . import px_terminal
 from . import px_processinfo
 
-if False:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
-    from typing import Callable  # NOQA
-    from typing import Union  # NOQA
-    from six import text_type  # NOQA
+from typing import Callable
 
-# Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
-# Make our own guaranteed-to-be-int constants.
+# Constants signal.SIGXXX are enums in Python 3. But we want the numbers (to
+# pass as an argument to /bin/kill), so we make our own int constants.
 SIGTERM = 15
 SIGKILL = 9
 
 KILL_TIMEOUT_SECONDS = 5
 
 
-def get_header_line(process):
-    # type: (px_process.PxProcess) -> text_type
-    header_line = u"Process: "
-    header_line += str(process.pid) + u" " + process.command
+def get_header_line(process: px_process.PxProcess) -> str:
+    header_line = "Process: "
+    header_line += str(process.pid) + " " + process.command
     header_line = px_terminal.bold(header_line)
     return header_line
 
 
-def kill(process, signo):
-    # type: (px_process.PxProcess, int) -> bool
+def kill(process: px_process.PxProcess, signo: int) -> bool:
     """
     Signal a process.
 
@@ -57,8 +50,7 @@ def kill(process, signo):
     return True
 
 
-def sudo_kill(process, signo):
-    # type: (px_process.PxProcess, int) -> bool
+def sudo_kill(process: px_process.PxProcess, signo: int) -> bool:
     """
     Signal a process as root.
 
@@ -94,31 +86,29 @@ def sudo_kill(process, signo):
 class PxProcessMenu(object):
     # NOTE: Must match number constants in execute_menu_entry()
     MENU_ENTRIES = [
-        u"Show info",
-        u"Kill process",
-        u"Kill process as root",
-        u"Back to process listing",
+        "Show info",
+        "Kill process",
+        "Kill process as root",
+        "Back to process listing",
     ]
 
-    def __init__(self, process):
-        # type: (px_process.PxProcess) -> None
+    def __init__(self, process: px_process.PxProcess) -> None:
         self.process = process
         self.done = False
 
         # Shown to user, status of last operation
-        self.status = u""
+        self.status = ""
 
         # Index into MENU_ENTRIES
         self.active_entry = 0
 
-    def refresh_display(self):
-        # type: () -> None
+    def refresh_display(self) -> None:
         rows, columns = px_terminal.get_window_size()
 
         lines = []
 
         lines += [get_header_line(self.process)]
-        lines += [u""]
+        lines += [""]
 
         lines += [
             px_terminal.bold("Arrow keys")
@@ -128,35 +118,34 @@ class PxProcessMenu(object):
             + px_terminal.bold("ESC")
             + " to go back."
         ]
-        lines += [u""]
+        lines += [""]
 
         last_entry_no = len(self.MENU_ENTRIES) - 1
         for entry_no, text in enumerate(self.MENU_ENTRIES):
-            prefix = u"    "
-            arrow = u"⇵"
+            prefix = "    "
+            arrow = "⇵"
             if entry_no == 0:
-                arrow = u"↓"
+                arrow = "↓"
             elif entry_no == last_entry_no:
-                arrow = u"↑"
+                arrow = "↑"
             if entry_no == self.active_entry:
-                prefix = arrow + u" ->"
+                prefix = arrow + " ->"
                 text = px_terminal.inverse_video(text)
 
             lines += [prefix + text]
 
         if self.status:
-            lines += [u"", u"Status: " + px_terminal.bold(self.status)]
+            lines += ["", "Status: " + px_terminal.bold(self.status)]
 
         px_terminal.draw_screen_lines(lines, columns)
 
-    def await_and_handle_user_input(self):
-        # type: () -> None
+    def await_and_handle_user_input(self) -> None:
         input = px_terminal.getch()
         if input is None:
             return
         assert len(input) > 0
 
-        self.status = u""
+        self.status = ""
         while len(input) > 0:
             if input.consume(px_terminal.KEY_UPARROW):
                 self.active_entry -= 1
@@ -168,7 +157,7 @@ class PxProcessMenu(object):
                     self.active_entry = len(self.MENU_ENTRIES) - 1
             elif input.consume(px_terminal.KEY_ENTER):
                 self.execute_menu_entry()
-            elif input.consume(u"q"):
+            elif input.consume("q"):
                 self.done = True
                 return
             elif input.consume(px_terminal.SIGWINCH_KEY):
@@ -182,8 +171,7 @@ class PxProcessMenu(object):
                 # Unable to consume, give up
                 break
 
-    def start(self):
-        # type: () -> None
+    def start(self) -> None:
         """
         Process menu main loop
         """
@@ -191,8 +179,7 @@ class PxProcessMenu(object):
             self.refresh_display()
             self.await_and_handle_user_input()
 
-    def page_process_info(self):
-        # type: () -> None
+    def page_process_info(self) -> None:
         """
         Display process info in a pager.
         """
@@ -206,7 +193,7 @@ class PxProcessMenu(object):
             px_pager.page_process_info(process, processes)
 
     def await_death(self, message):
-        # type(text_type) -> None
+        # type(str) -> None
         """
         Wait KILL_TIMEOUT_SECONDS for process to die.
 
@@ -222,7 +209,7 @@ class PxProcessMenu(object):
             countdown_s = KILL_TIMEOUT_SECONDS - dt_s
             if countdown_s <= 0:
                 return
-            self.status = u"{:.1f}s {}".format(
+            self.status = "{:.1f}s {}".format(
                 countdown_s,
                 message,
             )
@@ -230,8 +217,9 @@ class PxProcessMenu(object):
 
             time.sleep(0.1)
 
-    def kill_process(self, signal_process):
-        # type: (Callable[[px_process.PxProcess, int], bool]) -> None
+    def kill_process(
+        self, signal_process: Callable[[px_process.PxProcess, int], bool]
+    ) -> None:
         """
         Send first SIGTERM then SIGKILL to a process.
 
@@ -241,13 +229,11 @@ class PxProcessMenu(object):
         # Please go away
         if not signal_process(self.process, SIGTERM):
             self.status = (
-                u"Not allowed to kill <"
-                + self.process.command
-                + ">, try again as root!"
+                "Not allowed to kill <" + self.process.command + ">, try again as root!"
             )
             return
         self.await_death(
-            u"Waiting for %s to shut down after SIGTERM" % self.process.command
+            "Waiting for %s to shut down after SIGTERM" % self.process.command
         )
         if not self.process.is_alive():
             return
@@ -255,12 +241,12 @@ class PxProcessMenu(object):
         # Die!!
         assert signal_process(self.process, SIGKILL)
         self.await_death(
-            u"Waiting for %s to shut down after kill -9" % self.process.command
+            "Waiting for %s to shut down after kill -9" % self.process.command
         )
         if not self.process.is_alive():
             return
 
-        self.status = u"<" + self.process.command + "> did not die!"
+        self.status = "<" + self.process.command + "> did not die!"
         return
 
     def execute_menu_entry(self):

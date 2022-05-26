@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import re
@@ -62,7 +62,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: MacOS",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "Topic :: System :: Monitoring",
         "Topic :: System :: Systems Administration",

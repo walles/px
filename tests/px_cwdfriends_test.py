@@ -4,11 +4,8 @@ from px import px_cwdfriends
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
-    from px import px_process  # NOQA
-    from six import text_type  # NOQA
+from typing import List
+from px import px_process
 
 
 def test_current_cwd_unknown():
@@ -57,8 +54,7 @@ def test_find_friends():
     assert test_me.friends == [friend]
 
 
-def _get_friends_in_order(*args):
-    # type: (text_type) -> List[text_type]
+def _get_friends_in_order(*args: str) -> List[str]:
     procs = []
     files = []
     for index, arg in enumerate(args):
@@ -76,8 +72,9 @@ def _get_friends_in_order(*args):
     return return_me
 
 
-def _get_friend_processes_in_order(*args):
-    # type: (px_process.PxProcess) -> List[px_process.PxProcess]
+def _get_friend_processes_in_order(
+    *args: px_process.PxProcess,
+) -> List[px_process.PxProcess]:
     files = []
     procs = list(args)
     for proc in procs:

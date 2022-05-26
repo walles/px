@@ -271,7 +271,7 @@ def test_get_command_interpreters():
 
 
 def test_get_command_unicode():
-    assert px_commandline.get_command(u"😀") == u"😀"
+    assert px_commandline.get_command("😀") == "😀"
 
 
 def test_get_command_ruby_switches():

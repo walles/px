@@ -125,18 +125,18 @@ def test_to_tuple_list():
 
 def test_merge_tuple_lists():
     launchcounter = px_launchcounter.Launchcounter()
-    l1 = [(u"a", 0), (u"b", 2), (u"c", 5)]
-    l2 = [(u"a", 0), (u"b", 4)]
-    l3 = [(u"a", 0), (u"e", 4)]
+    l1 = [("a", 0), ("b", 2), ("c", 5)]
+    l2 = [("a", 0), ("b", 4)]
+    l3 = [("a", 0), ("e", 4)]
 
-    assert launchcounter._merge_tuple_lists(l1, l2) == [(u"a", 0), (u"b", 6), (u"c", 5)]
+    assert launchcounter._merge_tuple_lists(l1, l2) == [("a", 0), ("b", 6), ("c", 5)]
 
     assert launchcounter._merge_tuple_lists(l1, l3) is None
 
 
 def test_sort_launchers_lists():
-    l1 = [(u"a", 3), (u"b", 4)]
-    l2 = [(u"a", 5), (u"e", 0)]
+    l1 = [("a", 3), ("b", 4)]
+    l2 = [("a", 5), ("e", 0)]
 
     # List with highest individual number should come first
     assert px_launchcounter.sort_launchers_list([l1, l2]) == [l2, l1]

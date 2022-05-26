@@ -6,8 +6,7 @@ import dateutil.tz
 
 from . import px_exec_util
 
-if False:
-    from typing import Set, Optional  # NOQA
+from typing import Optional, Set
 
 LOG = logging.getLogger(__name__)
 
@@ -57,11 +56,10 @@ MONTHS = {
 
 
 def get_users_at(
-    timestamp,  # type: datetime.datetime
-    last_output=None,  # type: Optional[str]
-    now=None,  # type: Optional[datetime.datetime]
-):
-    # type: (...) -> Set[str]
+    timestamp: datetime.datetime,
+    last_output: Optional[str] = None,
+    now: Optional[datetime.datetime] = None,
+) -> Set[str]:
     """
     Return a set of strings corresponding to which users were logged in from
     which addresses at a given timestamp.
@@ -176,8 +174,7 @@ def _to_timestamp(string, now):
     )
 
 
-def _to_timedelta(string):
-    # type: (str) -> datetime.timedelta
+def _to_timedelta(string: str) -> datetime.timedelta:
     match = TIMEDELTA_RE.match(string)
     assert match is not None
 

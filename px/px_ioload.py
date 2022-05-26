@@ -4,7 +4,6 @@ Functions for visualizing where IO is bottlenecking.
 
 import datetime
 import math
-import six
 import re
 import os
 
@@ -12,14 +11,10 @@ from . import px_units
 from . import px_terminal
 from . import px_exec_util
 
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List
-    from typing import Dict
-    from typing import Tuple
-    from typing import Optional
+from typing import List
+from typing import Dict
+from typing import Tuple
+from typing import Optional
 
 
 # Matches output lines in "netstat -ib" on macOS.
@@ -55,12 +50,23 @@ PROC_DISKSTATS_RE = re.compile(
 )
 
 
-def parse_netstat_ib_output(netstat_ib_output):
-    # type: (six.text_type) -> List[Sample]
+class Sample(object):
+    def __init__(self, name: str, bytecount: int) -> None:
+        self.name = name
+        self.bytecount = bytecount
+
+    def __repr__(self):
+        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
+
+    def __eq__(self, o):
+        return self.bytecount == o.bytecount and self.name == o.name
+
+
+def parse_netstat_ib_output(netstat_ib_output: str) -> List[Sample]:
     """
     Parse output of "netstat -ib" on macOS.
     """
-    samples = []  # type: List[Sample]
+    samples: List[Sample] = []
     for line in netstat_ib_output.splitlines()[1:]:
         match = NETSTAT_IB_LINE_RE.match(line)
         if not match:
@@ -78,8 +84,7 @@ def parse_netstat_ib_output(netstat_ib_output):
     return samples
 
 
-def parse_iostat_output(iostat_output):
-    # type: (six.text_type) -> List[Sample]
+def parse_iostat_output(iostat_output: str) -> List[Sample]:
     """
     Parse output of "iostat -dKI -n 99" on macOS.
     """
@@ -93,7 +98,7 @@ def parse_iostat_output(iostat_output):
     # Numbers are: "KB/t", "xfrs" and "xfrs"
     numbers = lines[2].split()
 
-    samples = []  # type: List[Sample]
+    samples: List[Sample] = []
     for i in range(len(names)):
         name = names[i]
         mb_string = numbers[3 * i + 2]
@@ -107,12 +112,11 @@ def parse_iostat_output(iostat_output):
     return samples
 
 
-def parse_proc_net_dev(proc_net_dev_contents):
-    # type: (six.text_type) -> List[Sample]
+def parse_proc_net_dev(proc_net_dev_contents: str) -> List[Sample]:
     """
     Parse /proc/net/dev contents into a list of samples.
     """
-    return_me = []  # type: List[Sample]
+    return_me: List[Sample] = []
     for line in proc_net_dev_contents.splitlines():
         match = PROC_NET_DEV_RE.match(line)
         if not match:
@@ -130,12 +134,11 @@ def parse_proc_net_dev(proc_net_dev_contents):
     return return_me
 
 
-def parse_proc_diskstats(proc_diskstats_contents):
-    # type: (six.text_type) -> List[Sample]
+def parse_proc_diskstats(proc_diskstats_contents: str) -> List[Sample]:
     """
     Parse /proc/net/dev contents into a list of samples.
     """
-    return_me = []  # type: List[Sample]
+    return_me: List[Sample] = []
     for line in proc_diskstats_contents.splitlines():
         match = PROC_DISKSTATS_RE.match(line)
         if not match:
@@ -155,22 +158,8 @@ def parse_proc_diskstats(proc_diskstats_contents):
     return return_me
 
 
-class Sample(object):
-    def __init__(self, name, bytecount):
-        # type: (six.text_type, int) -> None
-        self.name = name
-        self.bytecount = bytecount
-
-    def __repr__(self):
-        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
-
-    def __eq__(self, o):
-        return self.bytecount == o.bytecount and self.name == o.name
-
-
 class SubsystemStat(object):
-    def __init__(self, throughput, high_watermark):
-        # type: (float, float) -> None
+    def __init__(self, throughput: float, high_watermark: float) -> None:
 
         if throughput > high_watermark:
             raise ValueError(
@@ -184,21 +173,19 @@ class SubsystemStat(object):
 
 
 class SystemState(object):
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         self.timestamp = datetime.datetime.now()
 
-        self.samples = (
+        self.samples: List[Sample] = (
             self.sample_network_interfaces() + self.sample_drives()
-        )  # type: List[Sample]
+        )
 
-        by_name = {}  # type: Dict[six.text_type, Sample]
+        by_name: Dict[str, Sample] = {}
         for sample in self.samples:
             by_name[sample.name] = sample
         self.samples_by_name = by_name
 
-    def sample_network_interfaces(self):
-        # type: () -> List[Sample]
+    def sample_network_interfaces(self) -> List[Sample]:
         """
         Query system for network interfaces byte counts
         """
@@ -212,8 +199,7 @@ class SystemState(object):
         netstat_ib_output = px_exec_util.run(["netstat", "-ib"])
         return parse_netstat_ib_output(netstat_ib_output)
 
-    def sample_drives(self):
-        # type: () -> List[Sample]
+    def sample_drives(self) -> List[Sample]:
         """
         Query system for drive statistics
         """
@@ -229,22 +215,20 @@ class SystemState(object):
 
 
 class PxIoLoad(object):
-    def __init__(self):
-        # type: () -> None
-        self.most_recent_system_state = SystemState()  # type: SystemState
-        self.previous_system_state = None  # type: Optional[SystemState]
+    def __init__(self) -> None:
+        self.most_recent_system_state: SystemState = SystemState()
+        self.previous_system_state: Optional[SystemState] = None
 
         # Maps a subsystem name ("eth0 outgoing") to a current bytes-per-second
         # value and a high watermark for the same value.
-        self.ios = {}  # type: Dict[six.text_type, SubsystemStat]
+        self.ios: Dict[str, SubsystemStat] = {}
 
         # Per interface, keep track of when we first saw it and its byte count
         # at that time.
-        self.baseline = {}  # type: Dict[six.text_type, Tuple[datetime.datetime, int]]
+        self.baseline: Dict[str, Tuple[datetime.datetime, int]] = {}
         self.update_baseline_from_system(self.most_recent_system_state)
 
-    def update_baseline_from_system(self, system_state):
-        # type: (SystemState) -> None
+    def update_baseline_from_system(self, system_state: SystemState) -> None:
         """
         Add new entries to the baseline, and remove those that aren't part of
         the system state any more.
@@ -265,8 +249,7 @@ class PxIoLoad(object):
         for remove_me in unseen:
             del self.baseline[remove_me]
 
-    def update(self):
-        # type: () -> None
+    def update(self) -> None:
 
         self.previous_system_state = self.most_recent_system_state
         self.most_recent_system_state = SystemState()
@@ -279,7 +262,7 @@ class PxIoLoad(object):
         assert seconds_since_previous > 0
 
         # Update self.ios from the system states
-        updated_ios = {}  # type: Dict[six.text_type, SubsystemStat]
+        updated_ios: Dict[str, SubsystemStat] = {}
         for sample in self.most_recent_system_state.samples:
             name = sample.name
 
@@ -330,8 +313,7 @@ class PxIoLoad(object):
 
         self.ios = updated_ios
 
-    def get_load_string(self):
-        # type: () -> six.text_type
+    def get_load_string(self) -> str:
         """
         Example return value: "[123B/s / 878B/s] eth0 outgoing"
         """
@@ -347,8 +329,8 @@ class PxIoLoad(object):
         # Then, we need to sort these by current-bytes-per-second, and render the top one.
 
         # Values per entry: name, current value, high watermark
-        collected_ios = []  # type: List[Tuple[six.text_type, float, float]]
-        for name, loads in six.iteritems(self.ios):
+        collected_ios: List[Tuple[str, float, float]] = []
+        for name, loads in self.ios.items():
             collected_ios.append((name, loads.throughput, loads.high_watermark))
 
         if not collected_ios:

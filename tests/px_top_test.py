@@ -105,13 +105,13 @@ def test_get_screen_lines_low_screen():
     lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     # Top row should contain ANSI escape codes
-    CSI = u"\x1b["
-    assert u"CSI" in lines[0].replace(CSI, u"CSI")
+    CSI = "\x1b["
+    assert "CSI" in lines[0].replace(CSI, "CSI")
 
     assert len(lines) == SCREEN_ROWS
 
     # Last line should be decorated
-    assert u"CSI" in lines[-1].replace(CSI, u"CSI")
+    assert "CSI" in lines[-1].replace(CSI, "CSI")
 
 
 def test_get_screen_lines_high_screen():
@@ -123,13 +123,13 @@ def test_get_screen_lines_high_screen():
     lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
     # Top row should contain ANSI escape codes
-    CSI = u"\x1b["
-    assert u"CSI" in lines[0].replace(CSI, u"CSI")
+    CSI = "\x1b["
+    assert "CSI" in lines[0].replace(CSI, "CSI")
 
     assert len(lines) == SCREEN_ROWS
 
     # Last line should be decorated
-    assert u"CSI" in lines[-1].replace(CSI, u"CSI")
+    assert "CSI" in lines[-1].replace(CSI, "CSI")
 
 
 def test_get_screen_lines_with_many_launches():

@@ -3,9 +3,7 @@ import sys
 
 from px import px_file
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List  # NOQA
+from typing import List
 
 
 def test_lsof_to_files():
@@ -78,8 +76,7 @@ def test_get_all():
     assert cwd_count > 0
 
 
-def lsof_to_file(shard_array):
-    # type: (List[str]) -> px_file.PxFile
+def lsof_to_file(shard_array: List[str]) -> px_file.PxFile:
     return px_file.lsof_to_files("\0".join(shard_array + ["\n"]))[0]
 
 

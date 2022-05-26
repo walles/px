@@ -2,63 +2,24 @@ import socket
 
 from . import px_exec_util
 
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Set  # NOQA
-    from typing import List  # NOQA
-    from typing import Tuple  # NOQA
-    from typing import Iterable  # NOQA
-    from typing import Optional  # NOQA
-
-
-class PxFileBuilder:
-    def __init__(self):
-        self.fd = None  # type: Optional[int]
-        self.pid = None  # type: Optional[int]
-        self.name = None  # type: Optional[str]
-        self.type = None  # type: Optional[str]
-        self.inode = None  # type: Optional[str]
-        self.device = None  # type: Optional[str]
-        self.access = None  # type: Optional[str]
-
-        # Example values: "cwd", "txt" and probably others as well
-        self.fdtype = None  # type: Optional[str]
-
-    def build(self):
-        # type: () -> PxFile
-        assert self.pid is not None
-        assert self.type
-        pxFile = PxFile(self.pid, self.type)
-        pxFile.name = self.name
-        pxFile.fd = self.fd
-        pxFile.inode = self.inode
-        pxFile.device = self.device
-        pxFile.access = self.access
-        pxFile.fdtype = self.fdtype
-
-        return pxFile
-
-    def __repr__(self):
-        return "PxFileBuilder(pid={}, name={}, type={})".format(
-            self.pid, self.name, self.type
-        )
+from typing import Set
+from typing import List
+from typing import Tuple
+from typing import Optional
 
 
 class PxFile(object):
-    def __init__(self, pid, filetype):
-        # type: (int, str) -> None
-        self.fd = None  # type: Optional[int]
+    def __init__(self, pid: int, filetype: str) -> None:
+        self.fd: Optional[int] = None
         self.pid = pid
         self.type = filetype
-        self.name = None  # type: Optional[str]
-        self.inode = None  # type: Optional[str]
-        self.device = None  # type: Optional[str]
-        self.access = None  # type: Optional[str]
+        self.name: Optional[str] = None
+        self.inode: Optional[str] = None
+        self.device: Optional[str] = None
+        self.access: Optional[str] = None
 
         # Example values: "cwd", "txt" and probably others as well
-        self.fdtype = None  # type: Optional[str]
+        self.fdtype: Optional[str] = None
 
     def __repr__(self):
         # The point of implementing this method is to make the py.test output
@@ -135,8 +96,7 @@ class PxFile(object):
         # compensate by having unique names.
         return self.name
 
-    def get_endpoints(self):
-        # type: () -> Tuple[Optional[str], Optional[str]]
+    def get_endpoints(self) -> Tuple[Optional[str], Optional[str]]:
         """
         Returns a (local,remote) tuple. They represent the local and the remote
         endpoints of a network connection.
@@ -168,8 +128,39 @@ class PxFile(object):
         return (local, remote)
 
 
-def resolve_endpoint(endpoint):
-    # type: (str) -> str
+class PxFileBuilder:
+    def __init__(self):
+        self.fd: Optional[int] = None
+        self.pid: Optional[int] = None
+        self.name: Optional[str] = None
+        self.type: Optional[str] = None
+        self.inode: Optional[str] = None
+        self.device: Optional[str] = None
+        self.access: Optional[str] = None
+
+        # Example values: "cwd", "txt" and probably others as well
+        self.fdtype: Optional[str] = None
+
+    def build(self) -> PxFile:
+        assert self.pid is not None
+        assert self.type
+        pxFile = PxFile(self.pid, self.type)
+        pxFile.name = self.name
+        pxFile.fd = self.fd
+        pxFile.inode = self.inode
+        pxFile.device = self.device
+        pxFile.access = self.access
+        pxFile.fdtype = self.fdtype
+
+        return pxFile
+
+    def __repr__(self):
+        return "PxFileBuilder(pid={}, name={}, type={})".format(
+            self.pid, self.name, self.type
+        )
+
+
+def resolve_endpoint(endpoint: str) -> str:
     """
     Resolves "127.0.0.1:portnumber" into "localhost:portnumber".
     """
@@ -210,15 +201,14 @@ def call_lsof():
     return px_exec_util.run(["lsof", "-n", "-F", "fnaptd0i"])
 
 
-def lsof_to_files(lsof):
-    # type: (str) -> List[PxFile]
+def lsof_to_files(lsof: str) -> List[PxFile]:
     """
     Convert lsof output into a files array.
     """
 
     pid = None
-    file_builder = None  # type: Optional[PxFileBuilder]
-    files = []  # type: List[PxFile]
+    file_builder: Optional[PxFileBuilder] = None
+    files: List[PxFile] = []
     for shard in lsof.split("\0"):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the
@@ -282,8 +272,7 @@ def lsof_to_files(lsof):
     return files
 
 
-def get_all():
-    # type: () -> Set[PxFile]
+def get_all() -> Set[PxFile]:
     """
     Get all files.
 

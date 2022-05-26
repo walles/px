@@ -7,9 +7,7 @@ from . import testutils
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import List, Tuple  # NOQA
+from typing import List, Tuple
 
 
 def test_to_relative_start_string():
@@ -105,7 +103,7 @@ def test_print_starttime():
 
 
 def test_print_process_subtree():
-    lines = []  # type: List[Tuple[str, px_process.PxProcess]]
+    lines: List[Tuple[str, px_process.PxProcess]] = []
 
     child_proc = testutils.create_process(pid=2, commandline="child")
     child_proc.children = set()

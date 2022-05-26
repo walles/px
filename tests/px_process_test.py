@@ -2,17 +2,12 @@ import getpass
 import datetime
 
 import os
-import six
 import pytest
 
 from px import px_process
 from . import testutils
 
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableSet  # NOQA
+from typing import MutableSet
 
 
 def test_create_process():
@@ -70,8 +65,8 @@ def test_create_future_process():
 def test_ps_line_to_process_unicode():
     process = testutils.create_process(cputime="2:14.15")
 
-    assert process.username == u"root"
-    assert process.cmdline == u"/usr/sbin/cupsd -l"
+    assert process.username == "root"
+    assert process.cmdline == "/usr/sbin/cupsd -l"
 
 
 def test_ps_line_to_process_1():
@@ -170,7 +165,7 @@ def _test_get_all():
     assert 1 in pids
 
     # Assert that all contains no duplicate PIDs
-    seen_pids = set()  # type: MutableSet[int]
+    seen_pids: MutableSet[int] = set()
     for process in all:
         pid = process.pid
         assert pid not in seen_pids
@@ -195,8 +190,8 @@ def _test_get_all():
         assert process.start_time < now
 
     for process in all:
-        assert isinstance(process.cmdline, six.text_type)
-        assert isinstance(process.username, six.text_type)
+        assert isinstance(process.cmdline, str)
+        assert isinstance(process.username, str)
 
 
 def test_get_all_swedish():
@@ -368,11 +363,11 @@ def test_command_in_parentheses():
 def test_uid_to_username():
     username = px_process.uid_to_username(os.getuid())
     assert username == getpass.getuser()
-    assert isinstance(username, six.text_type)
+    assert isinstance(username, str)
 
     username = px_process.uid_to_username(456789)
     assert username == "456789"
-    assert isinstance(username, six.text_type)
+    assert isinstance(username, str)
 
 
 def test_resolve_links():

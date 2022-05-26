@@ -10,22 +10,16 @@ from px import px_ipc_map
 import dateutil.tz
 import dateutil.parser
 
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import MutableMapping  # NOQA
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from six import text_type  # NOQA
+from typing import MutableMapping
+from typing import Optional
+from typing import List
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"
 TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
 
 
-def load(sample_file_name):
-    # type: (text_type) -> text_type
+def load(sample_file_name: str) -> str:
     my_dir = os.path.dirname(__file__)
     full_path = os.path.join(my_dir, sample_file_name)
     with open(full_path) as sample_file:
@@ -51,8 +45,7 @@ def create_process(
     mempercent="0.0",
     commandline="/usr/sbin/cupsd -l",
     now=now(),
-):
-    # type: (...) -> px_process.PxProcess
+) -> px_process.PxProcess:
     psline = (
         spaces(at_least=0)
         + str(pid)
@@ -78,14 +71,14 @@ def create_process(
 
 
 def create_file(
-    filetype,  # type: str
-    name,  # type: str
-    device,  # type: Optional[str]
-    pid,  # type: int
-    access=None,  # type: str
-    inode=None,  # type: str
-    fd=None,  # type: int
-    fdtype=None,  # type: Optional[str]
+    filetype: str,
+    name: str,
+    device: Optional[str],
+    pid: int,
+    access: str = None,
+    inode: str = None,
+    fd: int = None,
+    fdtype: Optional[str] = None,
 ):
     # type (...) -> px_file.PxFile
 
@@ -105,10 +98,11 @@ def create_file(
     return file
 
 
-def create_ipc_map(pid, all_files, is_root=False):
-    # type: (int, List[px_file.PxFile], bool) -> px_ipc_map.IpcMap
+def create_ipc_map(
+    pid: int, all_files: List[px_file.PxFile], is_root: bool = False
+) -> px_ipc_map.IpcMap:
     """Wrapper around IpcMap() so that we can test it"""
-    pid2process = {}  # type: MutableMapping[int, px_process.PxProcess]
+    pid2process: MutableMapping[int, px_process.PxProcess] = {}
     for file in all_files:
         if file.pid in pid2process:
             continue
@@ -124,8 +118,7 @@ def create_ipc_map(pid, all_files, is_root=False):
     return px_ipc_map.IpcMap(process, all_files, processes, is_root)
 
 
-def fake_callchain(*args):
-    # type: (*str) -> px_process.PxProcess
+def fake_callchain(*args: str) -> px_process.PxProcess:
     procs = []
     for arg in args:
         procs.append(create_process(commandline=arg))

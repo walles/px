@@ -1,19 +1,11 @@
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
-
-
-def bytes_to_string(bytes_count):
-    # type: (int) -> text_type
+def bytes_to_string(bytes_count: int) -> str:
     """
     Turn byte counts into strings like "14MB"
     """
-    KB = 1024 ** 1
-    MB = 1024 ** 2
-    GB = 1024 ** 3
-    TB = 1024 ** 4
+    KB = 1024**1
+    MB = 1024**2
+    GB = 1024**3
+    TB = 1024**4
 
     if bytes_count < 7 * KB:
         return str(bytes_count) + "B"

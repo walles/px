@@ -9,12 +9,7 @@ import os
 from . import px_cpuinfo
 from . import px_terminal
 
-import sys
-
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from six import text_type  # NOQA
-    from typing import Tuple  # NOQA
+from typing import Tuple
 
 
 physical, logical = px_cpuinfo.get_core_count()
@@ -59,15 +54,6 @@ def levels_to_graph(levels):
         # Left pad uneven-length arrays with an empty column
         levels = [-1] + levels
 
-    # From: http://stackoverflow.com/a/19177754/473672
-    unicodify = chr
-    try:
-        # Python 2
-        unicodify = unichr  # type: ignore
-    except NameError:
-        # Python 3
-        pass
-
     # https://en.wikipedia.org/wiki/Braille_Patterns#Identifying.2C_naming_and_ordering
     LEFT_BAR = [0x00, 0x40, 0x44, 0x46, 0x47]
     RIGHT_BAR = [0x00, 0x80, 0xA0, 0xB0, 0xB8]
@@ -77,13 +63,12 @@ def levels_to_graph(levels):
         left_level = levels[index] + 1
         right_level = levels[index + 1] + 1
         code = 0x2800 + LEFT_BAR[left_level] + RIGHT_BAR[right_level]
-        graph += unicodify(code)
+        graph += chr(code)
 
     return graph
 
 
-def get_load_values():
-    # type: () -> Tuple[float, float, float]
+def get_load_values() -> Tuple[float, float, float]:
     """
     Returns three system load numbers:
     * The first is the average system load over the last 0m-1m
@@ -99,8 +84,7 @@ def get_load_values():
     return (avg0to1, avg1to5, avg5to15)
 
 
-def get_load_string(load_values=None):
-    # type: (Tuple[float, float, float]) -> text_type
+def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     """
     Example return string, underlines indicate bold:
     "1.5  [4 cores | 8 virtual]  [15m load history: GRAPH]"
@@ -116,7 +100,7 @@ def get_load_string(load_values=None):
 
     avg0to1, avg1to5, avg5to15 = load_values
 
-    load_string = u"{:.1f}".format(avg0to1)
+    load_string = "{:.1f}".format(avg0to1)
     if avg0to1 <= physical:
         load_string = px_terminal.green(load_string)
     elif avg0to1 <= logical:
@@ -130,4 +114,4 @@ def get_load_string(load_values=None):
     # Increase intensity for more recent times
     graph = px_terminal.faint(graph[0:3]) + graph[3:6] + px_terminal.bold(graph[6:])
 
-    return u"{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)
+    return "{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)

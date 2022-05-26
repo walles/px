@@ -10,17 +10,14 @@ from . import px_launchcounter
 
 import sys
 
-if sys.version_info.major >= 3:
-    # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
-    from typing import List  # NOQA
-    from six import text_type
+from typing import Optional
+from typing import List
 
 
 # We'll report poll done as this key having been pressed.
 #
 # NOTE: This must be detected as non-printable by handle_search_keypress().
-POLL_COMPLETE_KEY = u"\x01"
+POLL_COMPLETE_KEY = "\x01"
 
 # Key repeat speed is about one every 30+ms, and this pause needs to be longer
 # than that for the pause to be useful while scrolling.
@@ -28,29 +25,28 @@ SHORT_PAUSE_SECONDS = 0.1
 
 
 class PxPoller(object):
-    def __init__(self, poll_complete_notification_fd=None):
-        # type: (Optional[int]) -> None
+    def __init__(self, poll_complete_notification_fd: Optional[int] = None) -> None:
         """
         After a poll is done and there is new data, a POLL_COMPLETE_KEY will be
         written to the poll_complete_notification_fd file descriptor.
         """
-        self.thread = None  # type: Optional[threading.Thread]
+        self.thread: Optional[threading.Thread] = None
 
         self.poll_complete_notification_fd = poll_complete_notification_fd
 
         self.lock = threading.Lock()
 
         self._ioload = px_ioload.PxIoLoad()
-        self._ioload_string = u"None"
+        self._ioload_string = "None"
 
-        self._loadstring = u"None"
+        self._loadstring = "None"
 
-        self._meminfo = u"None"
+        self._meminfo = "None"
 
-        self._all_processes = []  # type: List[px_process.PxProcess]
+        self._all_processes: List[px_process.PxProcess] = []
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines = []  # type: List[text_type]
+        self._launchcounter_screen_lines: List[str] = []
 
         # No process polling until this timestamp, timestamp from time.time()
         self._pause_process_updates_until = 0.0
@@ -117,27 +113,22 @@ class PxPoller(object):
             time.sleep(sleeptime)
             self.poll_once()
 
-    def get_all_processes(self):
-        # type: () -> List[px_process.PxProcess]
+    def get_all_processes(self) -> List[px_process.PxProcess]:
         with self.lock:
             return self._all_processes
 
-    def get_ioload_string(self):
-        # type: () -> text_type
+    def get_ioload_string(self) -> str:
         with self.lock:
             return self._ioload_string
 
-    def get_launchcounter_lines(self):
-        # type: () -> List[text_type]
+    def get_launchcounter_lines(self) -> List[str]:
         with self.lock:
             return self._launchcounter_screen_lines
 
-    def get_meminfo(self):
-        # type: () -> text_type
+    def get_meminfo(self) -> str:
         with self.lock:
             return self._meminfo
 
-    def get_loadstring(self):
-        # type: () -> text_type
+    def get_loadstring(self) -> str:
         with self.lock:
             return self._loadstring

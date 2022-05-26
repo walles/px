@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from px import px_load
 from px import px_terminal
 
@@ -27,11 +25,11 @@ def test_averages_to_levels():
 def test_levels_to_graph():
     # Levels 0-3 should be visualized with 1-4 dots. And each character should
     # contain two bars. So this test case wants: "1, 2", "3, 4".
-    assert px_load.levels_to_graph([0, 1, 2, 3]) == u"⣠⣾"
+    assert px_load.levels_to_graph([0, 1, 2, 3]) == "⣠⣾"
 
     # Uneven-numbered level arrays should be padded with an empty column on the
     # left
-    assert px_load.levels_to_graph([0, 1, 3]) == u"⢀⣼"
+    assert px_load.levels_to_graph([0, 1, 3]) == "⢀⣼"
 
     assert px_load.levels_to_graph([]) == ""
     assert len(px_load.levels_to_graph([0])) == 1
@@ -42,7 +40,7 @@ def test_levels_to_graph():
 
 def test_get_load_string():
     px_terminal._enable_color = True
-    CSI = u"\x1b["
+    CSI = "\x1b["
     assert "0.3" + CSI in px_load.get_load_string((0.3, 0.2, 0.1))
     assert "3.0" + CSI in px_load.get_load_string((3.0, 0.2, 0.1))
     assert "1.1" + CSI in px_load.get_load_string((1.135135, 0.2, 0.1))
