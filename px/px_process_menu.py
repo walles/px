@@ -18,8 +18,8 @@ from . import px_processinfo
 
 from typing import Callable
 
-# Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
-# Make our own guaranteed-to-be-int constants.
+# Constants signal.SIGXXX are enums in Python 3. But we want the numbers (to
+# pass as an argument to /bin/kill), so we make our own int constants.
 SIGTERM = 15
 SIGKILL = 9
 
