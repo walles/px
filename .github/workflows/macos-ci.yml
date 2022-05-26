@@ -32,4 +32,4 @@ jobs:
           # The point is to run as little as possible on macOS because macOS runs are
           # slow and expensive, look for "multiplier" on this page:
           # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions
-          tox -e version.py,installtest,pytest3,package,test-package,test-wheel
+          tox -e version.py,installtest,pytest,package,test-package,test-wheel
