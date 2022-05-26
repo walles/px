@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """Benchmark loading the output of "lsof -F fnaptd0i" from a big system
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from . import testutils
 
 from px import px_ioload
