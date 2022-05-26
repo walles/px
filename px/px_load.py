@@ -80,8 +80,7 @@ def levels_to_graph(levels):
     return graph
 
 
-def get_load_values():
-    # type: () -> Tuple[float, float, float]
+def get_load_values() -> Tuple[float, float, float]:
     """
     Returns three system load numbers:
     * The first is the average system load over the last 0m-1m
@@ -97,8 +96,7 @@ def get_load_values():
     return (avg0to1, avg1to5, avg5to15)
 
 
-def get_load_string(load_values=None):
-    # type: (Tuple[float, float, float]) -> text_type
+def get_load_string(load_values: Tuple[float, float, float] = None) -> text_type:
     """
     Example return string, underlines indicate bold:
     "1.5  [4 cores | 8 virtual]  [15m load history: GRAPH]"

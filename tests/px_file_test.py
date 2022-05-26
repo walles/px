@@ -76,8 +76,7 @@ def test_get_all():
     assert cwd_count > 0
 
 
-def lsof_to_file(shard_array):
-    # type: (List[str]) -> px_file.PxFile
+def lsof_to_file(shard_array: List[str]) -> px_file.PxFile:
     return px_file.lsof_to_files("\0".join(shard_array + ["\n"]))[0]
 
 

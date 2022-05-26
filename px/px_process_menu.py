@@ -31,16 +31,14 @@ SIGKILL = 9
 KILL_TIMEOUT_SECONDS = 5
 
 
-def get_header_line(process):
-    # type: (px_process.PxProcess) -> text_type
+def get_header_line(process: px_process.PxProcess) -> text_type:
     header_line = "Process: "
     header_line += str(process.pid) + " " + process.command
     header_line = px_terminal.bold(header_line)
     return header_line
 
 
-def kill(process, signo):
-    # type: (px_process.PxProcess, int) -> bool
+def kill(process: px_process.PxProcess, signo: int) -> bool:
     """
     Signal a process.
 
@@ -57,8 +55,7 @@ def kill(process, signo):
     return True
 
 
-def sudo_kill(process, signo):
-    # type: (px_process.PxProcess, int) -> bool
+def sudo_kill(process: px_process.PxProcess, signo: int) -> bool:
     """
     Signal a process as root.
 
@@ -100,8 +97,7 @@ class PxProcessMenu(object):
         "Back to process listing",
     ]
 
-    def __init__(self, process):
-        # type: (px_process.PxProcess) -> None
+    def __init__(self, process: px_process.PxProcess) -> None:
         self.process = process
         self.done = False
 
@@ -111,8 +107,7 @@ class PxProcessMenu(object):
         # Index into MENU_ENTRIES
         self.active_entry = 0
 
-    def refresh_display(self):
-        # type: () -> None
+    def refresh_display(self) -> None:
         rows, columns = px_terminal.get_window_size()
 
         lines = []
@@ -149,8 +144,7 @@ class PxProcessMenu(object):
 
         px_terminal.draw_screen_lines(lines, columns)
 
-    def await_and_handle_user_input(self):
-        # type: () -> None
+    def await_and_handle_user_input(self) -> None:
         input = px_terminal.getch()
         if input is None:
             return
@@ -182,8 +176,7 @@ class PxProcessMenu(object):
                 # Unable to consume, give up
                 break
 
-    def start(self):
-        # type: () -> None
+    def start(self) -> None:
         """
         Process menu main loop
         """
@@ -191,8 +184,7 @@ class PxProcessMenu(object):
             self.refresh_display()
             self.await_and_handle_user_input()
 
-    def page_process_info(self):
-        # type: () -> None
+    def page_process_info(self) -> None:
         """
         Display process info in a pager.
         """
@@ -230,8 +222,9 @@ class PxProcessMenu(object):
 
             time.sleep(0.1)
 
-    def kill_process(self, signal_process):
-        # type: (Callable[[px_process.PxProcess, int], bool]) -> None
+    def kill_process(
+        self, signal_process: Callable[[px_process.PxProcess, int], bool]
+    ) -> None:
         """
         Send first SIGTERM then SIGKILL to a process.
 

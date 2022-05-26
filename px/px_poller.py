@@ -26,13 +26,12 @@ SHORT_PAUSE_SECONDS = 0.1
 
 
 class PxPoller(object):
-    def __init__(self, poll_complete_notification_fd=None):
-        # type: (Optional[int]) -> None
+    def __init__(self, poll_complete_notification_fd: Optional[int] = None) -> None:
         """
         After a poll is done and there is new data, a POLL_COMPLETE_KEY will be
         written to the poll_complete_notification_fd file descriptor.
         """
-        self.thread = None  # type: Optional[threading.Thread]
+        self.thread: Optional[threading.Thread] = None
 
         self.poll_complete_notification_fd = poll_complete_notification_fd
 
@@ -45,10 +44,10 @@ class PxPoller(object):
 
         self._meminfo = "None"
 
-        self._all_processes = []  # type: List[px_process.PxProcess]
+        self._all_processes: List[px_process.PxProcess] = []
 
         self._launchcounter = px_launchcounter.Launchcounter()
-        self._launchcounter_screen_lines = []  # type: List[text_type]
+        self._launchcounter_screen_lines: List[text_type] = []
 
         # No process polling until this timestamp, timestamp from time.time()
         self._pause_process_updates_until = 0.0
@@ -115,27 +114,22 @@ class PxPoller(object):
             time.sleep(sleeptime)
             self.poll_once()
 
-    def get_all_processes(self):
-        # type: () -> List[px_process.PxProcess]
+    def get_all_processes(self) -> List[px_process.PxProcess]:
         with self.lock:
             return self._all_processes
 
-    def get_ioload_string(self):
-        # type: () -> text_type
+    def get_ioload_string(self) -> text_type:
         with self.lock:
             return self._ioload_string
 
-    def get_launchcounter_lines(self):
-        # type: () -> List[text_type]
+    def get_launchcounter_lines(self) -> List[text_type]:
         with self.lock:
             return self._launchcounter_screen_lines
 
-    def get_meminfo(self):
-        # type: () -> text_type
+    def get_meminfo(self) -> text_type:
         with self.lock:
             return self._meminfo
 
-    def get_loadstring(self):
-        # type: () -> text_type
+    def get_loadstring(self) -> text_type:
         with self.lock:
             return self._loadstring

@@ -18,8 +18,9 @@ def check_output(capfd):
     assert not out
 
 
-def get_users_at(last_output, now, testtime):
-    # type: (str, datetime.datetime, datetime.datetime) -> Set[str]
+def get_users_at(
+    last_output: str, now: datetime.datetime, testtime: datetime.datetime
+) -> Set[str]:
     """
     Ask px_loginhistory to parse last_output given the current timestamp of now.
 

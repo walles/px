@@ -65,8 +65,7 @@ Problems detected, please send this text to one of:
 """
 
 
-def install(argv):
-    # type: (List[str]) -> None
+def install(argv: List[str]) -> None:
     """Find full path to self"""
     if not argv:
         sys.stderr.write("ERROR: Can't find myself, can't install\n")
@@ -102,8 +101,7 @@ def main():
     handleLogMessages(stringIO.getvalue())
 
 
-def configureLogging(loglevel, stringIO):
-    # type: (int, six.StringIO) -> None
+def configureLogging(loglevel: int, stringIO: six.StringIO) -> None:
 
     # This method inspired by: https://stackoverflow.com/a/9534960/473672
 
@@ -125,8 +123,7 @@ def configureLogging(loglevel, stringIO):
     rootLogger.addHandler(handler)
 
 
-def handleLogMessages(messages):
-    # type: (Optional[str]) -> None
+def handleLogMessages(messages: Optional[str]) -> None:
     if not messages:
         return
 
@@ -147,8 +144,7 @@ def handleLogMessages(messages):
     sys.exit(1)
 
 
-def _main(argv):
-    # type: (List[str]) -> None
+def _main(argv: List[str]) -> None:
 
     if "--install" in argv:
         install(argv)
@@ -169,11 +165,11 @@ def _main(argv):
         print(version.VERSION)
         return
 
-    with_pager = None  # type: Optional[bool]
-    with_color = None  # type: Optional[bool]
+    with_pager: Optional[bool] = None
+    with_color: Optional[bool] = None
     with_username = True
-    top = False  # type: bool
-    sort_cpupercent = False  # type: bool
+    top: bool = False
+    sort_cpupercent: bool = False
 
     while "--no-pager" in argv:
         with_pager = False
@@ -240,7 +236,7 @@ def _main(argv):
 
     procs = list(filter(lambda p: p.match(search), px_process.get_all()))
 
-    columns = None  # type: Optional[int]
+    columns: Optional[int] = None
     try:
         rows, columns = px_terminal.get_window_size()
     except px_terminal.TerminalError:

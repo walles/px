@@ -8,8 +8,7 @@ from typing import Optional  # NOQA
 from six import text_type  # NOQA
 
 
-def _strip_leading_dash(process):
-    # type: (px_process.PxProcess) -> text_type
+def _strip_leading_dash(process: px_process.PxProcess) -> text_type:
     key = process.command
     if key.startswith("-"):
         key = key[1:]
@@ -17,17 +16,21 @@ def _strip_leading_dash(process):
 
 
 class PxCwdFriends(object):
-    def __init__(self, process, all_processes, all_files):
-        # type: (px_process.PxProcess, List[px_process.PxProcess], List[px_file.PxFile]) -> None
+    def __init__(
+        self,
+        process: px_process.PxProcess,
+        all_processes: List[px_process.PxProcess],
+        all_files: List[px_file.PxFile],
+    ) -> None:
 
-        pid_to_process = {}  # type: Dict[int, px_process.PxProcess]
+        pid_to_process: Dict[int, px_process.PxProcess] = {}
         for p in all_processes:
             pid_to_process[p.pid] = p
 
         # Cwd can be None if lsof and process listing are out of sync
-        self.cwd = None  # type: Optional[text_type]
+        self.cwd: Optional[text_type] = None
 
-        cwd_to_processes = {}  # type: Dict[text_type, List[px_process.PxProcess]]
+        cwd_to_processes: Dict[text_type, List[px_process.PxProcess]] = {}
         for current_file in all_files:
             if not current_file.name:
                 continue
@@ -54,7 +57,7 @@ class PxCwdFriends(object):
                 cwd_to_processes[current_file.name] = file_processes
 
         if self.cwd is None:
-            friends = []  # type: List[px_process.PxProcess]
+            friends: List[px_process.PxProcess] = []
         elif self.cwd in cwd_to_processes:
             friends = cwd_to_processes[self.cwd]
         else:
@@ -66,4 +69,4 @@ class PxCwdFriends(object):
         # Sort primarily by command and secondarily by PID
         friends = sorted(friends, key=lambda friend: friend.pid)
         friends = sorted(friends, key=_strip_leading_dash)
-        self.friends = friends  # type: List[px_process.PxProcess]
+        self.friends: List[px_process.PxProcess] = friends

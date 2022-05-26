@@ -35,26 +35,27 @@ SEARCH_CURSOR = px_terminal.inverse_video(" ")
 MODE_BASE = 0
 MODE_SEARCH = 1
 
-top_mode = MODE_BASE  # type: int
+top_mode: int = MODE_BASE
 search_string = ""
 
 # Which pid were we last hovering?
-last_highlighted_pid = None  # type: Optional[int]
+last_highlighted_pid: Optional[int] = None
 
 # Which row were we last hovering? Go for this one if
 # we can't use last_pid.
-last_highlighted_row = 0  # type: int
+last_highlighted_row: int = 0
 
 # Has the user manually moved the highlight? If not, just stay on the top
 # row even if the tow PID moves away.
-highlight_has_moved = False  # type: bool
+highlight_has_moved: bool = False
 
 # Order top list by memory usage. The opposite is by CPU usage.
 sort_by_memory = False
 
 
-def adjust_cpu_times(baseline, current):
-    # type: (List[px_process.PxProcess], List[px_process.PxProcess]) -> List[px_process.PxProcess]
+def adjust_cpu_times(
+    baseline: List[px_process.PxProcess], current: List[px_process.PxProcess]
+) -> List[px_process.PxProcess]:
     """
     Identify processes in current that are also in baseline.
 
@@ -66,7 +67,7 @@ def adjust_cpu_times(baseline, current):
 
     Neither current nor baseline are changed by this function.
     """
-    pid2proc = {}  # type: Dict[int,px_process.PxProcess]
+    pid2proc: Dict[int, px_process.PxProcess] = {}
     for proc in current:
         pid2proc[proc.pid] = proc
 
@@ -98,16 +99,14 @@ def adjust_cpu_times(baseline, current):
     return list(pid2proc.values())
 
 
-def get_notnone_cpu_time_seconds(proc):
-    # type: (px_process.PxProcess) -> float
+def get_notnone_cpu_time_seconds(proc: px_process.PxProcess) -> float:
     seconds = proc.cpu_time_seconds
     if seconds is not None:
         return seconds
     return 0
 
 
-def get_notnone_memory_percent(proc):
-    # type: (px_process.PxProcess) -> float
+def get_notnone_memory_percent(proc: px_process.PxProcess) -> float:
     percent = proc.memory_percent
     if percent is not None:
         return percent
@@ -134,9 +133,9 @@ def sort_by_cpu_usage(toplist):
 
 
 def get_toplist(
-    baseline,  # type: List[px_process.PxProcess]
-    current,  # type: List[px_process.PxProcess]
-    by_memory=False,  # type: bool
+    baseline: List[px_process.PxProcess],
+    current: List[px_process.PxProcess],
+    by_memory: bool = False,
 ):
     # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
@@ -152,13 +151,13 @@ def get_toplist(
     return toplist
 
 
-def writebytes(bytestring):
-    # type: (bytes) -> None
+def writebytes(bytestring: bytes) -> None:
     os.write(sys.stdout.fileno(), bytestring)
 
 
-def get_line_to_highlight(toplist, max_process_count):
-    # type: (List[px_process.PxProcess], int) -> Optional[int]
+def get_line_to_highlight(
+    toplist: List[px_process.PxProcess], max_process_count: int
+) -> Optional[int]:
     global last_highlighted_pid
     global last_highlighted_row
     global highlight_has_moved
@@ -202,14 +201,13 @@ def get_line_to_highlight(toplist, max_process_count):
 
 
 def get_screen_lines(
-    toplist,  # type: List[px_process.PxProcess]
-    poller,  # type: px_poller.PxPoller
-    rows,  # type: int
-    columns,  # type: int
-    include_footer=True,  # type: bool
-    search=None,  # type: Optional[text_type]
-):
-    # type: (...) -> List[text_type]
+    toplist: List[px_process.PxProcess],
+    poller: px_poller.PxPoller,
+    rows: int,
+    columns: int,
+    include_footer: bool = True,
+    search: Optional[text_type] = None,
+) -> List[text_type]:
     """
     Note that the columns parameter is only used for layout purposes. Lines
     returned from this function will still need to be cropped before being
@@ -258,7 +256,7 @@ def get_screen_lines(
     # Create a launchers section
     header_height = len(lines)
     launches_maxheight = rows - header_height - cputop_minheight - footer_height
-    launchlines = []  # type: List[text_type]
+    launchlines: List[text_type] = []
     if launches_maxheight >= 3:
         launchlines = poller.get_launchcounter_lines()
         if len(launchlines) > 0:
@@ -326,13 +324,12 @@ def get_screen_lines(
 
 
 def redraw(
-    toplist,  # type: List[px_process.PxProcess]
-    poller,  # type: px_poller.PxPoller
-    rows,  # type: int
-    columns,  # type: int
-    include_footer=True,  # type: bool
-):
-    # type: (...) -> None
+    toplist: List[px_process.PxProcess],
+    poller: px_poller.PxPoller,
+    rows: int,
+    columns: int,
+    include_footer: bool = True,
+) -> None:
     """
     Refresh display.
 
@@ -346,8 +343,7 @@ def redraw(
     px_terminal.draw_screen_lines(lines, columns)
 
 
-def handle_search_keypresses(key_sequence):
-    # type: (px_terminal.ConsumableString) -> None
+def handle_search_keypresses(key_sequence: px_terminal.ConsumableString) -> None:
     global search_string
     global last_highlighted_row
     global last_highlighted_pid
@@ -455,8 +451,7 @@ def get_command(**kwargs):
     return CMD_WHATEVER
 
 
-def _top(search=""):
-    # type: (str) -> None
+def _top(search: str = "") -> None:
 
     global search_string
     search_string = search
@@ -495,8 +490,7 @@ def _top(search=""):
                 toplist = get_toplist(baseline, current, sort_by_memory)
 
 
-def top(search=""):
-    # type: (str) -> None
+def top(search: str = "") -> None:
 
     if not sys.stdout.isatty():
         sys.stderr.write(

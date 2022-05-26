@@ -50,8 +50,7 @@ def _pump_info_to_fd(with_fileno, process, processes):
 
 
 # From: https://stackoverflow.com/a/377028/473672
-def which(program):
-    # type: (Optional[str]) -> Optional[str]
+def which(program: Optional[str]) -> Optional[str]:
     if not program:
         return None
 
@@ -71,8 +70,7 @@ def which(program):
     return None
 
 
-def to_command_line(spec):
-    # type: (Optional[str]) -> Optional[List[str]]
+def to_command_line(spec: Optional[str]) -> Optional[List[str]]:
     if not spec:
         return None
 
@@ -118,8 +116,9 @@ def launch_pager():
     return subprocess.Popen(pager_cmd, stdin=subprocess.PIPE, env=env)
 
 
-def page_process_info(process, processes):
-    # type: (px_process.PxProcess, List[px_process.PxProcess]) -> None
+def page_process_info(
+    process: px_process.PxProcess, processes: List[px_process.PxProcess]
+) -> None:
 
     pager = launch_pager()
     pager_stdin = pager.stdin

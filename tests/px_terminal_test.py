@@ -102,7 +102,7 @@ def test_getch():
 def test_tokenize():
     px_terminal._enable_color = True
     input = "ab" + px_terminal.bold("c") + "de"
-    parts = []  # type: List[text_type]
+    parts: List[text_type] = []
     for token in px_terminal._tokenize(input):
         parts.append(token)
 

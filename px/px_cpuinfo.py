@@ -11,8 +11,7 @@ from typing import List  # NOQA
 from six import text_type  # NOQA
 
 
-def get_core_count():
-    # type: () -> Tuple[int,int]
+def get_core_count() -> Tuple[int, int]:
     """
     Count the number of cores in the system.
 
@@ -33,8 +32,9 @@ def get_core_count():
     raise IOError("Unable to get cores info " + platform_s)
 
 
-def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
-    # type: (str) -> Optional[Tuple[int,int]]
+def get_core_count_from_proc_cpuinfo(
+    proc_cpuinfo: str = "/proc/cpuinfo",
+) -> Optional[Tuple[int, int]]:
     """
     Count the number of cores in /proc/cpuinfo.
 
@@ -71,8 +71,7 @@ def get_core_count_from_proc_cpuinfo(proc_cpuinfo="/proc/cpuinfo"):
     return (physical, logical)
 
 
-def get_core_count_from_sysctl():
-    # type: () -> Optional[Tuple[int,int]]
+def get_core_count_from_sysctl() -> Optional[Tuple[int, int]]:
     try:
         stdout = px_exec_util.run(["sysctl", "hw"])
     except (IOError, OSError) as e:
@@ -92,8 +91,9 @@ def get_core_count_from_sysctl():
     return (physical, logical)
 
 
-def parse_sysctl_output(sysctl_lines):
-    # type: (List[text_type]) -> Tuple[Optional[int],Optional[int]]
+def parse_sysctl_output(
+    sysctl_lines: List[text_type],
+) -> Tuple[Optional[int], Optional[int]]:
 
     # Note the ending spaces, they must be there for number extraction to work!
     PHYSICAL_PREFIX = "hw.physicalcpu: "

@@ -20,8 +20,7 @@ PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")
 SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
 
 
-def get_meminfo():
-    # type: () -> text_type
+def get_meminfo() -> text_type:
 
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
@@ -49,8 +48,7 @@ def get_meminfo():
     return ram_text
 
 
-def _get_ram_numbers():
-    # type: () -> Tuple[int, int]
+def _get_ram_numbers() -> Tuple[int, int]:
     """
     Returns a tuple containing two numbers:
     * Total amount of RAM installed in the machine (in bytes)
@@ -72,8 +70,9 @@ def _get_ram_numbers():
     raise IOError("Unable to get memory info " + platform_s)
 
 
-def _update_from_meminfo(base, line, name):
-    # type: (Optional[int], text_type, text_type) -> Optional[int]
+def _update_from_meminfo(
+    base: Optional[int], line: text_type, name: text_type
+) -> Optional[int]:
     if not line.startswith(name + ":"):
         return base
 
@@ -82,17 +81,18 @@ def _update_from_meminfo(base, line, name):
     return int(just_the_number)
 
 
-def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
-    # type: (str) -> Optional[Tuple[int, int]]
+def _get_ram_numbers_from_proc(
+    proc_meminfo: str = "/proc/meminfo",
+) -> Optional[Tuple[int, int]]:
 
-    total_kb = None  # type: Optional[int]
-    available_kb = None  # type: Optional[int]
-    free_kb = None  # type: Optional[int]
-    buffers_kb = None  # type: Optional[int]
-    cached_kb = None  # type: Optional[int]
-    swapcached_kb = None  # type: Optional[int]
-    swaptotal_kb = None  # type: Optional[int]
-    swapfree_kb = None  # type: Optional[int]
+    total_kb: Optional[int] = None
+    available_kb: Optional[int] = None
+    free_kb: Optional[int] = None
+    buffers_kb: Optional[int] = None
+    cached_kb: Optional[int] = None
+    swapcached_kb: Optional[int] = None
+    swaptotal_kb: Optional[int] = None
+    swapfree_kb: Optional[int] = None
 
     try:
         with open(proc_meminfo) as f:
@@ -142,8 +142,7 @@ def _get_ram_numbers_from_proc(proc_meminfo="/proc/meminfo"):
     return (total_kb * 1024, (swapused_kb + ramused_kb) * 1024)
 
 
-def _get_ram_numbers_macos():
-    # type: () -> Optional[Tuple[int, int]]
+def _get_ram_numbers_macos() -> Optional[Tuple[int, int]]:
     vm_stat_lines = _get_vmstat_output_lines()
     if vm_stat_lines is None:
         return None
@@ -159,8 +158,7 @@ def _get_ram_numbers_macos():
     return (total_ram_bytes, used_ram_bytes + used_swap_bytes)
 
 
-def _get_vmstat_output_lines():
-    # type: () -> Optional[List[text_type]]
+def _get_vmstat_output_lines() -> Optional[List[text_type]]:
     try:
         return px_exec_util.run(["vm_stat"]).splitlines()
     except (IOError, OSError) as e:
@@ -171,8 +169,7 @@ def _get_vmstat_output_lines():
         raise
 
 
-def _get_used_swap_bytes_sysctl():
-    # type: () -> int
+def _get_used_swap_bytes_sysctl() -> int:
     stdout = px_exec_util.run(["sysctl", "vm.swapusage"], check_exitcode=True)
     match = SWAPUSAGE_RE.match(stdout.strip())
     if not match:
@@ -181,8 +178,9 @@ def _get_used_swap_bytes_sysctl():
     return int(float(match.group(1)) * 1024 * 1024)
 
 
-def _update_if_prefix(base, line, prefix):
-    # type: (Optional[int], text_type, text_type) -> Optional[int]
+def _update_if_prefix(
+    base: Optional[int], line: text_type, prefix: text_type
+) -> Optional[int]:
     if not line.startswith(prefix):
         return base
 
@@ -191,8 +189,9 @@ def _update_if_prefix(base, line, prefix):
     return int(no_ending_dot[len(prefix) :])
 
 
-def _get_ram_numbers_from_vm_stat_output(vm_stat_lines):
-    # type: (List[text_type]) -> Optional[Tuple[int, int]]
+def _get_ram_numbers_from_vm_stat_output(
+    vm_stat_lines: List[text_type],
+) -> Optional[Tuple[int, int]]:
 
     # List based on https://apple.stackexchange.com/a/196925/182882
     page_size_bytes = None

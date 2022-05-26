@@ -11,14 +11,15 @@ from typing import Tuple  # NOQA
 from six import text_type  # NOQA
 
 
-def get_process_categories(all_processes):
-    # type: (List[px_process.PxProcess]) -> List[Tuple[text_type, int]]
+def get_process_categories(
+    all_processes: List[px_process.PxProcess],
+) -> List[Tuple[text_type, int]]:
     """
     Group processes by pretty names, keeping track of the total rss_kb in each
     group.
     """
 
-    names_to_kilobytes = {}  # type: Dict[text_type, int]
+    names_to_kilobytes: Dict[text_type, int] = {}
     for process in all_processes:
         base_kb = 0
         if process.command in names_to_kilobytes:
@@ -31,14 +32,15 @@ def get_process_categories(all_processes):
     return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def get_user_categories(all_processes):
-    # type: (List[px_process.PxProcess]) -> List[Tuple[text_type, int]]
+def get_user_categories(
+    all_processes: List[px_process.PxProcess],
+) -> List[Tuple[text_type, int]]:
     """
     Group processes by user names, keeping track of the total rss_kb in each
     group.
     """
 
-    names_to_kilobytes = {}  # type: Dict[text_type, int]
+    names_to_kilobytes: Dict[text_type, int] = {}
     for process in all_processes:
         base_kb = 0
         if process.username in names_to_kilobytes:
@@ -51,8 +53,9 @@ def get_user_categories(all_processes):
     return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def render_bar(bar_length, names_and_numbers):
-    # type: (int, List[Tuple[text_type, int]]) -> text_type
+def render_bar(
+    bar_length: int, names_and_numbers: List[Tuple[text_type, int]]
+) -> text_type:
     """
     You probably want to use rambar() instead, this is just utility function.
     """
@@ -109,11 +112,13 @@ def render_bar(bar_length, names_and_numbers):
     return bar
 
 
-def rambar_by_process(ram_bar_length, all_processes):
-    # type: (int, List[px_process.PxProcess]) -> text_type
+def rambar_by_process(
+    ram_bar_length: int, all_processes: List[px_process.PxProcess]
+) -> text_type:
     return render_bar(ram_bar_length, get_process_categories(all_processes))
 
 
-def rambar_by_user(ram_bar_length, all_processes):
-    # type: (int, List[px_process.PxProcess]) -> text_type
+def rambar_by_user(
+    ram_bar_length: int, all_processes: List[px_process.PxProcess]
+) -> text_type:
     return render_bar(ram_bar_length, get_user_categories(all_processes))

@@ -33,7 +33,7 @@ DURATION_S = 30
 
 
 def get_most_common_pid(files):
-    counts = {}  # type: MutableMapping[int, int]
+    counts: MutableMapping[int, int] = {}
     for file in files:
         pid = file.pid
         if pid not in counts:

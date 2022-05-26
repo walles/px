@@ -8,7 +8,7 @@ from typing import List  # NOQA
 from typing import Dict  # NOQA
 
 
-ENV = {}  # type: Dict[str, str]
+ENV: Dict[str, str] = {}
 for name, value in os.environ.items():
     if name == "LANG":
         continue
@@ -17,8 +17,7 @@ for name, value in os.environ.items():
     ENV[name] = value
 
 
-def run(command, check_exitcode=False):
-    # type: (List[str], bool) -> text_type
+def run(command: List[str], check_exitcode: bool = False) -> text_type:
     run = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV
     )

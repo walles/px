@@ -10,8 +10,7 @@ from typing import Dict  # NOQA
 from typing import Optional  # NOQA
 
 
-def render_launch_tuple(launch_tuple):
-    # type: (Tuple[text_type, int]) -> text_type
+def render_launch_tuple(launch_tuple: Tuple[text_type, int]) -> text_type:
     binary = launch_tuple[0]
     count = launch_tuple[1]
     if count == 0:
@@ -20,28 +19,27 @@ def render_launch_tuple(launch_tuple):
         return px_terminal.bold(binary) + "(" + str(count) + ")"
 
 
-def _get_minus_max_score(tuples_list):
-    # type: (List[Tuple[text_type, int]]) -> int
+def _get_minus_max_score(tuples_list: List[Tuple[text_type, int]]) -> int:
     max_score = 0
     for tuple in tuples_list:
         max_score = max(max_score, tuple[1])
     return -max_score
 
 
-def sort_launchers_list(launchers_list):
-    # type: (List[List[Tuple[text_type, int]]]) -> List[List[Tuple[text_type, int]]]
+def sort_launchers_list(
+    launchers_list: List[List[Tuple[text_type, int]]]
+) -> List[List[Tuple[text_type, int]]]:
     return sorted(launchers_list, key=_get_minus_max_score)
 
 
 class Launchcounter(object):
     def __init__(self):
-        self._hierarchies = {}  # type: Dict[Tuple[text_type, ...], int]
+        self._hierarchies: Dict[Tuple[text_type, ...], int] = {}
 
         # Most recent process snapshot
-        self._last_processlist = None  # type: Optional[List[px_process.PxProcess]]
+        self._last_processlist: Optional[List[px_process.PxProcess]] = None
 
-    def _strip_parentheses(self, s):
-        # type: (text_type) -> text_type
+    def _strip_parentheses(self, s: text_type) -> text_type:
         if not s:
             return s
         if s[0] != "(":
@@ -50,20 +48,18 @@ class Launchcounter(object):
             return s
         return s[1:-1]
 
-    def _callchain(self, process):
-        # type: (px_process.PxProcess) -> Tuple[text_type, ...]
+    def _callchain(self, process: px_process.PxProcess) -> Tuple[text_type, ...]:
 
-        reverse_callchain = []  # type: List[text_type]
+        reverse_callchain: List[text_type] = []
 
-        current = process  # type: Optional[px_process.PxProcess]
+        current: Optional[px_process.PxProcess] = process
         while current is not None:
             reverse_callchain.append(self._strip_parentheses(current.command))
             current = current.parent
 
         return tuple(reversed(reverse_callchain))
 
-    def _register_launches(self, new_processes):
-        # type: (List[px_process.PxProcess]) -> None
+    def _register_launches(self, new_processes: List[px_process.PxProcess]) -> None:
 
         for new_process in new_processes:
             callchain = self._callchain(new_process)
@@ -74,11 +70,10 @@ class Launchcounter(object):
 
     def _list_new_launches(
         self,
-        before,  # type: List[px_process.PxProcess]
-        after,  # type: List[px_process.PxProcess]
-    ):
-        # type: (...) -> List[px_process.PxProcess]
-        pid2oldProc = {}  # type: Dict[int,px_process.PxProcess]
+        before: List[px_process.PxProcess],
+        after: List[px_process.PxProcess],
+    ) -> List[px_process.PxProcess]:
+        pid2oldProc: Dict[int, px_process.PxProcess] = {}
         for old_proc in before:
             pid2oldProc[old_proc.pid] = old_proc
 
@@ -97,8 +92,7 @@ class Launchcounter(object):
 
         return new_procs
 
-    def update(self, procs_snapshot):
-        # type: (List[px_process.PxProcess]) -> None
+    def update(self, procs_snapshot: List[px_process.PxProcess]) -> None:
 
         if self._last_processlist is None:
             self._last_processlist = procs_snapshot
@@ -109,13 +103,14 @@ class Launchcounter(object):
 
         self._last_processlist = procs_snapshot
 
-    def _to_tuple_list(self, launcher_list, count):
-        # type: (Tuple[text_type, ...], int) -> List[Tuple[text_type, int]]
+    def _to_tuple_list(
+        self, launcher_list: Tuple[text_type, ...], count: int
+    ) -> List[Tuple[text_type, int]]:
         """
         Converts from: (("a", "b", "c"), 5)
                  to  : [("a", 0), ("b", 0), ("c", 5)]
         """
-        tuple_list = []  # type: List[Tuple[text_type, int]]
+        tuple_list: List[Tuple[text_type, int]] = []
         for launcher in launcher_list:
             tuple_list.append((launcher, 0))
         tuple_list[-1] = (launcher_list[-1], count)
@@ -123,10 +118,9 @@ class Launchcounter(object):
 
     def _merge_tuple_lists(
         self,
-        tl1,  # type: List[Tuple[text_type, int]]
-        tl2,  # type: List[Tuple[text_type, int]]
-    ):
-        # type: (...) -> Optional[List[Tuple[text_type, int]]]
+        tl1: List[Tuple[text_type, int]],
+        tl2: List[Tuple[text_type, int]],
+    ) -> Optional[List[Tuple[text_type, int]]]:
         if len(tl1) > len(tl2):
             longer = tl1
             shorter = tl2
@@ -145,9 +139,8 @@ class Launchcounter(object):
 
         return merged
 
-    def _coalesce_launchers(self):
-        # type: () -> List[List[Tuple[text_type, int]]]
-        coalesced = []  # type: List[List[Tuple[text_type, int]]]
+    def _coalesce_launchers(self) -> List[List[Tuple[text_type, int]]]:
+        coalesced: List[List[Tuple[text_type, int]]] = []
 
         for launcher_list in sorted(self._hierarchies.keys()):
             count = self._hierarchies[launcher_list]
@@ -165,13 +158,12 @@ class Launchcounter(object):
 
         return coalesced
 
-    def get_screen_lines(self):
-        # type: () -> List[text_type]
+    def get_screen_lines(self) -> List[text_type]:
 
         launchers_list = self._coalesce_launchers()
         launchers_list = sort_launchers_list(launchers_list)
 
-        lines = []  # type: List[text_type]
+        lines: List[text_type] = []
         for row in launchers_list:
             line = " -> ".join(map(render_launch_tuple, row))
             lines.append(line)

@@ -55,8 +55,7 @@ def test_find_friends():
     assert test_me.friends == [friend]
 
 
-def _get_friends_in_order(*args):
-    # type: (text_type) -> List[text_type]
+def _get_friends_in_order(*args: text_type) -> List[text_type]:
     procs = []
     files = []
     for index, arg in enumerate(args):
@@ -74,8 +73,9 @@ def _get_friends_in_order(*args):
     return return_me
 
 
-def _get_friend_processes_in_order(*args):
-    # type: (px_process.PxProcess) -> List[px_process.PxProcess]
+def _get_friend_processes_in_order(
+    *args: px_process.PxProcess,
+) -> List[px_process.PxProcess]:
     files = []
     procs = list(args)
     for proc in procs:

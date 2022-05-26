@@ -34,12 +34,11 @@ class IpcMap(object):
 
     def __init__(
         self,
-        process,  # type: px_process.PxProcess
-        files,  # type: Iterable[px_file.PxFile]
-        processes,  # type: Iterable[px_process.PxProcess]
-        is_root,  # type: bool
-    ):
-        # type: (...) -> None
+        process: px_process.PxProcess,
+        files: Iterable[px_file.PxFile],
+        processes: Iterable[px_process.PxProcess],
+        is_root: bool,
+    ) -> None:
 
         # On Linux, lsof reports the same open file once per thread of a
         # process. Putting the files in a set gives us each file only once.
@@ -58,13 +57,12 @@ class IpcMap(object):
             filter(lambda f: f.pid == self.process.pid, self.files)
         )
 
-        self._map = {}  # type: MutableMapping[PeerProcess, Set[px_file.PxFile]]
+        self._map: MutableMapping[PeerProcess, Set[px_file.PxFile]] = {}
         self._create_mapping()
 
         self.fds = self._create_fds(is_root)
 
-    def _create_fds(self, is_root):
-        # type: (bool) -> Dict[int, str]
+    def _create_fds(self, is_root: bool) -> Dict[int, str]:
         """
         Describe standard FDs open by this process; the mapping is from FD number to
         FD description.
@@ -96,7 +94,7 @@ class IpcMap(object):
                 excuse = "destination not found, try running px as root"
                 if is_root:
                     excuse = "not connected"
-                name = file.name  # type: Optional[str]
+                name: Optional[str] = file.name
                 if not name:
                     name = file.device
                 if name and name.startswith("->"):
@@ -134,8 +132,7 @@ class IpcMap(object):
 
         return fds
 
-    def _create_mapping(self):
-        # type: () -> None
+    def _create_mapping(self) -> None:
         self._create_indices()
 
         unknown = PeerProcess(
@@ -169,23 +166,20 @@ class IpcMap(object):
                     self._pid2process[other_end_pid] = other_end_process
                 self.add_ipc_entry(other_end_process, file)
 
-        self.network_connections = network_connections  # type: Set[px_file.PxFile]
+        self.network_connections: Set[px_file.PxFile] = network_connections
 
-    def _create_indices(self):
-        # type: () -> None
+    def _create_indices(self) -> None:
         """
         Creates indices used by _get_other_end_pids()
         """
         self._pid2process = create_pid2process(self.processes)
 
-        self._device_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._name_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._name_to_files = {}  # type: MutableMapping[str, List[px_file.PxFile]]
-        self._device_number_to_files = (
-            {}
-        )  # type: MutableMapping[int, List[px_file.PxFile]]
-        self._fifo_id_and_access_to_pids = {}  # type: MutableMapping[str, List[int]]
-        self._local_endpoint_to_pid = {}  # type: MutableMapping[str, int]
+        self._device_to_pids: MutableMapping[str, List[int]] = {}
+        self._name_to_pids: MutableMapping[str, List[int]] = {}
+        self._name_to_files: MutableMapping[str, List[px_file.PxFile]] = {}
+        self._device_number_to_files: MutableMapping[int, List[px_file.PxFile]] = {}
+        self._fifo_id_and_access_to_pids: MutableMapping[str, List[int]] = {}
+        self._local_endpoint_to_pid: MutableMapping[str, int] = {}
         for file in self.files:
             if file.device is not None:
                 add_arraymapping(self._device_to_pids, file.device, file.pid)
@@ -211,8 +205,7 @@ class IpcMap(object):
                         file.pid,
                     )
 
-    def _get_other_end_pids(self, file):
-        # type: (px_file.PxFile) -> Iterable[int]
+    def _get_other_end_pids(self, file: px_file.PxFile) -> Iterable[int]:
         """Locate the other end of a pipe / domain socket"""
         if file.type in ["IPv4", "IPv6"]:
             local, remote = file.get_endpoints()
@@ -236,7 +229,7 @@ class IpcMap(object):
         if file.device is not None:
             file_device_with_arrow = "->" + file.device
 
-        pids = set()  # type: Set[int]
+        pids: Set[int] = set()
 
         # The other end of the socket / pipe is encoded in the DEVICE field of
         # lsof's output ("view source" in your browser to see the conversation):
@@ -274,8 +267,7 @@ class IpcMap(object):
 
         return pids
 
-    def add_ipc_entry(self, process, file):
-        # type: (PeerProcess, px_file.PxFile) -> None
+    def add_ipc_entry(self, process: PeerProcess, file: px_file.PxFile) -> None:
         """
         Note that we're connected to process via file
         """
@@ -284,15 +276,13 @@ class IpcMap(object):
 
         self._map[process].add(file)
 
-    def keys(self):
-        # type: () -> Iterable[PeerProcess]
+    def keys(self) -> Iterable[PeerProcess]:
         """
         Returns a set of other px_processes this process is connected to
         """
         return self._map.keys()
 
-    def __getitem__(self, process):
-        # type: (PeerProcess) -> Set[px_file.PxFile]
+    def __getitem__(self, process: PeerProcess) -> Set[px_file.PxFile]:
         """
         Returns a set of px_files through which we're connected to the px_process
         """
@@ -300,8 +290,7 @@ class IpcMap(object):
 
 
 class PeerProcess(object):
-    def __init__(self, name=None, pid=None):
-        # type: (Optional[Text], Optional[int]) -> None
+    def __init__(self, name: Optional[Text] = None, pid: Optional[int] = None) -> None:
         if not name:
             if pid is None:
                 raise ValueError("Either pid, name or both must be set")
@@ -310,8 +299,8 @@ class PeerProcess(object):
             if pid is not None:
                 name += "(" + str(pid) + ")"
 
-        self.name = name  # type: Text
-        self.pid = pid  # type: Optional[int]
+        self.name: Text = name
+        self.pid: Optional[int] = pid
 
     def __repr__(self):
         return self.name
@@ -323,9 +312,10 @@ class PeerProcess(object):
         return self.name
 
 
-def create_pid2process(processes):
-    # type: (Iterable[px_process.PxProcess]) -> MutableMapping[int, PeerProcess]
-    pid2process = {}  # type: MutableMapping[int, PeerProcess]
+def create_pid2process(
+    processes: Iterable[px_process.PxProcess],
+) -> MutableMapping[int, PeerProcess]:
+    pid2process: MutableMapping[int, PeerProcess] = {}
     for process in processes:
         # Guard against duplicate PIDs
         assert process.pid not in pid2process
@@ -335,7 +325,6 @@ def create_pid2process(processes):
     return pid2process
 
 
-def add_arraymapping(mapping, key, value):
-    # type: (MutableMapping[S, List[T]], S, T) -> None
+def add_arraymapping(mapping: MutableMapping[S, List[T]], key: S, value: T) -> None:
     array = mapping.setdefault(key, [])
     array.append(value)

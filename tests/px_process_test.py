@@ -168,7 +168,7 @@ def _test_get_all():
     assert 1 in pids
 
     # Assert that all contains no duplicate PIDs
-    seen_pids = set()  # type: MutableSet[int]
+    seen_pids: MutableSet[int] = set()
     for process in all:
         pid = process.pid
         assert pid not in seen_pids
