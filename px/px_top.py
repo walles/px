@@ -2,7 +2,6 @@
 
 import sys
 import copy
-import time
 import logging
 import unicodedata
 
@@ -202,8 +201,8 @@ def get_line_to_highlight(
 def get_screen_lines(
     toplist: List[px_process.PxProcess],
     poller: px_poller.PxPoller,
-    rows: int,
-    columns: int,
+    screen_rows: int,
+    screen_columns: int,
     include_footer: bool = True,
     search: Optional[str] = None,
 ) -> List[str]:
@@ -227,8 +226,8 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
-    assert columns > 0
-    ram_bar_length = columns - 16
+    assert screen_columns > 0
+    ram_bar_length = screen_columns - 16
     if ram_bar_length > 20:
         # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
         # feel free to change it if you have a better number.
@@ -252,12 +251,22 @@ def get_screen_lines(
         "",
     ]
 
-    # Create a launchers section
+    # Create a launches section
     header_height = len(lines)
-    launches_maxheight = rows - header_height - cputop_minheight - footer_height
+    main_area_height = screen_rows - header_height - footer_height
+    launches_maxheight1 = (
+        main_area_height - cputop_minheight
+    )  # Give CPU top part enough space
+    launches_maxheight2 = (
+        main_area_height * 30
+    ) // 100  # https://github.com/walles/px/issues/98
+    launches_maxheight = min(launches_maxheight1, launches_maxheight2)
     launchlines: List[str] = []
     if launches_maxheight >= 3:
-        launchlines = poller.get_launchcounter_lines()
+        launchlines = (
+            poller.get_launchcounter_lines()
+            + ["imagine -> some -> real -> launch -> lines -> here"] * 44
+        )
         if len(launchlines) > 0:
             # Add a section header
             launchlines = [
@@ -269,7 +278,7 @@ def get_screen_lines(
             launchlines = launchlines[0:launches_maxheight]
 
     # Compute cputop height now that we know how many launchlines we have
-    cputop_height = rows - header_height - len(launchlines) - footer_height
+    cputop_height = screen_rows - header_height - len(launchlines) - footer_height
 
     # -2 = Section name + column headings
     max_process_count = cputop_height - 2
@@ -291,7 +300,7 @@ def get_screen_lines(
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
-    toplist_table_lines += rows * [""]
+    toplist_table_lines += screen_rows * [""]
 
     top_what = "CPU"
     if sort_by_memory:
