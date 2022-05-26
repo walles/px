@@ -8,8 +8,6 @@ import pytest
 from px import px_process
 from . import testutils
 
-import sys
-
 from typing import MutableSet
 
 

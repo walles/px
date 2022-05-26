@@ -217,7 +217,6 @@ Development
 Prerequisites
 -------------
 
-* A Python 2 version
 * A Python 3.6+ version
 * `tox`_
 
@@ -228,8 +227,8 @@ Note that before editing any code, you need to run ``tox.sh`` once to create
 the ``px/version.py`` file.
 
 Note that the build infrastructure here is designed to create a ``px.pex`` file
-that works on both Python 2 and Python 3, and on "all" machines with Python
-interpreters (tested on Linux and macOS).
+that works on "all" machines with Python 3 interpreters (tested on Linux and
+macOS).
 
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
 * Build and test: ``./tox.sh``
