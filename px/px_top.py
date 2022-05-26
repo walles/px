@@ -261,6 +261,7 @@ def get_screen_lines(
         main_area_height * 30
     ) // 100  # https://github.com/walles/px/issues/98
     launches_maxheight = min(launches_maxheight1, launches_maxheight2)
+
     launchlines: List[str] = []
     if launches_maxheight >= 3:
         launchlines = poller.get_launchcounter_lines()
