@@ -70,8 +70,8 @@ def test_create_future_process():
 def test_ps_line_to_process_unicode():
     process = testutils.create_process(cputime="2:14.15")
 
-    assert process.username == u"root"
-    assert process.cmdline == u"/usr/sbin/cupsd -l"
+    assert process.username == "root"
+    assert process.cmdline == "/usr/sbin/cupsd -l"
 
 
 def test_ps_line_to_process_1():

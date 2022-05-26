@@ -12,13 +12,13 @@ if sys.version_info.major >= 3:
 
 
 # Match "[kworker/0:0H]", no grouping
-LINUX_KERNEL_PROC = re.compile(u"^\\[[^/ ]+/?[^/ ]+\\]$")
+LINUX_KERNEL_PROC = re.compile("^\\[[^/ ]+/?[^/ ]+\\]$")
 
 # Match "(python2.7)", no grouping
-OSX_PARENTHESIZED_PROC = re.compile(u"^\\([^()]+\\)$")
+OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 
 # Name of the Perl interpreter
-PERL_BIN = re.compile(u"^perl[.0-9]*$")
+PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
 def to_array(commandline):

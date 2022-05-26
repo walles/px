@@ -38,7 +38,7 @@ MODE_BASE = 0
 MODE_SEARCH = 1
 
 top_mode = MODE_BASE  # type: int
-search_string = u""
+search_string = ""
 
 # Which pid were we last hovering?
 last_highlighted_pid = None  # type: Optional[int]
@@ -249,12 +249,12 @@ def get_screen_lines(
 
     # Print header
     lines = [
-        px_terminal.bold(u"Sysload: ") + poller.get_loadstring(),
-        px_terminal.bold(u"RAM Use: ") + poller.get_meminfo(),
-        u"  By process: " + rambar_by_process,
-        u"     By user: " + rambar_by_user,
-        px_terminal.bold(u"IO Load:      ") + poller.get_ioload_string(),
-        u"",
+        px_terminal.bold("Sysload: ") + poller.get_loadstring(),
+        px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
+        "  By process: " + rambar_by_process,
+        "     By user: " + rambar_by_user,
+        px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
+        "",
     ]
 
     # Create a launchers section
@@ -287,9 +287,9 @@ def get_screen_lines(
     if top_mode == MODE_SEARCH:
         highlight_row = None
 
-    highlight_column = u"CPUTIME"
+    highlight_column = "CPUTIME"
     if sort_by_memory:
-        highlight_column = u"RAM"
+        highlight_column = "RAM"
     toplist_table_lines = px_terminal.to_screen_lines(
         toplist[:max_process_count], highlight_row, highlight_column
     )
@@ -317,10 +317,10 @@ def get_screen_lines(
 
     if include_footer:
         footer_line = (
-            u"  q - Quit  m - Sort order  / - Search  ↑↓ - Move  Enter - Select"
+            "  q - Quit  m - Sort order  / - Search  ↑↓ - Move  Enter - Select"
         )
         # Inverse the whole footer line
-        footer_line = px_terminal.inverse_video(footer_line + 999 * u" ")
+        footer_line = px_terminal.inverse_video(footer_line + 999 * " ")
 
         lines += [footer_line]
 
@@ -438,13 +438,13 @@ def get_command(**kwargs):
             if not process:
                 continue
             px_process_menu.PxProcessMenu(process).start()
-        elif input.consume(u"/"):
+        elif input.consume("/"):
             global search_string
             top_mode = MODE_SEARCH
             return None
-        elif input.consume(u"m") or input.consume(u"M"):
+        elif input.consume("m") or input.consume("M"):
             sort_by_memory = not sort_by_memory
-        elif input.consume(u"q"):
+        elif input.consume("q"):
             return CMD_QUIT
         elif input.consume(px_terminal.SIGWINCH_KEY):
             return CMD_RESIZE

@@ -10,10 +10,10 @@ def bytes_to_string(bytes_count):
     """
     Turn byte counts into strings like "14MB"
     """
-    KB = 1024 ** 1
-    MB = 1024 ** 2
-    GB = 1024 ** 3
-    TB = 1024 ** 4
+    KB = 1024**1
+    MB = 1024**2
+    GB = 1024**3
+    TB = 1024**4
 
     if bytes_count < 7 * KB:
         return str(bytes_count) + "B"

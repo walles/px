@@ -216,9 +216,9 @@ def to_ipc_lines(ipc_map):
 def print_cwd_friends(fd, process, all_processes, all_files):
     friends = px_cwdfriends.PxCwdFriends(process, all_processes, all_files)
 
-    cwd_suffix = u""
+    cwd_suffix = ""
     if friends.cwd:
-        cwd_suffix = u" (" + px_terminal.bold(friends.cwd) + ")"
+        cwd_suffix = " (" + px_terminal.bold(friends.cwd) + ")"
     println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
         sudo_px = px_terminal.bold("sudo px {}".format(process.pid))

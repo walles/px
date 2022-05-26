@@ -175,7 +175,7 @@ class Launchcounter(object):
 
         lines = []  # type: List[text_type]
         for row in launchers_list:
-            line = u" -> ".join(map(render_launch_tuple, row))
+            line = " -> ".join(map(render_launch_tuple, row))
             lines.append(line)
 
         return lines

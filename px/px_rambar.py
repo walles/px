@@ -64,7 +64,7 @@ def render_bar(bar_length, names_and_numbers):
         sum += category[1]
     assert sum > 0
 
-    bar = u""
+    bar = ""
     bar_chars = 0
     chunk_number = -1
     should_alternate = False
@@ -83,12 +83,12 @@ def render_bar(bar_length, names_and_numbers):
 
             chars = int(round(bar_length * number * 1.0 / sum))
             if chars > 1:
-                add_to_bar = px_terminal.get_string_of_length(u" " + name, chars)
+                add_to_bar = px_terminal.get_string_of_length(" " + name, chars)
             else:
                 should_alternate = True
 
         if should_alternate:
-            add_to_bar = u" "
+            add_to_bar = " "
         add_to_bar_chars = len(add_to_bar)
 
         if chunk_number == 0:

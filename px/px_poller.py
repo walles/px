@@ -20,7 +20,7 @@ if sys.version_info.major >= 3:
 # We'll report poll done as this key having been pressed.
 #
 # NOTE: This must be detected as non-printable by handle_search_keypress().
-POLL_COMPLETE_KEY = u"\x01"
+POLL_COMPLETE_KEY = "\x01"
 
 # Key repeat speed is about one every 30+ms, and this pause needs to be longer
 # than that for the pause to be useful while scrolling.
@@ -41,11 +41,11 @@ class PxPoller(object):
         self.lock = threading.Lock()
 
         self._ioload = px_ioload.PxIoLoad()
-        self._ioload_string = u"None"
+        self._ioload_string = "None"
 
-        self._loadstring = u"None"
+        self._loadstring = "None"
 
-        self._meminfo = u"None"
+        self._meminfo = "None"
 
         self._all_processes = []  # type: List[px_process.PxProcess]
 

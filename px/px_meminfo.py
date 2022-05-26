@@ -28,7 +28,7 @@ def get_meminfo():
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
 
-    percentage_string = str(int(round(percentage))) + u"%"
+    percentage_string = str(int(round(percentage))) + "%"
 
     # "80"? I made it up.
     if percentage < 80:

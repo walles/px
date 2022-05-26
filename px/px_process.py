@@ -63,18 +63,18 @@ def _parse_time(time_s):
     """
 
     zero_based_month = [
-        u"Jan",
-        u"Feb",
-        u"Mar",
-        u"Apr",
-        u"May",
-        u"Jun",
-        u"Jul",
-        u"Aug",
-        u"Sep",
-        u"Oct",
-        u"Nov",
-        u"Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
     ].index(time_s[4:7])
 
     day_of_month = int(time_s[8:10])
@@ -276,15 +276,18 @@ class PxProcessBuilder(object):
         self.memory_percent = None  # type: Optional[float]
 
     def __repr__(self):
-        return "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>" % (
-            self.start_time_string,
-            self.pid,
-            self.ppid,
-            self.username,
-            self.cpu_percent,
-            self.cpu_time,
-            self.memory_percent,
-            self.cmdline,
+        return (
+            "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
+            % (
+                self.start_time_string,
+                self.pid,
+                self.ppid,
+                self.username,
+                self.cpu_percent,
+                self.cpu_time,
+                self.memory_percent,
+                self.cmdline,
+            )
         )
 
     def build(self, now):
@@ -386,10 +389,10 @@ def create_kernel_process(now):
     )
 
     process_builder.rss_kb = 0
-    process_builder.username = u"root"
+    process_builder.username = "root"
     process_builder.cpu_time = None
     process_builder.memory_percent = None
-    process_builder.cmdline = u"kernel PID 0"
+    process_builder.cmdline = "kernel PID 0"
     process = process_builder.build(now)
 
     return process

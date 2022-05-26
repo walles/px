@@ -33,8 +33,8 @@ initial_termios_attr = None
 
 CSI = "\x1b["
 
-CURSOR_TO_TOP_LEFT = CSI + u"H"
-CURSOR_TO_RIGHT_EDGE = CSI + u"999C"  # Actually "999 steps to the right"
+CURSOR_TO_TOP_LEFT = CSI + "H"
+CURSOR_TO_RIGHT_EDGE = CSI + "999C"  # Actually "999 steps to the right"
 
 """
 Clear the screen and move cursor to top left corner:
@@ -46,12 +46,12 @@ for example, the contents of the previous screen gets added to the
 scrollback buffer, which isn't what we want. Tread carefully if you
 intend to change these.
 """
-CLEAR_SCREEN = CSI + u"1J" + CURSOR_TO_TOP_LEFT
+CLEAR_SCREEN = CSI + "1J" + CURSOR_TO_TOP_LEFT
 
-HIDE_CURSOR = CSI + u"?25l"
-SHOW_CURSOR = CSI + u"?25h"
+HIDE_CURSOR = CSI + "?25l"
+SHOW_CURSOR = CSI + "?25h"
 
-CLEAR_TO_EOL = CSI + u"0K"
+CLEAR_TO_EOL = CSI + "0K"
 CLEAR_TO_END_OF_SCREEN = CSI + "J"  # Clear from cursor to end of screen
 
 # Used for informing our getch() function that a window resize has occurred
@@ -60,7 +60,7 @@ SIGWINCH_PIPE = os.pipe()
 # We'll report window resize as this key having been pressed.
 #
 # NOTE: This must be detected as non-printable by handle_search_keypress().
-SIGWINCH_KEY = u"\x00"
+SIGWINCH_KEY = "\x00"
 
 _enable_color = True
 
@@ -283,13 +283,13 @@ def draw_screen_lines(lines, columns):
 
 def width_specifier(width, right_align=False):
     # type: (int, bool) -> text_type
-    return_me = u"{:"
+    return_me = "{:"
 
     if right_align:
-        return_me += u">"
+        return_me += ">"
 
     return_me += str(width)
-    return_me += u"}"
+    return_me += "}"
 
     return return_me
 
@@ -306,7 +306,7 @@ def format_with_widths(widths, strings):
 
     assert len(widths) == len(strings)
 
-    result = u""
+    result = ""
     for i in range(len(widths)):
         if i > 0:
             result += " "
@@ -325,7 +325,7 @@ def format_with_widths(widths, strings):
             result += string
             continue
 
-        padding = padding_amount * u" "
+        padding = padding_amount * " "
         if width > 0:
             result += string + padding
         else:
@@ -351,13 +351,13 @@ def to_screen_lines(
     """
 
     headings = [
-        u"PID",
-        u"COMMAND",
-        u"USERNAME",
-        u"CPU",
-        u"CPUTIME",
-        u"RAM",
-        u"COMMANDLINE",
+        "PID",
+        "COMMAND",
+        "USERNAME",
+        "CPU",
+        "CPUTIME",
+        "RAM",
+        "COMMANDLINE",
     ]
     highlight_column = None  # type: Optional[int]
     if highlight_heading is not None:
@@ -469,7 +469,7 @@ def to_screen_lines(
 
         if row_to_highlight == line_number:
             # Highlight the whole screen line
-            line = inverse_video(line + u" " * 999)
+            line = inverse_video(line + " " * 999)
         lines.append(line)
 
     lines[0] = heading_line
@@ -551,7 +551,7 @@ def get_string_of_length(string, length):
         return string
 
     if initial_length < length:
-        return string + u" " * (length - initial_length)
+        return string + " " * (length - initial_length)
 
     if initial_length > length:
         return crop_ansi_string_at_length(string, length)
@@ -610,10 +610,10 @@ def crop_ansi_string_at_length(string, length):
         # LRU would be better but this is easier to implement
         crop_cache.clear()
 
-    result = u""
+    result = ""
     char_count = 0
 
-    reset_sequence = u""
+    reset_sequence = ""
 
     for token in _tokenize(string):
         if token.startswith(CSI):

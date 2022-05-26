@@ -116,7 +116,7 @@ def get_load_string(load_values=None):
 
     avg0to1, avg1to5, avg5to15 = load_values
 
-    load_string = u"{:.1f}".format(avg0to1)
+    load_string = "{:.1f}".format(avg0to1)
     if avg0to1 <= physical:
         load_string = px_terminal.green(load_string)
     elif avg0to1 <= logical:
@@ -130,4 +130,4 @@ def get_load_string(load_values=None):
     # Increase intensity for more recent times
     graph = px_terminal.faint(graph[0:3]) + graph[3:6] + px_terminal.bold(graph[6:])
 
-    return u"{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)
+    return "{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)
