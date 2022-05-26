@@ -263,10 +263,7 @@ def get_screen_lines(
     launches_maxheight = min(launches_maxheight1, launches_maxheight2)
     launchlines: List[str] = []
     if launches_maxheight >= 3:
-        launchlines = (
-            poller.get_launchcounter_lines()
-            + ["imagine -> some -> real -> launch -> lines -> here"] * 44
-        )
+        launchlines = poller.get_launchcounter_lines()
         if len(launchlines) > 0:
             # Add a section header
             launchlines = [
