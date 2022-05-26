@@ -1,17 +1,17 @@
 import sys
 
 
-from . import px_file  # NOQA
-from . import px_process  # NOQA
-from typing import Set  # NOQA
-from typing import List  # NOQA
-from typing import Dict  # NOQA
-from typing import Text  # NOQA
-from typing import AbstractSet  # NOQA
-from typing import MutableMapping  # NOQA
-from typing import Iterable  # NOQA
-from typing import TypeVar  # NOQA
-from typing import Optional  # NOQA
+from . import px_file
+from . import px_process
+from typing import Set
+from typing import List
+from typing import Dict
+from typing import Text
+from typing import AbstractSet
+from typing import MutableMapping
+from typing import Iterable
+from typing import TypeVar
+from typing import Optional
 
 T = TypeVar("T")
 S = TypeVar("S")

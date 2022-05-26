@@ -4,9 +4,9 @@ from px import px_cwdfriends
 
 import sys
 
-from typing import List  # NOQA
-from px import px_process  # NOQA
-from six import text_type  # NOQA
+from typing import List
+from px import px_process
+from six import text_type
 
 
 def test_current_cwd_unknown():

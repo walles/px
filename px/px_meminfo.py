@@ -7,10 +7,10 @@ from . import px_units
 from . import px_terminal
 from . import px_exec_util
 
-from six import text_type  # NOQA
-from typing import List  # NOQA
-from typing import Tuple  # NOQA
-from typing import Optional  # NOQA
+from six import text_type
+from typing import List
+from typing import Tuple
+from typing import Optional
 
 
 PAGE_SIZE_RE = re.compile(r"page size of ([0-9]+) bytes")

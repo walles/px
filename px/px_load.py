@@ -11,8 +11,8 @@ from . import px_terminal
 
 import sys
 
-from six import text_type  # NOQA
-from typing import Tuple  # NOQA
+from six import text_type
+from typing import Tuple
 
 
 physical, logical = px_cpuinfo.get_core_count()

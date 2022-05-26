@@ -15,12 +15,12 @@ from . import px_loginhistory
 
 if False:
     # For mypy PEP-484 static typing validation
-    from typing import MutableSet  # NOQA
-    from typing import Optional  # NOQA
-    from typing import Iterable  # NOQA
-    from typing import List  # NOQA
-    from typing import Tuple  # NOQA
-    from six import text_type  # NOQA
+    from typing import MutableSet
+    from typing import Optional
+    from typing import Iterable
+    from typing import List
+    from typing import Tuple
+    from six import text_type
 
 
 def println(fd: int, string: text_type) -> None:

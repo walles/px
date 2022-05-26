@@ -1,6 +1,6 @@
 import sys
 
-from six import text_type  # NOQA
+from six import text_type
 
 
 def bytes_to_string(bytes_count: int) -> text_type:

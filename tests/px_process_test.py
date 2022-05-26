@@ -10,7 +10,7 @@ from . import testutils
 
 import sys
 
-from typing import MutableSet  # NOQA
+from typing import MutableSet
 
 
 def test_create_process():

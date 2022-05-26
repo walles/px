@@ -8,9 +8,9 @@ from . import px_processinfo
 
 if False:
     # For mypy PEP-484 static typing validation
-    from . import px_process  # NOQA
-    from typing import List  # NOQA
-    from typing import Optional  # NOQA
+    from . import px_process
+    from typing import List
+    from typing import Optional
 
 LOG = logging.getLogger(__name__)
 

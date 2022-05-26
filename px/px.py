@@ -53,7 +53,7 @@ from . import px_processinfo
 
 import sys
 
-from typing import Optional, List  # NOQA
+from typing import Optional, List
 
 
 ERROR_REPORTING_HEADER = """

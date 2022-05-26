@@ -4,11 +4,11 @@ from . import px_exec_util
 
 import sys
 
-from typing import Set  # NOQA
-from typing import List  # NOQA
-from typing import Tuple  # NOQA
-from typing import Iterable  # NOQA
-from typing import Optional  # NOQA
+from typing import Set
+from typing import List
+from typing import Tuple
+from typing import Iterable
+from typing import Optional
 
 
 class PxFileBuilder:

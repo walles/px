@@ -18,10 +18,10 @@ from . import px_processinfo
 
 if False:
     # For mypy PEP-484 static typing validation
-    from typing import Optional  # NOQA
-    from typing import Callable  # NOQA
-    from typing import Union  # NOQA
-    from six import text_type  # NOQA
+    from typing import Optional
+    from typing import Callable
+    from typing import Union
+    from six import text_type
 
 # Constants signal.SIGXXX are ints in Python 2 and enums in Python 3.
 # Make our own guaranteed-to-be-int constants.

@@ -25,7 +25,7 @@ import time
 from tests import testutils
 from px import px_file
 
-from typing import MutableMapping  # NOQA
+from typing import MutableMapping
 
 
 # For how long should we do the benchmarking run (in seconds)

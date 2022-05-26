@@ -10,8 +10,8 @@ from . import px_launchcounter
 
 import sys
 
-from typing import Optional  # NOQA
-from typing import List  # NOQA
+from typing import Optional
+from typing import List
 from six import text_type
 
 

@@ -1,11 +1,11 @@
 import sys
 
-from . import px_process  # NOQA
-from . import px_file  # NOQA
-from typing import List  # NOQA
-from typing import Dict  # NOQA
-from typing import Optional  # NOQA
-from six import text_type  # NOQA
+from . import px_process
+from . import px_file
+from typing import List
+from typing import Dict
+from typing import Optional
+from six import text_type
 
 
 def _strip_leading_dash(process: px_process.PxProcess) -> text_type:

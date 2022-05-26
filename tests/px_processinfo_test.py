@@ -7,7 +7,7 @@ from . import testutils
 
 import sys
 
-from typing import List, Tuple  # NOQA
+from typing import List, Tuple
 
 
 def test_to_relative_start_string():

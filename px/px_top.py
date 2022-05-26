@@ -14,11 +14,11 @@ from . import px_process_menu
 from . import px_poller
 from . import px_rambar
 
-from typing import List  # NOQA
-from typing import Dict  # NOQA
-from typing import Union  # NOQA
-from typing import Optional  # NOQA
-from six import text_type  # NOQA
+from typing import List
+from typing import Dict
+from typing import Union
+from typing import Optional
+from six import text_type
 
 LOG = logging.getLogger(__name__)
 

@@ -7,13 +7,13 @@ import select
 import termios
 import tty
 
-from six import text_type  # NOQA
-from typing import Dict  # NOQA
-from typing import List  # NOQA
-from typing import Tuple  # NOQA
-from typing import Optional  # NOQA
-from typing import Iterable  # NOQA
-from . import px_process  # NOQA
+from six import text_type
+from typing import Dict
+from typing import List
+from typing import Tuple
+from typing import Optional
+from typing import Iterable
+from . import px_process
 
 
 # NOTE: To work with this list it can be useful to find the text "Uncomment to

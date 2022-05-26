@@ -3,9 +3,9 @@ import subprocess
 
 import sys
 
-from six import text_type  # NOQA
-from typing import List  # NOQA
-from typing import Dict  # NOQA
+from six import text_type
+from typing import List
+from typing import Dict
 
 
 ENV: Dict[str, str] = {}

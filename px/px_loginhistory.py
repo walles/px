@@ -7,7 +7,7 @@ import dateutil.tz
 from . import px_exec_util
 
 if False:
-    from typing import Set, Optional  # NOQA
+    from typing import Set, Optional
 
 LOG = logging.getLogger(__name__)
 

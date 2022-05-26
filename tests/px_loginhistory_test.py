@@ -6,7 +6,7 @@ import dateutil.tz
 from px import px_loginhistory
 
 if False:
-    from typing import Set  # NOQA
+    from typing import Set
 
 
 @pytest.yield_fixture

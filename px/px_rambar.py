@@ -5,10 +5,10 @@ from px import px_terminal
 
 from . import px_process
 
-from typing import List  # NOQA
-from typing import Dict  # NOQA
-from typing import Tuple  # NOQA
-from six import text_type  # NOQA
+from typing import List
+from typing import Dict
+from typing import Tuple
+from six import text_type
 
 
 def get_process_categories(

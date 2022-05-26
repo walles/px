@@ -5,10 +5,10 @@ from . import px_exec_util
 
 import sys
 
-from typing import Optional  # NOQA
-from typing import Tuple  # NOQA
-from typing import List  # NOQA
-from six import text_type  # NOQA
+from typing import Optional
+from typing import Tuple
+from typing import List
+from six import text_type
 
 
 def get_core_count() -> Tuple[int, int]:

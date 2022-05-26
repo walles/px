@@ -16,13 +16,13 @@ from . import px_exec_util
 
 import sys
 
-from typing import Dict  # NOQA
-from typing import MutableSet  # NOQA
-from typing import Text  # NOQA
-from typing import Optional  # NOQA
-from typing import List  # NOQA
-from typing import Iterable  # NOQA
-from six import text_type  # NOQA
+from typing import Dict
+from typing import MutableSet
+from typing import Text
+from typing import Optional
+from typing import List
+from typing import Iterable
+from six import text_type
 
 
 LOG = logging.getLogger(__name__)

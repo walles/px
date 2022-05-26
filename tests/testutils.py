@@ -12,10 +12,10 @@ import dateutil.parser
 
 import sys
 
-from typing import MutableMapping  # NOQA
-from typing import Optional  # NOQA
-from typing import List  # NOQA
-from six import text_type  # NOQA
+from typing import MutableMapping
+from typing import Optional
+from typing import List
+from six import text_type
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"

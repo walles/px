@@ -4,9 +4,9 @@ import re
 import sys
 import os.path
 
-from six import text_type  # NOQA
-from typing import List  # NOQA
-from typing import Optional  # NOQA
+from six import text_type
+from typing import List
+from typing import Optional
 
 
 # Match "[kworker/0:0H]", no grouping

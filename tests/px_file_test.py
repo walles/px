@@ -3,7 +3,7 @@ import sys
 
 from px import px_file
 
-from typing import List  # NOQA
+from typing import List
 
 
 def test_lsof_to_files():

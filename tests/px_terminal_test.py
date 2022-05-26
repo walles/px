@@ -7,8 +7,8 @@ from px import px_terminal
 
 from . import testutils
 
-from typing import List  # NOQA
-from six import text_type  # NOQA
+from typing import List
+from six import text_type
 
 
 def test_to_screen_lines_unbounded():
