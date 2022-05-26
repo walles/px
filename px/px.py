@@ -41,8 +41,8 @@ of which processes are most active right now.
 import operator
 import platform
 import logging
-import six
 import sys
+import io
 import os
 
 from . import px_pager
@@ -89,7 +89,7 @@ def main():
         argv.remove("--debug")
         loglevel = logging.DEBUG
 
-    stringIO = six.StringIO()
+    stringIO = io.StringIO()
     configureLogging(loglevel, stringIO)
 
     try:
@@ -101,10 +101,8 @@ def main():
     handleLogMessages(stringIO.getvalue())
 
 
-def configureLogging(loglevel: int, stringIO: six.StringIO) -> None:
-
-    # This method inspired by: https://stackoverflow.com/a/9534960/473672
-
+# This method inspired by: https://stackoverflow.com/a/9534960/473672
+def configureLogging(loglevel: int, stringIO: io.StringIO) -> None:
     rootLogger = logging.getLogger()
     rootLogger.setLevel(loglevel)
 

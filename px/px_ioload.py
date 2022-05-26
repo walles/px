@@ -4,7 +4,6 @@ Functions for visualizing where IO is bottlenecking.
 
 import datetime
 import math
-import six
 import re
 import os
 
@@ -331,7 +330,7 @@ class PxIoLoad(object):
 
         # Values per entry: name, current value, high watermark
         collected_ios: List[Tuple[str, float, float]] = []
-        for name, loads in six.iteritems(self.ios):
+        for name, loads in self.ios.items():
             collected_ios.append((name, loads.throughput, loads.high_watermark))
 
         if not collected_ios:
