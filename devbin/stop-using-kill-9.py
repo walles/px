@@ -5,9 +5,8 @@ import time
 import signal
 
 
-def receiveSignal(signalNumber, frame):
+def receiveSignal(signalNumber, _):
     print("Received signal " + str(signalNumber))
-    return
 
 
 signal.signal(signal.SIGTERM, receiveSignal)

@@ -20,7 +20,7 @@ def test_create_process():
     process_builder.cpu_time = 1.3
     process_builder.memory_percent = 42.7
     process_builder.cmdline = "hej kontinent"
-    test_me = process_builder.build(testutils.now())
+    test_me = process_builder.build(testutils.local_now())
 
     assert test_me.pid == 7
     assert test_me.ppid == 1
@@ -116,7 +116,7 @@ def test_ps_line_to_process_3():
         " --pid-file=/var/run/mysqld/mysqld.pid"
         " --socket=/var/run/mysqld/mysqld.sock"
         " --port=3306",
-        testutils.now(),
+        testutils.local_now(),
     )
     assert process.username == getpass.getuser()
     assert process.cpu_percent_s == "6%"
@@ -179,7 +179,7 @@ def _test_get_all():
 
     _validate_references(all)
 
-    now = testutils.now()
+    now = testutils.local_now()
     for process in all:
         # Scores should be computed via multiplications and divisions of
         # positive numbers, if this value is negative something is wrong.
@@ -217,7 +217,7 @@ def test_process_eq():
     process_a = testutils.create_process()
 
     process_b = testutils.create_process()
-    parent = px_process.create_kernel_process(testutils.now())
+    parent = px_process.create_kernel_process(testutils.local_now())
     process_b.parent = parent
 
     assert process_a != process_b
@@ -375,7 +375,7 @@ def test_resolve_links():
     p1 = testutils.create_process(pid=1, ppid=UNKNOWN_PID)
     p2 = testutils.create_process(pid=2, ppid=1)
     processes = {p1.pid: p1, p2.pid: p2}
-    px_process.resolve_links(processes, testutils.now())
+    px_process.resolve_links(processes, testutils.local_now())
 
     assert p1.parent is None
     assert p2.parent is p1

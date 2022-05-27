@@ -23,7 +23,7 @@ LAPS = 20
 
 def main():
     t0 = time.time()
-    for iteration in range(LAPS):
+    for _ in range(LAPS):
         px_process.get_all()
     t1 = time.time()
     dt_seconds = t1 - t0
