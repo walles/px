@@ -2,6 +2,7 @@
 disable=
     consider-using-f-string, # We should, in a separate change
     consider-using-max-builtin,
+    disallowed-name,
     fixme,
     global-statement,
     invalid-name,
