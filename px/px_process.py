@@ -447,24 +447,24 @@ def get_all() -> List[PxProcess]:
     ]
 
     with open(os.devnull, "w", encoding="utf-8") as DEVNULL:
-        ps = subprocess.Popen(
+        with subprocess.Popen(
             command,
             stdin=DEVNULL,
             stdout=subprocess.PIPE,
             stderr=DEVNULL,
             close_fds=close_fds,
             env=px_exec_util.ENV,
-        )
+        ) as ps:
 
-        stdout = ps.stdout
-        assert stdout
-        now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
-        for ps_line in stdout:
-            process = ps_line_to_process(ps_line.decode("utf-8"), now)
-            processes[process.pid] = process
+            stdout = ps.stdout
+            assert stdout
+            now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
+            for ps_line in stdout:
+                process = ps_line_to_process(ps_line.decode("utf-8"), now)
+                processes[process.pid] = process
 
-        if ps.wait() != 0:
-            raise IOError("Exit code {} from {}".format(ps.returncode, command))
+            if ps.wait() != 0:
+                raise IOError("Exit code {} from {}".format(ps.returncode, command))
 
     resolve_links(processes, now)
     remove_process_and_descendants(processes, os.getpid())
