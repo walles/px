@@ -66,7 +66,6 @@ def test_get_command_java():
 
     # FIXME: Add test for classpath containing spaces? I say this should be
     # postponed until we have a real world use case for that.
-    pass
 
 
 def test_get_command_java_gradled():
