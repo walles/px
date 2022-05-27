@@ -1,5 +1,3 @@
-import sys
-
 from . import px_process
 from . import px_file
 from typing import List
@@ -14,7 +12,7 @@ def _strip_leading_dash(process: px_process.PxProcess) -> str:
     return key
 
 
-class PxCwdFriends(object):
+class PxCwdFriends:
     def __init__(
         self,
         process: px_process.PxProcess,

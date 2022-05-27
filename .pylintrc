@@ -10,6 +10,7 @@ disable=
     missing-function-docstring,
     missing-module-docstring,
     protected-access, # Used a lot in tests, maybe make this tests-specific?
+    too-few-public-methods,
     too-many-arguments,
     too-many-branches,
     too-many-instance-attributes,
