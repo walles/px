@@ -285,11 +285,10 @@ def format_with_widths(widths: List[int], strings: List[str]) -> str:
     assert len(widths) == len(strings)
 
     result = ""
-    for i in range(len(widths)):
+    for i, width in enumerate(widths):
         if i > 0:
             result += " "
 
-        width = widths[i]
         string = strings[i]
 
         if width == 0:

@@ -39,6 +39,7 @@ class PeerProcess:
 
 
 class IpcMap:
+    # pylint: disable=attribute-defined-outside-init
     """
     This is a map of process->[channels], where "process" is a process we have
     IPC communication open with, and a channel is a socket or a pipe that we
@@ -93,7 +94,7 @@ class IpcMap:
         take a lot of time. If you do want to try it, just drop all the "if fd
         not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
-        fds = dict()
+        fds = {}
 
         if not self._own_files:
             for fd in [0, 1, 2]:
@@ -133,7 +134,7 @@ class IpcMap:
             fds[network_connection.fd] = str(network_connection)
 
         # Traverse our IPC structure and update FDs as required
-        for target in self.keys():
+        for target in self.keys():  # pylint: disable=consider-using-dict-items
             for link in self[target]:
                 if link.fd is None:
                     # No FD, never mind

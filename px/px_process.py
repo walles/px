@@ -82,6 +82,7 @@ def _parse_time(time_s: Text) -> datetime.datetime:
 
 
 class PxProcess:
+    # pylint: disable=attribute-defined-outside-init
     def __init__(
         self,
         cmdline: Text,
