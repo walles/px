@@ -81,7 +81,7 @@ def sudo_kill(process: px_process.PxProcess, signo: int) -> bool:
         return False
 
 
-class PxProcessMenu(object):
+class PxProcessMenu:
     # NOTE: Must match number constants in execute_menu_entry()
     MENU_ENTRIES = [
         "Show info",

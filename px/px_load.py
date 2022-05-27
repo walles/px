@@ -108,7 +108,7 @@ def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     else:
         load_string = px_terminal.red(load_string)
 
-    recent, between, old, peak = averages_to_levels(avg0to1, avg1to5, avg5to15)
+    recent, between, old, _ = averages_to_levels(avg0to1, avg1to5, avg5to15)
     graph = levels_to_graph([old] * 10 + [between] * 4 + [recent])
 
     # Increase intensity for more recent times

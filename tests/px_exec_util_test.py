@@ -14,7 +14,10 @@ def test_exec_true_with_check():
 def test_exec_false_with_check():
     try:
         px_exec_util.run(["false"], check_exitcode=True)
-        assert False and "We should never get here"
+        assert (
+            False  # pylint: disable=condition-evals-to-constant
+            and "We should never get here"
+        )
     except subprocess.CalledProcessError:
         # This is the exception we want, done!
         pass
