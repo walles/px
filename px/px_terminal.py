@@ -642,7 +642,6 @@ def _exit_fullscreen():
 class fullscreen_display:
     def __enter__(self):
         _enter_fullscreen()
-        return None
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         _exit_fullscreen()
@@ -659,7 +658,6 @@ class normal_display:
 
     def __enter__(self):
         _exit_fullscreen()
-        return None
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         _enter_fullscreen()

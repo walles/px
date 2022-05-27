@@ -1,6 +1,3 @@
-import sys
-
-
 from . import px_file
 from . import px_process
 from typing import Set
@@ -210,7 +207,7 @@ class IpcMap:
                 add_arraymapping(self._name_to_pids, file.name, file.pid)
                 add_arraymapping(self._name_to_files, file.name, file)
 
-            local_endpoint, remote = file.get_endpoints()
+            local_endpoint, _ = file.get_endpoints()
             if local_endpoint:
                 self._local_endpoint_to_pid[local_endpoint] = file.pid
 
@@ -230,15 +227,14 @@ class IpcMap:
     def _get_other_end_pids(self, file: px_file.PxFile) -> Iterable[int]:
         """Locate the other end of a pipe / domain socket"""
         if file.type in ["IPv4", "IPv6"]:
-            local, remote = file.get_endpoints()
+            _, remote = file.get_endpoints()
             if remote is None:
                 return []
 
             pid = self._local_endpoint_to_pid.get(remote)
             if pid:
                 return [pid]
-            else:
-                return []
+            return []
 
         name = file.name
         if name and name.startswith("->"):

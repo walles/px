@@ -13,8 +13,6 @@ from . import px_commandline
 from . import px_exec_util
 
 
-import sys
-
 from typing import Dict
 from typing import MutableSet
 from typing import Text
