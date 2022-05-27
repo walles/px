@@ -36,10 +36,12 @@ with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as tmp:
         os.remove(tmp.name)
 
 requirements = None
-with open("requirements.txt") as reqsfile:
+with open("requirements.txt", encoding="utf-8") as reqsfile:
     requirements = reqsfile.readlines()
 
-with open(os.path.join(os.path.dirname(__file__), "README.rst")) as fp:
+with open(
+    os.path.join(os.path.dirname(__file__), "README.rst"), encoding="utf-8"
+) as fp:
     LONG_DESCRIPTION = fp.read()
 
 if not re.match(r"^[0-9]+\.[0-9]+\.[0-9]+$", git_version):

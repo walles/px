@@ -22,7 +22,7 @@ TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
 def load(sample_file_name: str) -> str:
     my_dir = os.path.dirname(__file__)
     full_path = os.path.join(my_dir, sample_file_name)
-    with open(full_path) as sample_file:
+    with open(full_path, encoding="utf-8") as sample_file:
         return sample_file.read()
 
 

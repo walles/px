@@ -192,7 +192,7 @@ class SystemState(object):
 
         if os.path.exists("/proc/net/dev"):
             # We're on Linux
-            with open("/proc/net/dev") as proc_net_dev:
+            with open("/proc/net/dev", encoding="utf-8") as proc_net_dev:
                 return parse_proc_net_dev(proc_net_dev.read())
 
         # Assuming macOS, add support for more platforms on demand
@@ -206,7 +206,7 @@ class SystemState(object):
 
         if os.path.exists("/proc/diskstats"):
             # We're on Linux
-            with open("/proc/diskstats") as proc_diskstats:
+            with open("/proc/diskstats", encoding="utf-8") as proc_diskstats:
                 return parse_proc_diskstats(proc_diskstats.read())
 
         # Assuming macOS, add support for more platforms on demand

@@ -447,7 +447,7 @@ def get_all() -> List[PxProcess]:
         "pid=,ppid=,rss=,lstart=,uid=,pcpu=,time=,%mem=,command=",
     ]
 
-    with open(os.devnull, "w") as DEVNULL:
+    with open(os.devnull, "w", encoding="utf-8") as DEVNULL:
         ps = subprocess.Popen(
             command,
             stdin=DEVNULL,

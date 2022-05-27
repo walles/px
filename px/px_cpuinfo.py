@@ -47,7 +47,7 @@ def get_core_count_from_proc_cpuinfo(
     core_ids = set()
     max_processor_no = 0
     try:
-        with open(proc_cpuinfo) as f:
+        with open(proc_cpuinfo, encoding="utf-8") as f:
             for line in f:
                 if line.startswith(PROCESSOR_NO_PREFIX):
                     processor_no = int(line[len(PROCESSOR_NO_PREFIX) :])
