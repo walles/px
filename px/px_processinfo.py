@@ -201,7 +201,7 @@ def to_ipc_lines(ipc_map: px_ipc_map.IpcMap) -> Iterable[str]:
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("name", "pid")):
         channels = ipc_map[target]
         channel_names: MutableSet[str] = set()
-        for channel_name in map(lambda c: str(c), channels):
+        for channel_name in map(str, channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
             return_me.append(
@@ -333,7 +333,7 @@ def print_pid_info(fd: int, pid: int) -> None:
     process = find_process_by_pid(pid, processes)
     if not process:
         sys.stderr.write("No such PID: {}\n".format(pid))
-        exit(1)
+        sys.exit(1)
 
     print_process_info(fd, process, processes)
 
