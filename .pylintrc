@@ -1,8 +1,16 @@
 [MESSAGES CONTROL]
 disable=
+    fixme,
+    line-too-long,
+    global-statement,
     wrong-import-position,
     wrong-import-order,
     missing-module-docstring,
+    missing-class-docstring,
     missing-function-docstring,
     invalid-name,
+    too-many-arguments,
+    too-many-instance-attributes,
+    too-many-return-statements,
+    too-many-local-variables,
     protected-access, # Used a lot in tests, maybe make this tests-specific?
