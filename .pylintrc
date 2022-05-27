@@ -1,0 +1,8 @@
+[MESSAGES CONTROL]
+disable=
+    wrong-import-position,
+    wrong-import-order,
+    missing-module-docstring,
+    missing-function-docstring,
+    invalid-name,
+    protected-access, # Used a lot in tests, maybe make this tests-specific?
