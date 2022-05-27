@@ -99,8 +99,7 @@ def parse_iostat_output(iostat_output: str) -> List[Sample]:
     numbers = lines[2].split()
 
     samples: List[Sample] = []
-    for i in range(len(names)):
-        name = names[i]
+    for i, name in enumerate(names):
         mb_string = numbers[3 * i + 2]
 
         # 1024 * 1024 mirrors what happens in iostat.c:
@@ -172,46 +171,46 @@ class SubsystemStat:
         self.high_watermark = high_watermark
 
 
+def sample_network_interfaces() -> List[Sample]:
+    """
+    Query system for network interfaces byte counts
+    """
+
+    if os.path.exists("/proc/net/dev"):
+        # We're on Linux
+        with open("/proc/net/dev", encoding="utf-8") as proc_net_dev:
+            return parse_proc_net_dev(proc_net_dev.read())
+
+    # Assuming macOS, add support for more platforms on demand
+    netstat_ib_output = px_exec_util.run(["netstat", "-ib"])
+    return parse_netstat_ib_output(netstat_ib_output)
+
+
+def sample_drives() -> List[Sample]:
+    """
+    Query system for drive statistics
+    """
+
+    if os.path.exists("/proc/diskstats"):
+        # We're on Linux
+        with open("/proc/diskstats", encoding="utf-8") as proc_diskstats:
+            return parse_proc_diskstats(proc_diskstats.read())
+
+    # Assuming macOS, add support for more platforms on demand
+    iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
+    return parse_iostat_output(iostat_output)
+
+
 class SystemState:
     def __init__(self) -> None:
         self.timestamp = datetime.datetime.now()
 
-        self.samples: List[Sample] = (
-            self.sample_network_interfaces() + self.sample_drives()
-        )
+        self.samples: List[Sample] = sample_network_interfaces() + sample_drives()
 
         by_name: Dict[str, Sample] = {}
         for sample in self.samples:
             by_name[sample.name] = sample
         self.samples_by_name = by_name
-
-    def sample_network_interfaces(self) -> List[Sample]:
-        """
-        Query system for network interfaces byte counts
-        """
-
-        if os.path.exists("/proc/net/dev"):
-            # We're on Linux
-            with open("/proc/net/dev", encoding="utf-8") as proc_net_dev:
-                return parse_proc_net_dev(proc_net_dev.read())
-
-        # Assuming macOS, add support for more platforms on demand
-        netstat_ib_output = px_exec_util.run(["netstat", "-ib"])
-        return parse_netstat_ib_output(netstat_ib_output)
-
-    def sample_drives(self) -> List[Sample]:
-        """
-        Query system for drive statistics
-        """
-
-        if os.path.exists("/proc/diskstats"):
-            # We're on Linux
-            with open("/proc/diskstats", encoding="utf-8") as proc_diskstats:
-                return parse_proc_diskstats(proc_diskstats.read())
-
-        # Assuming macOS, add support for more platforms on demand
-        iostat_output = px_exec_util.run(["iostat", "-dKI", "-n 99"])
-        return parse_iostat_output(iostat_output)
 
 
 class PxIoLoad:
