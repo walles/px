@@ -34,11 +34,12 @@ def get_meminfo() -> str:
     else:
         percentage_string = px_terminal.red(percentage_string)
 
+    current_ram, max_ram = px_units.bytes_to_strings(wanted_ram_bytes, total_ram_bytes)
     wanted_and_total_string = "".join(
         [
-            px_terminal.bold(px_units.bytes_to_string(wanted_ram_bytes)),
+            px_terminal.bold(current_ram),
             " / ",
-            px_terminal.bold(px_units.bytes_to_string(total_ram_bytes)),
+            px_terminal.bold(max_ram),
         ]
     )
 

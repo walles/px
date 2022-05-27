@@ -341,11 +341,12 @@ class PxIoLoad(object):
         collected_ios.sort(key=lambda collectee: collectee[1], reverse=True)
 
         bottleneck = collected_ios[0]
+        current_throughput, max_throughput = px_units.bytes_to_strings(
+            math.trunc(bottleneck[1]), math.trunc(bottleneck[2])
+        )
         return "[{} / {}] {}".format(
-            px_terminal.bold(
-                px_units.bytes_to_string(math.trunc(bottleneck[1])) + "/s"
-            ),
-            px_units.bytes_to_string(math.trunc(bottleneck[2])) + "/s",
+            px_terminal.bold(current_throughput + "/s"),
+            max_throughput + "/s",
             px_terminal.bold(bottleneck[0]),
         )
 
