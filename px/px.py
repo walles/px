@@ -51,8 +51,6 @@ from . import px_process
 from . import px_terminal
 from . import px_processinfo
 
-import sys
-
 from typing import Optional, List
 
 
@@ -94,7 +92,7 @@ def main():
 
     try:
         _main(argv)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         LOG = logging.getLogger(__name__)
         LOG.exception("Uncaught Exception")
 
@@ -128,7 +126,14 @@ def handleLogMessages(messages: Optional[str]) -> None:
     sys.stderr.write(ERROR_REPORTING_HEADER)
     sys.stderr.write("\n")
 
-    from . import version
+    # If this fails, run "tox.sh" once and the "version.py" file will be created
+    # for you.
+    #
+    # NOTE: If we "import version" at the top of this file, we will depend on it
+    # even if we don't use it. And this will make test avoidance fail to avoid
+    # px.py tests every time you make a new commit (because committing recreates
+    # version.py).
+    from . import version  # pylint: disable=import-outside-toplevel
 
     sys.stderr.write("px version: " + version.VERSION + "\n")
 
@@ -158,7 +163,7 @@ def _main(argv: List[str]) -> None:
         # NOTE: If we "import version" at the top of this file, we will depend on it even if
         # we don't use it. And this will make test avoidance fail to avoid px.py tests every
         # time you make a new commit (because committing recreates version.py).
-        from . import version
+        from . import version  # pylint: disable=import-outside-toplevel
 
         print(version.VERSION)
         return
@@ -209,7 +214,7 @@ def _main(argv: List[str]) -> None:
 
     if top:
         # Pulling px_top in on demand like this improves test result caching
-        from . import px_top
+        from . import px_top  # pylint: disable=import-outside-toplevel
 
         px_top.top(search=search)
         return
@@ -224,7 +229,7 @@ def _main(argv: List[str]) -> None:
         processes = px_process.get_all()
         process = px_processinfo.find_process_by_pid(pid, processes)
         if not process:
-            exit("No such PID: {}\n".format(pid))
+            sys.exit("No such PID: {}\n".format(pid))
 
         px_pager.page_process_info(process, processes)
         return
@@ -236,7 +241,7 @@ def _main(argv: List[str]) -> None:
 
     columns: Optional[int] = None
     try:
-        rows, columns = px_terminal.get_window_size()
+        _, columns = px_terminal.get_window_size()
     except px_terminal.TerminalError:
         columns = None
 
