@@ -18,7 +18,7 @@ S = TypeVar("S")
 FILE_TYPES = ["PIPE", "FIFO", "unix", "IPv4", "IPv6"]
 
 
-class PeerProcess(object):
+class PeerProcess:
     def __init__(self, name: Optional[Text] = None, pid: Optional[int] = None) -> None:
         if not name:
             if pid is None:
@@ -41,7 +41,7 @@ class PeerProcess(object):
         return self.name
 
 
-class IpcMap(object):
+class IpcMap:
     """
     This is a map of process->[channels], where "process" is a process we have
     IPC communication open with, and a channel is a socket or a pipe that we

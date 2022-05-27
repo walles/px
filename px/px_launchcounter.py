@@ -31,7 +31,7 @@ def sort_launchers_list(
     return sorted(launchers_list, key=_get_minus_max_score)
 
 
-class Launchcounter(object):
+class Launchcounter:
     def __init__(self):
         self._hierarchies: Dict[Tuple[str, ...], int] = {}
 

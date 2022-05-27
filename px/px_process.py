@@ -83,7 +83,7 @@ def _parse_time(time_s: Text) -> datetime.datetime:
     )
 
 
-class PxProcess(object):
+class PxProcess:
     def __init__(
         self,
         cmdline: Text,
@@ -256,7 +256,7 @@ class PxProcess(object):
         return True
 
 
-class PxProcessBuilder(object):
+class PxProcessBuilder:
     def __init__(self):
         self.cmdline: Optional[Text] = None
         self.pid: Optional[int] = None

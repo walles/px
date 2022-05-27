@@ -50,7 +50,7 @@ PROC_DISKSTATS_RE = re.compile(
 )
 
 
-class Sample(object):
+class Sample:
     def __init__(self, name: str, bytecount: int) -> None:
         self.name = name
         self.bytecount = bytecount
@@ -158,7 +158,7 @@ def parse_proc_diskstats(proc_diskstats_contents: str) -> List[Sample]:
     return return_me
 
 
-class SubsystemStat(object):
+class SubsystemStat:
     def __init__(self, throughput: float, high_watermark: float) -> None:
 
         if throughput > high_watermark:
@@ -172,7 +172,7 @@ class SubsystemStat(object):
         self.high_watermark = high_watermark
 
 
-class SystemState(object):
+class SystemState:
     def __init__(self) -> None:
         self.timestamp = datetime.datetime.now()
 
@@ -214,7 +214,7 @@ class SystemState(object):
         return parse_iostat_output(iostat_output)
 
 
-class PxIoLoad(object):
+class PxIoLoad:
     def __init__(self) -> None:
         self.most_recent_system_state: SystemState = SystemState()
         self.previous_system_state: Optional[SystemState] = None
