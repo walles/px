@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import sys
 import copy
 import logging
@@ -15,7 +13,6 @@ from . import px_rambar
 
 from typing import List
 from typing import Dict
-from typing import Union
 from typing import Optional
 
 LOG = logging.getLogger(__name__)

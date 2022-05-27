@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import os
 
 from px import px_commandline

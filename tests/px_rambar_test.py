@@ -1,8 +1,3 @@
-# coding=utf-8
-
-import os
-import sys
-
 from px import px_rambar
 from px import px_terminal
 

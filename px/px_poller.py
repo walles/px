@@ -8,8 +8,6 @@ from . import px_meminfo
 from . import px_process
 from . import px_launchcounter
 
-import sys
-
 from typing import Optional
 from typing import List
 

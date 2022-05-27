@@ -1,5 +1,4 @@
 import re
-import sys
 
 from px import px_file
 

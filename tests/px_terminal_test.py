@@ -1,7 +1,4 @@
-# coding=utf-8
-
 import os
-import sys
 
 from px import px_terminal
 

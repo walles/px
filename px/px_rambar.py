@@ -1,4 +1,3 @@
-import sys
 import operator
 
 from px import px_terminal
