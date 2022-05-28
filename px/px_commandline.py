@@ -1,7 +1,6 @@
 """Extract information from command lines"""
 
 import re
-import sys
 import os.path
 
 from typing import List
@@ -260,7 +259,7 @@ def get_java_command(commandline: str) -> str:
                 # to just returning the command name
                 return java
             return os.path.basename(component)
-        elif state == "scanning":
+        if state == "scanning":
             if component.startswith("-X"):
                 continue
             if component.startswith("-D"):
@@ -302,7 +301,7 @@ def get_java_command(commandline: str) -> str:
                 continue
             if component == "-noverify":
                 continue
-            if component == "-cp" or component == "-classpath":
+            if component in ("-cp", "-classpath"):
                 state = "skip next"
                 continue
             if component == "-jar":
@@ -312,20 +311,22 @@ def get_java_command(commandline: str) -> str:
                 # Unsupported switch, give up
                 return java
             return prettify_fully_qualified_java_class(component)
-        else:
-            raise ValueError(
-                "Unhandled state <{}> at <{}> for: {}".format(state, component, array)
-            )
+
+        raise ValueError(
+            "Unhandled state <{}> at <{}> for: {}".format(state, component, array)
+        )
 
     # We got to the end without being able to come up with a better name, give up
     return java
 
 
 def get_generic_script_command(
-    commandline: str, ignore_switches: List[str] = []
+    commandline: str, ignore_switches: Optional[List[str]] = None
 ) -> str:
     array = to_array(commandline)
 
+    if ignore_switches is None:
+        ignore_switches = []
     while len(array) > 1 and array[1].split("=")[0] in ignore_switches:
         del array[1]
 

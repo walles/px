@@ -1,8 +1,6 @@
 import os
 import subprocess
 
-import sys
-
 from typing import List
 from typing import Dict
 
@@ -17,12 +15,12 @@ for name, value in os.environ.items():
 
 
 def run(command: List[str], check_exitcode: bool = False) -> str:
-    run = subprocess.Popen(
+    with subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV
-    )
-    stdout = run.communicate()[0].decode("utf-8")
+    ) as execution:
+        stdout = execution.communicate()[0].decode("utf-8")
 
-    if check_exitcode and run.returncode != 0:
-        raise subprocess.CalledProcessError(run.returncode, command)
+        if check_exitcode and execution.returncode != 0:
+            raise subprocess.CalledProcessError(execution.returncode, command)
 
-    return stdout
+        return stdout

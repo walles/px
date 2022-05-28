@@ -1,5 +1,3 @@
-# coding=utf-8
-
 """
 Interactive menu for killing or infoing a process.
 
@@ -60,7 +58,7 @@ def sudo_kill(process: px_process.PxProcess, signo: int) -> bool:
         print(px_terminal.CLEAR_SCREEN)
 
         # Print process screen heading followed by an empty line
-        rows, columns = px_terminal.get_window_size()
+        _, columns = px_terminal.get_window_size()
 
         print(px_terminal.crop_ansi_string_at_length(get_header_line(process), columns))
         print("")
@@ -83,7 +81,7 @@ def sudo_kill(process: px_process.PxProcess, signo: int) -> bool:
         return False
 
 
-class PxProcessMenu(object):
+class PxProcessMenu:
     # NOTE: Must match number constants in execute_menu_entry()
     MENU_ENTRIES = [
         "Show info",
@@ -103,7 +101,7 @@ class PxProcessMenu(object):
         self.active_entry = 0
 
     def refresh_display(self) -> None:
-        rows, columns = px_terminal.get_window_size()
+        _, columns = px_terminal.get_window_size()
 
         lines = []
 
@@ -140,31 +138,31 @@ class PxProcessMenu(object):
         px_terminal.draw_screen_lines(lines, columns)
 
     def await_and_handle_user_input(self) -> None:
-        input = px_terminal.getch()
-        if input is None:
+        incoming = px_terminal.getch()
+        if incoming is None:
             return
-        assert len(input) > 0
+        assert len(incoming) > 0
 
         self.status = ""
-        while len(input) > 0:
-            if input.consume(px_terminal.KEY_UPARROW):
+        while len(incoming) > 0:
+            if incoming.consume(px_terminal.KEY_UPARROW):
                 self.active_entry -= 1
                 if self.active_entry < 0:
                     self.active_entry = 0
-            elif input.consume(px_terminal.KEY_DOWNARROW):
+            elif incoming.consume(px_terminal.KEY_DOWNARROW):
                 self.active_entry += 1
                 if self.active_entry >= len(self.MENU_ENTRIES):
                     self.active_entry = len(self.MENU_ENTRIES) - 1
-            elif input.consume(px_terminal.KEY_ENTER):
+            elif incoming.consume(px_terminal.KEY_ENTER):
                 self.execute_menu_entry()
-            elif input.consume("q"):
+            elif incoming.consume("q"):
                 self.done = True
                 return
-            elif input.consume(px_terminal.SIGWINCH_KEY):
+            elif incoming.consume(px_terminal.SIGWINCH_KEY):
                 # After we return the screen will be refreshed anyway,
                 # no need to do anything here.
                 continue
-            elif input.consume(px_terminal.KEY_ESC):
+            elif incoming.consume(px_terminal.KEY_ESC):
                 self.done = True
                 return
             else:

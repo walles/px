@@ -1,4 +1,3 @@
-import sys
 import operator
 
 from px import px_terminal
@@ -54,13 +53,13 @@ def get_user_categories(
 
 def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str:
     """
-    You probably want to use rambar() instead, this is just utility function.
+    You probably want to use rambar() instead, this is just a utility function.
     """
 
-    sum = 0
+    total = 0
     for category in names_and_numbers:
-        sum += category[1]
-    assert sum > 0
+        total += category[1]
+    assert total > 0
 
     bar = ""
     bar_chars = 0
@@ -79,7 +78,7 @@ def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str
             name = name_and_number[0]
             number = name_and_number[1]
 
-            chars = int(round(bar_length * number * 1.0 / sum))
+            chars = int(round(bar_length * number * 1.0 / total))
             if chars > 1:
                 add_to_bar = px_terminal.get_string_of_length(" " + name, chars)
             else:

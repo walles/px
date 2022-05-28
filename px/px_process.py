@@ -13,8 +13,6 @@ from . import px_commandline
 from . import px_exec_util
 
 
-import sys
-
 from typing import Dict
 from typing import MutableSet
 from typing import Text
@@ -83,7 +81,8 @@ def _parse_time(time_s: Text) -> datetime.datetime:
     )
 
 
-class PxProcess(object):
+class PxProcess:
+    # pylint: disable=attribute-defined-outside-init
     def __init__(
         self,
         cmdline: Text,
@@ -256,7 +255,7 @@ class PxProcess(object):
         return True
 
 
-class PxProcessBuilder(object):
+class PxProcessBuilder:
     def __init__(self):
         self.cmdline: Optional[Text] = None
         self.pid: Optional[int] = None
@@ -447,25 +446,25 @@ def get_all() -> List[PxProcess]:
         "pid=,ppid=,rss=,lstart=,uid=,pcpu=,time=,%mem=,command=",
     ]
 
-    with open(os.devnull, "w") as DEVNULL:
-        ps = subprocess.Popen(
+    with open(os.devnull, "w", encoding="utf-8") as DEVNULL:
+        with subprocess.Popen(
             command,
             stdin=DEVNULL,
             stdout=subprocess.PIPE,
             stderr=DEVNULL,
             close_fds=close_fds,
             env=px_exec_util.ENV,
-        )
+        ) as ps:
 
-        stdout = ps.stdout
-        assert stdout
-        now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
-        for ps_line in stdout:
-            process = ps_line_to_process(ps_line.decode("utf-8"), now)
-            processes[process.pid] = process
+            stdout = ps.stdout
+            assert stdout
+            now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
+            for ps_line in stdout:
+                process = ps_line_to_process(ps_line.decode("utf-8"), now)
+                processes[process.pid] = process
 
-        if ps.wait() != 0:
-            raise IOError("Exit code {} from {}".format(ps.returncode, command))
+            if ps.wait() != 0:
+                raise IOError("Exit code {} from {}".format(ps.returncode, command))
 
     resolve_links(processes, now)
     remove_process_and_descendants(processes, os.getpid())

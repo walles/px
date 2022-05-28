@@ -1,6 +1,3 @@
-import sys
-
-
 from . import px_file
 from . import px_process
 from typing import Set
@@ -18,7 +15,7 @@ S = TypeVar("S")
 FILE_TYPES = ["PIPE", "FIFO", "unix", "IPv4", "IPv6"]
 
 
-class PeerProcess(object):
+class PeerProcess:
     def __init__(self, name: Optional[Text] = None, pid: Optional[int] = None) -> None:
         if not name:
             if pid is None:
@@ -41,7 +38,8 @@ class PeerProcess(object):
         return self.name
 
 
-class IpcMap(object):
+class IpcMap:
+    # pylint: disable=attribute-defined-outside-init
     """
     This is a map of process->[channels], where "process" is a process we have
     IPC communication open with, and a channel is a socket or a pipe that we
@@ -96,7 +94,7 @@ class IpcMap(object):
         take a lot of time. If you do want to try it, just drop all the "if fd
         not in [0, 1, 2]: continue"s and benchmark it on not-cached IP addresses.
         """
-        fds = dict()
+        fds = {}
 
         if not self._own_files:
             for fd in [0, 1, 2]:
@@ -136,7 +134,7 @@ class IpcMap(object):
             fds[network_connection.fd] = str(network_connection)
 
         # Traverse our IPC structure and update FDs as required
-        for target in self.keys():
+        for target in self.keys():  # pylint: disable=consider-using-dict-items
             for link in self[target]:
                 if link.fd is None:
                     # No FD, never mind
@@ -210,7 +208,7 @@ class IpcMap(object):
                 add_arraymapping(self._name_to_pids, file.name, file.pid)
                 add_arraymapping(self._name_to_files, file.name, file)
 
-            local_endpoint, remote = file.get_endpoints()
+            local_endpoint, _ = file.get_endpoints()
             if local_endpoint:
                 self._local_endpoint_to_pid[local_endpoint] = file.pid
 
@@ -230,15 +228,14 @@ class IpcMap(object):
     def _get_other_end_pids(self, file: px_file.PxFile) -> Iterable[int]:
         """Locate the other end of a pipe / domain socket"""
         if file.type in ["IPv4", "IPv6"]:
-            local, remote = file.get_endpoints()
+            _, remote = file.get_endpoints()
             if remote is None:
                 return []
 
             pid = self._local_endpoint_to_pid.get(remote)
             if pid:
                 return [pid]
-            else:
-                return []
+            return []
 
         name = file.name
         if name and name.startswith("->"):

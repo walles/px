@@ -93,7 +93,7 @@ def _get_ram_numbers_from_proc(
     swapfree_kb: Optional[int] = None
 
     try:
-        with open(proc_meminfo) as f:
+        with open(proc_meminfo, encoding="utf-8") as f:
             for line in f:
                 total_kb = _update_from_meminfo(total_kb, line, "MemTotal")
                 available_kb = _update_from_meminfo(available_kb, line, "MemAvailable")

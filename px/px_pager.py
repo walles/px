@@ -36,7 +36,7 @@ def _pump_info_to_fd(with_fileno, process, processes):
             LOG.warning(
                 "Unexpected OSError pumping process info into pager", exc_info=True
             )
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Logging exceptions on warning level will make them visible to somebody
         # who changes the LOGLEVEL in px.py, but not to ordinary users.
         #
@@ -55,7 +55,7 @@ def which(program: Optional[str]) -> Optional[str]:
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-    fpath, fname = os.path.split(program)
+    fpath, _ = os.path.split(program)
     if fpath:
         if is_exe(program):
             return program
@@ -131,7 +131,7 @@ def page_process_info(
 
     pagerExitcode = pager.wait()
     if pagerExitcode != 0:
-        LOG.warn("Pager exited with code %d", pagerExitcode)
+        LOG.warning("Pager exited with code %d", pagerExitcode)
 
     # FIXME: Maybe join info_thread here as well to ensure we aren't still pumping before returning?
     # This could possibly prevent https://github.com/walles/px/issues/67

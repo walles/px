@@ -22,8 +22,6 @@ def assert_core_counts_from_file(filename, expected_physical, expected_logical):
 
 
 def test_get_core_count_from_proc_cpuinfo():
-    my_dir = os.path.dirname(__file__)
-
     assert_core_counts_from_file("proc-cpuinfo-1p1l.txt", 1, 1)
     assert_core_counts_from_file("proc-cpuinfo-2p4l.txt", 2, 4)
     assert_core_counts_from_file("proc-cpuinfo-24p96l.txt", 24, 96)

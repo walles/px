@@ -106,7 +106,7 @@ def get_users_at(
             from_timestamp = _to_timestamp(from_s, now)
             if timestamp < from_timestamp:
                 continue
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             LOG.error("Problematic1 last line: <%s>", line)
             continue
 
@@ -120,7 +120,7 @@ def get_users_at(
             to_timestamp = from_timestamp + duration_delta
             if timestamp > to_timestamp:
                 continue
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             LOG.error("Problematic2 last line: <%s>", line)
 
         users.add(username)

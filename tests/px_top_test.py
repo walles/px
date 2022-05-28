@@ -10,7 +10,7 @@ from . import testutils
 
 
 def test_adjust_cpu_times():
-    now = testutils.now()
+    now = testutils.local_now()
 
     current = [
         px_process.create_kernel_process(now),

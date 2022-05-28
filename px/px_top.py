@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import sys
 import copy
 import logging
@@ -15,7 +13,6 @@ from . import px_rambar
 
 from typing import List
 from typing import Dict
-from typing import Union
 from typing import Optional
 
 LOG = logging.getLogger(__name__)
@@ -285,7 +282,6 @@ def get_screen_lines(
     max_process_count -= 1
 
     highlight_row = get_line_to_highlight(toplist, max_process_count)
-    global top_mode
     if top_mode == MODE_SEARCH:
         highlight_row = None
 
@@ -341,7 +337,6 @@ def redraw(
 
     The new display will be rows rows x columns columns.
     """
-    global search_string
     lines = get_screen_lines(
         toplist, poller, rows, columns, include_footer, search=search_string
     )
@@ -408,27 +403,27 @@ def get_command(**kwargs):
     """
     Call getch() and interpret the results.
     """
-    input = px_terminal.getch(**kwargs)
-    if input is None:
+    user_input = px_terminal.getch(**kwargs)
+    if user_input is None:
         return None
-    assert len(input) > 0
+    assert len(user_input) > 0
 
     global top_mode
     if top_mode == MODE_SEARCH:
-        handle_search_keypresses(input)
+        handle_search_keypresses(user_input)
         return CMD_HANDLED
 
     global last_highlighted_row
     global last_highlighted_pid
     global sort_by_memory
-    while len(input) > 0:
-        if input.consume(px_terminal.KEY_UPARROW):
+    while len(user_input) > 0:
+        if user_input.consume(px_terminal.KEY_UPARROW):
             last_highlighted_row -= 1
             last_highlighted_pid = None
-        elif input.consume(px_terminal.KEY_DOWNARROW):
+        elif user_input.consume(px_terminal.KEY_DOWNARROW):
             last_highlighted_row += 1
             last_highlighted_pid = None
-        elif input.consume(px_terminal.KEY_ENTER):
+        elif user_input.consume(px_terminal.KEY_ENTER):
             if last_highlighted_pid is None:
                 continue
             processes = px_process.get_all()
@@ -438,17 +433,16 @@ def get_command(**kwargs):
             if not process:
                 continue
             px_process_menu.PxProcessMenu(process).start()
-        elif input.consume("/"):
-            global search_string
+        elif user_input.consume("/"):
             top_mode = MODE_SEARCH
             return None
-        elif input.consume("m") or input.consume("M"):
+        elif user_input.consume("m") or user_input.consume("M"):
             sort_by_memory = not sort_by_memory
-        elif input.consume("q"):
+        elif user_input.consume("q"):
             return CMD_QUIT
-        elif input.consume(px_terminal.SIGWINCH_KEY):
+        elif user_input.consume(px_terminal.SIGWINCH_KEY):
             return CMD_RESIZE
-        elif input.consume(px_poller.POLL_COMPLETE_KEY):
+        elif user_input.consume(px_poller.POLL_COMPLETE_KEY):
             return CMD_POLL_COMPLETE
         else:
             # Unable to consume anything, give up
@@ -468,7 +462,6 @@ def _top(search: str = "") -> None:
     baseline = poller.get_all_processes()
     current = poller.get_all_processes()
 
-    global sort_by_memory
     toplist = get_toplist(baseline, current, sort_by_memory)
 
     rows, columns = px_terminal.get_window_size()
@@ -502,12 +495,12 @@ def top(search: str = "") -> None:
         sys.stderr.write(
             'Top mode only works on TTYs, try running just "px" instead.\n'
         )
-        exit(1)
+        sys.exit(1)
 
     with px_terminal.fullscreen_display():
         try:
             _top(search=search)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             LOG.exception("Running ptop failed")
 
         # Make sure we actually end up on a new line

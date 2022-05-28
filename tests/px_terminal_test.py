@@ -1,7 +1,4 @@
-# coding=utf-8
-
 import os
-import sys
 
 from px import px_terminal
 
@@ -101,9 +98,9 @@ def test_getch():
 
 def test_tokenize():
     px_terminal._enable_color = True
-    input = "ab" + px_terminal.bold("c") + "de"
+    tokenize_me = "ab" + px_terminal.bold("c") + "de"
     parts: List[str] = []
-    for token in px_terminal._tokenize(input):
+    for token in px_terminal._tokenize(tokenize_me):
         parts.append(token)
 
     assert parts == ["ab", "\x1b[1m", "c", "\x1b[22m", "de"]

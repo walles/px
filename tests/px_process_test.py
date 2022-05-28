@@ -20,7 +20,7 @@ def test_create_process():
     process_builder.cpu_time = 1.3
     process_builder.memory_percent = 42.7
     process_builder.cmdline = "hej kontinent"
-    test_me = process_builder.build(testutils.now())
+    test_me = process_builder.build(testutils.local_now())
 
     assert test_me.pid == 7
     assert test_me.ppid == 1
@@ -116,7 +116,7 @@ def test_ps_line_to_process_3():
         " --pid-file=/var/run/mysqld/mysqld.pid"
         " --socket=/var/run/mysqld/mysqld.sock"
         " --port=3306",
-        testutils.now(),
+        testutils.local_now(),
     )
     assert process.username == getpass.getuser()
     assert process.cpu_percent_s == "6%"
@@ -133,7 +133,7 @@ def _validate_references(processes):
         else:
             assert process.parent is not None
 
-        assert type(process.children) is set
+        assert isinstance(process.children, set)
         if process.parent:
             assert process.parent in processes
             assert process.parent.pid == process.ppid
@@ -145,12 +145,12 @@ def _validate_references(processes):
 
 
 def _test_get_all():
-    all = px_process.get_all()
-    assert len(all) >= 4  # Expect at least kernel, init, bash and python
-    for process in all:
+    all_processes = px_process.get_all()
+    assert len(all_processes) >= 4  # Expect at least kernel, init, bash and python
+    for process in all_processes:
         assert process is not None
 
-    pids = list(map(lambda p: p.pid, all))
+    pids = list(map(lambda p: p.pid, all_processes))
 
     # Finding ourselves is just confusing...
     assert os.getpid() not in pids
@@ -166,21 +166,21 @@ def _test_get_all():
 
     # Assert that all contains no duplicate PIDs
     seen_pids: MutableSet[int] = set()
-    for process in all:
+    for process in all_processes:
         pid = process.pid
         assert pid not in seen_pids
         seen_pids.add(pid)
 
     # Assert that there are processes with the current user name
     current_users_processes = filter(
-        lambda process: process.username == getpass.getuser(), all
+        lambda process: process.username == getpass.getuser(), all_processes
     )
     assert current_users_processes
 
-    _validate_references(all)
+    _validate_references(all_processes)
 
-    now = testutils.now()
-    for process in all:
+    now = testutils.local_now()
+    for process in all_processes:
         # Scores should be computed via multiplications and divisions of
         # positive numbers, if this value is negative something is wrong.
         assert process.score >= 0
@@ -189,7 +189,7 @@ def _test_get_all():
         assert process.age_seconds >= 0
         assert process.start_time < now
 
-    for process in all:
+    for process in all_processes:
         assert isinstance(process.cmdline, str)
         assert isinstance(process.username, str)
 
@@ -217,7 +217,7 @@ def test_process_eq():
     process_a = testutils.create_process()
 
     process_b = testutils.create_process()
-    parent = px_process.create_kernel_process(testutils.now())
+    parent = px_process.create_kernel_process(testutils.local_now())
     process_b.parent = parent
 
     assert process_a != process_b
@@ -375,7 +375,7 @@ def test_resolve_links():
     p1 = testutils.create_process(pid=1, ppid=UNKNOWN_PID)
     p2 = testutils.create_process(pid=2, ppid=1)
     processes = {p1.pid: p1, p2.pid: p2}
-    px_process.resolve_links(processes, testutils.now())
+    px_process.resolve_links(processes, testutils.local_now())
 
     assert p1.parent is None
     assert p2.parent is p1

@@ -19,7 +19,7 @@ def test_list_new_launches():
     before = [process]
     after = [process_identical, process_other_pid, process_other_starttime]
 
-    new_processes = px_launchcounter.Launchcounter()._list_new_launches(before, after)
+    new_processes = px_launchcounter._list_new_launches(before, after)
 
     # We should get unicode responses from getch()
     assert new_processes == [process_other_pid, process_other_starttime]
@@ -113,25 +113,23 @@ def test_ignore_surrounding_parentheses():
 
 
 def test_to_tuple_list():
-    launchcounter = px_launchcounter.Launchcounter()
-    assert launchcounter._to_tuple_list(("a", "b", "c"), 5) == [
+    assert px_launchcounter._to_tuple_list(("a", "b", "c"), 5) == [
         ("a", 0),
         ("b", 0),
         ("c", 5),
     ]
 
-    assert launchcounter._to_tuple_list(("a",), 5) == [("a", 5)]
+    assert px_launchcounter._to_tuple_list(("a",), 5) == [("a", 5)]
 
 
 def test_merge_tuple_lists():
-    launchcounter = px_launchcounter.Launchcounter()
     l1 = [("a", 0), ("b", 2), ("c", 5)]
     l2 = [("a", 0), ("b", 4)]
     l3 = [("a", 0), ("e", 4)]
 
-    assert launchcounter._merge_tuple_lists(l1, l2) == [("a", 0), ("b", 6), ("c", 5)]
+    assert px_launchcounter._merge_tuple_lists(l1, l2) == [("a", 0), ("b", 6), ("c", 5)]
 
-    assert launchcounter._merge_tuple_lists(l1, l3) is None
+    assert px_launchcounter._merge_tuple_lists(l1, l3) is None
 
 
 def test_sort_launchers_lists():

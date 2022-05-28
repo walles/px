@@ -70,7 +70,7 @@ def disable_color():
     _enable_color = False
 
 
-def sigwinch_handler(signum, frame):
+def sigwinch_handler(_signum, _frame):
     """Handle window resize signals by telling our getch() function to return"""
     # "r" for "refresh" perhaps? The actual letter doesn't matter, as long as it
     # doesn't collide with anything with some meaning other than "please
@@ -82,7 +82,7 @@ def sigwinch_handler(signum, frame):
 signal.signal(signal.SIGWINCH, sigwinch_handler)
 
 
-class ConsumableString(object):
+class ConsumableString:
     def __init__(self, string: str) -> None:
         self._string = string
 
@@ -147,8 +147,7 @@ def getch(
 
 
 class TerminalError(Exception):
-    def __init__(self, message):
-        super(TerminalError, self).__init__(message)
+    pass
 
 
 def get_window_size() -> Tuple[int, int]:
@@ -199,8 +198,6 @@ def filter_out_unchanged_screen_lines(
     all_screen_lines: List[str], columns: int
 ) -> List[Optional[str]]:
     """Compare lines to the cache and None out the ones that match the cache"""
-    global previous_screen_lines
-    global previous_screen_columns
 
     if len(previous_screen_lines) != len(all_screen_lines):
         # Screen resized, never mind the cache
@@ -288,11 +285,10 @@ def format_with_widths(widths: List[int], strings: List[str]) -> str:
     assert len(widths) == len(strings)
 
     result = ""
-    for i in range(len(widths)):
+    for i, width in enumerate(widths):
         if i > 0:
             result += " "
 
-        width = widths[i]
         string = strings[i]
 
         if width == 0:
@@ -458,56 +454,48 @@ def to_screen_lines(
 
 
 def inverse_video(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "7m" + string + CSI + "27m"
 
 
 def bold(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "1m" + string + CSI + "22m"
 
 
 def faint(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "2m" + string + CSI + "22m"
 
 
 def underline(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "4m" + string + CSI + "24m"
 
 
 def red(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;97;41m" + string + CSI + "49;39;22m"
 
 
 def yellow(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "30;103m" + string + CSI + "49;39m"
 
 
 def green(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;32m" + string + CSI + "39;22m"
 
 
 def blue(string: str) -> str:
-    global _enable_color
     if not _enable_color:
         return string
     return CSI + "1;97;44m" + string + CSI + "49;39;22m"
@@ -570,7 +558,6 @@ crop_cache: Dict[Tuple[str, int], str] = {}
 def crop_ansi_string_at_length(string: str, length: int) -> str:
     assert length >= 0
 
-    global crop_cache
     cache_key = (string, length)
     cache_hit = crop_cache.get(cache_key, None)
     if cache_hit is not None:
@@ -654,7 +641,6 @@ def _exit_fullscreen():
 class fullscreen_display:
     def __enter__(self):
         _enter_fullscreen()
-        return None
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         _exit_fullscreen()
@@ -671,7 +657,6 @@ class normal_display:
 
     def __enter__(self):
         _exit_fullscreen()
-        return None
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         _enter_fullscreen()

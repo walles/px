@@ -2,8 +2,6 @@ from . import testutils
 
 from px import px_cwdfriends
 
-import sys
-
 from typing import List
 from px import px_process
 

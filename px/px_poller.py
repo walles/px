@@ -8,8 +8,6 @@ from . import px_meminfo
 from . import px_process
 from . import px_launchcounter
 
-import sys
-
 from typing import Optional
 from typing import List
 
@@ -24,7 +22,7 @@ POLL_COMPLETE_KEY = "\x01"
 SHORT_PAUSE_SECONDS = 0.1
 
 
-class PxPoller(object):
+class PxPoller:
     def __init__(self, poll_complete_notification_fd: Optional[int] = None) -> None:
         """
         After a poll is done and there is new data, a POLL_COMPLETE_KEY will be

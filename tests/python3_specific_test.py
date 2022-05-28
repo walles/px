@@ -1,13 +1,19 @@
-import sys
-
 from px import px
 from px import px_process
-from px import px_terminal
-from px import px_processinfo
 
 from unittest.mock import patch
 
 from typing import List
+
+# FIXME: Distribute these tests to the other *_test.py files and remove this
+# one.
+#
+# These tests all require Python 3. Back when we also supported Python 2 the
+# tests in here used to live in their own Python 3 specific directory.
+#
+# But since we're now entirely on Python 3, I just moved the whole file in here.
+# These tests should be moved into the correct files, and this file should be
+# removed / renamed.
 
 
 @patch("px.px.install")

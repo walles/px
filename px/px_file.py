@@ -8,7 +8,7 @@ from typing import Tuple
 from typing import Optional
 
 
-class PxFile(object):
+class PxFile:
     def __init__(self, pid: int, filetype: str) -> None:
         self.fd: Optional[int] = None
         self.pid = pid
@@ -42,7 +42,7 @@ class PxFile(object):
         name = self.name
         listen_suffix = ""
         if self.type in ["IPv4", "IPv6"]:
-            local, remote_endpoint = self.get_endpoints()
+            _, remote_endpoint = self.get_endpoints()
             if not remote_endpoint:
                 listen_suffix = " (LISTEN)"
 
@@ -179,8 +179,12 @@ def resolve_endpoint(endpoint: str) -> str:
 
     try:
         host = socket.gethostbyaddr(address)[0]
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Lookup failed for whatever reason, give up
+        #
+        # Catching "Exception" because I am (on 2022may27) unable to figure out
+        # from these docs what exceptions can be thrown by that method, if any:
+        # https://docs.python.org/3.10/library/socket.html#socket.gethostbyaddr
         return endpoint
 
     if host == "localhost.localdomain":

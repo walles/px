@@ -22,7 +22,7 @@ TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
 def load(sample_file_name: str) -> str:
     my_dir = os.path.dirname(__file__)
     full_path = os.path.join(my_dir, sample_file_name)
-    with open(full_path) as sample_file:
+    with open(full_path, encoding="utf-8") as sample_file:
         return sample_file.read()
 
 
@@ -30,7 +30,7 @@ def spaces(at_least=1, at_most=3):
     return " " * random.randint(at_least, at_most)
 
 
-def now():
+def local_now():
     return datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
 
 
@@ -44,7 +44,7 @@ def create_process(
     cputime="0:00.03",
     mempercent="0.0",
     commandline="/usr/sbin/cupsd -l",
-    now=now(),
+    now=local_now(),
 ) -> px_process.PxProcess:
     psline = (
         spaces(at_least=0)
@@ -124,8 +124,11 @@ def fake_callchain(*args: str) -> px_process.PxProcess:
         procs.append(create_process(commandline=arg))
 
     parent = None
+    last_proc = None
     for proc in procs:
         proc.parent = parent
         parent = proc
+        last_proc = proc
 
-    return proc
+    assert last_proc is not None
+    return last_proc

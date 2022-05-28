@@ -12,19 +12,17 @@ the highest number of entries in that file.
 """
 
 import os
+import sys
+import time
+
+from typing import MutableMapping
+
 
 MYDIR = os.path.dirname(os.path.abspath(__file__))
-
-import sys
-
 sys.path.insert(0, os.path.join(MYDIR, ".."))
-
-import time
 
 from tests import testutils
 from px import px_file
-
-from typing import MutableMapping
 
 
 # For how long should we do the benchmarking run (in seconds)
@@ -49,7 +47,7 @@ def get_timings(file, pid):
     """
     t0 = time.time()
     files = None
-    with open(file, "r") as lsof_output:
+    with open(file, "r", encoding="utf-8") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
     t1 = time.time()
     dt_load = t1 - t0
@@ -73,7 +71,7 @@ def print_statistics(name, values):
 def main(lsof_file):
     print("Finding most popular PID...")
     files = None
-    with open(lsof_file, "r") as lsof_output:
+    with open(lsof_file, "r", encoding="utf-8") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
     pid = get_most_common_pid(files)
     print("Most popular PID: {}".format(pid))

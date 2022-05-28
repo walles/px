@@ -7,8 +7,13 @@ from px import px_loginhistory
 
 from typing import Set
 
+# These warnings conflict with how pytest fixtures work:
+# https://docs.pytest.org/en/6.2.x/fixture.html
+#
+# pylint: disable=redefined-outer-name,unused-argument
 
-@pytest.yield_fixture
+
+@pytest.fixture
 def check_output(capfd):
     yield None
 
