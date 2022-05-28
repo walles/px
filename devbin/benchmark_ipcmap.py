@@ -12,19 +12,17 @@ the highest number of entries in that file.
 """
 
 import os
+import sys
+import time
+
+from typing import MutableMapping
+
 
 MYDIR = os.path.dirname(os.path.abspath(__file__))
-
-import sys
-
 sys.path.insert(0, os.path.join(MYDIR, ".."))
-
-import time
 
 from tests import testutils
 from px import px_file
-
-from typing import MutableMapping
 
 
 # For how long should we do the benchmarking run (in seconds)
