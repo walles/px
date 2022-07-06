@@ -4,13 +4,14 @@ from px import px_terminal
 
 from . import px_process
 
-from typing import List
+from typing import Callable, List
 from typing import Dict
 from typing import Tuple
 
 
 def get_process_categories(
     all_processes: List[px_process.PxProcess],
+    get_category: Callable[[px_process.PxProcess], str],
 ) -> List[Tuple[str, int]]:
     """
     Group processes by pretty names, keeping track of the total rss_kb in each
@@ -19,34 +20,9 @@ def get_process_categories(
 
     names_to_kilobytes: Dict[str, int] = {}
     for process in all_processes:
-        base_kb = 0
-        if process.command in names_to_kilobytes:
-            base_kb = names_to_kilobytes[process.command]
-        else:
-            base_kb = 0
-
-        names_to_kilobytes[process.command] = base_kb + process.rss_kb
-
-    return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
-
-
-def get_user_categories(
-    all_processes: List[px_process.PxProcess],
-) -> List[Tuple[str, int]]:
-    """
-    Group processes by user names, keeping track of the total rss_kb in each
-    group.
-    """
-
-    names_to_kilobytes: Dict[str, int] = {}
-    for process in all_processes:
-        base_kb = 0
-        if process.username in names_to_kilobytes:
-            base_kb = names_to_kilobytes[process.username]
-        else:
-            base_kb = 0
-
-        names_to_kilobytes[process.username] = base_kb + process.rss_kb
+        category = get_category(process)
+        base_kb = names_to_kilobytes.get(category, 0)
+        names_to_kilobytes[category] = base_kb + process.rss_kb
 
     return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
@@ -111,10 +87,16 @@ def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str
 def rambar_by_process(
     ram_bar_length: int, all_processes: List[px_process.PxProcess]
 ) -> str:
-    return render_bar(ram_bar_length, get_process_categories(all_processes))
+    return render_bar(
+        ram_bar_length,
+        get_process_categories(all_processes, lambda process: process.command),
+    )
 
 
 def rambar_by_user(
     ram_bar_length: int, all_processes: List[px_process.PxProcess]
 ) -> str:
-    return render_bar(ram_bar_length, get_user_categories(all_processes))
+    return render_bar(
+        ram_bar_length,
+        get_process_categories(all_processes, lambda process: process.username),
+    )
