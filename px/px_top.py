@@ -9,7 +9,7 @@ from . import px_terminal
 from . import px_processinfo
 from . import px_process_menu
 from . import px_poller
-from . import px_rambar
+from . import px_category_bar
 
 from typing import List
 from typing import Dict
@@ -224,25 +224,35 @@ def get_screen_lines(
         footer_height = 1
 
     assert screen_columns > 0
-    ram_bar_length = screen_columns - 16
-    if ram_bar_length > 20:
-        # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
-        # feel free to change it if you have a better number.
-        rambar_by_process = (
-            "[" + px_rambar.rambar_by_process(ram_bar_length, all_processes) + "]"
+    bar_length = screen_columns - 16
+    if bar_length > 20:
+        # Enough space for usable category bars. Length limit ^ picked entirely
+        # arbitrarily, feel free to change it if you have a better number.
+        cpubar_by_program = (
+            "[" + px_category_bar.cpu_by_program(bar_length, all_processes) + "]"
+        )
+        cpubar_by_user = (
+            "[" + px_category_bar.cpu_by_user(bar_length, all_processes) + "]"
+        )
+        rambar_by_program = (
+            "[" + px_category_bar.ram_by_program(bar_length, all_processes) + "]"
         )
         rambar_by_user = (
-            "[" + px_rambar.rambar_by_user(ram_bar_length, all_processes) + "]"
+            "[" + px_category_bar.ram_by_user(bar_length, all_processes) + "]"
         )
     else:
-        rambar_by_process = "[ ... ]"
+        cpubar_by_program = "[ ... ]"
+        cpubar_by_user = "[ ... ]"
+        rambar_by_program = "[ ... ]"
         rambar_by_user = "[ ... ]"
 
     # Print header
     lines = [
         px_terminal.bold("Sysload: ") + poller.get_loadstring(),
+        "  By program: " + cpubar_by_program,
+        "     By user: " + cpubar_by_user,
         px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
-        "  By process: " + rambar_by_process,
+        "  By program: " + rambar_by_program,
         "     By user: " + rambar_by_user,
         px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
         "",

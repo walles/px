@@ -4,35 +4,39 @@ from px import px_terminal
 
 from . import px_process
 
-from typing import Callable, List
+from typing import Callable, List, Optional
 from typing import Dict
 from typing import Tuple
 
 
-def get_process_categories(
+def cluster_processes(
     all_processes: List[px_process.PxProcess],
     get_category: Callable[[px_process.PxProcess], str],
-) -> List[Tuple[str, int]]:
+    get_value: Callable[[px_process.PxProcess], Optional[float]],
+) -> List[Tuple[str, float]]:
     """
-    Group processes by pretty names, keeping track of the total rss_kb in each
-    group.
+    Group processes by category and value, summing up the values in each group.
     """
 
-    names_to_kilobytes: Dict[str, int] = {}
+    names_to_kilobytes: Dict[str, float] = {}
     for process in all_processes:
         category = get_category(process)
-        base_kb = names_to_kilobytes.get(category, 0)
-        names_to_kilobytes[category] = base_kb + process.rss_kb
+        value = get_value(process)
+        if value is None:
+            continue
+
+        total = names_to_kilobytes.get(category, 0)
+        names_to_kilobytes[category] = total + value
 
     return sorted(names_to_kilobytes.items(), key=operator.itemgetter(1), reverse=True)
 
 
-def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str:
+def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, float]]) -> str:
     """
     You probably want to use rambar() instead, this is just a utility function.
     """
 
-    total = 0
+    total = 0.0
     for category in names_and_numbers:
         total += category[1]
     assert total > 0
@@ -84,19 +88,45 @@ def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, int]]) -> str
     return bar
 
 
-def rambar_by_process(
-    ram_bar_length: int, all_processes: List[px_process.PxProcess]
-) -> str:
+def ram_by_program(length: int, all_processes: List[px_process.PxProcess]) -> str:
     return render_bar(
-        ram_bar_length,
-        get_process_categories(all_processes, lambda process: process.command),
+        length,
+        cluster_processes(
+            all_processes,
+            lambda process: process.command,
+            lambda process: process.rss_kb,
+        ),
     )
 
 
-def rambar_by_user(
-    ram_bar_length: int, all_processes: List[px_process.PxProcess]
-) -> str:
+def ram_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
     return render_bar(
-        ram_bar_length,
-        get_process_categories(all_processes, lambda process: process.username),
+        length,
+        cluster_processes(
+            all_processes,
+            lambda process: process.username,
+            lambda process: process.rss_kb,
+        ),
+    )
+
+
+def cpu_by_program(length: int, all_processes: List[px_process.PxProcess]) -> str:
+    return render_bar(
+        length,
+        cluster_processes(
+            all_processes,
+            lambda process: process.command,
+            lambda process: process.cpu_time_seconds,
+        ),
+    )
+
+
+def cpu_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
+    return render_bar(
+        length,
+        cluster_processes(
+            all_processes,
+            lambda process: process.username,
+            lambda process: process.cpu_time_seconds,
+        ),
     )
