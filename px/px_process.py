@@ -15,7 +15,6 @@ from . import px_exec_util
 
 from typing import Dict
 from typing import MutableSet
-from typing import Text
 from typing import Optional
 from typing import List
 from typing import Iterable
@@ -268,6 +267,9 @@ class PxProcessBuilder:
         self.memory_percent: Optional[float] = None
 
     def __repr__(self):
+        # An f-string would be long and unreadable in this case.
+        #
+        # pylint: disable=consider-using-f-string
         return (
             "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
             % (
@@ -345,7 +347,7 @@ def uid_to_username(uid: int) -> str:
 def ps_line_to_process(ps_line: str, now: datetime.datetime) -> PxProcess:
     match = PS_LINE.match(ps_line)
     if not match:
-        raise Exception("Failed to match ps line <%r>" % ps_line)
+        raise Exception(f"Failed to match ps line <{ps_line:!r}>")
 
     process_builder = PxProcessBuilder()
     process_builder.pid = int(match.group(1))
