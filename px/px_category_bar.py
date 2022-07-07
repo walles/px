@@ -39,7 +39,8 @@ def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, float]]) -> s
     total = 0.0
     for category in names_and_numbers:
         total += category[1]
-    assert total > 0
+    if total == 0:
+        return ""
 
     bar = ""
     bar_chars = 0
