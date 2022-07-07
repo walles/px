@@ -9,7 +9,7 @@ from . import px_terminal
 from . import px_processinfo
 from . import px_process_menu
 from . import px_poller
-from . import px_rambar
+from . import px_category_bar
 
 from typing import List
 from typing import Dict
@@ -195,6 +195,79 @@ def get_line_to_highlight(
     return last_highlighted_row
 
 
+def generate_header(
+    filtered_processes: List[px_process.PxProcess],
+    poller: px_poller.PxPoller,
+    screen_columns: int,
+) -> List[str]:
+    assert screen_columns > 0
+
+    sysload_line = px_terminal.bold("Sysload: ") + poller.get_loadstring()
+    ramuse_line = px_terminal.bold("RAM Use: ") + poller.get_meminfo()
+
+    if px_terminal.visual_length(sysload_line) > (screen_columns // 2 - 1):
+        # Traditional header
+        bar_length = screen_columns - 16
+        if bar_length > 20:
+            # Enough space for usable category bars. Length limit ^ picked entirely
+            # arbitrarily, feel free to change it if you have a better number.
+            rambar_by_program = (
+                "["
+                + px_category_bar.ram_by_program(bar_length, filtered_processes)
+                + "]"
+            )
+            rambar_by_user = (
+                "[" + px_category_bar.ram_by_user(bar_length, filtered_processes) + "]"
+            )
+        else:
+            rambar_by_program = "[ ... ]"
+            rambar_by_user = "[ ... ]"
+
+        # Print header
+        return [
+            sysload_line,
+            ramuse_line,
+            "  By program: " + rambar_by_program,
+            "     By user: " + rambar_by_user,
+            px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
+            "",
+        ]
+
+    # Make a split header
+    bar_length = screen_columns // 2 - 3
+    if bar_length > 20:
+        # Enough space for usable category bars. Length limit ^ picked entirely
+        # arbitrarily, feel free to change it if you have a better number.
+        cpubar_by_program = (
+            "[" + px_category_bar.cpu_by_program(bar_length, filtered_processes) + "]"
+        )
+        cpubar_by_user = (
+            "[" + px_category_bar.cpu_by_user(bar_length, filtered_processes) + "]"
+        )
+        rambar_by_program = (
+            "[" + px_category_bar.ram_by_program(bar_length, filtered_processes) + "]"
+        )
+        rambar_by_user = (
+            "[" + px_category_bar.ram_by_user(bar_length, filtered_processes) + "]"
+        )
+    else:
+        cpubar_by_program = "[ ... ]"
+        cpubar_by_user = "[ ... ]"
+        rambar_by_program = "[ ... ]"
+        rambar_by_user = "[ ... ]"
+
+    return [
+        px_terminal.get_string_of_length(sysload_line, screen_columns // 2)
+        + ramuse_line,
+        px_terminal.get_string_of_length(cpubar_by_program, screen_columns // 2)
+        + rambar_by_program,
+        px_terminal.get_string_of_length(cpubar_by_user, screen_columns // 2)
+        + rambar_by_user,
+        px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
+        "",
+    ]
+
+
 def get_screen_lines(
     toplist: List[px_process.PxProcess],
     poller: px_poller.PxPoller,
@@ -223,30 +296,7 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
-    assert screen_columns > 0
-    ram_bar_length = screen_columns - 16
-    if ram_bar_length > 20:
-        # Enough space for a usable RAM bar. Limit picked entirely arbitrarily,
-        # feel free to change it if you have a better number.
-        rambar_by_process = (
-            "[" + px_rambar.rambar_by_process(ram_bar_length, all_processes) + "]"
-        )
-        rambar_by_user = (
-            "[" + px_rambar.rambar_by_user(ram_bar_length, all_processes) + "]"
-        )
-    else:
-        rambar_by_process = "[ ... ]"
-        rambar_by_user = "[ ... ]"
-
-    # Print header
-    lines = [
-        px_terminal.bold("Sysload: ") + poller.get_loadstring(),
-        px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
-        "  By process: " + rambar_by_process,
-        "     By user: " + rambar_by_user,
-        px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
-        "",
-    ]
+    lines = generate_header(all_processes, poller, screen_columns)
 
     # Create a launches section
     header_height = len(lines)
@@ -307,9 +357,10 @@ def get_screen_lines(
         assert top_mode == MODE_BASE
         lines += [SEARCH_PROMPT_INACTIVE + px_terminal.bold(search or "")]
 
-    lines += toplist_table_lines[
-        0 : max_process_count + 1
-    ]  # +1 for the column headings
+    if max_process_count > 0:
+        lines += toplist_table_lines[
+            0 : max_process_count + 1
+        ]  # +1 for the column headings
 
     lines += launchlines
 

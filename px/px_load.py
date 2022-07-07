@@ -87,7 +87,7 @@ def get_load_values() -> Tuple[float, float, float]:
 def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     """
     Example return string, underlines indicate bold:
-    "1.5  [4 cores | 8 virtual]  [15m load history: GRAPH]"
+    "1.5  [4 cores | 8 virtual]  [15m history: GRAPH]"
      ^^^   ^^^^^^^                                  ^^^^^
 
     Load number is color coded:
@@ -114,4 +114,4 @@ def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     # Increase intensity for more recent times
     graph = px_terminal.faint(graph[0:3]) + graph[3:6] + px_terminal.bold(graph[6:])
 
-    return "{}  {}  [15m load history: {}]".format(load_string, cores_string, graph)
+    return "{}  {}  [15m history: {}]".format(load_string, cores_string, graph)
