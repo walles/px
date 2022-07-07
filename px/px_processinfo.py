@@ -132,9 +132,7 @@ def to_relative_start_string(base, relative):
         delta_string = "just"
         if relative.pid > base.pid:
             before_or_after = "after"
-    return "{} was started {} {} {}".format(
-        relative, delta_string, before_or_after, base
-    )
+    return f"{relative} was started {delta_string} {before_or_after} {base}"
 
 
 def get_closest_starts(
@@ -287,8 +285,8 @@ def print_fds(
     watch_lsof = px_terminal.bold(f"sudo watch lsof -p {process.pid}")
     println(
         fd,
-        'For a list of all open files, do "{}", '
-        'or "{}" for a live view.'.format(lsof, watch_lsof),
+        f'For a list of all open files, do "{lsof}", '
+        f'or "{watch_lsof}" for a live view.',
     )
 
     if os.getuid() != 0:
@@ -301,6 +299,7 @@ def print_fds(
 
 
 def print_start_time(fd: int, process: px_process.PxProcess) -> None:
+    # pylint: disable=consider-using-f-string
     println(
         fd,
         "{} {} was started by {}, at {}.".format(
@@ -313,6 +312,7 @@ def print_start_time(fd: int, process: px_process.PxProcess) -> None:
 
     if process.cpu_time_seconds and process.age_seconds:
         cpu_percent = 100.0 * process.cpu_time_seconds / process.age_seconds
+        # pylint: disable=consider-using-f-string
         println(
             fd,
             "{} has been its average CPU usage since then, or {}/{}".format(
@@ -328,8 +328,7 @@ def print_pid_info(fd: int, pid: int) -> None:
 
     process = find_process_by_pid(pid, processes)
     if not process:
-        sys.stderr.write(f"No such PID: {pid}\n")
-        sys.exit(1)
+        sys.exit(f"No such PID: {pid}")
 
     print_process_info(fd, process, processes)
 

@@ -267,8 +267,6 @@ class PxProcessBuilder:
         self.memory_percent: Optional[float] = None
 
     def __repr__(self):
-        # An f-string would be long and unreadable in this case.
-        #
         # pylint: disable=consider-using-f-string
         return (
             "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
