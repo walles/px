@@ -33,7 +33,8 @@ def cluster_processes(
 
 def render_bar(bar_length: int, names_and_numbers: List[Tuple[str, float]]) -> str:
     """
-    You probably want to use rambar() instead, this is just a utility function.
+    You probably want to use x_by_y() functions at the end of this file instead,
+    this is just an internal utility function.
     """
 
     total = 0.0

@@ -3,7 +3,7 @@ from px import px_terminal
 
 
 def test_render_bar_happy_path():
-    names_and_numbers = [("apa", 1000), ("bepa", 300), ("cepa", 50)] + [
+    names_and_numbers = [("apa", 1000.0), ("bepa", 300.0), ("cepa", 50.0)] + [
         ("long tail", 1)
     ] * 300
     assert px_category_bar.render_bar(10, names_and_numbers) == (
@@ -15,7 +15,7 @@ def test_render_bar_happy_path():
 
 
 def test_render_bar_happy_path_unicode():
-    names_and_numbers = [("åpa", 1000), ("bäpa", 300), ("cäpa", 50)] + [
+    names_and_numbers = [("åpa", 1000.0), ("bäpa", 300.0), ("cäpa", 50.0)] + [
         ("lång svans", 1)
     ] * 300
     assert px_category_bar.render_bar(10, names_and_numbers) == (
