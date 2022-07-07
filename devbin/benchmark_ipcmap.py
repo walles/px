@@ -47,7 +47,7 @@ def get_timings(file, pid):
     """
     t0 = time.time()
     files = None
-    with open(file, "r", encoding="utf-8") as lsof_output:
+    with open(file, encoding="utf-8") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
     t1 = time.time()
     dt_load = t1 - t0
@@ -65,16 +65,16 @@ def print_statistics(name, values):
     highest = max(values)
     middle = (lowest + highest) / 2
     radius = (highest - lowest) / 2
-    print("{} is {:.2f}s±{:.2f}s".format(name, middle, radius))
+    print(f"{name} is {middle:.2f}s±{radius:.2f}s")
 
 
 def main(lsof_file):
     print("Finding most popular PID...")
     files = None
-    with open(lsof_file, "r", encoding="utf-8") as lsof_output:
+    with open(lsof_file, encoding="utf-8") as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
     pid = get_most_common_pid(files)
-    print("Most popular PID: {}".format(pid))
+    print(f"Most popular PID: {pid}")
 
     end = time.time() + DURATION_S
     lap_number = 0
@@ -83,7 +83,7 @@ def main(lsof_file):
     total_times = []
     while time.time() < end:
         lap_number += 1
-        print("Lap {}, {:.0f}s left...".format(lap_number, end - time.time()))
+        print(f"Lap {lap_number}, {end - time.time():.0f}s left...")
         load_time, mapping_time = get_timings(lsof_file, pid)
         load_times.append(load_time)
         mapping_times.append(mapping_time)
