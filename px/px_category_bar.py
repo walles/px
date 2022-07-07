@@ -112,29 +112,39 @@ def ram_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
     )
 
 
+def create_cpu_getter(
+    all_processes: List[px_process.PxProcess],
+) -> Callable[[px_process.PxProcess], Optional[float]]:
+    """
+    Getter for cpu_time_seconds if there are any, otherwise for cpu_percent (of
+    which we know there are a bunch).
+    """
+    for process in all_processes:
+        if process.cpu_time_seconds is None:
+            continue
+        if process.cpu_time_seconds > 0:
+            return lambda p: p.cpu_time_seconds
+
+    return lambda p: p.cpu_percent
+
+
 def cpu_by_program(length: int, all_processes: List[px_process.PxProcess]) -> str:
-    # FIXME: If all CPU times are zero / unset, use CPU percentages instead.
-    # That would make the switch between the first and the second screen frames
-    # less jarring to look at.
     return render_bar(
         length,
         cluster_processes(
             all_processes,
             lambda process: process.command,
-            lambda process: process.cpu_time_seconds,
+            create_cpu_getter(all_processes),
         ),
     )
 
 
 def cpu_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
-    # FIXME: If all CPU times are zero / unset, use CPU percentages instead.
-    # That would make the switch between the first and the second screen frames
-    # less jarring to look at.
     return render_bar(
         length,
         cluster_processes(
             all_processes,
             lambda process: process.username,
-            lambda process: process.cpu_time_seconds,
+            create_cpu_getter(all_processes),
         ),
     )
