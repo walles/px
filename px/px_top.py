@@ -195,6 +195,49 @@ def get_line_to_highlight(
     return last_highlighted_row
 
 
+def generate_header(
+    filtered_processes: List[px_process.PxProcess],
+    poller: px_poller.PxPoller,
+    screen_columns: int,
+) -> List[str]:
+    assert screen_columns > 0
+    bar_length = screen_columns - 16
+    if bar_length > 20:
+        # Enough space for usable category bars. Length limit ^ picked entirely
+        # arbitrarily, feel free to change it if you have a better number.
+        cpubar_by_program = (
+            "[" + px_category_bar.cpu_by_program(bar_length, filtered_processes) + "]"
+        )
+        cpubar_by_user = (
+            "[" + px_category_bar.cpu_by_user(bar_length, filtered_processes) + "]"
+        )
+        rambar_by_program = (
+            "[" + px_category_bar.ram_by_program(bar_length, filtered_processes) + "]"
+        )
+        rambar_by_user = (
+            "[" + px_category_bar.ram_by_user(bar_length, filtered_processes) + "]"
+        )
+    else:
+        cpubar_by_program = "[ ... ]"
+        cpubar_by_user = "[ ... ]"
+        rambar_by_program = "[ ... ]"
+        rambar_by_user = "[ ... ]"
+
+    # Print header
+    lines = [
+        px_terminal.bold("Sysload: ") + poller.get_loadstring(),
+        "  By program: " + cpubar_by_program,
+        "     By user: " + cpubar_by_user,
+        px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
+        "  By program: " + rambar_by_program,
+        "     By user: " + rambar_by_user,
+        px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
+        "",
+    ]
+
+    return lines
+
+
 def get_screen_lines(
     toplist: List[px_process.PxProcess],
     poller: px_poller.PxPoller,
@@ -223,40 +266,7 @@ def get_screen_lines(
     if include_footer:
         footer_height = 1
 
-    assert screen_columns > 0
-    bar_length = screen_columns - 16
-    if bar_length > 20:
-        # Enough space for usable category bars. Length limit ^ picked entirely
-        # arbitrarily, feel free to change it if you have a better number.
-        cpubar_by_program = (
-            "[" + px_category_bar.cpu_by_program(bar_length, all_processes) + "]"
-        )
-        cpubar_by_user = (
-            "[" + px_category_bar.cpu_by_user(bar_length, all_processes) + "]"
-        )
-        rambar_by_program = (
-            "[" + px_category_bar.ram_by_program(bar_length, all_processes) + "]"
-        )
-        rambar_by_user = (
-            "[" + px_category_bar.ram_by_user(bar_length, all_processes) + "]"
-        )
-    else:
-        cpubar_by_program = "[ ... ]"
-        cpubar_by_user = "[ ... ]"
-        rambar_by_program = "[ ... ]"
-        rambar_by_user = "[ ... ]"
-
-    # Print header
-    lines = [
-        px_terminal.bold("Sysload: ") + poller.get_loadstring(),
-        "  By program: " + cpubar_by_program,
-        "     By user: " + cpubar_by_user,
-        px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
-        "  By program: " + rambar_by_program,
-        "     By user: " + rambar_by_user,
-        px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
-        "",
-    ]
+    lines = generate_header(all_processes, poller, screen_columns)
 
     # Create a launches section
     header_height = len(lines)
