@@ -204,9 +204,7 @@ def to_ipc_lines(ipc_map: px_ipc_map.IpcMap) -> Iterable[str]:
         for channel_name in map(str, channels):
             channel_names.add(channel_name)
         for channel_name in sorted(channel_names):
-            return_me.append(
-                "{}: {}".format(px_terminal.bold(str(target)), channel_name)
-            )
+            return_me.append(f"{px_terminal.bold(str(target))}: {channel_name}")
 
     return return_me
 
@@ -219,10 +217,8 @@ def print_cwd_friends(fd, process, all_processes, all_files):
         cwd_suffix = " (" + px_terminal.bold(friends.cwd) + ")"
     println(fd, "Others sharing this process' working directory" + cwd_suffix)
     if not friends.cwd:
-        sudo_px = px_terminal.bold("sudo px {}".format(process.pid))
-        println(
-            fd, '  Working directory unknown, try again or try "{}"'.format(sudo_px)
-        )
+        sudo_px = px_terminal.bold(f"sudo px {process.pid}")
+        println(fd, f'  Working directory unknown, try again or try "{sudo_px}"')
         return
 
     if friends.cwd == "/":
@@ -287,8 +283,8 @@ def print_fds(
         println(fd, "  " + line)
 
     println(fd, "")
-    lsof = px_terminal.bold("sudo lsof -p {}".format(process.pid))
-    watch_lsof = px_terminal.bold("sudo watch lsof -p {}".format(process.pid))
+    lsof = px_terminal.bold(f"sudo lsof -p {process.pid}")
+    watch_lsof = px_terminal.bold(f"sudo watch lsof -p {process.pid}")
     println(
         fd,
         'For a list of all open files, do "{}", '
@@ -320,7 +316,7 @@ def print_start_time(fd: int, process: px_process.PxProcess) -> None:
         println(
             fd,
             "{} has been its average CPU usage since then, or {}/{}".format(
-                px_terminal.bold("{:.1f}%".format(cpu_percent)),
+                px_terminal.bold(f"{cpu_percent:.1f}%"),
                 px_terminal.bold(process.cpu_time_s),
                 px_terminal.bold(process.age_s),
             ),
@@ -332,7 +328,7 @@ def print_pid_info(fd: int, pid: int) -> None:
 
     process = find_process_by_pid(pid, processes)
     if not process:
-        sys.stderr.write("No such PID: {}\n".format(pid))
+        sys.stderr.write(f"No such PID: {pid}\n")
         sys.exit(1)
 
     print_process_info(fd, process, processes)
