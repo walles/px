@@ -102,14 +102,12 @@ def test_ignore_surrounding_parentheses():
 
     # Note that the ordering of the lines doesn't really matter here, just as
     # long as all of them are in there
-    assert set(lines) == set(
-        [
-            "init -> " + px_terminal.bold("iTerm") + "(3)",
-            "init -> " + px_terminal.bold("(i)Term") + "(1)",
-            "init -> " + px_terminal.bold("i(Term)") + "(1)",
-            "init -> " + px_terminal.bold("iTerm()") + "(1)",
-        ]
-    )
+    assert set(lines) == {
+        "init -> " + px_terminal.bold("iTerm") + "(3)",
+        "init -> " + px_terminal.bold("(i)Term") + "(1)",
+        "init -> " + px_terminal.bold("i(Term)") + "(1)",
+        "init -> " + px_terminal.bold("iTerm()") + "(1)",
+    }
 
 
 def test_to_tuple_list():
