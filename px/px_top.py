@@ -201,7 +201,40 @@ def generate_header(
     screen_columns: int,
 ) -> List[str]:
     assert screen_columns > 0
-    bar_length = screen_columns - 16
+
+    sysload_line = px_terminal.bold("Sysload: ") + poller.get_loadstring()
+    ramuse_line = px_terminal.bold("RAM Use: ") + poller.get_meminfo()
+
+    if px_terminal.visual_length(sysload_line) > (screen_columns // 2 - 1):
+        # Traditional header
+        bar_length = screen_columns - 16
+        if bar_length > 20:
+            # Enough space for usable category bars. Length limit ^ picked entirely
+            # arbitrarily, feel free to change it if you have a better number.
+            rambar_by_program = (
+                "["
+                + px_category_bar.ram_by_program(bar_length, filtered_processes)
+                + "]"
+            )
+            rambar_by_user = (
+                "[" + px_category_bar.ram_by_user(bar_length, filtered_processes) + "]"
+            )
+        else:
+            rambar_by_program = "[ ... ]"
+            rambar_by_user = "[ ... ]"
+
+        # Print header
+        return [
+            sysload_line,
+            ramuse_line,
+            "  By program: " + rambar_by_program,
+            "     By user: " + rambar_by_user,
+            px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
+            "",
+        ]
+
+    # Make a split header
+    bar_length = screen_columns // 2 - 3
     if bar_length > 20:
         # Enough space for usable category bars. Length limit ^ picked entirely
         # arbitrarily, feel free to change it if you have a better number.
@@ -223,19 +256,16 @@ def generate_header(
         rambar_by_program = "[ ... ]"
         rambar_by_user = "[ ... ]"
 
-    # Print header
-    lines = [
-        px_terminal.bold("Sysload: ") + poller.get_loadstring(),
-        "  By program: " + cpubar_by_program,
-        "     By user: " + cpubar_by_user,
-        px_terminal.bold("RAM Use: ") + poller.get_meminfo(),
-        "  By program: " + rambar_by_program,
-        "     By user: " + rambar_by_user,
+    return [
+        px_terminal.get_string_of_length(sysload_line, screen_columns // 2)
+        + ramuse_line,
+        px_terminal.get_string_of_length(cpubar_by_program, screen_columns // 2)
+        + rambar_by_program,
+        px_terminal.get_string_of_length(cpubar_by_user, screen_columns // 2)
+        + rambar_by_user,
         px_terminal.bold("IO Load:      ") + poller.get_ioload_string(),
         "",
     ]
-
-    return lines
 
 
 def get_screen_lines(
