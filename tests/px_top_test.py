@@ -100,7 +100,10 @@ def test_get_screen_lines_low_screen():
     baseline = px_process.get_all()
     poller = px_poller.PxPoller()
 
-    SCREEN_ROWS = 10
+    # We have to make up some number for "How low screens can we cope with?".
+    # Here's the number I made up.
+    SCREEN_ROWS = 11
+
     px_terminal._enable_color = True
     lines = px_top.get_screen_lines(baseline, poller, SCREEN_ROWS, 99)
 
