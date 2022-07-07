@@ -112,6 +112,9 @@ def ram_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
 
 
 def cpu_by_program(length: int, all_processes: List[px_process.PxProcess]) -> str:
+    # FIXME: If all CPU times are zero / unset, use CPU percentages instead.
+    # That would make the switch between the first and the second screen frames
+    # less jarring to look at.
     return render_bar(
         length,
         cluster_processes(
@@ -123,6 +126,9 @@ def cpu_by_program(length: int, all_processes: List[px_process.PxProcess]) -> st
 
 
 def cpu_by_user(length: int, all_processes: List[px_process.PxProcess]) -> str:
+    # FIXME: If all CPU times are zero / unset, use CPU percentages instead.
+    # That would make the switch between the first and the second screen frames
+    # less jarring to look at.
     return render_bar(
         length,
         cluster_processes(

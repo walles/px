@@ -317,9 +317,10 @@ def get_screen_lines(
         assert top_mode == MODE_BASE
         lines += [SEARCH_PROMPT_INACTIVE + px_terminal.bold(search or "")]
 
-    lines += toplist_table_lines[
-        0 : max_process_count + 1
-    ]  # +1 for the column headings
+    if max_process_count > 0:
+        lines += toplist_table_lines[
+            0 : max_process_count + 1
+        ]  # +1 for the column headings
 
     lines += launchlines
 
