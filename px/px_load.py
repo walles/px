@@ -14,7 +14,7 @@ from typing import Tuple
 
 physical, logical = px_cpuinfo.get_core_count()
 physical_string = px_terminal.bold(str(physical) + " cores")
-cores_string = "[{} | {} virtual]".format(physical_string, logical)
+cores_string = f"[{physical_string} | {logical} virtual]"
 
 
 def average_to_level(average, peak):
@@ -100,7 +100,7 @@ def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
 
     avg0to1, avg1to5, avg5to15 = load_values
 
-    load_string = "{:.1f}".format(avg0to1)
+    load_string = f"{avg0to1:.1f}"
     if avg0to1 <= physical:
         load_string = px_terminal.green(load_string)
     elif avg0to1 <= logical:
@@ -114,4 +114,4 @@ def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
     # Increase intensity for more recent times
     graph = px_terminal.faint(graph[0:3]) + graph[3:6] + px_terminal.bold(graph[6:])
 
-    return "{}  {}  [15m history: {}]".format(load_string, cores_string, graph)
+    return f"{load_string}  {cores_string}  [15m history: {graph}]"

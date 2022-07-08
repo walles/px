@@ -15,7 +15,6 @@ from . import px_exec_util
 
 from typing import Dict
 from typing import MutableSet
-from typing import Text
 from typing import Optional
 from typing import List
 from typing import Iterable
@@ -42,11 +41,11 @@ CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9]
 TIMEZONE = dateutil.tz.tzlocal()
 
 
-uid_to_username_cache: Dict[int, Text] = {}
-get_command_cache: Dict[Text, Text] = {}
+uid_to_username_cache: Dict[int, str] = {}
+get_command_cache: Dict[str, str] = {}
 
 
-def _parse_time(time_s: Text) -> datetime.datetime:
+def _parse_time(time_s: str) -> datetime.datetime:
     """
     Parse a local date from ps into a datetime.datetime object.
 
@@ -85,11 +84,11 @@ class PxProcess:
     # pylint: disable=attribute-defined-outside-init
     def __init__(
         self,
-        cmdline: Text,
+        cmdline: str,
         pid: int,
         rss_kb: int,
-        start_time_string: Text,
-        username: Text,
+        start_time_string: str,
+        username: str,
         now: datetime.datetime,
         ppid: Optional[int],
         memory_percent: Optional[float] = None,
@@ -137,12 +136,12 @@ class PxProcess:
         self.memory_percent = memory_percent
         self.memory_percent_s: str = "--"
         if memory_percent is not None:
-            self.memory_percent_s = "{:.0f}%".format(memory_percent)
+            self.memory_percent_s = f"{memory_percent:.0f}%"
 
         self.cpu_percent = cpu_percent
         self.cpu_percent_s: str = "--"
         if cpu_percent is not None:
-            self.cpu_percent_s = "{:.0f}%".format(cpu_percent)
+            self.cpu_percent_s = f"{cpu_percent:.0f}%"
 
         # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(cpu_time)
@@ -184,7 +183,7 @@ class PxProcess:
         )
 
     def set_cpu_time_seconds(self, seconds: Optional[float]) -> None:
-        self.cpu_time_s: Text = "--"
+        self.cpu_time_s: str = "--"
         self.cpu_time_seconds = None
         if seconds is not None:
             self.cpu_time_s = seconds_to_str(seconds)
@@ -257,17 +256,18 @@ class PxProcess:
 
 class PxProcessBuilder:
     def __init__(self):
-        self.cmdline: Optional[Text] = None
+        self.cmdline: Optional[str] = None
         self.pid: Optional[int] = None
         self.ppid: Optional[int] = None
         self.rss_kb: Optional[int] = None
-        self.start_time_string: Optional[Text] = None
-        self.username: Optional[Text] = None
+        self.start_time_string: Optional[str] = None
+        self.username: Optional[str] = None
         self.cpu_percent: Optional[float] = None
         self.cpu_time: Optional[float] = None
         self.memory_percent: Optional[float] = None
 
     def __repr__(self):
+        # pylint: disable=consider-using-f-string
         return (
             "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
             % (
@@ -302,7 +302,7 @@ class PxProcessBuilder:
         )
 
 
-def parse_time(timestring: Text) -> float:
+def parse_time(timestring: str) -> float:
     """Convert a CPU time string returned by ps to a number of seconds"""
 
     match = CPUTIME_OSX.match(timestring)
@@ -329,7 +329,7 @@ def parse_time(timestring: Text) -> float:
     raise ValueError("Unparsable timestamp: <" + timestring + ">")
 
 
-def uid_to_username(uid: int) -> Text:
+def uid_to_username(uid: int) -> str:
     if uid in uid_to_username_cache:
         return uid_to_username_cache[uid]
 
@@ -342,10 +342,10 @@ def uid_to_username(uid: int) -> Text:
     return uid_to_username_cache[uid]
 
 
-def ps_line_to_process(ps_line: Text, now: datetime.datetime) -> PxProcess:
+def ps_line_to_process(ps_line: str, now: datetime.datetime) -> PxProcess:
     match = PS_LINE.match(ps_line)
     if not match:
-        raise Exception("Failed to match ps line <%r>" % ps_line)
+        raise Exception(f"Failed to match ps line <{ps_line:!r}>")
 
     process_builder = PxProcessBuilder()
     process_builder.pid = int(match.group(1))
@@ -464,7 +464,7 @@ def get_all() -> List[PxProcess]:
                 processes[process.pid] = process
 
             if ps.wait() != 0:
-                raise IOError("Exit code {} from {}".format(ps.returncode, command))
+                raise OSError(f"Exit code {ps.returncode} from {command}")
 
     resolve_links(processes, now)
     remove_process_and_descendants(processes, os.getpid())
@@ -484,7 +484,7 @@ def order_best_first(processes: Iterable[PxProcess]) -> List[PxProcess]:
     return ordered
 
 
-def seconds_to_str(seconds: float) -> Text:
+def seconds_to_str(seconds: float) -> str:
     if seconds < 60:
         seconds_s = str(seconds)
         decimal_index = seconds_s.rfind(".")
@@ -496,13 +496,13 @@ def seconds_to_str(seconds: float) -> Text:
     if seconds < 3600:
         minutes = int(seconds / 60)
         remaining_seconds = int(seconds - minutes * 60)
-        return "{}m{:02d}s".format(minutes, remaining_seconds)
+        return f"{minutes}m{remaining_seconds:02d}s"
 
     if seconds < 86400:
         hours = int(seconds / 3600)
         minutes = int((seconds - 3600 * hours) / 60)
-        return "{}h{:02d}m".format(hours, minutes)
+        return f"{hours}h{minutes:02d}m"
 
     days = int(seconds / 86400)
     hours = int((seconds - 86400 * days) / 3600)
-    return "{}d{:02d}h".format(days, hours)
+    return f"{days}d{hours:02d}h"

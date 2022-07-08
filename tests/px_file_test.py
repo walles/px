@@ -93,7 +93,7 @@ def test_setability():
     # Can files be stored in sets?
     a = lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"])
     b = lsof_to_file(["p123", "f6", "aw", "tREG", "d0x42", "n/somefile"])
-    s = set([a, b])
+    s = {a, b}
     assert len(s) == 1
 
 

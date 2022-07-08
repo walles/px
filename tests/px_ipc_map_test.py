@@ -16,15 +16,15 @@ def test_get_other_end_pids_basic():
 
     my_end = testutils.create_file("PIPE", "[] " + PIPE_ID, "0x1234", 42)
     found = get_other_end_pids(my_end, files)
-    assert found == set([25])
+    assert found == {25}
 
     my_end = testutils.create_file("PIPE", "[] ->" + PIPE_ID, "0x1234", 42)
     found = get_other_end_pids(my_end, files)
-    assert found == set([25])
+    assert found == {25}
 
     my_end = testutils.create_file("PIPE", "doesn't exist", "0x1234", 42)
     found = get_other_end_pids(my_end, files)
-    assert found == set([])
+    assert found == set()
 
 
 def test_get_other_end_pids_osx_pipe1():
@@ -34,7 +34,7 @@ def test_get_other_end_pids_osx_pipe1():
     ]
     my_end = testutils.create_file("PIPE", "[] ->0xE0e", "0x8000", 42)
     found = get_other_end_pids(my_end, files)
-    assert found == set([25, 26])
+    assert found == {25, 26}
 
 
 def test_get_other_end_pids_osx_pipe2():
@@ -44,7 +44,7 @@ def test_get_other_end_pids_osx_pipe2():
     ]
     my_end = testutils.create_file("PIPE", "[] ->0x8a8de9", "0xAda", 42)
     found = get_other_end_pids(my_end, files)
-    assert found == set([25, 26])
+    assert found == {25, 26}
 
 
 def test_get_other_end_pids_linux_pipe():
@@ -53,8 +53,8 @@ def test_get_other_end_pids_linux_pipe():
         testutils.create_file("FIFO", "pipe", None, 200, inode="100200", access="w"),
         testutils.create_file("FIFO", "pipe", None, 300, inode="100300", access="w"),
     ]
-    assert get_other_end_pids(files[0], files) == set([200])
-    assert get_other_end_pids(files[1], files) == set([100])
+    assert get_other_end_pids(files[0], files) == {200}
+    assert get_other_end_pids(files[1], files) == {100}
     assert get_other_end_pids(files[2], files) == set()
 
 
@@ -63,7 +63,7 @@ def test_get_other_end_pids_fifo1():
 
     my_end = testutils.create_file("FIFO", "[] /fifo/name", None, 42, "w")
     found = get_other_end_pids(my_end, files)
-    assert found == set([25])
+    assert found == {25}
 
 
 def test_get_other_end_pids_fifo2():
@@ -71,7 +71,7 @@ def test_get_other_end_pids_fifo2():
 
     my_end = testutils.create_file("FIFO", "[] /fifo/name", None, 42, "r")
     found = get_other_end_pids(my_end, files)
-    assert found == set([25])
+    assert found == {25}
 
 
 def test_get_other_end_pids_linux_socket():
@@ -150,7 +150,7 @@ def test_get_ipc_map_1():
     files = None
     my_dir = os.path.dirname(__file__)
     with open(
-        os.path.join(my_dir, "lsof-test-output-linux-1.txt"), "r", encoding="utf-8"
+        os.path.join(my_dir, "lsof-test-output-linux-1.txt"), encoding="utf-8"
     ) as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
 
@@ -170,7 +170,7 @@ def test_get_ipc_map_2():
     files = None
     my_dir = os.path.dirname(__file__)
     with open(
-        os.path.join(my_dir, "lsof-test-output-linux-2.txt"), "r", encoding="utf-8"
+        os.path.join(my_dir, "lsof-test-output-linux-2.txt"), encoding="utf-8"
     ) as lsof_output:
         files = px_file.lsof_to_files(lsof_output.read())
 

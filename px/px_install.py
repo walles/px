@@ -13,10 +13,10 @@ def install(src, dest):
     try:
         _install(src, dest)
     except Exception as e:  # pylint: disable=broad-except
-        sys.stderr.write("Installing {} failed, please retry with sudo\n".format(dest))
-        sys.stderr.write("Error was: {}\n".format(str(e)))
+        sys.stderr.write(f"Installing {dest} failed, please retry with sudo\n")
+        sys.stderr.write(f"Error was: {str(e)}\n")
         sys.exit(1)
-    print("Created: {}".format(dest))
+    print(f"Created: {dest}")
 
 
 def _install(src, dest):
@@ -30,14 +30,14 @@ def _install(src, dest):
         return
 
     if not os.path.isfile(src):
-        raise IOError("Source is not a file: %s" % (src,))
+        raise OSError(f"Source is not a file: {src}")
 
     parent = os.path.dirname(dest)
     if not os.path.isdir(parent):
-        raise IOError("Destination parent is not a directory: %s" % (parent,))
+        raise OSError(f"Destination parent is not a directory: {parent}")
 
     if os.path.isdir(dest):
-        raise IOError("Destination is a directory, won't replace that: %s" % (dest,))
+        raise OSError(f"Destination is a directory, won't replace that: {dest}")
 
     # Make sure nothing's in the way
     try:
@@ -45,7 +45,7 @@ def _install(src, dest):
     except OSError:
         pass
     if os.path.exists(dest):
-        raise IOError("Can't remove existing entry: %s" % (dest,))
+        raise OSError(f"Can't remove existing entry: {dest}")
 
     shutil.copyfile(src, dest)
     os.chmod(dest, 0o755)

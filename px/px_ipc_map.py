@@ -119,11 +119,7 @@ class IpcMap:
                     name = file.device
                 if name and name.startswith("->"):
                     name = name[2:]
-                fds[file.fd] = "[{}] <{}> ({})".format(
-                    file.type,
-                    excuse,
-                    name,
-                )
+                fds[file.fd] = f"[{file.type}] <{excuse}> ({name})"
 
         # Traverse network connections and update FDs as required
         for network_connection in self.network_connections:
@@ -148,7 +144,7 @@ class IpcMap:
                 name = link.name
                 if name and name.startswith("->"):
                     name = name[2:]
-                fds[link.fd] = "[{}] -> {} ({})".format(link.type, str(target), name)
+                fds[link.fd] = f"[{link.type}] -> {target} ({name})"
 
         return fds
 
