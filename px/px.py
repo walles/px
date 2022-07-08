@@ -229,7 +229,7 @@ def _main(argv: List[str]) -> None:
         processes = px_process.get_all()
         process = px_processinfo.find_process_by_pid(pid, processes)
         if not process:
-            sys.exit("No such PID: {}\n".format(pid))
+            sys.exit(f"No such PID: {pid}")
 
         px_pager.page_process_info(process, processes)
         return
