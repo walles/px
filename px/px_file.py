@@ -155,9 +155,7 @@ class PxFileBuilder:
         return pxFile
 
     def __repr__(self):
-        return "PxFileBuilder(pid={}, name={}, type={})".format(
-            self.pid, self.name, self.type
-        )
+        return f"PxFileBuilder(pid={self.pid}, name={self.name}, type={self.type})"
 
 
 def resolve_endpoint(endpoint: str) -> str:
@@ -265,9 +263,7 @@ def lsof_to_files(lsof: str) -> List[PxFile]:
             file_builder.inode = value
 
         else:
-            raise Exception(
-                "Unhandled type <{}> for shard <{}>".format(infotype, shard)
-            )
+            raise Exception(f"Unhandled type <{infotype}> for shard <{shard}>")
 
     if file_builder:
         # Don't forget the last file

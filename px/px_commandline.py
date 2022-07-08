@@ -312,9 +312,7 @@ def get_java_command(commandline: str) -> str:
                 return java
             return prettify_fully_qualified_java_class(component)
 
-        raise ValueError(
-            "Unhandled state <{}> at <{}> for: {}".format(state, component, array)
-        )
+        raise ValueError(f"Unhandled state <{state}> at <{component}> for: {array}")
 
     # We got to the end without being able to come up with a better name, give up
     return java
