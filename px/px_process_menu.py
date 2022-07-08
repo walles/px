@@ -207,10 +207,7 @@ class PxProcessMenu:
             countdown_s = KILL_TIMEOUT_SECONDS - dt_s
             if countdown_s <= 0:
                 return
-            self.status = "{:.1f}s {}".format(
-                countdown_s,
-                message,
-            )
+            self.status = f"{countdown_s:.1f}s {message}"
             self.refresh_display()
 
             time.sleep(0.1)
@@ -231,7 +228,7 @@ class PxProcessMenu:
             )
             return
         self.await_death(
-            "Waiting for %s to shut down after SIGTERM" % self.process.command
+            f"Waiting for {self.process.command} to shut down after SIGTERM"
         )
         if not self.process.is_alive():
             return
@@ -239,7 +236,7 @@ class PxProcessMenu:
         # Die!!
         assert signal_process(self.process, SIGKILL)
         self.await_death(
-            "Waiting for %s to shut down after kill -9" % self.process.command
+            f"Waiting for {self.process.command} to shut down after kill -9"
         )
         if not self.process.is_alive():
             return

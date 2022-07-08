@@ -56,7 +56,7 @@ class Sample:
         self.bytecount = bytecount
 
     def __repr__(self):
-        return 'Sample[name="{}", count={}]'.format(self.name, self.bytecount)
+        return f'Sample[name="{self.name}", count={self.bytecount}]'
 
     def __eq__(self, o):
         return self.bytecount == o.bytecount and self.name == o.name
@@ -162,9 +162,7 @@ class SubsystemStat:
 
         if throughput > high_watermark:
             raise ValueError(
-                "High watermark {} lower than throughput {}".format(
-                    high_watermark, throughput
-                )
+                f"High watermark {high_watermark} lower than throughput {throughput}"
             )
 
         self.throughput = throughput
@@ -343,6 +341,8 @@ class PxIoLoad:
         current_throughput, max_throughput = px_units.bytes_to_strings(
             math.trunc(bottleneck[1]), math.trunc(bottleneck[2])
         )
+
+        # pylint: disable=consider-using-f-string
         return "[{} / {}] {}".format(
             px_terminal.bold(current_throughput + "/s"),
             max_throughput + "/s",
