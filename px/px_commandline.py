@@ -2,9 +2,11 @@
 
 import re
 import os.path
+import logging
 
-from typing import List
-from typing import Optional
+from typing import Callable, List, Optional
+
+LOG = logging.getLogger(__name__)
 
 
 # Match "[kworker/0:0H]", no grouping
@@ -76,6 +78,23 @@ def try_clarify_electron(commandline: str) -> Optional[str]:
     return None
 
 
+def faillog(parser: Callable[..., Optional[str]], commandline: str, *args) -> str:
+    """
+    Call parser with commandline and the rest as arguments.
+
+    If successful, just return the result. If unsuccessful log the problem and
+    return the VM name.
+    """
+    result: Optional[str] = parser(commandline, *args)
+    if result:
+        return result
+
+    LOG.debug("Parsing failed, using fallback: <%s>", commandline)
+
+    vm = os.path.basename(to_array(commandline)[0])
+    return vm
+
+
 def get_command(commandline: str) -> str:
     """
     Extracts the command from the command line.
@@ -95,7 +114,7 @@ def get_command(commandline: str) -> str:
     command = os.path.basename(to_array(commandline)[0])
 
     if command.startswith("python") or command == "Python":
-        return get_python_command(commandline)
+        return faillog(get_python_command, commandline)
 
     if command == "Electron":
         clarified = try_clarify_electron(commandline)
@@ -103,11 +122,12 @@ def get_command(commandline: str) -> str:
             return clarified
 
     if command == "java":
-        return get_java_command(commandline)
+        return faillog(get_java_command, commandline)
 
     if command == "ruby":
         # Switches list inspired by ruby 2.3.7p456 --help output
-        return get_generic_script_command(
+        return faillog(
+            get_generic_script_command,
             commandline,
             [
                 "-a",
@@ -135,16 +155,18 @@ def get_command(commandline: str) -> str:
         )
 
     if command == "sudo":
-        return get_sudo_command(commandline)
+        return faillog(get_sudo_command, commandline)
 
     if command == "node":
-        return get_generic_script_command(commandline, ["--max_old_space_size"])
+        return faillog(
+            get_generic_script_command, commandline, ["--max_old_space_size"]
+        )
 
     if command in ["bash", "sh"]:
-        return get_generic_script_command(commandline)
+        return faillog(get_generic_script_command, commandline)
 
     if PERL_BIN.match(command):
-        return get_generic_script_command(commandline)
+        return faillog(get_generic_script_command, commandline)
 
     app_name_prefix = get_app_name_prefix(commandline)
     if is_human_friendly(command):
@@ -168,7 +190,8 @@ def get_command(commandline: str) -> str:
     return app_name_prefix + command
 
 
-def get_python_command(commandline: str) -> str:
+def get_python_command(commandline: str) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
     array = to_array(commandline)
     array = list(filter(lambda s: s, array))
 
@@ -207,17 +230,18 @@ def get_python_command(commandline: str) -> str:
         if array[1] == "-m" and not array[2].startswith("-"):
             return os.path.basename(array[2])
 
-    return python
+    return None
 
 
-def get_sudo_command(commandline: str) -> str:
+def get_sudo_command(commandline: str) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
     without_sudo = commandline[5:].strip()
     if not without_sudo:
         return "sudo"
 
     if without_sudo.startswith("-"):
         # Give up on options
-        return "sudo"
+        return None
 
     return "sudo " + get_command(without_sudo)
 
@@ -234,7 +258,8 @@ def prettify_fully_qualified_java_class(class_name: str) -> str:
     return split[-1]
 
 
-def get_java_command(commandline: str) -> str:
+def get_java_command(commandline: str) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
     array = to_array(commandline)
     java = os.path.basename(array[0])
     if len(array) == 1:
@@ -248,16 +273,14 @@ def get_java_command(commandline: str) -> str:
 
         if state == "skip next":
             if component.startswith("-"):
-                # Skipping switches doesn't make sense. We're lost, fall back to
-                # just returning the command name
-                return java
+                # Skipping switches doesn't make sense. We're lost.
+                return None
             state = "scanning"
             continue
         if state == "return next":
             if component.startswith("-"):
-                # Returning switches doesn't make sense. We're lost, fall back
-                # to just returning the command name
-                return java
+                # Returning switches doesn't make sense. We're lost.
+                return None
             return os.path.basename(component)
         if state == "scanning":
             if component.startswith("-X"):
@@ -309,18 +332,19 @@ def get_java_command(commandline: str) -> str:
                 continue
             if component.startswith("-"):
                 # Unsupported switch, give up
-                return java
+                return None
             return prettify_fully_qualified_java_class(component)
 
         raise ValueError(f"Unhandled state <{state}> at <{component}> for: {array}")
 
     # We got to the end without being able to come up with a better name, give up
-    return java
+    return None
 
 
 def get_generic_script_command(
     commandline: str, ignore_switches: Optional[List[str]] = None
-) -> str:
+) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
     array = to_array(commandline)
 
     if ignore_switches is None:
@@ -333,7 +357,7 @@ def get_generic_script_command(
         return vm
 
     if array[1].startswith("-"):
-        # This is some option, we don't do options
-        return vm
+        # Unknown option, help!
+        return None
 
     return os.path.basename(array[1])
