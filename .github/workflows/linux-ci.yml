@@ -40,7 +40,7 @@ jobs:
       - name: Install tox in our virtualenv
         run: |
           . ./env/bin/activate
-          pip install tox
+          pip install tox==4.0.9
       - name: Run tox in our virtualenv
         run: |
           . ./env/bin/activate
