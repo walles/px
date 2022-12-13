@@ -188,6 +188,10 @@ If you have `Homebrew`_ on your system (likely on macOS)::
 
   brew install px
 
+On `Arch Linux`_::
+
+  paru -S px_ptop
+
 On other systems, install into ``/usr/local/bin`` by copy / pasting this command
 into a terminal::
 
@@ -351,6 +355,7 @@ DONE
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
 .. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
 .. _Homebrew: https://brew.sh
+.. _Arch Linux: https://archlinux.org/
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
