@@ -182,7 +182,7 @@ Installation
 ------------
 On `Debian 10 Buster`_ or later, and on `Ubuntu 19.04 Disco`_ and later, install using::
 
-  sudo apt-get install px
+  sudo apt install px
 
 If you have `Homebrew`_ on your system (likely on macOS)::
 
