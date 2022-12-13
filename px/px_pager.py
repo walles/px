@@ -126,7 +126,12 @@ def page_process_info(
     info_thread = threading.Thread(
         target=_pump_info_to_fd, args=(pager_stdin, process, processes)
     )
-    info_thread.setDaemon(True)  # Terminating ptop while this is running is fine
+
+    # Terminating ptop while this is running is fine. This is deprecated since
+    # Python 3.10, but we want to support older Pythons as well so let's keep it
+    # this way for now.
+    info_thread.setDaemon(True)  # pylint: disable=deprecated-method
+
     info_thread.start()
 
     pagerExitcode = pager.wait()
