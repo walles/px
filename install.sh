@@ -11,32 +11,33 @@ PXPREFIX=${PXPREFIX:-/usr/local/bin}
 
 # Get the download URL for the latest release
 TEMPFILE=$(mktemp || mktemp -t px-install-releasesjson.XXXXXXXX)
-curl -s https://api.github.com/repos/$REPO/releases > "${TEMPFILE}"
-if grep "API rate limit exceeded" "${TEMPFILE}" > /dev/null ; then
+curl -s https://api.github.com/repos/${REPO}/releases >"${TEMPFILE}"
+if grep "API rate limit exceeded" "${TEMPFILE}" >/dev/null; then
   cat "${TEMPFILE}" >&2
   exit 1
 fi
 
 URL=$(
-  grep browser_download_url "$TEMPFILE" \
-  | cut -d '"' -f 4 \
-  | head -n 1)
+  grep browser_download_url "${TEMPFILE}" |
+    cut -d '"' -f 4 |
+    head -n 1
+)
 rm "${TEMPFILE}"
 
 echo "Downloading the latest release..."
-echo "  $URL"
+echo "  ${URL}"
 TEMPFILE=$(mktemp || mktemp -t px-install.XXXXXXXX)
-curl -L -s "$URL" > "$TEMPFILE"
-chmod a+x "$TEMPFILE"
+curl -L -s "${URL}" >"${TEMPFILE}"
+chmod a+x "${TEMPFILE}"
 
 echo "Installing the latest release..."
 echo
-echo "sudo install px.pex /usr/local/bin/px"
-sudo install "$TEMPFILE" "${PXPREFIX}/px"
-echo "sudo install px.pex /usr/local/bin/ptop"
-sudo install "$TEMPFILE" "${PXPREFIX}/ptop"
+echo "sudo install px.pex ${PXPREFIX}/px"
+sudo install "${TEMPFILE}" "${PXPREFIX}/px"
+echo "sudo ln px ${PXPREFIX}/ptop"
+sudo ln -sf px "${PXPREFIX}/ptop"
 
-rm -f "$TEMPFILE"
+rm -f "${TEMPFILE}"
 
 echo
 echo "Installation done, now run one or both of:"
