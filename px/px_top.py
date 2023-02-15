@@ -290,6 +290,12 @@ def get_screen_lines(
             filter(lambda p: p.match(search, require_exact_user=False), toplist)
         )
 
+        # Put exact search matches first. Useful for "px cat" or other short
+        # search strings with tons of hits.
+        toplist = sorted(
+            toplist, key=lambda p: search in (p.command, p.username), reverse=True
+        )
+
     # Hand out different amount of lines to the different sections
     footer_height = 0
     cputop_minheight = 10

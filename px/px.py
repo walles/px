@@ -251,6 +251,10 @@ def _main(argv: List[str]) -> None:
     if sort_cpupercent:
         procs = list(filter(lambda p: p.cpu_percent is not None, procs))
         procs = sorted(procs, key=operator.attrgetter("cpu_percent"))
+    if search:
+        # Put exact search matches last. Useful for "px cat" or other short
+        # search strings with tons of hits.
+        procs = sorted(procs, key=lambda p: p.command == search)
     lines = px_terminal.to_screen_lines(procs, None, None, with_username)
 
     if columns:
