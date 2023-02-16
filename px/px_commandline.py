@@ -178,14 +178,18 @@ def get_command(commandline: str) -> str:
 
     command_split = command.split(".")
     if len(command_split) > 1:
+        command_suggestion = ""
         if len(command_split[-1]) > 4:
             # Pretend all the dots are a kind of path and go for the last
             # part only
-            command = command_split[-1]
+            command_suggestion = command_split[-1]
         else:
             # Assume last part is a file suffix (like ".exe") and take the
             # next to last part
-            command = command_split[-2]
+            command_suggestion = command_split[-2]
+        if len(command_suggestion) >= 5:
+            # Good enough!
+            command = command_suggestion
 
     return app_name_prefix + command
 

@@ -398,6 +398,16 @@ def test_get_homebrew_commandline():
     )
 
 
+def test_get_terraform_commandline():
+    # Source: https://github.com/walles/px/issues/105
+    assert (
+        px_commandline.get_command(
+            ".terraform/providers/registry.terraform.io/heroku/heroku/4.8.0/darwin_amd64/terraform-provider-heroku_v4.8.0"
+        )
+        == "terraform-provider-heroku_v4.8.0"
+    )
+
+
 def test_node_max_old_space():
     assert (
         px_commandline.get_command("node --max_old_space_size=4096 scripts/start.js")
