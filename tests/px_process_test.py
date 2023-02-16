@@ -278,6 +278,14 @@ def test_match():
     assert p.match("air")
     assert p.match("play")
 
+    # Match PID by prefix but not substring. Exact matches are used for
+    # searching in ptop. Prefix matching is used to not throw the right answer
+    # away while the user is typing their search in ptop. Substring matching has
+    # no value.
+    assert p.match("47536")
+    assert p.match("4753")
+    assert not p.match("7536")
+
 
 def test_seconds_to_str():
     assert px_process.seconds_to_str(0.54321) == "0.54s"

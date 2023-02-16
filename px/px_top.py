@@ -292,8 +292,15 @@ def get_screen_lines(
 
         # Put exact search matches first. Useful for "px cat" or other short
         # search strings with tons of hits.
+        search_pid = -1
+        try:
+            search_pid = int(search)
+        except ValueError:
+            pass
         toplist = sorted(
-            toplist, key=lambda p: search in (p.command, p.username), reverse=True
+            toplist,
+            key=lambda p: search in (p.command, p.username) or p.pid == search_pid,
+            reverse=True,
         )
 
     # Hand out different amount of lines to the different sections

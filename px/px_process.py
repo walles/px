@@ -214,6 +214,9 @@ class PxProcess:
         if string in self.cmdline.lower():
             return True
 
+        if str(self.pid).startswith(string):
+            return True
+
         return False
 
     def get_command_line_array(self):
