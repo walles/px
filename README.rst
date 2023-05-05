@@ -16,20 +16,27 @@ Output
 
 ``ptop``
 --------
+
+If you're coming from ``htop`` or some other ``top`` variant, here's what to
+expect from ``ptop``:
+
 |ptop screenshot|
 
-* Note how the default sort order of CPU-usage-since-``ptop``-started makes the
-  display mostly stable.
 * Note the core count right next to the system load number, for easy comparison.
-* Note the load history graph next to the load numbers. On this system the
-  load went up during the last minute. This is a visualization of the numbers
+* Note the load history graph next to the load numbers. On this system the load
+  has been high for the last 15 minutes. This is a visualization of the numbers
   you get from ``uptime``.
-* Note the ``IO Load`` number, this shows which IO device had the highest
-  average throughput since ``ptop`` launched.
+* Note the bars showing which programs / users are using your memory below the
+  memory numbers
+* Note the ``IO Load`` number, showing which IO device had the highest average
+  throughput since ``ptop`` launched.
+* Note how the default sort order of CPUTIME-since-``ptop``-started makes the
+  display mostly stable and enables you to sort by CPU usage.
 * Note that binaries launched while ``ptop`` is running are listed at the bottom
   of the display.
-* Note the visualization of which programs / users are using your memory below
-  the memory numbers
+* Note how the Python program on the second to last line is shown as
+  ``run_adapter.py`` (the program) rather than ``python3`` (the runtime). `This
+  support is available for many VMs`_ like Java, Node, ...
 * Selecting a process with Enter will offer you to see detailed information
   about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
 * After you press ``q`` to quit, the display is retained and some lines at the
