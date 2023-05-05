@@ -42,6 +42,8 @@ expect from ``ptop``, with explanations below the screenshot:
 * After you press ``q`` to quit, the display is retained and some lines at the
   bottom are removed to prevent the information you want from scrolling out of
   view.
+* A help text on the bottom hints you how to search / filter (interactively),
+  change sort order or how to pick processes for further inspection or killing.
 
 ``px``
 -------------
