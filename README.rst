@@ -18,7 +18,7 @@ Output
 --------
 
 If you're coming from ``htop`` or some other ``top`` variant, here's what to
-expect from ``ptop``:
+expect from ``ptop``, with explanations below the screenshot:
 
 |ptop screenshot|
 
