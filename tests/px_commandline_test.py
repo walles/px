@@ -408,6 +408,12 @@ def test_get_terraform_commandline():
     )
 
 
+def test_get_go_commandline():
+    assert px_commandline.get_command("go build ./...") == "go build"
+    assert px_commandline.get_command("go --version") == "go"
+    assert px_commandline.get_command("/usr/local/bin/go") == "go"
+
+
 def test_node_max_old_space():
     assert (
         px_commandline.get_command("node --max_old_space_size=4096 scripts/start.js")

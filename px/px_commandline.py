@@ -157,6 +157,9 @@ def get_command(commandline: str) -> str:
     if command == "sudo":
         return faillog(get_sudo_command, commandline)
 
+    if command == "go":
+        return faillog(get_go_command, commandline)
+
     if command == "node":
         return faillog(
             get_generic_script_command, commandline, ["--max_old_space_size"]
@@ -248,6 +251,18 @@ def get_sudo_command(commandline: str) -> Optional[str]:
         return None
 
     return "sudo " + get_command(without_sudo)
+
+
+def get_go_command(commandline: str) -> Optional[str]:
+    array = to_array(commandline)
+
+    if len(array) == 1:
+        return "go"
+
+    if array[1].startswith("-"):
+        return "go"
+
+    return f"go {array[1]}"
 
 
 def prettify_fully_qualified_java_class(class_name: str) -> str:
