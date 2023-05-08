@@ -111,7 +111,7 @@ virtualenv "${ENVDIR}"
 # https://github.com/pypa/twine/issues/273#issuecomment-334911815
 pip install "ndg-httpsclient == 0.4.3"
 
-pip install "twine == 1.9.1"
+pip install "twine == 4.0.2"
 
 # Upload!
 echo
