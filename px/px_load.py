@@ -9,7 +9,7 @@ import os
 from . import px_cpuinfo
 from . import px_terminal
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 physical, logical = px_cpuinfo.get_core_count()
@@ -84,7 +84,7 @@ def get_load_values() -> Tuple[float, float, float]:
     return (avg0to1, avg1to5, avg5to15)
 
 
-def get_load_string(load_values: Tuple[float, float, float] = None) -> str:
+def get_load_string(load_values: Optional[Tuple[float, float, float]] = None) -> str:
     """
     Example return string, underlines indicate bold:
     "1.5  [4 cores | 8 virtual]  [15m history: GRAPH]"

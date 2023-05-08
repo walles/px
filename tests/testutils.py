@@ -75,9 +75,9 @@ def create_file(
     name: str,
     device: Optional[str],
     pid: int,
-    access: str = None,
-    inode: str = None,
-    fd: int = None,
+    access: Optional[str] = None,
+    inode: Optional[str] = None,
+    fd: Optional[int] = None,
     fdtype: Optional[str] = None,
 ):
     # type (...) -> px_file.PxFile
