@@ -119,7 +119,7 @@ def read_select(
 
 
 def getch(
-    timeout_seconds: Optional[int] = None, fd: int = None
+    timeout_seconds: Optional[int] = None, fd: Optional[int] = None
 ) -> Optional[ConsumableString]:
     """
     Wait at most timeout_seconds for a character to become available on stdin.
@@ -219,7 +219,6 @@ def filter_out_unchanged_screen_lines(
 
 
 def draw_screen_lines(lines: List[str], columns: int) -> None:
-
     unfiltered_screen_lines = raw_lines_to_screen_lines(lines, columns)
     screen_lines = filter_out_unchanged_screen_lines(unfiltered_screen_lines, columns)
 
