@@ -4,7 +4,7 @@ import re
 import os.path
 import logging
 
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -78,16 +78,13 @@ def try_clarify_electron(commandline: str) -> Optional[str]:
     return None
 
 
-def faillog(parser: Callable[..., Optional[str]], commandline: str, *args) -> str:
+def faillog(commandline: str, parse_result: Optional[str]) -> str:
     """
-    Call parser with commandline and the rest as arguments.
-
     If successful, just return the result. If unsuccessful log the problem and
     return the VM name.
     """
-    result: Optional[str] = parser(commandline, *args)
-    if result:
-        return result
+    if parse_result:
+        return parse_result
 
     LOG.debug("Parsing failed, using fallback: <%s>", commandline)
 
@@ -114,7 +111,7 @@ def get_command(commandline: str) -> str:
     command = os.path.basename(to_array(commandline)[0])
 
     if command.startswith("python") or command == "Python":
-        return faillog(get_python_command, commandline)
+        return faillog(commandline, get_python_command(commandline))
 
     if command == "Electron":
         clarified = try_clarify_electron(commandline)
@@ -122,54 +119,78 @@ def get_command(commandline: str) -> str:
             return clarified
 
     if command == "java":
-        return faillog(get_java_command, commandline)
+        return faillog(commandline, get_java_command(commandline))
 
     if command == "ruby":
         # Switches list inspired by ruby 2.3.7p456 --help output
         return faillog(
-            get_generic_script_command,
             commandline,
-            [
-                "-a",
-                "-d",
-                "--debug",
-                "--disable",
-                #
-                # Quickfix for #74, better implementations welcome!
-                # https://github.com/walles/px/issues/74
-                "-Eascii-8bit:ascii-8bit",
-                #
-                "-l",
-                "-n",
-                "-p",
-                "-s",
-                "-S",
-                "-v",
-                "--verbose",
-                "-w",
-                "-W0",
-                "-W1",
-                "-W2",
-                "--",
-            ],
+            get_generic_script_command(
+                commandline,
+                ignore_switches=[
+                    "-a",
+                    "-d",
+                    "--debug",
+                    "--disable",
+                    #
+                    # Quickfix for #74, better implementations welcome!
+                    # https://github.com/walles/px/issues/74
+                    "-Eascii-8bit:ascii-8bit",
+                    #
+                    "-l",
+                    "-n",
+                    "-p",
+                    "-s",
+                    "-S",
+                    "-v",
+                    "--verbose",
+                    "-w",
+                    "-W0",
+                    "-W1",
+                    "-W2",
+                    "--",
+                ],
+            ),
         )
 
     if command == "sudo":
-        return faillog(get_sudo_command, commandline)
+        return faillog(commandline, get_sudo_command(commandline))
 
-    if command == "go":
-        return faillog(get_go_command, commandline)
+    if command in [
+        # NOTE: This list contains binaries that are mostly used with
+        # subcommands. Scripts (like brew.rb) are handled in
+        # get_generic_script_command().
+        #
+        # "gradle" and "mvn" are not handled at all, could be added to
+        # get_java_command().
+        "apt-get",
+        "apt",
+        "cargo",
+        "docker",
+        "docker-compose",
+        "git",
+        "go",
+        "npm",
+        "pip",
+        "pip3",
+        "rustup",
+        "terraform",
+    ]:
+        return faillog(commandline, get_with_subcommand(commandline))
 
     if command == "node":
         return faillog(
-            get_generic_script_command, commandline, ["--max_old_space_size"]
+            commandline,
+            get_generic_script_command(
+                commandline, ignore_switches=["--max_old_space_size"]
+            ),
         )
 
     if command in ["bash", "sh"]:
-        return faillog(get_generic_script_command, commandline)
+        return faillog(commandline, get_generic_script_command(commandline))
 
     if PERL_BIN.match(command):
-        return faillog(get_generic_script_command, commandline)
+        return faillog(commandline, get_generic_script_command(commandline))
 
     app_name_prefix = get_app_name_prefix(commandline)
     if is_human_friendly(command):
@@ -253,16 +274,17 @@ def get_sudo_command(commandline: str) -> Optional[str]:
     return "sudo " + get_command(without_sudo)
 
 
-def get_go_command(commandline: str) -> Optional[str]:
+def get_with_subcommand(commandline: str) -> Optional[str]:
     array = to_array(commandline)
+    command = os.path.basename(array[0])
 
     if len(array) == 1:
-        return "go"
+        return command
 
     if array[1].startswith("-"):
-        return "go"
+        return command
 
-    return f"go {array[1]}"
+    return f"{command} {array[1]}"
 
 
 def prettify_fully_qualified_java_class(class_name: str) -> str:
@@ -375,8 +397,20 @@ def get_generic_script_command(
     if len(array) == 1:
         return vm
 
+    script = os.path.basename(array[1])
     if array[1].startswith("-"):
         # Unknown option, help!
         return None
 
-    return os.path.basename(array[1])
+    if len(array) == 2:
+        # vm + script
+        return script
+    if script not in ["brew.rb", "yarn.js"]:
+        return script
+
+    subcommand = array[2]
+    if subcommand.startswith("-"):
+        # Unknown option before the subcommand
+        return script
+
+    return f"{script} {subcommand}"

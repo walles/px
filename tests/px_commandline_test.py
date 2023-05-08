@@ -276,7 +276,7 @@ def test_get_command_ruby_switches():
         px_commandline.get_command(
             "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust"
         )
-        == "brew.rb"
+        == "brew.rb install"
     )
 
     # https://github.com/walles/px/issues/87
@@ -394,7 +394,7 @@ def test_get_homebrew_commandline():
                 ]
             )
         )
-        == "brew.rb"
+        == "brew.rb upgrade"
     )
 
 
@@ -412,6 +412,15 @@ def test_get_go_commandline():
     assert px_commandline.get_command("go build ./...") == "go build"
     assert px_commandline.get_command("go --version") == "go"
     assert px_commandline.get_command("/usr/local/bin/go") == "go"
+
+
+def test_get_git_commandline():
+    assert (
+        px_commandline.get_command("git clone git@github.com:walles/riff")
+        == "git clone"
+    )
+    assert px_commandline.get_command("git --version") == "git"
+    assert px_commandline.get_command("/usr/local/bin/git") == "git"
 
 
 def test_node_max_old_space():
