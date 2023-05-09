@@ -174,9 +174,13 @@ def get_command(commandline: str) -> str:
         "pip",
         "pip3",
         "rustup",
-        "terraform",
     ]:
         return faillog(commandline, get_with_subcommand(commandline))
+
+    if command == "terraform":
+        return faillog(
+            commandline, get_with_subcommand(commandline, ignore_switches=["-chdir"])
+        )
 
     if command == "node":
         return faillog(
@@ -274,19 +278,6 @@ def get_sudo_command(commandline: str) -> Optional[str]:
     return "sudo " + get_command(without_sudo)
 
 
-def get_with_subcommand(commandline: str) -> Optional[str]:
-    array = to_array(commandline)
-    command = os.path.basename(array[0])
-
-    if len(array) == 1:
-        return command
-
-    if array[1].startswith("-"):
-        return command
-
-    return f"{command} {array[1]}"
-
-
 def prettify_fully_qualified_java_class(class_name: str) -> str:
     split = class_name.split(".")
     if len(split) == 1:
@@ -382,6 +373,27 @@ def get_java_command(commandline: str) -> Optional[str]:
     return None
 
 
+def get_with_subcommand(
+    commandline: str, ignore_switches: Optional[List[str]] = None
+) -> Optional[str]:
+    array = to_array(commandline)
+
+    if ignore_switches is None:
+        ignore_switches = []
+    while len(array) > 1 and array[1].split("=")[0] in ignore_switches:
+        del array[1]
+
+    command = os.path.basename(array[0])
+    if len(array) == 1:
+        return command
+
+    if array[1].startswith("-"):
+        # Unknown option, help!
+        return command
+
+    return f"{command} {array[1]}"
+
+
 def get_generic_script_command(
     commandline: str, ignore_switches: Optional[List[str]] = None
 ) -> Optional[str]:
@@ -397,16 +409,17 @@ def get_generic_script_command(
     if len(array) == 1:
         return vm
 
-    script = os.path.basename(array[1])
     if array[1].startswith("-"):
         # Unknown option, help!
         return None
 
+    script = os.path.basename(array[1])
     if len(array) == 2:
         # vm + script
         return script
     if script not in ["brew.rb", "yarn.js"]:
         return script
+    script = os.path.splitext(script)[0]
 
     subcommand = array[2]
     if subcommand.startswith("-"):

@@ -276,7 +276,7 @@ def test_get_command_ruby_switches():
         px_commandline.get_command(
             "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust"
         )
-        == "brew.rb install"
+        == "brew install"
     )
 
     # https://github.com/walles/px/issues/87
@@ -394,17 +394,25 @@ def test_get_homebrew_commandline():
                 ]
             )
         )
-        == "brew.rb upgrade"
+        == "brew upgrade"
     )
 
 
-def test_get_terraform_commandline():
+def test_get_terraform_provider_commandline():
     # Source: https://github.com/walles/px/issues/105
     assert (
         px_commandline.get_command(
             ".terraform/providers/registry.terraform.io/heroku/heroku/4.8.0/darwin_amd64/terraform-provider-heroku_v4.8.0"
         )
         == "terraform-provider-heroku_v4.8.0"
+    )
+
+
+def test_get_terraform_commandline():
+    # Source: https://github.com/walles/px/issues/113
+    assert (
+        px_commandline.get_command("terraform -chdir=dev apply -target=abc123")
+        == "terraform apply"
     )
 
 
