@@ -148,7 +148,6 @@ def handleLogMessages(messages: Optional[str]) -> None:
 
 
 def _main(argv: List[str]) -> None:
-
     if "--install" in argv:
         install(argv)
         return
@@ -210,6 +209,11 @@ def _main(argv: List[str]) -> None:
 
     search = ""
     if len(argv) == 2:
+        if argv[1].startswith("--"):
+            sys.stderr.write(f"ERROR: Unknown argument: {argv[1]}\n\n")
+            print(__doc__)
+            sys.exit(1)
+
         search = argv[1]
 
     if top:
