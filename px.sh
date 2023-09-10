@@ -2,4 +2,4 @@
 
 # Run px from current sources
 
-tox -e package > /dev/null && ./px.pex "$@"
+PYTHONPATH=px:$(echo env/lib/python*/site-packages) python3 -m px.px "$@"
