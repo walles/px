@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# Run ptop from current sources
+# Run pxtree from current sources
 
-tox -e package >/dev/null && ./px.pex --tree "$@"
+PYTHONPATH=px:$(echo env/lib/python*/site-packages) python3 -m px.px --tree "$@"
