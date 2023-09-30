@@ -172,6 +172,7 @@ def _main(argv: List[str]) -> None:
     with_color: Optional[bool] = None
     with_username = True
     top: bool = False
+    tree: bool = False
     sort_cpupercent: bool = False
 
     while "--no-pager" in argv:
@@ -194,6 +195,12 @@ def _main(argv: List[str]) -> None:
     if os.path.basename(argv[0]).endswith("top"):
         top = True
 
+    while "--tree" in argv:
+        tree = True
+        argv.remove("--tree")
+    if os.path.basename(argv[0]).endswith("tree"):
+        tree = True
+
     while "--sort=cpupercent" in argv:
         sort_cpupercent = True
         argv.remove("--sort=cpupercent")
@@ -205,23 +212,35 @@ def _main(argv: List[str]) -> None:
 
     if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
-        print(__doc__)
+        print(__doc__, file=sys.stderr)
         sys.exit(1)
 
     search = ""
     if len(argv) == 2:
         if argv[1].startswith("--"):
             sys.stderr.write(f"ERROR: Unknown argument: {argv[1]}\n\n")
-            print(__doc__)
+            print(__doc__, file=sys.stderr)
             sys.exit(1)
 
         search = argv[1]
+
+    if top and tree:
+        sys.stderr.write("ERROR: --top and --tree are mutually exclusive\n\n")
+        print(__doc__, file=sys.stderr)
+        sys.exit(1)
 
     if top:
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top  # pylint: disable=import-outside-toplevel
 
         px_top.top(search=search)
+        return
+
+    if tree:
+        # Pulling px_tree in on demand like this improves test result caching
+        from . import px_tree
+
+        px_tree.tree(search=search)
         return
 
     try:
