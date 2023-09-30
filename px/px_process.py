@@ -143,7 +143,6 @@ class PxProcess:
         if cpu_percent is not None:
             self.cpu_percent_s = f"{cpu_percent:.0f}%"
 
-        # Setting the CPU time like this implicitly recomputes the score
         self.set_cpu_time_seconds(cpu_time)
 
         self.children: MutableSet[PxProcess] = set()
@@ -169,27 +168,12 @@ class PxProcess:
     def __hash__(self):
         return self.pid
 
-    def _recompute_score(self):
-        self.score = 0.0
-        if self.memory_percent is None:
-            return
-        if self.cpu_time_seconds is None:
-            return
-
-        self.score = (
-            (self.cpu_time_seconds + 1.0)
-            * (self.memory_percent + 1.0)
-            / (self.age_seconds + 1.0)
-        )
-
     def set_cpu_time_seconds(self, seconds: Optional[float]) -> None:
         self.cpu_time_s: str = "--"
         self.cpu_time_seconds = None
         if seconds is not None:
             self.cpu_time_s = seconds_to_str(seconds)
             self.cpu_time_seconds = seconds
-
-        self._recompute_score()
 
     def match(self, string, require_exact_user=True):
         """
@@ -458,7 +442,6 @@ def get_all() -> List[PxProcess]:
             close_fds=close_fds,
             env=px_exec_util.ENV,
         ) as ps:
-
             stdout = ps.stdout
             assert stdout
             now = datetime.datetime.now().replace(tzinfo=TIMEZONE)
@@ -476,15 +459,75 @@ def get_all() -> List[PxProcess]:
 
 
 def order_best_last(processes: Iterable[PxProcess]) -> List[PxProcess]:
-    """Returns process list ordered with the most interesting one last"""
-    return sorted(processes, key=operator.attrgetter("score", "cmdline"))
+    """
+    Returns process list ordered with the most interesting one last.
+
+    The interestingness of a process is determined by three factors:
+    * How recently it was started. More recently is more interesting.
+    * How much memory it is using. Higher memory usage is more interesting.
+    * How much CPU it is using right now. Higher CPU usage is more interesting.
+    * How much CPU time it has used. Higher CPU time is more interesting.
+
+    To sort by all three of these factors, we first make three lists. The score
+    of each process is determined by its best position in any of the lists.
+    """
+
+    # Earlier in these lists = more interesting
+    by_age = sorted(
+        filter(lambda p: p.age_seconds is not None, processes),
+        key=operator.attrgetter("age_seconds"),
+    )
+    by_memory = sorted(
+        filter(lambda p: p.memory_percent is not None, processes),
+        key=operator.attrgetter("memory_percent"),
+        reverse=True,
+    )
+    by_cpu = sorted(
+        filter(lambda p: p.cpu_percent is not None, processes),
+        key=operator.attrgetter("cpu_percent"),
+        reverse=True,
+    )
+    by_cpu_time = sorted(
+        filter(lambda p: p.cpu_time_seconds is not None, processes),
+        key=operator.attrgetter("cpu_time_seconds"),
+        reverse=True,
+    )
+
+    age_to_position: Dict[int, int] = {}
+    for position, process in enumerate(by_age):
+        age_to_position[process.pid] = position
+
+    memory_to_position: Dict[float, int] = {}
+    for position, process in enumerate(by_memory):
+        memory_to_position[process.pid] = position
+
+    cpu_to_position: Dict[float, int] = {}
+    for position, process in enumerate(by_cpu):
+        cpu_to_position[process.pid] = position
+
+    cpu_time_to_position: Dict[float, int] = {}
+    for position, process in enumerate(by_cpu_time):
+        cpu_time_to_position[process.pid] = position
+
+    # Presumably higher than the number of processes on any system
+    NOT_FOUND = 99999
+
+    def score(process: PxProcess) -> int:
+        """Higher score = more interesting"""
+        best_position = min(
+            age_to_position.get(process.pid, NOT_FOUND),
+            memory_to_position.get(process.pid, NOT_FOUND),
+            cpu_to_position.get(process.pid, NOT_FOUND),
+            cpu_time_to_position.get(process.pid, NOT_FOUND),
+        )
+        return -best_position
+
+    return sorted(processes, key=score)
 
 
 def order_best_first(processes: Iterable[PxProcess]) -> List[PxProcess]:
     """Returns process list ordered with the most interesting one first"""
-    ordered = sorted(processes, key=operator.attrgetter("cmdline"))
-    ordered = sorted(ordered, key=operator.attrgetter("score"), reverse=True)
-    return ordered
+    return order_best_last(processes)[::-1]
 
 
 def seconds_to_str(seconds: float) -> str:

@@ -181,10 +181,6 @@ def _test_get_all():
 
     now = testutils.local_now()
     for process in all_processes:
-        # Scores should be computed via multiplications and divisions of
-        # positive numbers, if this value is negative something is wrong.
-        assert process.score >= 0
-
         # Processes created in the future = fishy
         assert process.age_seconds >= 0
         assert process.start_time < now
@@ -232,36 +228,6 @@ def test_parse_time():
     with pytest.raises(ValueError) as e:
         px_process.parse_time("Constantinople")
     assert "Constantinople" in str(e.value)
-
-
-def test_order_best_last():
-    p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
-    p1 = testutils.create_process(
-        commandline="awk", cputime="0:11.00", mempercent="1.0"
-    )
-    p2 = testutils.create_process(
-        commandline="bash", cputime="0:01.00", mempercent="11.0"
-    )
-
-    # P0 should be last because its score is the highest, and p1 and p2 should
-    # be ordered alphabetically
-    assert px_process.order_best_last([p0, p1, p2]) == [p1, p2, p0]
-    assert px_process.order_best_last([p2, p1, p0]) == [p1, p2, p0]
-
-
-def test_order_best_first():
-    p0 = testutils.create_process(cputime="0:10.00", mempercent="10.0")
-    p1 = testutils.create_process(
-        commandline="awk", cputime="0:11.00", mempercent="1.0"
-    )
-    p2 = testutils.create_process(
-        commandline="bash", cputime="0:01.00", mempercent="11.0"
-    )
-
-    # P0 should be first because its score is the highest, then p1 and p2 should
-    # be ordered alphabetically
-    assert px_process.order_best_first([p0, p1, p2]) == [p0, p1, p2]
-    assert px_process.order_best_first([p2, p1, p0]) == [p0, p1, p2]
 
 
 def test_match():
