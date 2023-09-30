@@ -29,7 +29,7 @@ of which processes are most active right now.
 
 --top: Show a continuously refreshed process list
 --debug: Print debug logs (if any) after running
---install: Install /usr/local/bin/px and /usr/local/bin/ptop
+--install: Install px, ptop and pxtree in /usr/local/bin/
 --no-pager: Print PID info to stdout rather than to a pager
 --sort=cpupercent: Order processes by CPU percentage only
 --no-username: Don't show the username column in px output
@@ -76,6 +76,7 @@ def install(argv: List[str]) -> None:
 
     px_install.install(px_pex, "/usr/local/bin/px")
     px_install.install(px_pex, "/usr/local/bin/ptop")
+    px_install.install(px_pex, "/usr/local/bin/pxtree")
 
 
 # This is the setup.py entry point
