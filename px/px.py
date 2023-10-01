@@ -7,6 +7,7 @@ Usage:
   px [--debug] [--sort=cpupercent] [--no-username] [filter string]
   px [--debug] [--no-pager] [--color] <PID>
   px [--debug] --top [filter string]
+  px [--debug] --tree [filter string]
   px --install
   px --help
   px --version
@@ -27,7 +28,11 @@ processes are on top. In this mode, CPU times are counted from when you first
 invoked px, rather than from when each process started. This gives you a picture
 of which processes are most active right now.
 
+In --tree mode, a process tree is shown. Filtering is supported, try
+"px --tree firefox" for example.
+
 --top: Show a continuously refreshed process list
+--tree: Print a process tree
 --debug: Print debug logs (if any) after running
 --install: Install px, ptop and pxtree in /usr/local/bin/
 --no-pager: Print PID info to stdout rather than to a pager
@@ -238,7 +243,7 @@ def _main(argv: List[str]) -> None:
 
     if tree:
         # Pulling px_tree in on demand like this improves test result caching
-        from . import px_tree
+        from . import px_tree  # pylint: disable=import-outside-toplevel
 
         px_tree.tree(search=search)
         return
