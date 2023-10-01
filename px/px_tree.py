@@ -1,4 +1,5 @@
 from . import px_process
+from . import px_terminal
 
 from typing import Set
 
@@ -27,19 +28,21 @@ def tree(search: str) -> None:
     if not procs:
         return
 
-    _print_subtree(procs[0], 0, show_pids)
+    _print_subtree(procs[0], 0, search, show_pids)
 
 
 def _print_subtree(
-    process: px_process.PxProcess, indent: int, show_pids: Set[int]
+    process: px_process.PxProcess, indent: int, search: str, show_pids: Set[int]
 ) -> None:
     if show_pids and process.pid not in show_pids:
         return
 
     print("  " * indent, end="")
 
-    # FIXME: Highlight search hits
-    print(f"{process.command}({process.pid})")
+    if search and process.match(search):
+        print(f"{px_terminal.bold(process.command)}({process.pid})")
+    else:
+        print(f"{process.command}({process.pid})")
 
     # FIXME: Unless they are search hits, coalesce leaf nodes that have the same
     # names
@@ -47,4 +50,4 @@ def _print_subtree(
         if show_pids and child.pid not in show_pids:
             continue
 
-        _print_subtree(child, indent + 1, show_pids)
+        _print_subtree(child, indent + 1, search, show_pids)
