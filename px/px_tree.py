@@ -43,8 +43,7 @@ def _print_subtree(
 
     # FIXME: Unless they are search hits, coalesce leaf nodes that have the same
     # names
-    # FIXME: If two child nodes have the same name, sort them by PID
-    for child in sorted(process.children, key=lambda p: p.command.lower()):
+    for child in sorted(process.children, key=lambda p: (p.command.lower(), p.pid)):
         if show_pids and child.pid not in show_pids:
             continue
 
