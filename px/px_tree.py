@@ -1,7 +1,7 @@
 from . import px_process
 from . import px_terminal
 
-from typing import Set, List
+from typing import Set, List, Optional
 
 
 def tree(search: str) -> None:
@@ -37,7 +37,11 @@ def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[s
     if not processes:
         return []
 
-    return _generate_subtree(processes[0], 0, search, show_pids)
+    lines = []
+    coalescer = Coalescer(0)
+    lines += coalescer.submit(processes[0], search)
+    lines += coalescer.flush()
+    return lines + _generate_child_tree(processes[0], 0, search, show_pids)
 
 
 def _mark_children(process: px_process.PxProcess, show_pids: Set[int]) -> None:
@@ -47,25 +51,78 @@ def _mark_children(process: px_process.PxProcess, show_pids: Set[int]) -> None:
         _mark_children(child, show_pids)
 
 
-def _generate_subtree(
+class Coalescer:
+    def __init__(self, indent: int) -> None:
+        self._base: Optional[px_process.PxProcess] = None
+        self._count = 0
+        self._indent = indent
+
+    def submit(self, process: px_process.PxProcess, search: str) -> List[str]:
+        """Returns an array of zero or more lines to be printed"""
+        is_search_hit = search and process.match(search)
+        has_children = bool(process.children)
+        is_candidate = not is_search_hit and not has_children
+
+        # If we can coalesce this, do it!
+        if self._base and is_candidate and self._base.command == process.command:
+            self._count += 1
+            return []
+        if not self._base and is_candidate:
+            self._base = process
+            self._count = 1
+            return []
+
+        return_me = []
+
+        # Otherwise, print the coalesced line if we have one
+        if self._base:
+            return_me += self.flush()
+
+        # And print the current line
+        if is_search_hit:
+            return_me.append(
+                f"{'  ' * self._indent}{px_terminal.bold(process.command)}({process.pid})"
+            )
+        else:
+            return_me.append(f"{'  ' * self._indent}{process.command}({process.pid})")
+
+        return return_me
+
+    def flush(self) -> List[str]:
+        if not self._base:
+            return []
+
+        assert self._count > 0
+
+        return_me: str
+        if self._count == 1:
+            return_me = f"{'  ' * self._indent}{self._base.command}({self._base.pid})"
+        else:
+            return_me = f"{'  ' * self._indent}{self._base.command} * {self._count}"
+
+        self._base = None
+        self._count = 0
+
+        return [return_me]
+
+
+def _generate_child_tree(
     process: px_process.PxProcess, indent: int, search: str, show_pids: Set[int]
 ) -> List[str]:
     if show_pids and process.pid not in show_pids:
         return []
 
-    line: str
-    if search and process.match(search):
-        line = f"{px_terminal.bold(process.command)}({process.pid})"
-    else:
-        line = f"{process.command}({process.pid})"
-    lines = ["  " * indent + line]
+    lines = []
 
-    # FIXME: Unless they are search hits, coalesce leaf nodes that have the same
-    # names
-    for child in sorted(process.children, key=lambda p: (p.command.lower(), p.pid)):
+    coalescer = Coalescer(indent + 1)
+    for child in sorted(
+        process.children, key=lambda p: (p.command.lower(), bool(p.children), p.pid)
+    ):
         if show_pids and child.pid not in show_pids:
             continue
 
-        lines += _generate_subtree(child, indent + 1, search, show_pids)
+        lines += coalescer.submit(child, search)
+        lines += _generate_child_tree(child, indent + 1, search, show_pids)
 
+    lines += coalescer.flush()
     return lines

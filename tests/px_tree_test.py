@@ -57,7 +57,7 @@ def test_coalesce_no_search():
             ]
         ),
         "",
-    ) == ["root(1)", "  find-me * 2"]
+    ) == ["root(1)", "  process * 2"]
 
 
 def test_coalesce_with_search():
@@ -72,8 +72,8 @@ def test_coalesce_with_search():
         "process",
     ) == [
         "root(1)",
-        f"  {px_terminal.bold('find-me')}(2)",
-        f"  {px_terminal.bold('find-me')}(3)",
+        f"  {px_terminal.bold('process')}(2)",
+        f"  {px_terminal.bold('process')}(3)",
     ]
 
 
@@ -91,4 +91,4 @@ def test_coalesce_no_leaf():
             ]
         ),
         "",
-    ) == ["parent(1)", "  process * 4", "  process(4)", "    subprocess(7)"]
+    ) == ["root(1)", "  process * 4", "  process(4)", "    subprocess(7)"]
