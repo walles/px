@@ -12,23 +12,35 @@ def tree(search: str) -> None:
     # We do that by starting at the search hits and walking up the tree from all
     # of them, collecting each PID we see along the way. Then when we render the
     # tree, we only render those PIDs.
-    show_pids = set()
+    show_pids: Set[int] = set()
     if search:
         for process in px_process.get_all():
-            if process.match(search):
-                while process:
-                    if process.pid in show_pids:
-                        break
-                    show_pids.add(process.pid)
-                    if not process.parent:
-                        break
-                    process = process.parent
+            if not process.match(search):
+                continue
+
+            _mark_children(process, show_pids)
+
+            while process:
+                if process.pid in show_pids:
+                    break
+                show_pids.add(process.pid)
+                if not process.parent:
+                    break
+                process = process.parent
 
     procs = px_process.get_all()
     if not procs:
         return
 
     _print_subtree(procs[0], 0, search, show_pids)
+
+
+# Recursively mark all children of the search hit as needing to be
+# shown
+def _mark_children(process: px_process.PxProcess, show_pids: Set[int]) -> None:
+    show_pids.add(process.pid)
+    for child in process.children:
+        _mark_children(child, show_pids)
 
 
 def _print_subtree(
