@@ -45,3 +45,50 @@ def test_search():
         ),
         "find-me",
     ) == ["root(1)", f"  {px_terminal.bold('find-me')}(2)"]
+
+
+def test_coalesce_no_search():
+    assert px_tree._generate_tree(
+        resolve(
+            [
+                testutils.create_process(pid=1, ppid=0, commandline="root"),
+                testutils.create_process(pid=2, ppid=1, commandline="process"),
+                testutils.create_process(pid=3, ppid=1, commandline="process"),
+            ]
+        ),
+        "",
+    ) == ["root(1)", "  find-me * 2"]
+
+
+def test_coalesce_with_search():
+    assert px_tree._generate_tree(
+        resolve(
+            [
+                testutils.create_process(pid=1, ppid=0, commandline="root"),
+                testutils.create_process(pid=2, ppid=1, commandline="process"),
+                testutils.create_process(pid=3, ppid=1, commandline="process"),
+            ]
+        ),
+        "process",
+    ) == [
+        "root(1)",
+        f"  {px_terminal.bold('find-me')}(2)",
+        f"  {px_terminal.bold('find-me')}(3)",
+    ]
+
+
+def test_coalesce_no_leaf():
+    assert px_tree._generate_tree(
+        resolve(
+            [
+                testutils.create_process(pid=1, ppid=0, commandline="root"),
+                testutils.create_process(pid=2, ppid=1, commandline="process"),
+                testutils.create_process(pid=3, ppid=1, commandline="process"),
+                testutils.create_process(pid=4, ppid=1, commandline="process"),
+                testutils.create_process(pid=5, ppid=1, commandline="process"),
+                testutils.create_process(pid=6, ppid=1, commandline="process"),
+                testutils.create_process(pid=7, ppid=4, commandline="subprocess"),
+            ]
+        ),
+        "",
+    ) == ["parent(1)", "  process * 4", "  process(4)", "    subprocess(7)"]
