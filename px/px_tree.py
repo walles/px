@@ -11,8 +11,6 @@ def tree(search: str) -> None:
 
 
 def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[str]:
-    """Print a process tree"""
-
     # Only print subtrees needed for showing all search hits and their children.
     #
     # We do that by starting at the search hits and walking up the tree from all
@@ -26,6 +24,8 @@ def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[s
 
             _mark_children(process, show_pids)
 
+            if process and process.parent:
+                process = process.parent
             while process:
                 if process.pid in show_pids:
                     break
