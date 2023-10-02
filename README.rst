@@ -11,6 +11,9 @@ going on.
 ``px`` I use for figuring out things like "do I still have any `Flutter`_
 processes running in the background"?
 
+``pxtree`` can be used as ``watch --color pxtree brew`` to figure out what
+`Homebrew`_ is doing.
+
 Output
 ======
 
@@ -44,6 +47,17 @@ expect from ``ptop``, with explanations below the screenshot:
   view.
 * A help text on the bottom hints you how to search / filter (interactively),
   change sort order or how to pick processes for further inspection or killing.
+
+``pxtree``
+----------
+
+|pxtree screenshot|
+
+* Note how search hits are highlighted in **bold**
+* Note how PIDs (process IDs) are printed by default
+* Note how multiple processes with the same names are coalesced and printed with
+  the count in parentheses
+* Note how the process names make sense (``lsp_server.py`` rather than ``python3``)
 
 ``px``
 -------------
@@ -361,6 +375,7 @@ DONE
 .. _how to install: #installation
 .. _Bubblemon: https://walles.github.io/bubblemon/
 .. _Flutter: https://flutter.dev
+.. _Homebrew: https://brew.sh
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
 .. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
 .. _Homebrew: https://brew.sh
@@ -378,3 +393,4 @@ DONE
 .. |macOS CI Status| image:: https://github.com/walles/px/actions/workflows/macos-ci.yml/badge.svg
    :target: https://github.com/walles/px/actions/workflows/macos-ci.yml?query=branch%3Apython
 .. |ptop screenshot| image:: doc/ptop-screenshot.png
+.. |pxtree screenshot| image:: doc/pxtree-screenshot.png
