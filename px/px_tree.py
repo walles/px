@@ -78,6 +78,12 @@ class Coalescer:
         if self._base:
             return_me += self.flush()
 
+        # Can we coalesce this line?
+        if is_candidate:
+            self._base = process
+            self._count = 1
+            return return_me
+
         # And print the current line
         if is_search_hit:
             return_me.append(
@@ -98,7 +104,7 @@ class Coalescer:
         if self._count == 1:
             return_me = f"{'  ' * self._indent}{self._base.command}({self._base.pid})"
         else:
-            return_me = f"{'  ' * self._indent}{self._base.command} * {self._count}"
+            return_me = f"{'  ' * self._indent}{self._count} × {self._base.command}"
 
         self._base = None
         self._count = 0
