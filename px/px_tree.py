@@ -1,7 +1,7 @@
 from . import px_process
 from . import px_terminal
 
-from typing import Set, List, Optional
+from typing import Set, List, Optional, Iterable
 
 
 def tree(search: str) -> None:
@@ -41,7 +41,7 @@ def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[s
     coalescer = Coalescer(0)
     lines += coalescer.submit(processes[0], search)
     lines += coalescer.flush()
-    return lines + _generate_child_tree(processes[0], 0, search, show_pids)
+    return lines + _generate_child_tree(processes[0].children, 1, search, show_pids)
 
 
 def _mark_children(process: px_process.PxProcess, show_pids: Set[int]) -> None:
@@ -113,22 +113,22 @@ class Coalescer:
 
 
 def _generate_child_tree(
-    process: px_process.PxProcess, indent: int, search: str, show_pids: Set[int]
+    children: Iterable[px_process.PxProcess],
+    indent: int,
+    search: str,
+    show_pids: Set[int],
 ) -> List[str]:
-    if show_pids and process.pid not in show_pids:
-        return []
-
     lines = []
 
-    coalescer = Coalescer(indent + 1)
+    coalescer = Coalescer(indent)
     for child in sorted(
-        process.children, key=lambda p: (p.command.lower(), bool(p.children), p.pid)
+        children, key=lambda p: (p.command.lower(), bool(p.children), p.pid)
     ):
         if show_pids and child.pid not in show_pids:
             continue
 
         lines += coalescer.submit(child, search)
-        lines += _generate_child_tree(child, indent + 1, search, show_pids)
+        lines += _generate_child_tree(child.children, indent + 1, search, show_pids)
 
     lines += coalescer.flush()
     return lines
