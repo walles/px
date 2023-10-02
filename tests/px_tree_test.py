@@ -57,7 +57,7 @@ def test_coalesce_no_search():
             ]
         ),
         "",
-    ) == ["root(1)", "  2 × process"]
+    ) == ["root(1)", f"  process... ({px_terminal.bold('2×')})"]
 
 
 def test_coalesce_with_search():
@@ -91,19 +91,14 @@ def test_coalesce_no_leaf():
             ]
         ),
         "",
-    ) == ["root(1)", "  4 × process", "  process(4)", "    subprocess(7)"]
+    ) == [
+        "root(1)",
+        f"  process... ({px_terminal.bold('4×')})",
+        "  process(4)",
+        "    subprocess(7)",
+    ]
 
 
-# FIXME: If I just do ./pxtree.sh I get:
-#
-# ...
-#   Firefox/firefox(3545)
-#     <defunct>(4989)
-#     Firefox/plugin-container(3547)
-#     Firefox/plugin-container * 11
-# ...
-#
-# This should be * 12 ^, fix this!
 def test_coalescer():
     test_me = px_tree.Coalescer(0)
     assert not test_me.submit(testutils.create_process(pid=1, commandline="Kuala"), "")
@@ -112,4 +107,4 @@ def test_coalescer():
     ]
     assert not test_me.submit(testutils.create_process(commandline="Lumpur"), "")
     assert not test_me.submit(testutils.create_process(commandline="Lumpur"), "")
-    assert test_me.flush() == ["3 × Lumpur"]
+    assert test_me.flush() == [f"Lumpur... ({px_terminal.bold('3×')})"]

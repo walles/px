@@ -104,7 +104,7 @@ class Coalescer:
         if self._count == 1:
             return_me = f"{'  ' * self._indent}{self._base.command}({self._base.pid})"
         else:
-            return_me = f"{'  ' * self._indent}{self._count} × {self._base.command}"
+            return_me = f"{'  ' * self._indent}{self._base.command}... ({px_terminal.bold(f'{self._count}×')})"
 
         self._base = None
         self._count = 0
