@@ -80,7 +80,11 @@ setup(
         "pytest",
     ],
     entry_points={
-        "console_scripts": ["px = px.px:main", "ptop = px.px:main"],
+        "console_scripts": [
+            "px = px.px:main",
+            "ptop = px.px:main",
+            "pxtree = px.px:main",
+        ],
     }
     # Note that we're by design *not* installing man pages here.
     # Using "data_files=" only puts the man pages in the egg file,

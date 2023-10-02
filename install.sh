@@ -36,10 +36,13 @@ echo "sudo install px.pex ${PXPREFIX}/px"
 sudo install "${TEMPFILE}" "${PXPREFIX}/px"
 echo "sudo ln px ${PXPREFIX}/ptop"
 sudo ln -sf px "${PXPREFIX}/ptop"
+echo "sudo ln px ${PXPREFIX}/pxtree"
+sudo ln -sf px "${PXPREFIX}/pxtree"
 
 rm -f "${TEMPFILE}"
 
 echo
-echo "Installation done, now run one or both of:"
-echo "  px"
+echo "Installation done, now run one or all of:"
 echo "  ptop"
+echo "  pxtree"
+echo "  px"

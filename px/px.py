@@ -7,6 +7,7 @@ Usage:
   px [--debug] [--sort=cpupercent] [--no-username] [filter string]
   px [--debug] [--no-pager] [--color] <PID>
   px [--debug] --top [filter string]
+  px [--debug] --tree [filter string]
   px --install
   px --help
   px --version
@@ -27,9 +28,13 @@ processes are on top. In this mode, CPU times are counted from when you first
 invoked px, rather than from when each process started. This gives you a picture
 of which processes are most active right now.
 
+In --tree mode, a process tree is shown. Filtering is supported, try
+"px --tree firefox" for example.
+
 --top: Show a continuously refreshed process list
+--tree: Print a process tree
 --debug: Print debug logs (if any) after running
---install: Install /usr/local/bin/px and /usr/local/bin/ptop
+--install: Install px, ptop and pxtree in /usr/local/bin/
 --no-pager: Print PID info to stdout rather than to a pager
 --sort=cpupercent: Order processes by CPU percentage only
 --no-username: Don't show the username column in px output
@@ -76,6 +81,7 @@ def install(argv: List[str]) -> None:
 
     px_install.install(px_pex, "/usr/local/bin/px")
     px_install.install(px_pex, "/usr/local/bin/ptop")
+    px_install.install(px_pex, "/usr/local/bin/pxtree")
 
 
 # This is the setup.py entry point
@@ -171,6 +177,7 @@ def _main(argv: List[str]) -> None:
     with_color: Optional[bool] = None
     with_username = True
     top: bool = False
+    tree: bool = False
     sort_cpupercent: bool = False
 
     while "--no-pager" in argv:
@@ -193,6 +200,12 @@ def _main(argv: List[str]) -> None:
     if os.path.basename(argv[0]).endswith("top"):
         top = True
 
+    while "--tree" in argv:
+        tree = True
+        argv.remove("--tree")
+    if os.path.basename(argv[0]).endswith("tree"):
+        tree = True
+
     while "--sort=cpupercent" in argv:
         sort_cpupercent = True
         argv.remove("--sort=cpupercent")
@@ -204,23 +217,35 @@ def _main(argv: List[str]) -> None:
 
     if len(argv) > 2:
         sys.stderr.write("ERROR: Expected zero or one argument but got more\n\n")
-        print(__doc__)
+        print(__doc__, file=sys.stderr)
         sys.exit(1)
 
     search = ""
     if len(argv) == 2:
         if argv[1].startswith("--"):
             sys.stderr.write(f"ERROR: Unknown argument: {argv[1]}\n\n")
-            print(__doc__)
+            print(__doc__, file=sys.stderr)
             sys.exit(1)
 
         search = argv[1]
+
+    if top and tree:
+        sys.stderr.write("ERROR: --top and --tree are mutually exclusive\n\n")
+        print(__doc__, file=sys.stderr)
+        sys.exit(1)
 
     if top:
         # Pulling px_top in on demand like this improves test result caching
         from . import px_top  # pylint: disable=import-outside-toplevel
 
         px_top.top(search=search)
+        return
+
+    if tree:
+        # Pulling px_tree in on demand like this improves test result caching
+        from . import px_tree  # pylint: disable=import-outside-toplevel
+
+        px_tree.tree(search=search)
         return
 
     try:

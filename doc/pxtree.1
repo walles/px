@@ -1,0 +1,59 @@
+.Dd October 2, 2023
+.Dt PXTREE 1
+.Os
+.Sh NAME
+.Nm pxtree
+.Nd display running processes in a tree
+.Sh SYNOPSIS
+.\" FIXME: Other man pages don't need to use \p to break lines here,
+.\" and use the Nm macro for the command name. Why can't we?
+.Ic pxtree [ --debug ] [ SEARCH ]
+.Sh DESCRIPTION
+.Nm
+lists all running processes in a tree.
+.Pp
+Process names are followed by their PIDs in parentheses. If multiple processes
+have the same names, they will be coalesced into one entry marked with (3×) in
+bold, where
+.Sy 3
+in this case is the number of duplicates.
+.Pp
+The optional
+.Cm SEARCH
+parameter can be:
+.Bl -bullet
+.It
+A PID (Process ID)
+.It
+A process name or part of one
+.It
+A user name
+.El
+.Pp
+Any search hits will be highlighted in bold. All parents and children of all
+search hits will always be listed.
+.Pp
+With the
+.Fl -debug
+flag, extra log messages are sometimes printed after
+.Nm
+finishes.
+.Sh PROCESS NAMING
+.Nm
+tries to be helpful about naming processes, and avoid printing names
+of various VMs.
+.Pp
+For example, if you do
+.Sy java -jar foo.jar ,
+.Nm
+will show this process as
+.Sy foo.jar
+rather than
+.Sy java .
+.El
+.Sh SEE ALSO
+.Xr px 1 ,
+.Xr ptop 1
+.Sh HOMEPAGE
+.Nm
+lives at http://github.com/walles/px

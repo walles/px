@@ -182,7 +182,7 @@ class PxProcess:
         See px_process_test.test_match() for the exact definition of how the
         matching is done.
         """
-        if string is None:
+        if not string:
             return True
 
         if self.username == string:
