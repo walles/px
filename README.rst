@@ -1,7 +1,7 @@
 |Linux CI Status| |macOS CI Status|
 
-``ps`` and ``top`` for Human Beings
-===================================
+``ps``, ``top`` and ``pstree`` for Human Beings
+===============================================
 
 See below for `how to install`_.
 
