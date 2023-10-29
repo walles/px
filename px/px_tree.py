@@ -1,16 +1,26 @@
 from . import px_process
 from . import px_terminal
 
+import sys
+
 from typing import Set, List, Optional, Iterable
 
 
 def tree(search: str) -> None:
     """Print a process tree"""
-    for line in _generate_tree(px_process.get_all(), search):
+    print_me = _generate_tree(px_process.get_all(), search)
+    if not print_me:
+        print(f"No processes found matching <{search}>", file=sys.stderr)
+        return
+
+    for line in print_me:
         print(line)
 
 
 def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[str]:
+    if not processes:
+        return []
+
     # Only print subtrees needed for showing all search hits and their children.
     #
     # We do that by starting at the search hits and walking up the tree from all
@@ -24,6 +34,7 @@ def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[s
 
             _mark_children(process, show_pids)
 
+            # Walk up the tree from this process, marking each process for display
             if process and process.parent:
                 process = process.parent
             while process:
@@ -34,8 +45,9 @@ def _generate_tree(processes: List[px_process.PxProcess], search: str) -> List[s
                     break
                 process = process.parent
 
-    if not processes:
-        return []
+        # Search found nothing
+        if not show_pids:
+            return []
 
     lines = []
     coalescer = Coalescer(0)

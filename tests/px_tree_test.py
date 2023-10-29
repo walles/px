@@ -47,6 +47,37 @@ def test_search():
     ) == ["root(1)", f"  {px_terminal.bold('find-me')}(2)"]
 
 
+def test_no_search():
+    assert px_tree._generate_tree(
+        resolve(
+            [
+                testutils.create_process(pid=1, ppid=0, commandline="root"),
+                testutils.create_process(pid=2, ppid=1, commandline="find-me"),
+                testutils.create_process(pid=3, ppid=1, commandline="uninteresting"),
+            ]
+        ),
+        "",
+    ) == ["root(1)", "  find-me(2)", "  uninteresting(3)"]
+
+
+def test_search_no_matches():
+    assert (
+        px_tree._generate_tree(
+            resolve(
+                [
+                    testutils.create_process(pid=1, ppid=0, commandline="root"),
+                    testutils.create_process(pid=2, ppid=1, commandline="find-me"),
+                    testutils.create_process(
+                        pid=3, ppid=1, commandline="uninteresting"
+                    ),
+                ]
+            ),
+            "not-there",
+        )
+        == []
+    )
+
+
 def test_coalesce_no_search():
     assert px_tree._generate_tree(
         resolve(
