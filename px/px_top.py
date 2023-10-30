@@ -516,7 +516,6 @@ def get_command(**kwargs):
 
 
 def _top(search: str = "") -> None:
-
     global search_string
     search_string = search
 
@@ -554,7 +553,6 @@ def _top(search: str = "") -> None:
 
 
 def top(search: str = "") -> None:
-
     if not sys.stdout.isatty():
         sys.stderr.write(
             'Top mode only works on TTYs, try running just "px" instead.\n'
@@ -564,7 +562,7 @@ def top(search: str = "") -> None:
     with px_terminal.fullscreen_display():
         try:
             _top(search=search)
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             LOG.exception("Running ptop failed")
 
         # Make sure we actually end up on a new line

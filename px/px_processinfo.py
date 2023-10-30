@@ -194,7 +194,6 @@ def print_users_when_process_started(fd: int, process: px_process.PxProcess) -> 
 
 
 def to_ipc_lines(ipc_map: px_ipc_map.IpcMap) -> Iterable[str]:
-
     return_me = []
     for target in sorted(ipc_map.keys(), key=operator.attrgetter("name", "pid")):
         channels = ipc_map[target]
@@ -234,7 +233,6 @@ def print_cwd_friends(fd, process, all_processes, all_files):
 def print_fds(
     fd: int, process: px_process.PxProcess, processes: Iterable[px_process.PxProcess]
 ) -> None:
-
     # It's true, I measured it myself /johan.walles@gmail.com
     println(
         fd,
@@ -299,7 +297,6 @@ def print_fds(
 
 
 def print_start_time(fd: int, process: px_process.PxProcess) -> None:
-    # pylint: disable=consider-using-f-string
     println(
         fd,
         "{} {} was started by {}, at {}.".format(
@@ -312,7 +309,6 @@ def print_start_time(fd: int, process: px_process.PxProcess) -> None:
 
     if process.cpu_time_seconds and process.age_seconds:
         cpu_percent = 100.0 * process.cpu_time_seconds / process.age_seconds
-        # pylint: disable=consider-using-f-string
         println(
             fd,
             "{} has been its average CPU usage since then, or {}/{}".format(

@@ -159,7 +159,6 @@ def parse_proc_diskstats(proc_diskstats_contents: str) -> List[Sample]:
 
 class SubsystemStat:
     def __init__(self, throughput: float, high_watermark: float) -> None:
-
         if throughput > high_watermark:
             raise ValueError(
                 f"High watermark {high_watermark} lower than throughput {throughput}"
@@ -247,7 +246,6 @@ class PxIoLoad:
             del self.baseline[remove_me]
 
     def update(self) -> None:
-
         self.previous_system_state = self.most_recent_system_state
         self.most_recent_system_state = SystemState()
         self.update_baseline_from_system(self.most_recent_system_state)
@@ -342,7 +340,6 @@ class PxIoLoad:
             math.trunc(bottleneck[1]), math.trunc(bottleneck[2])
         )
 
-        # pylint: disable=consider-using-f-string
         return "[{} / {}] {}".format(
             px_terminal.bold(current_throughput + "/s"),
             max_throughput + "/s",
