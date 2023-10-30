@@ -12,11 +12,11 @@ jobs:
     name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
   tox:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       # This is a regex:
       # https://github.com/tox-dev/tox/pull/990/files#diff-bfeb43314e311bd2d19d2b1ea565841101c8468f0df8cd3f86b4f199f06c0766
@@ -26,11 +26,11 @@ jobs:
       TOX_SKIP_ENV: shellcheck
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # For getting tags from the repo
       - name: Cache .tox directory
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .tox
           key: ${{ runner.os }}-${{ hashFiles('tox.ini') }}

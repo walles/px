@@ -12,11 +12,11 @@ jobs:
     runs-on: macos-12
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # For getting tags from the repo
       - name: Cache .tox directory
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .tox
           key: ${{ runner.os }}-${{ hashFiles('tox.ini') }}
