@@ -81,7 +81,6 @@ def _parse_time(time_s: str) -> datetime.datetime:
 
 
 class PxProcess:
-    # pylint: disable=attribute-defined-outside-init
     def __init__(
         self,
         cmdline: str,
@@ -254,7 +253,6 @@ class PxProcessBuilder:
         self.memory_percent: Optional[float] = None
 
     def __repr__(self):
-        # pylint: disable=consider-using-f-string
         return (
             "start_time_string=%r pid=%r ppid=%r user=%r cpu%%=%r cputime=%r mem%%=%r cmd=<%r>"
             % (

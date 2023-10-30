@@ -36,7 +36,7 @@ def _pump_info_to_fd(with_fileno, process, processes):
             LOG.warning(
                 "Unexpected OSError pumping process info into pager", exc_info=True
             )
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         # Logging exceptions on warning level will make them visible to somebody
         # who changes the LOGLEVEL in px.py, but not to ordinary users.
         #
@@ -117,7 +117,6 @@ def launch_pager():
 def page_process_info(
     process: px_process.PxProcess, processes: List[px_process.PxProcess]
 ) -> None:
-
     pager = launch_pager()
     pager_stdin = pager.stdin
     assert pager_stdin is not None
@@ -130,7 +129,7 @@ def page_process_info(
     # Terminating ptop while this is running is fine. This is deprecated since
     # Python 3.10, but we want to support older Pythons as well so let's keep it
     # this way for now.
-    info_thread.setDaemon(True)  # pylint: disable=deprecated-method
+    info_thread.setDaemon(True)
 
     info_thread.start()
 

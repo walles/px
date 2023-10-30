@@ -39,7 +39,6 @@ class PeerProcess:
 
 
 class IpcMap:
-    # pylint: disable=attribute-defined-outside-init
     """
     This is a map of process->[channels], where "process" is a process we have
     IPC communication open with, and a channel is a socket or a pipe that we
@@ -59,7 +58,6 @@ class IpcMap:
         processes: Iterable[px_process.PxProcess],
         is_root: bool,
     ) -> None:
-
         # On Linux, lsof reports the same open file once per thread of a
         # process. Putting the files in a set gives us each file only once.
         files = set(files)
@@ -130,7 +128,7 @@ class IpcMap:
             fds[network_connection.fd] = str(network_connection)
 
         # Traverse our IPC structure and update FDs as required
-        for target in self.keys():  # pylint: disable=consider-using-dict-items
+        for target in self.keys():
             for link in self[target]:
                 if link.fd is None:
                     # No FD, never mind

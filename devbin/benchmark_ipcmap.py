@@ -21,8 +21,8 @@ from typing import MutableMapping
 MYDIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(MYDIR, ".."))
 
-from tests import testutils
-from px import px_file
+from tests import testutils  # noqa: E402
+from px import px_file  # noqa: E402
 
 
 # For how long should we do the benchmarking run (in seconds)

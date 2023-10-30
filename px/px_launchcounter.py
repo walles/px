@@ -98,7 +98,6 @@ def _merge_tuple_lists(
 
 
 def _callchain(process: px_process.PxProcess) -> Tuple[str, ...]:
-
     reverse_callchain: List[str] = []
 
     current: Optional[px_process.PxProcess] = process
@@ -125,7 +124,6 @@ class Launchcounter:
                 self._hierarchies[callchain] = 1
 
     def update(self, procs_snapshot: List[px_process.PxProcess]) -> None:
-
         if self._last_processlist is None:
             self._last_processlist = procs_snapshot
             return
@@ -155,7 +153,6 @@ class Launchcounter:
         return coalesced
 
     def get_screen_lines(self) -> List[str]:
-
         launchers_list = self._coalesce_launchers()
         launchers_list = sort_launchers_list(launchers_list)
 

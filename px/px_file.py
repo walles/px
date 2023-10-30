@@ -177,7 +177,7 @@ def resolve_endpoint(endpoint: str) -> str:
 
     try:
         host = socket.gethostbyaddr(address)[0]
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         # Lookup failed for whatever reason, give up
         #
         # Catching "Exception" because I am (on 2022may27) unable to figure out

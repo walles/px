@@ -14,7 +14,7 @@ import time
 MYDIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(MYDIR, ".."))
 
-from px import px_process
+from px import px_process  # noqa: E402
 
 LAPS = 20
 

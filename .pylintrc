@@ -1,21 +1,4 @@
+# Disable all categories since we're running ruff instead, but VSCode insists on
+# invoking pylint all the time
 [MESSAGES CONTROL]
-disable=
-    consider-using-max-builtin,
-    disallowed-name,
-    fixme,
-    global-statement,
-    invalid-name,
-    line-too-long,
-    missing-class-docstring,
-    missing-function-docstring,
-    missing-module-docstring,
-    protected-access, # Used a lot in tests, maybe make this tests-specific?
-    too-few-public-methods,
-    too-many-arguments,
-    too-many-branches,
-    too-many-instance-attributes,
-    too-many-locals,
-    too-many-return-statements,
-    too-many-statements,
-    wrong-import-order,
-    wrong-import-position,
+disable=E,W,R,C,F

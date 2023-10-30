@@ -98,7 +98,7 @@ def main():
 
     try:
         _main(argv)
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOG = logging.getLogger(__name__)
         LOG.exception("Uncaught Exception")
 
@@ -139,7 +139,7 @@ def handleLogMessages(messages: Optional[str]) -> None:
     # even if we don't use it. And this will make test avoidance fail to avoid
     # px.py tests every time you make a new commit (because committing recreates
     # version.py).
-    from . import version  # pylint: disable=import-outside-toplevel
+    from . import version
 
     sys.stderr.write("px version: " + version.VERSION + "\n")
 
@@ -168,7 +168,7 @@ def _main(argv: List[str]) -> None:
         # NOTE: If we "import version" at the top of this file, we will depend on it even if
         # we don't use it. And this will make test avoidance fail to avoid px.py tests every
         # time you make a new commit (because committing recreates version.py).
-        from . import version  # pylint: disable=import-outside-toplevel
+        from . import version
 
         print(version.VERSION)
         return
@@ -236,14 +236,14 @@ def _main(argv: List[str]) -> None:
 
     if top:
         # Pulling px_top in on demand like this improves test result caching
-        from . import px_top  # pylint: disable=import-outside-toplevel
+        from . import px_top
 
         px_top.top(search=search)
         return
 
     if tree:
         # Pulling px_tree in on demand like this improves test result caching
-        from . import px_tree  # pylint: disable=import-outside-toplevel
+        from . import px_tree
 
         px_tree.tree(search=search)
         return

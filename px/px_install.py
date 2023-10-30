@@ -12,7 +12,7 @@ def install(src, dest):
     """
     try:
         _install(src, dest)
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         sys.stderr.write(f"Installing {dest} failed, please retry with sudo\n")
         sys.stderr.write(f"Error was: {str(e)}\n")
         sys.exit(1)

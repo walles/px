@@ -19,7 +19,6 @@ class PxCwdFriends:
         all_processes: List[px_process.PxProcess],
         all_files: List[px_file.PxFile],
     ) -> None:
-
         pid_to_process: Dict[int, px_process.PxProcess] = {}
         for p in all_processes:
             pid_to_process[p.pid] = p
