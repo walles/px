@@ -20,7 +20,6 @@ SWAPUSAGE_RE = re.compile(r".*used = ([0-9.]+)M.*")
 
 
 def get_meminfo() -> str:
-
     total_ram_bytes, wanted_ram_bytes = _get_ram_numbers()
     percentage = (100.0 * wanted_ram_bytes) / total_ram_bytes
 
@@ -82,7 +81,6 @@ def _update_from_meminfo(base: Optional[int], line: str, name: str) -> Optional[
 def _get_ram_numbers_from_proc(
     proc_meminfo: str = "/proc/meminfo",
 ) -> Optional[Tuple[int, int]]:
-
     total_kb: Optional[int] = None
     available_kb: Optional[int] = None
     free_kb: Optional[int] = None
@@ -188,7 +186,6 @@ def _update_if_prefix(base: Optional[int], line: str, prefix: str) -> Optional[i
 def _get_ram_numbers_from_vm_stat_output(
     vm_stat_lines: List[str],
 ) -> Optional[Tuple[int, int]]:
-
     # List based on https://apple.stackexchange.com/a/196925/182882
     page_size_bytes = None
     pages_free = None

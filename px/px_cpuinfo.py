@@ -93,7 +93,6 @@ def get_core_count_from_sysctl() -> Optional[Tuple[int, int]]:
 def parse_sysctl_output(
     sysctl_lines: List[str],
 ) -> Tuple[Optional[int], Optional[int]]:
-
     # Note the ending spaces, they must be there for number extraction to work!
     PHYSICAL_PREFIX = "hw.physicalcpu: "
     LOGICAL_PREFIX = "hw.logicalcpu: "

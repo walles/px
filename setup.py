@@ -85,7 +85,7 @@ setup(
             "ptop = px.px:main",
             "pxtree = px.px:main",
         ],
-    }
+    },
     # Note that we're by design *not* installing man pages here.
     # Using "data_files=" only puts the man pages in the egg file,
     # and installing that egg doesn't put them on the destination
