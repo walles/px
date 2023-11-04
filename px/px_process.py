@@ -356,7 +356,7 @@ def create_kernel_process(now: datetime.datetime) -> PxProcess:
     process_builder.ppid = None
 
     # FIXME: This should be the system boot timestamp, not the epoch
-    process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime(
+    process_builder.start_time_string = datetime.datetime.fromtimestamp(0, datetime.timezone.utc).strftime(
         "%c"
     )
 
