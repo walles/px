@@ -255,14 +255,42 @@ def get_python_command(commandline: str) -> Optional[str]:
     if len(array) == 1:
         return python
 
-    if not array[1].startswith("-"):
-        return os.path.basename(array[1])
-
     if len(array) > 2:
         if array[1] == "-m" and not array[2].startswith("-"):
             return os.path.basename(array[2])
 
-    return None
+    if array[1].startswith("-"):
+        return None
+
+    if os.path.basename(array[1]) == "aws":
+        # Drop the "python" part of "python aws"
+        return get_aws_command(array[1:])
+
+    return os.path.basename(array[1])
+
+
+def get_aws_command(args: List[str]) -> Optional[str]:
+    '''Extract "aws command subcommand" from a command line starting with "aws"'''
+    result = ["aws"]
+    for arg in args[1:]:
+        if arg.startswith("--profile="):
+            continue
+        if arg.startswith("--region="):
+            continue
+        if arg.startswith("-"):
+            break
+        if os.path.sep in arg:
+            break
+
+        result.append(arg)
+        if len(result) >= 4:
+            # Got "aws command subcommand"
+            break
+
+    if len(result) == 4 and result[-1] != "help":
+        del result[-1]
+
+    return " ".join(result)
 
 
 def get_sudo_command(commandline: str) -> Optional[str]:

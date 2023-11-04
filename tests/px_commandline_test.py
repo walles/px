@@ -36,6 +36,36 @@ def test_get_command_python():
     assert px_commandline.get_command("python    ") == "python"
 
 
+def test_get_command_aws():
+    assert px_commandline.get_command("Python /usr/local/bin/aws") == "aws"
+    assert px_commandline.get_command("python aws s3") == "aws s3"
+    assert px_commandline.get_command("python3 aws s3 help") == "aws s3 help"
+    assert (
+        px_commandline.get_command("/wherever/python3 aws s3 help flaska")
+        == "aws s3 help"
+    )
+    assert px_commandline.get_command("python aws s3 sync help") == "aws s3 sync help"
+    assert px_commandline.get_command("python aws s3 sync nothelp") == "aws s3 sync"
+    assert (
+        px_commandline.get_command(
+            " ".join(
+                [
+                    "python3",
+                    "/usr/local/bin/aws",
+                    "--profile=system-admin-prod",
+                    "--region=eu-west-1",
+                    "s3",
+                    "sync",
+                    "--only-show-errors",
+                    "s3://xxxxxx",
+                    "./xxxxxx",
+                ]
+            )
+        )
+        == "aws s3 sync"
+    )
+
+
 def test_get_command_java():
     assert px_commandline.get_command("java") == "java"
     assert px_commandline.get_command("java -version") == "java"
