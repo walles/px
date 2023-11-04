@@ -7,7 +7,6 @@ import re
 import pwd
 import errno
 import subprocess
-import dateutil.tz
 
 from . import px_commandline
 from . import px_exec_util
@@ -38,7 +37,7 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
-TIMEZONE = dateutil.tz.tzlocal()
+TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 
 uid_to_username_cache: Dict[int, str] = {}

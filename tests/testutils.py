@@ -7,7 +7,6 @@ from px import px_file
 from px import px_process
 from px import px_ipc_map
 
-import dateutil.tz
 import dateutil.parser
 
 from typing import MutableMapping
@@ -16,7 +15,8 @@ from typing import List
 
 # An example time string that can be produced by ps
 TIMESTRING = "Mon Mar  7 09:33:11 2016"
-TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=dateutil.tz.tzlocal())
+TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+TIME = dateutil.parser.parse(TIMESTRING).replace(tzinfo=TIMEZONE)
 
 
 def load(sample_file_name: str) -> str:
@@ -31,7 +31,7 @@ def spaces(at_least=1, at_most=3):
 
 
 def local_now():
-    return datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
+    return datetime.datetime.now().replace(tzinfo=TIMEZONE)
 
 
 def create_process(

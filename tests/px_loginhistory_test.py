@@ -1,14 +1,12 @@
 import datetime
 
 import pytest
-import dateutil.tz
 
 from px import px_loginhistory
 
 from typing import Set
 
-# These warnings conflict with how pytest fixtures work:
-# https://docs.pytest.org/en/6.2.x/fixture.html
+TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 
 @pytest.fixture
@@ -33,85 +31,81 @@ def get_users_at(
 
 def test_get_users_at_range(check_output):
     # Test user logged in between two timestamps
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "johan     ttys000                   Thu Mar 31 14:39 - 11:08  (20:29)"
 
     # Before
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 14, 38, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 14, 38, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 14, 39, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 14, 39, tzinfo=TIMEZONE),
     )
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 17, 46, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 17, 46, tzinfo=TIMEZONE),
     )
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 1, 11, 8, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 1, 11, 8, tzinfo=TIMEZONE),
     )
 
     # After
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 1, 11, 9, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 1, 11, 9, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_still_logged_in(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "johan     ttys000                   Sun Apr  3 11:54   still logged in"
 
     # Before
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 3, 11, 53, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 3, 11, 53, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 3, 11, 54, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 3, 11, 54, tzinfo=TIMEZONE),
     )
-    assert {"johan"} == get_users_at(
-        lastline, now, datetime.datetime.now(dateutil.tz.tzlocal())
-    )
+    assert {"johan"} == get_users_at(lastline, now, datetime.datetime.now(TIMEZONE))
 
 
 def test_get_users_at_remote(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = (
         "root     pts/1        10.1.6.120       Tue Jan 28 05:59   still logged in"
     )
 
     assert {"root from 10.1.6.120"} == get_users_at(
-        lastline, now, datetime.datetime.now(dateutil.tz.tzlocal())
+        lastline, now, datetime.datetime.now(TIMEZONE)
     )
 
 
 def test_get_users_at_local_osx(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "johan     ttys000                   Sun Apr  3 11:54   still logged in"
 
-    assert {"johan"} == get_users_at(
-        lastline, now, datetime.datetime.now(dateutil.tz.tzlocal())
-    )
+    assert {"johan"} == get_users_at(lastline, now, datetime.datetime.now(TIMEZONE))
 
 
 def test_get_users_at_local_linux(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = (
         "johan    pts/2        :0               Wed Mar  9 13:25 - 13:38  (00:12)"
     )
@@ -119,43 +113,43 @@ def test_get_users_at_local_linux(check_output):
     assert {"johan from :0"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 9, 13, 26, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 9, 13, 26, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_until_crash(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "johan     ttys001                   Thu Nov 26 19:55 - crash (27+07:11)"
 
     # Before
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 11, 26, 19, 54, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 11, 26, 19, 54, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 11, 26, 19, 55, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 11, 26, 19, 55, tzinfo=TIMEZONE),
     )
     assert {"johan"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 12, 10, 19, 53, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 12, 10, 19, 53, tzinfo=TIMEZONE),
     )
 
     # A bit after
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 12, 26, 19, 55, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 12, 26, 19, 55, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_until_shutdown_osx(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = (
         "_mbsetupuser  console                   Mon Jan 18 20:31 - shutdown (34+01:29)"
     )
@@ -164,31 +158,31 @@ def test_get_users_at_until_shutdown_osx(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 1, 18, 20, 30, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 1, 18, 20, 30, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"_mbsetupuser"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 1, 18, 20, 31, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 1, 18, 20, 31, tzinfo=TIMEZONE),
     )
     assert {"_mbsetupuser"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 2, 18, 20, 30, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 2, 18, 20, 30, tzinfo=TIMEZONE),
     )
 
     # A bit after
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 2, 28, 20, 30, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 2, 28, 20, 30, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_until_shutdown_linux(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = (
         "johan    :0           :0               Sat Mar 26 22:04 - down   (00:08)"
     )
@@ -197,32 +191,32 @@ def test_get_users_at_until_shutdown_linux(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 26, 22, 3, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 26, 22, 3, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan from :0"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 26, 22, 4, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 26, 22, 4, tzinfo=TIMEZONE),
     )
     assert {"johan from :0"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 26, 22, 9, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 26, 22, 9, tzinfo=TIMEZONE),
     )
 
     # A bit after
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 26, 22, 15, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 26, 22, 15, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_multiple(check_output):
     # Test multiple users logged in between two timestamps
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "\n".join(
         [
             "johan1     ttys000                   Thu Mar 31 14:39 - 11:08  (20:29)",
@@ -234,36 +228,36 @@ def test_get_users_at_multiple(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 14, 38, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 14, 38, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan1", "johan2"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 14, 39, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 14, 39, tzinfo=TIMEZONE),
     )
     assert {"johan1", "johan2"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 31, 17, 46, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 31, 17, 46, tzinfo=TIMEZONE),
     )
     assert {"johan1", "johan2"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 1, 11, 8, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 1, 11, 8, tzinfo=TIMEZONE),
     )
 
     # After
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 1, 11, 9, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 1, 11, 9, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_pseudousers_osx(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
 
     # Note trailing space in test string, we get that from last on OS X 10.11.3
     lastline = "reboot    ~                         Fri Oct 23 06:50 "
@@ -271,7 +265,7 @@ def test_get_users_at_pseudousers_osx(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 10, 23, 6, 50, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 10, 23, 6, 50, tzinfo=TIMEZONE),
     )
 
     # Note trailing space in test string, we get that from last on OS X 10.11.3
@@ -280,12 +274,12 @@ def test_get_users_at_pseudousers_osx(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2015, 10, 23, 6, 49, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2015, 10, 23, 6, 49, tzinfo=TIMEZONE),
     )
 
 
 def test_get_users_at_pseudousers_linux(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
 
     lastline = (
         "reboot   system boot  4.2.0-30-generic Thu Mar  3 11:19 - 13:38 (6+02:18)"
@@ -294,7 +288,7 @@ def test_get_users_at_pseudousers_linux(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 3, 3, 11, 19, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 3, 3, 11, 19, tzinfo=TIMEZONE),
     )
 
 
@@ -304,7 +298,7 @@ def test_get_users_at_gone_no_logout(check_output):
 
     That's the only place I've seen it.
     """
-    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=TIMEZONE)
     lastline = (
         "johan    pts/3        :0               Mon Apr  4 23:10    gone - no logout"
     )
@@ -313,22 +307,22 @@ def test_get_users_at_gone_no_logout(check_output):
     assert not get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 4, 23, 9, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 4, 23, 9, tzinfo=TIMEZONE),
     )
 
     # During
     assert {"johan from :0"} == get_users_at(
         lastline,
         now,
-        datetime.datetime(2016, 4, 4, 23, 10, tzinfo=dateutil.tz.tzlocal()),
+        datetime.datetime(2016, 4, 4, 23, 10, tzinfo=TIMEZONE),
     )
     assert {"johan from :0"} == get_users_at(
-        lastline, now, datetime.datetime.now(dateutil.tz.tzlocal())
+        lastline, now, datetime.datetime.now(TIMEZONE)
     )
 
 
 def test_get_users_at_trailing_noise(check_output):
-    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=TIMEZONE)
     assert not get_users_at("", now, now)
 
     # Note trailing space in test string, we get that from last on OS X 10.11.3
@@ -338,7 +332,7 @@ def test_get_users_at_trailing_noise(check_output):
 def test_get_users_at_unexpected_last_output(caplog):
     UNEXPECTED = "glasskiosk"
 
-    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 7, 12, 8, tzinfo=TIMEZONE)
     assert not get_users_at(UNEXPECTED, now, now)
 
     assert UNEXPECTED in caplog.text
@@ -346,20 +340,20 @@ def test_get_users_at_unexpected_last_output(caplog):
 
 def test_get_users_at_just_run_it(check_output):
     # Just tyre kick it live wherever we happen to be. This shouldn't crash.
-    px_loginhistory.get_users_at(datetime.datetime.now(dateutil.tz.tzlocal()))
+    px_loginhistory.get_users_at(datetime.datetime.now(TIMEZONE))
 
 
 def test_to_timestamp(check_output):
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
-    expected = datetime.datetime(2016, 3, 5, 11, 19, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
+    expected = datetime.datetime(2016, 3, 5, 11, 19, tzinfo=TIMEZONE)
     assert px_loginhistory._to_timestamp("Thu Mar  5 11:19", now) == expected
 
-    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
-    expected = datetime.datetime(2016, 2, 29, 13, 19, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
+    expected = datetime.datetime(2016, 2, 29, 13, 19, tzinfo=TIMEZONE)
     assert px_loginhistory._to_timestamp("Mon Feb 29 13:19", now) == expected
 
-    now = datetime.datetime(2017, 1, 3, 12, 8, tzinfo=dateutil.tz.tzlocal())
-    expected = datetime.datetime(2016, 2, 29, 13, 19, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2017, 1, 3, 12, 8, tzinfo=TIMEZONE)
+    expected = datetime.datetime(2016, 2, 29, 13, 19, tzinfo=TIMEZONE)
     assert px_loginhistory._to_timestamp("Mon Feb 29 13:19", now) == expected
 
 
@@ -379,8 +373,8 @@ def test_realworld_debian(check_output):
     """
     Regression test for https://github.com/walles/px/issues/48
     """
-    now = datetime.datetime(2016, 12, 6, 9, 21, tzinfo=dateutil.tz.tzlocal())
-    testtime = datetime.datetime(2016, 10, 24, 15, 34, tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime(2016, 12, 6, 9, 21, tzinfo=TIMEZONE)
+    testtime = datetime.datetime(2016, 10, 24, 15, 34, tzinfo=TIMEZONE)
     lastline = (
         "norbert  pts/3        mosh [29846]     Wed Oct 24 15:33 - 15:34  (00:01)"
     )

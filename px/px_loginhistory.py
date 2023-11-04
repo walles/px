@@ -2,13 +2,14 @@ import logging
 import datetime
 
 import re
-import dateutil.tz
 
 from . import px_exec_util
 
 from typing import Optional, Set
 
 LOG = logging.getLogger(__name__)
+
+TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 # last regexp parts
 LAST_USERNAME = "([^ ]+)"
@@ -72,7 +73,7 @@ def get_users_at(
     """
 
     if now is None:
-        now = datetime.datetime.now(dateutil.tz.tzlocal())
+        now = datetime.datetime.now(datetime.timezone.utc).astimezone()
 
     if last_output is None:
         last_output = call_last()
@@ -158,7 +159,7 @@ def _to_timestamp(string, now):
 
     try:
         timestamp = datetime.datetime(
-            now.year, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal()
+            now.year, month, day, hour, minute, tzinfo=TIMEZONE
         )
         if timestamp <= now:
             return timestamp
@@ -169,9 +170,7 @@ def _to_timestamp(string, now):
         else:
             raise
 
-    return datetime.datetime(
-        now.year - 1, month, day, hour, minute, tzinfo=dateutil.tz.tzlocal()
-    )
+    return datetime.datetime(now.year - 1, month, day, hour, minute, tzinfo=TIMEZONE)
 
 
 def _to_timedelta(string: str) -> datetime.timedelta:
