@@ -7,7 +7,6 @@ import re
 import pwd
 import errno
 import subprocess
-import dateutil.tz
 
 from . import px_commandline
 from . import px_exec_util
@@ -38,7 +37,7 @@ CPUTIME_LINUX = re.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 CPUTIME_LINUX_DAYS = re.compile("^([0-9]+)-([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$")
 
 
-TIMEZONE = dateutil.tz.tzlocal()
+TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 
 uid_to_username_cache: Dict[int, str] = {}
@@ -356,9 +355,9 @@ def create_kernel_process(now: datetime.datetime) -> PxProcess:
     process_builder.ppid = None
 
     # FIXME: This should be the system boot timestamp, not the epoch
-    process_builder.start_time_string = datetime.datetime.utcfromtimestamp(0).strftime(
-        "%c"
-    )
+    process_builder.start_time_string = datetime.datetime.fromtimestamp(
+        0, datetime.timezone.utc
+    ).strftime("%c")
 
     process_builder.rss_kb = 0
     process_builder.username = "root"

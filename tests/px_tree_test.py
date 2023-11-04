@@ -6,11 +6,10 @@ from . import testutils
 
 from typing import List
 import datetime
-import dateutil.tz
 
 
 def resolve(processes: List[px_process.PxProcess]) -> List[px_process.PxProcess]:
-    now = datetime.datetime.now().replace(tzinfo=dateutil.tz.tzlocal())
+    now = datetime.datetime.now(datetime.timezone.utc).astimezone()
 
     process_dict = {p.pid: p for p in processes}
     px_process.resolve_links(process_dict, now)
