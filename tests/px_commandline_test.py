@@ -44,8 +44,12 @@ def test_get_command_aws():
         px_commandline.get_command("/wherever/python3 aws s3 help flaska")
         == "aws s3 help"
     )
+
     assert px_commandline.get_command("python aws s3 sync help") == "aws s3 sync help"
     assert px_commandline.get_command("python aws s3 sync nothelp") == "aws s3 sync"
+
+    assert px_commandline.get_command("python aws s3 --unknown sync") == "aws s3"
+
     assert (
         px_commandline.get_command(
             " ".join(
