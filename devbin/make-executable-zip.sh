@@ -30,8 +30,8 @@ echo 'import px.px; px.px.main()' >"$WORKDIR/__main__.py"
 cp -a "$ROOTDIR/px" "$WORKDIR/"
 
 # Dependencies, must match list in requirements.txt
-cp -a "$ENVDIR"/lib/python*/site-packages/dateutil "$WORKDIR/"
-cp -a "$ENVDIR"/lib/python*/site-packages/six.py "$WORKDIR/"
+#
+# NOTE: This section intentionally left blank
 
 # Tidy up a bit
 find "$WORKDIR" -name '*.pyc' -delete
