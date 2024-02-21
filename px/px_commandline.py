@@ -4,7 +4,7 @@ import re
 import os.path
 import logging
 
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +19,9 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
-def to_array(commandline: str) -> List[str]:
+def to_array(
+    commandline: str, exists: Callable[[str], bool] = os.path.exists
+) -> List[str]:
     """Splits a command line string into components"""
     base_split = commandline.split(" ")
     if len(base_split) == 1:
@@ -27,7 +29,7 @@ def to_array(commandline: str) -> List[str]:
 
     # Try to reverse engineer executables with spaces in their names
     merged_split = list(base_split)
-    while not os.path.isfile(merged_split[0]):
+    while not exists(merged_split[0]):
         if len(merged_split) == 1:
             # Nothing more to merge, give up
             return base_split

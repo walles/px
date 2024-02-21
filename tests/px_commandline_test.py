@@ -3,6 +3,48 @@ import os
 from px import px_commandline
 
 
+def test_to_array_spaced1():
+    assert px_commandline.to_array(
+        "java -Dhello=/Applications/IntelliJ IDEA.app/Contents",
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents",
+        ],
+    ) == ["java", "-Dhello=/Applications/IntelliJ IDEA.app/Contents"]
+
+
+def test_to_array_spaced2():
+    assert px_commandline.to_array(
+        " ".join(
+            [
+                "java",
+                "-Dhello=/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+                "-classpath",
+                "/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+                "MainClass",
+            ]
+        ),
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents",
+            "/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+        ],
+    ) == [
+        "java",
+        "-Dhello=/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+        "-classpath",
+        "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+        "MainClass",
+    ]
+
+
 def test_get_command_python():
     assert px_commandline.get_command("python") == "python"
     assert px_commandline.get_command("/apa/Python") == "Python"
