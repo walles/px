@@ -19,6 +19,16 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
+def should_coalesce(
+    part1: str, part2: str, exists: Callable[[str], bool] = os.path.exists
+) -> bool:
+    """
+    Command line parts should be coalesced if combining them with a space in
+    between creates an existing file path.
+    """
+    return False
+
+
 def to_array(
     commandline: str, exists: Callable[[str], bool] = os.path.exists
 ) -> List[str]:
@@ -27,15 +37,13 @@ def to_array(
     if len(base_split) == 1:
         return base_split
 
-    # Try to reverse engineer executables with spaces in their names
-    merged_split = list(base_split)
-    while not exists(merged_split[0]):
-        if len(merged_split) == 1:
-            # Nothing more to merge, give up
-            return base_split
-
-        # Merge the two first elements: http://stackoverflow.com/a/1142879/473672
-        merged_split[0:2] = [" ".join(merged_split[0:2])]
+    # Try to reverse engineer which spaces should not be split on
+    merged_split = [base_split[0]]
+    for part in base_split[1:]:
+        if should_coalesce(merged_split[-1], part, exists):
+            merged_split[-1] += " " + part
+        else:
+            merged_split.append(part)
 
     return merged_split
 
