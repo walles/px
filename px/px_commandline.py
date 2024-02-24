@@ -59,7 +59,7 @@ def should_coalesce(
         # No path in part1, no need to coalesce
         return False
 
-    path_end_index_exclusive = len(part2) - 1
+    path_end_index_exclusive = len(part2)
     if (first_colon := part2.find(":")) >= 0:
         path_end_index_exclusive = first_colon
     if (first_slash := part2.find("/")) >= 0:
