@@ -329,7 +329,7 @@ def test_get_command_sudo_with_space_in_command_name(tmpdir):
     # Verify splitting with more parameters on the line
     assert (
         px_commandline.get_command("sudo " + spaced_name + " parameter")
-        == f"sudo {spaced_name}"
+        == "sudo with space"
     )
 
 
