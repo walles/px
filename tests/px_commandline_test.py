@@ -8,7 +8,6 @@ def test_should_coalesce():
         return s in [
             "/Applications",
             "/Applications/IntelliJ IDEA.app",
-            "/Applications/IntelliJ IDEA.app/Contents",
         ]
 
     assert not px_commandline.should_coalesce(
@@ -39,7 +38,6 @@ def test_to_array_spaced1():
         in [
             "/Applications",
             "/Applications/IntelliJ IDEA.app",
-            "/Applications/IntelliJ IDEA.app/Contents",
         ],
     ) == ["java", "-Dhello=/Applications/IntelliJ IDEA.app/Contents"]
 
@@ -62,8 +60,6 @@ def test_to_array_spaced2():
         in [
             "/Applications",
             "/Applications/IntelliJ IDEA.app",
-            "/Applications/IntelliJ IDEA.app/Contents",
-            "/Applications/IntelliJ IDEA.app/Contents/Info.plist",
         ],
     ) == [
         "java",
