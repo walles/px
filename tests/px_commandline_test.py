@@ -3,6 +3,73 @@ import os
 from px import px_commandline
 
 
+def test_should_coalesce():
+    def exists(s):
+        return s in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA.app",
+        ]
+
+    assert not px_commandline.should_coalesce(
+        "java", "-Dhello=/Applications/IntelliJ", exists=exists
+    )
+
+    assert px_commandline.should_coalesce(
+        "-Dhello=/Applications/IntelliJ", "IDEA.app/Contents", exists=exists
+    )
+
+    assert px_commandline.should_coalesce(
+        "/Applications/IntelliJ",
+        "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        exists=exists,
+    )
+
+    assert px_commandline.should_coalesce(
+        "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+        exists=exists,
+    )
+
+
+def test_to_array_spaced1():
+    assert px_commandline.to_array(
+        "java -Dhello=/Applications/IntelliJ IDEA.app/Contents",
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA.app",
+        ],
+    ) == ["java", "-Dhello=/Applications/IntelliJ IDEA.app/Contents"]
+
+
+def test_to_array_spaced2():
+    assert px_commandline.to_array(
+        " ".join(
+            [
+                "java",
+                "-Dhello=/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+                "-classpath",
+                "/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+                "MainClass",
+            ]
+        ),
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA.app",
+        ],
+    ) == [
+        "java",
+        "-Dhello=/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+        "-classpath",
+        "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+        "MainClass",
+    ]
+
+
 def test_get_command_python():
     assert px_commandline.get_command("python") == "python"
     assert px_commandline.get_command("/apa/Python") == "Python"
@@ -97,9 +164,6 @@ def test_get_command_java():
     assert px_commandline.get_command("java  ") == "java"
     assert px_commandline.get_command("java -jar") == "java"
     assert px_commandline.get_command("java -jar    ") == "java"
-
-    # FIXME: Add test for classpath containing spaces? I say this should be
-    # postponed until we have a real world use case for that.
 
 
 def test_get_command_java_gradled():
@@ -251,23 +315,23 @@ def test_get_command_sudo():
 
 def test_get_command_sudo_with_space_in_command_name(tmpdir):
     # Create a file name with a space in it
-    spaced_path = tmpdir.join("i contain spaces")
+    spaced_path = tmpdir.join("with space")
     spaced_path.write_binary(b"")
     spaced_name = str(spaced_path)
 
     # Verify splitting of the spaced file name
-    assert px_commandline.get_command("sudo " + spaced_name) == "sudo i contain spaces"
+    assert px_commandline.get_command("sudo " + spaced_name) == "sudo with space"
 
     # Verify splitting with more parameters on the line
     assert (
         px_commandline.get_command("sudo " + spaced_name + " parameter")
-        == "sudo i contain spaces"
+        == "sudo with space"
     )
 
 
 def test_get_command_sudo_with_space_in_path(tmpdir):
     # Create a file name with a space in it
-    spaced_dir = tmpdir.join("i contain spaces")
+    spaced_dir = tmpdir.join("with space")
     os.mkdir(str(spaced_dir))
     spaced_path = spaced_dir + "/runme"
 

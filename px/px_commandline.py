@@ -4,7 +4,7 @@ import re
 import os.path
 import logging
 
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 LOG = logging.getLogger(__name__)
 
@@ -19,21 +19,73 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
-def to_array(commandline: str) -> List[str]:
+def should_coalesce(
+    part1: str, part2: str, exists: Callable[[str], bool] = os.path.exists
+) -> bool:
+    """
+    Two (previously) space separated command line parts should be coalesced if
+    combining them with a space in between creates an existing file path.
+    """
+
+    if part1.endswith("/"):
+        # "xxx/ yyy" would make no sense coalesced
+        return False
+
+    if part2.startswith("-"):
+        # "xxx -yyy" would make no sense coalesced, that - likely means what
+        # comes after is a command line switch
+        return False
+
+    if part2.startswith("/"):
+        # "xxx /yyy" would make no sense coalesced
+        return False
+
+    # Find the last possible starting point of an absolute path in part1
+    path_start_index = -1
+    if part1.startswith("/"):
+        # /x/y/z
+        path_start_index = 0
+    if (first_equals_slash := part1.find("=/")) >= 0:
+        # -Dhello=/x/y/z
+        path_start_index = first_equals_slash + 1
+    if (last_colon_slash := part1.rfind(":/")) >= 0:
+        if last_colon_slash > path_start_index:
+            # -Dsomepath=/a/b/c:/x/y/z
+            path_start_index = last_colon_slash + 1
+
+    # FIXME: Ignore (non-file:?) URLs?
+
+    if path_start_index == -1:
+        # No path in part1, no need to coalesce
+        return False
+
+    path_end_index_exclusive = len(part2)
+    if (first_colon := part2.find(":")) >= 0:
+        path_end_index_exclusive = first_colon
+    if (first_slash := part2.find("/")) >= 0:
+        if first_slash < path_end_index_exclusive:
+            path_end_index_exclusive = first_slash
+
+    candidate_path = part1[path_start_index:] + " " + part2[:path_end_index_exclusive]
+
+    return exists(candidate_path)
+
+
+def to_array(
+    commandline: str, exists: Callable[[str], bool] = os.path.exists
+) -> List[str]:
     """Splits a command line string into components"""
     base_split = commandline.split(" ")
     if len(base_split) == 1:
         return base_split
 
-    # Try to reverse engineer executables with spaces in their names
-    merged_split = list(base_split)
-    while not os.path.isfile(merged_split[0]):
-        if len(merged_split) == 1:
-            # Nothing more to merge, give up
-            return base_split
-
-        # Merge the two first elements: http://stackoverflow.com/a/1142879/473672
-        merged_split[0:2] = [" ".join(merged_split[0:2])]
+    # Try to reverse engineer which spaces should not be split on
+    merged_split = [base_split[0]]
+    for part in base_split[1:]:
+        if should_coalesce(merged_split[-1], part, exists):
+            merged_split[-1] += " " + part
+        else:
+            merged_split.append(part)
 
     return merged_split
 
