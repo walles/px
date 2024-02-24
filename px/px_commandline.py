@@ -45,10 +45,10 @@ def should_coalesce(
     if part1.startswith("/"):
         # /x/y/z
         path_start_index = 0
-    if first_equals_slash := part1.find("=/") >= 0:
+    if (first_equals_slash := part1.find("=/")) >= 0:
         # -Dhello=/x/y/z
         path_start_index = first_equals_slash + 1
-    if last_colon_slash := part1.rfind(":/") >= 0:
+    if (last_colon_slash := part1.rfind(":/")) >= 0:
         if last_colon_slash > path_start_index:
             # -Dsomepath=/a/b/c:/x/y/z
             path_start_index = last_colon_slash + 1
@@ -60,9 +60,9 @@ def should_coalesce(
         return False
 
     path_end_index_exclusive = len(part2) - 1
-    if first_colon := part2.find(":") >= 0:
+    if (first_colon := part2.find(":")) >= 0:
         path_end_index_exclusive = first_colon
-    if first_slash := part2.find("/") >= 0:
+    if (first_slash := part2.find("/")) >= 0:
         if first_slash < path_end_index_exclusive:
             path_end_index_exclusive = first_slash
 
