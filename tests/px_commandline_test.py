@@ -70,6 +70,38 @@ def test_to_array_spaced2():
     ]
 
 
+def test_to_array_spaced3():
+    """Same as test_to_array_spaced2() but with two spaces rather than just one."""
+    assert px_commandline.to_array(
+        " ".join(
+            [
+                "java",
+                "-Dhello=/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+                "-classpath",
+                "/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+                "MainClass",
+            ]
+        ),
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA CE.app",
+        ],
+    ) == [
+        "java",
+        "-Dhello=/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+        "-classpath",
+        "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+        "MainClass",
+    ]
+
+
 def test_get_command_python():
     assert px_commandline.get_command("python") == "python"
     assert px_commandline.get_command("/apa/Python") == "Python"
