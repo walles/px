@@ -96,12 +96,12 @@ def coalesce_count(
         return 1
 
     for coalesce_count in range(2, len(parts)):
-        should_coalesce_result = should_coalesce(parts[:coalesce_count], exists)
+        should_coalesce_ = should_coalesce(parts[:coalesce_count], exists)
 
-        if should_coalesce_result is True:
+        if should_coalesce_ is True:
             return coalesce_count
 
-        if should_coalesce_result is False:
+        if should_coalesce_ is False:
             return 1
 
         # Or we got None, keep going
@@ -119,12 +119,12 @@ def to_array(
         return base_split
 
     # Try to reverse engineer which spaces should not be split on
-    merged_split = [base_split[0]]
-    for part in base_split[1:]:
-        if should_coalesce(merged_split[-1], part, exists):
-            merged_split[-1] += " " + part
-        else:
-            merged_split.append(part)
+    merged_split: List[str] = []
+    i = 0
+    while i < len(base_split):
+        coalesce_count_ = coalesce_count(base_split[i:], exists)
+        merged_split.append(" ".join(base_split[i : i + coalesce_count_]))
+        i += coalesce_count_
 
     return merged_split
 
