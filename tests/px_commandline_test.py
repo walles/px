@@ -11,22 +11,26 @@ def test_should_coalesce():
         ]
 
     assert not px_commandline.should_coalesce(
-        "java", "-Dhello=/Applications/IntelliJ", exists=exists
+        ["java", "-Dhello=/Applications/IntelliJ"], exists=exists
     )
 
     assert px_commandline.should_coalesce(
-        "-Dhello=/Applications/IntelliJ", "IDEA.app/Contents", exists=exists
+        ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
     )
 
     assert px_commandline.should_coalesce(
-        "/Applications/IntelliJ",
-        "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        [
+            "/Applications/IntelliJ",
+            "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        ],
         exists=exists,
     )
 
     assert px_commandline.should_coalesce(
-        "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-        "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+        [
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+            "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+        ],
         exists=exists,
     )
 
