@@ -95,7 +95,7 @@ def coalesce_count(
     if len(parts) < 2:
         return 1
 
-    for coalesce_count in range(2, len(parts)):
+    for coalesce_count in range(2, len(parts) + 1):
         should_coalesce_ = should_coalesce(parts[:coalesce_count], exists)
 
         if should_coalesce_ is True:
