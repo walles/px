@@ -88,6 +88,28 @@ def should_coalesce(
     return exists(candidate_path)
 
 
+def coalesce_count(
+    parts: List[str], exists: Callable[[str], bool] = os.path.exists
+) -> int:
+    """How many parts should be coalesced?"""
+    if len(parts) < 2:
+        return 1
+
+    for coalesce_count in range(2, len(parts)):
+        should_coalesce_result = should_coalesce(parts[:coalesce_count], exists)
+
+        if should_coalesce_result is True:
+            return coalesce_count
+
+        if should_coalesce_result is False:
+            return 1
+
+        # Or we got None, keep going
+
+    # Undecided until the end, this means no coalescing should be done
+    return 1
+
+
 def to_array(
     commandline: str, exists: Callable[[str], bool] = os.path.exists
 ) -> List[str]:
