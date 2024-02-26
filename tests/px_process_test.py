@@ -284,7 +284,7 @@ def test_get_command_line_array():
 
 def test_get_command_line_array_space_in_binary(tmpdir):
     # Create a file name with a space in it
-    spaced_path = tmpdir.join("with space")
+    spaced_path = tmpdir.join("i contain spaces")
     spaced_path.write_binary(b"")
     spaced_name = str(spaced_path)
 

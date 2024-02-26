@@ -11,23 +11,55 @@ def test_should_coalesce():
         ]
 
     assert not px_commandline.should_coalesce(
-        "java", "-Dhello=/Applications/IntelliJ", exists=exists
+        ["java", "-Dhello=/Applications/IntelliJ"], exists=exists
     )
 
     assert px_commandline.should_coalesce(
-        "-Dhello=/Applications/IntelliJ", "IDEA.app/Contents", exists=exists
+        ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
     )
 
     assert px_commandline.should_coalesce(
-        "/Applications/IntelliJ",
-        "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        [
+            "/Applications/IntelliJ",
+            "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+        ],
         exists=exists,
     )
 
     assert px_commandline.should_coalesce(
-        "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-        "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+        [
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+            "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+        ],
         exists=exists,
+    )
+
+
+def test_coalesce_count():
+    def exists(s):
+        return s == "/a b c"
+
+    assert px_commandline.coalesce_count(["/a", "b", "c"], exists=exists) == 3
+    assert px_commandline.coalesce_count(["/a", "b", "c/"], exists=exists) == 3
+    assert px_commandline.coalesce_count(["/a", "b", "c", "d"], exists=exists) == 3
+
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c:/a", "b", "c"], exists=exists) == 5
+    )
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c/:/a", "b", "c/"], exists=exists)
+        == 5
+    )
+
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c:/a", "b", "c", "d"], exists=exists)
+        == 5
+    )
+    assert (
+        px_commandline.coalesce_count(
+            ["/a", "b", "c/:/a", "b", "c/", "d/"], exists=exists
+        )
+        == 5
     )
 
 
@@ -66,6 +98,38 @@ def test_to_array_spaced2():
         "-Dhello=/Applications/IntelliJ IDEA.app/Contents/Info.plist",
         "-classpath",
         "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+        "MainClass",
+    ]
+
+
+def test_to_array_spaced3():
+    """Same as test_to_array_spaced2() but with two spaces rather than just one."""
+    assert px_commandline.to_array(
+        " ".join(
+            [
+                "java",
+                "-Dhello=/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+                "-classpath",
+                "/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ",
+                "IDEA",
+                "CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
+                "MainClass",
+            ]
+        ),
+        exists=lambda s: s
+        in [
+            "/Applications",
+            "/Applications/IntelliJ IDEA CE.app",
+        ],
+    ) == [
+        "java",
+        "-Dhello=/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+        "-classpath",
+        "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         "MainClass",
     ]
 
@@ -315,23 +379,23 @@ def test_get_command_sudo():
 
 def test_get_command_sudo_with_space_in_command_name(tmpdir):
     # Create a file name with a space in it
-    spaced_path = tmpdir.join("with space")
+    spaced_path = tmpdir.join("i contain spaces")
     spaced_path.write_binary(b"")
     spaced_name = str(spaced_path)
 
     # Verify splitting of the spaced file name
-    assert px_commandline.get_command("sudo " + spaced_name) == "sudo with space"
+    assert px_commandline.get_command("sudo " + spaced_name) == "sudo i contain spaces"
 
     # Verify splitting with more parameters on the line
     assert (
         px_commandline.get_command("sudo " + spaced_name + " parameter")
-        == "sudo with space"
+        == "sudo i contain spaces"
     )
 
 
 def test_get_command_sudo_with_space_in_path(tmpdir):
     # Create a file name with a space in it
-    spaced_dir = tmpdir.join("with space")
+    spaced_dir = tmpdir.join("i contain spaces")
     os.mkdir(str(spaced_dir))
     spaced_path = spaced_dir + "/runme"
 
