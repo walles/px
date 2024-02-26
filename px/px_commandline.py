@@ -65,17 +65,12 @@ def should_coalesce(
         # Part 1 does not contain the start of any path, do not coalesce
         return False
 
-    not_found_marker = len(parts[-1]) + 2
-    path_end_index_exclusive = not_found_marker
+    path_end_index_exclusive = len(parts[-1])
     if (first_colon := parts[-1].find(":")) >= 0:
         path_end_index_exclusive = first_colon
     if (first_slash := parts[-1].find("/")) >= 0:
         if first_slash < path_end_index_exclusive:
             path_end_index_exclusive = first_slash
-
-    if path_end_index_exclusive == not_found_marker:
-        # Not obviously part of a path, request more parts
-        return None
 
     middle = " "
     if len(parts) > 2:
@@ -85,16 +80,24 @@ def should_coalesce(
         parts[0][path_start_index:] + middle + parts[-1][:path_end_index_exclusive]
     )
 
-    return exists(candidate_path)
+    _exists = exists(candidate_path)
+    if _exists:
+        return True
+    else:
+        if path_end_index_exclusive == len(parts[-1]):
+            # No hit, but no slashes in the final part, so we might still be
+            # inside of a multi-part name
+            return None
+        else:
+            # No hit, and we got something with slashes in it, so this is
+            # definitely a no.
+            return False
 
 
 def coalesce_count(
     parts: List[str], exists: Callable[[str], bool] = os.path.exists
 ) -> int:
     """How many parts should be coalesced?"""
-    if len(parts) < 2:
-        return 1
-
     for coalesce_count in range(2, len(parts) + 1):
         should_coalesce_ = should_coalesce(parts[:coalesce_count], exists)
 
