@@ -35,6 +35,34 @@ def test_should_coalesce():
     )
 
 
+def test_coalesce_count():
+    def exists(s):
+        return s == "/a b c"
+
+    assert px_commandline.coalesce_count(["/a", "b", "c"], exists=exists) == 3
+    assert px_commandline.coalesce_count(["/a", "b", "c/"], exists=exists) == 3
+    assert px_commandline.coalesce_count(["/a", "b", "c", "d"], exists=exists) == 4
+
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c:/a", "b", "c"], exists=exists) == 5
+    )
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c/:/a", "b", "c/"], exists=exists)
+        == 5
+    )
+
+    assert (
+        px_commandline.coalesce_count(["/a", "b", "c:/a", "b", "c", "d"], exists=exists)
+        == 5
+    )
+    assert (
+        px_commandline.coalesce_count(
+            ["/a", "b", "c/:/a", "b", "c/", "d/"], exists=exists
+        )
+        == 5
+    )
+
+
 def test_to_array_spaced1():
     assert px_commandline.to_array(
         "java -Dhello=/Applications/IntelliJ IDEA.app/Contents",
