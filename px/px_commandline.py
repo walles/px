@@ -98,19 +98,30 @@ def coalesce_count(
     parts: List[str], exists: Callable[[str], bool] = os.path.exists
 ) -> int:
     """How many parts should be coalesced?"""
-    for coalesce_count in range(2, len(parts) + 1):
-        should_coalesce_ = should_coalesce(parts[:coalesce_count], exists)
 
-        if should_coalesce_ is True:
-            return coalesce_count
+    # This is what we can be sure of so far
+    confirmed_count = 1
+
+    section_start = 0
+    for coalesce_count in range(2, len(parts) + 1):
+        should_coalesce_ = should_coalesce(parts[section_start:coalesce_count], exists)
+
+        if should_coalesce_ is None:
+            # Undecided, keep looking
+            continue
 
         if should_coalesce_ is False:
-            return 1
+            return confirmed_count
 
-        # Or we got None, keep going
+        # should_coalesce_ is True
+        confirmed_count = coalesce_count
+
+        # See if the last part should also be coalesced with what comes after
+        # it. Think of a search path for example: "/a b:/c d"
+        section_start = coalesce_count - 1
 
     # Undecided until the end, this means no coalescing should be done
-    return 1
+    return confirmed_count
 
 
 def to_array(
