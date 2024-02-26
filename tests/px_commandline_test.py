@@ -41,7 +41,7 @@ def test_coalesce_count():
 
     assert px_commandline.coalesce_count(["/a", "b", "c"], exists=exists) == 3
     assert px_commandline.coalesce_count(["/a", "b", "c/"], exists=exists) == 3
-    assert px_commandline.coalesce_count(["/a", "b", "c", "d"], exists=exists) == 4
+    assert px_commandline.coalesce_count(["/a", "b", "c", "d"], exists=exists) == 3
 
     assert (
         px_commandline.coalesce_count(["/a", "b", "c:/a", "b", "c"], exists=exists) == 5
