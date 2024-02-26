@@ -59,8 +59,6 @@ def should_coalesce(
             # -Dsomepath=/a/b/c:/x/y/z
             path_start_index = last_colon_slash + 1
 
-    # FIXME: Ignore (non-file:?) URLs?
-
     if path_start_index == -1:
         # Part 1 does not contain the start of any path, do not coalesce
         return False
