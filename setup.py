@@ -53,6 +53,7 @@ setup(
     version=git_version,
     description="ps and top for Human Beings",
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/x-rst",
     author="Johan Walles",
     author_email="johan.walles@gmail.com",
     url="https://github.com/walles/px",
