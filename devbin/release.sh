@@ -92,32 +92,13 @@ set -x
 
 find . -name 'px*.whl' -delete
 
-# Build the release
+# Test and build the release so we know it works before we release it
 tox
 
-# Make a relelase virtualenv
-ENVDIR="$(mktemp -d)"
-function cleanup {
-  rm -rf "${ENVDIR}"
-}
-trap cleanup EXIT
-
-virtualenv "${ENVDIR}"
-# shellcheck source=/dev/null
-. "${ENVDIR}"/bin/activate
-
-# Work around having an old version of OpenSSL
+# Mark new release on Github.
 #
-# https://github.com/pypa/twine/issues/273#issuecomment-334911815
-pip install "ndg-httpsclient == 0.4.3"
-
-pip install "twine == 4.0.2"
-
-# Upload!
-echo
-twine upload --repository pypi dist/pxpx-*-py3-none-any.whl
-
-# Mark new release on Github
+# Note that this implicitly triggers uploads to Homebrew and PyPI through GitHub
+# actions configured in .github/workflows.
 git push --tags
 
 cat <<EOM

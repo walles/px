@@ -1,5 +1,10 @@
 name: Continuous Delivery
 
+env:
+  # NOTE: This version must match between all .yml files in the
+  # .github/workflows directory
+  TOX_VERSION: 4.0.9
+
 on:
   push:
     tags:
@@ -14,3 +19,43 @@ jobs:
         with:
           token: ${{secrets.JOHAN_GITHUB_API_TOKEN}}
           formula: px
+
+  pypi:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pxpx
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      #
+      # First, we need to create a wheel. We do this by running tox, just like
+      # in linux-ci.yml.
+      #
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # For getting tags from the repo
+      - name: Cache .tox directory
+        uses: actions/cache@v3
+        with:
+          path: .tox
+          key: ${{ runner.os }}-${{ hashFiles('tox.ini') }}
+      - name: Create a virtualenv
+        run: |
+          python3 -m venv env
+      - name: Install tox in our virtualenv
+        run: |
+          . ./env/bin/activate
+          pip install tox==${{ env.TOX_VERSION }}
+      - name: Run tox in our virtualenv
+        run: |
+          . ./env/bin/activate
+          tox
+
+      #
+      # Wheel created, publish it!
+      #
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
