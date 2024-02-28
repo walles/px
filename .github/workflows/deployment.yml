@@ -43,7 +43,7 @@ jobs:
         run: |
           git describe --dirty
           git rev-parse HEAD
-          git fetch --tags
+          git fetch --tags --force
           git describe --dirty
       - name: Cache .tox directory
         uses: actions/cache@v3
