@@ -37,6 +37,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # For getting tags from the repo
+      - name: Print current revision
+        run: |
+          git describe --dirty
       - name: Cache .tox directory
         uses: actions/cache@v3
         with:
@@ -49,10 +52,19 @@ jobs:
         run: |
           . ./env/bin/activate
           pip install tox==${{ env.TOX_VERSION }}
+      - name: Prevent 0.0.0 releases
+        run: |
+          tox -e version.py
+          cat px/version.py
+          ! grep '0.0.0' px/version.py
       - name: Run tox in our virtualenv
         run: |
           . ./env/bin/activate
           tox
+      - name: Print debug info
+        run: |
+          ls dist/
+          ! ls dist/ | grep '0.0.0'
 
       #
       # Wheel created, publish it!
