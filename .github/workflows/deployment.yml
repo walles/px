@@ -39,10 +39,9 @@ jobs:
           # For getting tags from the repo
           fetch-depth: 0
           fetch-tags: true
-      - name: Print current revision
+      - name: Force git describe to show the right tag
         run: |
           git describe --dirty
-          git rev-parse HEAD
           git fetch --tags --force
           git describe --dirty
       - name: Cache .tox directory
@@ -63,7 +62,7 @@ jobs:
           tox -e version.py
           cat px/version.py
           ! grep '0.0.0' px/version.py
-      - name: Run tox in our virtualenv
+      - name: Run tox to create the dist wheel
         run: |
           . ./env/bin/activate
           tox
