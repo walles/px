@@ -42,6 +42,7 @@ jobs:
       - name: Print current revision
         run: |
           git describe --dirty
+          git rev-parse HEAD
           git fetch --tags
           git describe --dirty
       - name: Cache .tox directory
