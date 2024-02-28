@@ -54,6 +54,7 @@ jobs:
           pip install tox==${{ env.TOX_VERSION }}
       - name: Prevent 0.0.0 releases
         run: |
+          . ./env/bin/activate
           tox -e version.py
           cat px/version.py
           ! grep '0.0.0' px/version.py
