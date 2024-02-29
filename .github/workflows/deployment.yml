@@ -40,6 +40,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Force git describe to show the right tag
+        # Workaround for: https://github.com/actions/checkout/issues/882
         run: |
           git describe --dirty
           git fetch --tags --force
