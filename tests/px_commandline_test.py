@@ -134,6 +134,37 @@ def test_to_array_spaced3():
     ]
 
 
+def test_to_array_ms_edge():
+    complete = "/".join(
+        [
+            "/Applications",
+            "Microsoft Edge.app",
+            "Contents",
+            "Frameworks",
+            "Microsoft Edge Framework.framework",
+            "Versions",
+            "122.0.2365.63",
+            "Helpers",
+            "Microsoft Edge Helper (GPU).app",
+            "Contents",
+            "MacOS",
+            "Microsoft Edge Helper (GPU)",
+        ]
+    )
+    exists = []
+    partial = complete
+    while True:
+        exists.append(partial)
+        partial = os.path.dirname(partial)
+        if partial == "/":
+            break
+
+    assert px_commandline.to_array(
+        complete + " --type=gpu-process",
+        exists=lambda s: s in exists,
+    ) == [complete] + ["--type=gpu-process"]
+
+
 def test_get_command_python():
     assert px_commandline.get_command("python") == "python"
     assert px_commandline.get_command("/apa/Python") == "Python"
