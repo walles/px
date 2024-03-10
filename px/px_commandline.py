@@ -100,9 +100,8 @@ def coalesce_count(
     # This is what we can be sure of so far
     confirmed_count = 1
 
-    section_start = 0
     for coalesce_count in range(2, len(parts) + 1):
-        should_coalesce_ = should_coalesce(parts[section_start:coalesce_count], exists)
+        should_coalesce_ = should_coalesce(parts[0:coalesce_count], exists)
 
         if should_coalesce_ is None:
             # Undecided, keep looking
@@ -113,10 +112,6 @@ def coalesce_count(
 
         # should_coalesce_ is True
         confirmed_count = coalesce_count
-
-        # See if the last part should also be coalesced with what comes after
-        # it. Think of a search path for example: "/a b:/c d"
-        section_start = coalesce_count - 1
 
     # Undecided until the end, this means no coalescing should be done
     return confirmed_count

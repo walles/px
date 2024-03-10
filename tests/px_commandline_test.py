@@ -39,6 +39,11 @@ def test_should_coalesce():
         exists=lambda s: s in ["/A/MS Edge.app", "/A/MS Edge.app/MS Edge"],
     )
 
+    assert px_commandline.should_coalesce(
+        ["/A/MS Edge.app/MS Edge:/A/MS Edge.app/MS Edge"],
+        exists=lambda s: s in ["/A/MS Edge.app", "/A/MS Edge.app/MS Edge"],
+    )
+
 
 def test_coalesce_count():
     def exists(s):
