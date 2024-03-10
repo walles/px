@@ -3,60 +3,27 @@ import os
 from px import px_commandline
 
 
-def test_should_coalesce():
-    def exists(s):
-        return s in [
-            "/Applications",
-            "/Applications/IntelliJ IDEA.app",
-        ]
+def test_get_coalesce_candidate():
+    assert px_commandline.get_coalesce_candidate("/hello") == "/hello"
+    assert px_commandline.get_coalesce_candidate("/hello:/baloo") == "/baloo"
 
-    assert not px_commandline.should_coalesce(
-        ["java", "-Dhello=/Applications/IntelliJ"], exists=exists
-    )
+    assert px_commandline.get_coalesce_candidate("-Dx=/hello") == "/hello"
+    assert px_commandline.get_coalesce_candidate("-Dx=/hello:/baloo") == "/baloo"
 
-    assert (
-        px_commandline.should_coalesce(
-            ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
-        )
-        is None  # Potentially incomplete
-    )
+    assert px_commandline.get_coalesce_candidate("hello") is None
+    assert px_commandline.get_coalesce_candidate("hello:/baloo") is None
 
     assert (
-        px_commandline.should_coalesce(
-            [
-                "/Applications/IntelliJ",
-                "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-            ],
-            exists=exists,
+        px_commandline.get_coalesce_candidate(
+            "/A/IntelliJ IDEA.app/C/p/mm/lib/mm.jar:/A/IntelliJ IDEA.app/C/p/ms/lib/ms.jar:/A/IntelliJ"
         )
-        is None  # Potentially incomplete
-    )
-
-    assert (
-        px_commandline.should_coalesce(
-            [
-                "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-                "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
-            ],
-            exists=exists,
-        )
-        is None  # Potentially incomplete
-    )
-
-    assert px_commandline.should_coalesce(
-        ["/A/MS Edge.app/MS Edge"],
-        exists=lambda s: s in ["/A/MS Edge.app", "/A/MS Edge.app/MS Edge"],
-    )
-
-    assert px_commandline.should_coalesce(
-        ["/A/MS Edge.app/MS Edge:/A/MS Edge.app/MS Edge"],
-        exists=lambda s: s in ["/A/MS Edge.app", "/A/MS Edge.app/MS Edge"],
+        == "/A/IntelliJ"
     )
 
 
 def test_coalesce_count():
     def exists(s):
-        return s == "/a b c"
+        return s in ["/", "/a b c", "/a b c/"]
 
     assert px_commandline.coalesce_count(["/a", "b", "c"], exists=exists) == 3
     assert px_commandline.coalesce_count(["/a", "b", "c/"], exists=exists) == 3
@@ -110,6 +77,7 @@ def test_to_array_spaced2():
         ),
         exists=lambda s: s
         in [
+            "/Applications",
             "/Applications/IntelliJ IDEA.app/Contents/Info.plist",
             "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar",
             "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
@@ -144,6 +112,7 @@ def test_to_array_spaced3():
         ),
         exists=lambda s: s
         in [
+            "/Applications",
             "/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
             "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar",
             "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar",

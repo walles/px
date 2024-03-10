@@ -19,6 +19,31 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
+def get_coalesce_candidate(so_far: str) -> Optional[str]:
+    start_index = -1
+    if so_far.startswith("/"):
+        start_index = 0
+    elif so_far.startswith("-"):
+        equals_slash_index = so_far.find("=/")
+        if equals_slash_index == -1:
+            # No =/ in the string, so we're not looking at -Djava.io.tmpdir=/tmp
+            return None
+
+        # Start at the slash after the equals sign
+        start_index = equals_slash_index + 1
+
+    if start_index == -1:
+        # Start not found, this is not a path
+        return None
+
+    colon_slash_index = so_far.rfind(":/", start_index)
+    if colon_slash_index == -1:
+        # Not a : separated path
+        return so_far[start_index:]
+
+    return so_far[colon_slash_index + 1 :]
+
+
 def should_coalesce(
     parts: List[str], exists: Callable[[str], bool] = os.path.exists
 ) -> Optional[bool]:
@@ -28,67 +53,39 @@ def should_coalesce(
     path, or a : separated series of file paths.
 
     Return values:
-    * True: Coalesce
-    * False: Do not coalesce, leave these parts alone
-    * None: Do not coalesce, but if you add more parts then that might work
+    * True: Coalesce, done
+    * False: Do not coalesce, done
+    * None: Undecided, add another part and try again
     """
 
-    if parts[-1].startswith("-"):
-        # "xxx -yyy" would make no sense coalesced, that - likely means what
-        # comes after is a command line switch
-        return False
-
-    if parts[-1].startswith("/"):
-        # "xxx /yyy" would make no sense coalesced
+    if parts[-1].startswith("-") or parts[-1].startswith("/"):
+        # Last part starts a command line option or a new absolute path, don't
+        # coalesce.
         return False
 
     coalesced = " ".join(parts)
-
-    # Find the last possible starting point of an absolute path. This would be
-    # either a leading /, or a : or a = followed by a /.
-    path_start_index = -1
-
-    if coalesced.startswith("/"):
-        # /x/y/z
-        path_start_index = 0
-    if (first_equals_slash := coalesced.find("=/")) >= 0:
-        # -Dhello=/x/y/z
-        path_start_index = first_equals_slash + 1
-    if (last_colon_slash := coalesced.rfind(":/")) >= 0:
-        if last_colon_slash > path_start_index:
-            # -Dsomepath=/a/b/c:/x/y/z
-            path_start_index = last_colon_slash + 1
-
-    if path_start_index == -1:
-        # Absolute path not found, do not coalesce
+    candidate = get_coalesce_candidate(coalesced)
+    if not candidate:
+        # This is not a candidate for coalescing
         return False
 
-    path_end_index_exclusive = len(coalesced)
-    if (last_colon := coalesced.rfind(":")) >= 0:
-        if last_colon > path_start_index:
-            path_end_index_exclusive = last_colon
-
-    candidate = coalesced[path_start_index:path_end_index_exclusive]
-    candidate = candidate.removesuffix("/")  # Simplifies testing
     if exists(candidate):
-        if path_end_index_exclusive == len(coalesced):
-            # End of input exists, coalesce
-            return True
-        else:
-            # Candidate exists, but input continues, keep looking
-            return None
-    else:
-        # Candidate does not exist, but maybe it's incomplete, keep looking
+        # Found it, done!
+        return True
+
+    if exists(os.path.dirname(candidate)):
+        # Found the parent directory, we're on the right track, keep looking!
         return None
+
+    # Candidate does not exists, and neither does its parent directory, this is
+    # not it.
+    return False
 
 
 def coalesce_count(
     parts: List[str], exists: Callable[[str], bool] = os.path.exists
 ) -> int:
     """How many parts should be coalesced?"""
-
-    # This is what we can be sure of so far
-    confirmed_count = 1
 
     for coalesce_count in range(2, len(parts) + 1):
         should_coalesce_ = should_coalesce(parts[0:coalesce_count], exists)
@@ -98,13 +95,13 @@ def coalesce_count(
             continue
 
         if should_coalesce_ is False:
-            return confirmed_count
+            return 1
 
         # should_coalesce_ is True
-        confirmed_count = coalesce_count
+        return coalesce_count
 
     # Undecided until the end, this means no coalescing should be done
-    return confirmed_count
+    return 1
 
 
 def to_array(
