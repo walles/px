@@ -3,41 +3,27 @@ import os
 from px import px_commandline
 
 
-def test_should_coalesce():
-    def exists(s):
-        return s in [
-            "/Applications",
-            "/Applications/IntelliJ IDEA.app",
-        ]
+def test_get_coalesce_candidate():
+    assert px_commandline.get_coalesce_candidate("/hello") == "/hello"
+    assert px_commandline.get_coalesce_candidate("/hello:/baloo") == "/baloo"
 
-    assert not px_commandline.should_coalesce(
-        ["java", "-Dhello=/Applications/IntelliJ"], exists=exists
-    )
+    assert px_commandline.get_coalesce_candidate("-Dx=/hello") == "/hello"
+    assert px_commandline.get_coalesce_candidate("-Dx=/hello:/baloo") == "/baloo"
 
-    assert px_commandline.should_coalesce(
-        ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
-    )
+    assert px_commandline.get_coalesce_candidate("hello") is None
+    assert px_commandline.get_coalesce_candidate("hello:/baloo") is None
 
-    assert px_commandline.should_coalesce(
-        [
-            "/Applications/IntelliJ",
-            "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-        ],
-        exists=exists,
-    )
-
-    assert px_commandline.should_coalesce(
-        [
-            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-            "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
-        ],
-        exists=exists,
+    assert (
+        px_commandline.get_coalesce_candidate(
+            "/A/IntelliJ IDEA.app/C/p/mm/lib/mm.jar:/A/IntelliJ IDEA.app/C/p/ms/lib/ms.jar:/A/IntelliJ"
+        )
+        == "/A/IntelliJ"
     )
 
 
 def test_coalesce_count():
     def exists(s):
-        return s == "/a b c"
+        return s in ["/", "/a b c", "/a b c/"]
 
     assert px_commandline.coalesce_count(["/a", "b", "c"], exists=exists) == 3
     assert px_commandline.coalesce_count(["/a", "b", "c/"], exists=exists) == 3
@@ -70,6 +56,7 @@ def test_to_array_spaced1():
         in [
             "/Applications",
             "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents",
         ],
     ) == ["java", "-Dhello=/Applications/IntelliJ IDEA.app/Contents"]
 
@@ -91,7 +78,10 @@ def test_to_array_spaced2():
         exists=lambda s: s
         in [
             "/Applications",
-            "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         ],
     ) == [
         "java",
@@ -123,7 +113,10 @@ def test_to_array_spaced3():
         exists=lambda s: s
         in [
             "/Applications",
-            "/Applications/IntelliJ IDEA CE.app",
+            "/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         ],
     ) == [
         "java",
@@ -132,6 +125,37 @@ def test_to_array_spaced3():
         "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar:/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         "MainClass",
     ]
+
+
+def test_to_array_ms_edge():
+    complete = "/".join(
+        [
+            "/Applications",
+            "Microsoft Edge.app",
+            "Contents",
+            "Frameworks",
+            "Microsoft Edge Framework.framework",
+            "Versions",
+            "122.0.2365.63",
+            "Helpers",
+            "Microsoft Edge Helper (GPU).app",
+            "Contents",
+            "MacOS",
+            "Microsoft Edge Helper (GPU)",
+        ]
+    )
+    exists = []
+    partial = complete
+    while True:
+        exists.append(partial)
+        partial = os.path.dirname(partial)
+        if partial == "/":
+            break
+
+    assert px_commandline.to_array(
+        complete + " --type=gpu-process",
+        exists=lambda s: s in exists,
+    ) == [complete] + ["--type=gpu-process"]
 
 
 def test_get_command_python():

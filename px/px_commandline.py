@@ -19,77 +19,67 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
+def get_coalesce_candidate(so_far: str) -> Optional[str]:
+    start_index = -1
+    if so_far.startswith("/"):
+        start_index = 0
+    elif so_far.startswith("-"):
+        equals_slash_index = so_far.find("=/")
+        if equals_slash_index == -1:
+            # No =/ in the string, so we're not looking at -Djava.io.tmpdir=/tmp
+            return None
+
+        # Start at the slash after the equals sign
+        start_index = equals_slash_index + 1
+
+    if start_index == -1:
+        # Start not found, this is not a path
+        return None
+
+    colon_slash_index = so_far.rfind(":/", start_index)
+    if colon_slash_index == -1:
+        # Not a : separated path
+        return so_far[start_index:]
+
+    return so_far[colon_slash_index + 1 :]
+
+
 def should_coalesce(
     parts: List[str], exists: Callable[[str], bool] = os.path.exists
 ) -> Optional[bool]:
     """
     Two or more (previously) space separated command line parts should be
     coalesced if combining them with a space in between creates an existing file
-    path.
+    path, or a : separated series of file paths.
 
     Return values:
-    * True: Coalesce
-    * False: Do not coalesce. The first part here does not start a coalescable sequence.
-    * None: Do not coalesce, but if you add more parts then that might work.
+    * True: Coalesce, done
+    * False: Do not coalesce, done
+    * None: Undecided, add another part and try again
     """
 
-    if parts[0].endswith("/"):
-        # "xxx/ yyy" would make no sense coalesced
+    if parts[-1].startswith("-") or parts[-1].startswith("/"):
+        # Last part starts a command line option or a new absolute path, don't
+        # coalesce.
         return False
 
-    if parts[-1].startswith("-"):
-        # "xxx -yyy" would make no sense coalesced, that - likely means what
-        # comes after is a command line switch
+    coalesced = " ".join(parts)
+    candidate = get_coalesce_candidate(coalesced)
+    if not candidate:
+        # This is not a candidate for coalescing
         return False
 
-    if parts[-1].startswith("/"):
-        # "xxx /yyy" would make no sense coalesced
-        return False
-
-    # Find the last possible starting point of an absolute path in part1
-    path_start_index = -1
-    if parts[0].startswith("/"):
-        # /x/y/z
-        path_start_index = 0
-    if (first_equals_slash := parts[0].find("=/")) >= 0:
-        # -Dhello=/x/y/z
-        path_start_index = first_equals_slash + 1
-    if (last_colon_slash := parts[0].rfind(":/")) >= 0:
-        if last_colon_slash > path_start_index:
-            # -Dsomepath=/a/b/c:/x/y/z
-            path_start_index = last_colon_slash + 1
-
-    if path_start_index == -1:
-        # Part 1 does not contain the start of any path, do not coalesce
-        return False
-
-    path_end_index_exclusive = len(parts[-1])
-    if (first_colon := parts[-1].find(":")) >= 0:
-        path_end_index_exclusive = first_colon
-    if (first_slash := parts[-1].find("/")) >= 0:
-        if first_slash < path_end_index_exclusive:
-            path_end_index_exclusive = first_slash
-
-    middle = " "
-    if len(parts) > 2:
-        middle = " " + " ".join(parts[1:-1]) + " "
-
-    candidate_path = (
-        parts[0][path_start_index:] + middle + parts[-1][:path_end_index_exclusive]
-    )
-
-    _exists = exists(candidate_path)
-    if _exists:
+    if exists(candidate):
+        # Found it, done!
         return True
-    else:
-        if path_end_index_exclusive == len(parts[-1]):
-            # No hit, but no slashes in the final part, so we might still be
-            # inside of a multi-part name
-            return None
-        else:
-            # No hit, and we got something with slashes in it, so this is
-            # definitely a no.
-            return False
+
+    if exists(os.path.dirname(candidate)):
+        # Found the parent directory, we're on the right track, keep looking!
+        return None
+
+    # Candidate does not exists, and neither does its parent directory, this is
+    # not it.
+    return False
 
 
 def coalesce_count(
@@ -97,29 +87,21 @@ def coalesce_count(
 ) -> int:
     """How many parts should be coalesced?"""
 
-    # This is what we can be sure of so far
-    confirmed_count = 1
-
-    section_start = 0
     for coalesce_count in range(2, len(parts) + 1):
-        should_coalesce_ = should_coalesce(parts[section_start:coalesce_count], exists)
+        should_coalesce_ = should_coalesce(parts[0:coalesce_count], exists)
 
         if should_coalesce_ is None:
             # Undecided, keep looking
             continue
 
         if should_coalesce_ is False:
-            return confirmed_count
+            return 1
 
         # should_coalesce_ is True
-        confirmed_count = coalesce_count
-
-        # See if the last part should also be coalesced with what comes after
-        # it. Think of a search path for example: "/a b:/c d"
-        section_start = coalesce_count - 1
+        return coalesce_count
 
     # Undecided until the end, this means no coalescing should be done
-    return confirmed_count
+    return 1
 
 
 def to_array(
