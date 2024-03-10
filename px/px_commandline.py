@@ -25,17 +25,13 @@ def should_coalesce(
     """
     Two or more (previously) space separated command line parts should be
     coalesced if combining them with a space in between creates an existing file
-    path.
+    path, or a : separated series of file paths.
 
     Return values:
     * True: Coalesce
-    * False: Do not coalesce. The first part here does not start a coalescable sequence.
-    * None: Do not coalesce, but if you add more parts then that might work.
+    * False: Do not coalesce, leave these parts alone
+    * None: Do not coalesce, but if you add more parts then that might work
     """
-
-    if parts[0].endswith("/"):
-        # "xxx/ yyy" would make no sense coalesced
-        return False
 
     if parts[-1].startswith("-"):
         # "xxx -yyy" would make no sense coalesced, that - likely means what
@@ -46,50 +42,44 @@ def should_coalesce(
         # "xxx /yyy" would make no sense coalesced
         return False
 
-    # Find the last possible starting point of an absolute path in part1
+    coalesced = " ".join(parts)
+
+    # Find the last possible starting point of an absolute path. This would be
+    # either a leading /, or a : or a = followed by a /.
     path_start_index = -1
-    if parts[0].startswith("/"):
+
+    if coalesced.startswith("/"):
         # /x/y/z
         path_start_index = 0
-    if (first_equals_slash := parts[0].find("=/")) >= 0:
+    if (first_equals_slash := coalesced.find("=/")) >= 0:
         # -Dhello=/x/y/z
         path_start_index = first_equals_slash + 1
-    if (last_colon_slash := parts[0].rfind(":/")) >= 0:
+    if (last_colon_slash := coalesced.rfind(":/")) >= 0:
         if last_colon_slash > path_start_index:
             # -Dsomepath=/a/b/c:/x/y/z
             path_start_index = last_colon_slash + 1
 
     if path_start_index == -1:
-        # Part 1 does not contain the start of any path, do not coalesce
+        # Absolute path not found, do not coalesce
         return False
 
-    path_end_index_exclusive = len(parts[-1])
-    if (first_colon := parts[-1].find(":")) >= 0:
-        path_end_index_exclusive = first_colon
-    if (first_slash := parts[-1].find("/")) >= 0:
-        if first_slash < path_end_index_exclusive:
-            path_end_index_exclusive = first_slash
+    path_end_index_exclusive = len(coalesced)
+    if (last_colon := coalesced.rfind(":")) >= 0:
+        if last_colon > path_start_index:
+            path_end_index_exclusive = last_colon
 
-    middle = " "
-    if len(parts) > 2:
-        middle = " " + " ".join(parts[1:-1]) + " "
-
-    candidate_path = (
-        parts[0][path_start_index:] + middle + parts[-1][:path_end_index_exclusive]
-    )
-
-    _exists = exists(candidate_path)
-    if _exists:
-        return True
-    else:
-        if path_end_index_exclusive == len(parts[-1]):
-            # No hit, but no slashes in the final part, so we might still be
-            # inside of a multi-part name
-            return None
+    candidate = coalesced[path_start_index:path_end_index_exclusive]
+    candidate = candidate.removesuffix("/")  # Simplifies testing
+    if exists(candidate):
+        if path_end_index_exclusive == len(coalesced):
+            # End of input exists, coalesce
+            return True
         else:
-            # No hit, and we got something with slashes in it, so this is
-            # definitely a no.
-            return False
+            # Candidate exists, but input continues, keep looking
+            return None
+    else:
+        # Candidate does not exist, but maybe it's incomplete, keep looking
+        return None
 
 
 def coalesce_count(

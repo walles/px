@@ -14,24 +14,33 @@ def test_should_coalesce():
         ["java", "-Dhello=/Applications/IntelliJ"], exists=exists
     )
 
-    assert px_commandline.should_coalesce(
-        ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
+    assert (
+        px_commandline.should_coalesce(
+            ["-Dhello=/Applications/IntelliJ", "IDEA.app/Contents"], exists=exists
+        )
+        is None  # Potentially incomplete
     )
 
-    assert px_commandline.should_coalesce(
-        [
-            "/Applications/IntelliJ",
-            "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-        ],
-        exists=exists,
+    assert (
+        px_commandline.should_coalesce(
+            [
+                "/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+            ],
+            exists=exists,
+        )
+        is None  # Potentially incomplete
     )
 
-    assert px_commandline.should_coalesce(
-        [
-            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
-            "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
-        ],
-        exists=exists,
+    assert (
+        px_commandline.should_coalesce(
+            [
+                "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar:/Applications/IntelliJ",
+                "IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+            ],
+            exists=exists,
+        )
+        is None  # Potentially incomplete
     )
 
     assert px_commandline.should_coalesce(
@@ -80,6 +89,7 @@ def test_to_array_spaced1():
         in [
             "/Applications",
             "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents",
         ],
     ) == ["java", "-Dhello=/Applications/IntelliJ IDEA.app/Contents"]
 
@@ -100,8 +110,10 @@ def test_to_array_spaced2():
         ),
         exists=lambda s: s
         in [
-            "/Applications",
-            "/Applications/IntelliJ IDEA.app",
+            "/Applications/IntelliJ IDEA.app/Contents/Info.plist",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-model/lib/maven-model.jar",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven-server/lib/maven-server.jar",
+            "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         ],
     ) == [
         "java",
@@ -132,8 +144,10 @@ def test_to_array_spaced3():
         ),
         exists=lambda s: s
         in [
-            "/Applications",
-            "/Applications/IntelliJ IDEA CE.app",
+            "/Applications/IntelliJ IDEA CE.app/Contents/Info.plist",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-model/lib/maven-model.jar",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven-server/lib/maven-server.jar",
+            "/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3-server-common.jar",
         ],
     ) == [
         "java",
