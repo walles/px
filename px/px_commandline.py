@@ -19,7 +19,13 @@ OSX_PARENTHESIZED_PROC = re.compile("^\\([^()]+\\)$")
 PERL_BIN = re.compile("^perl[.0-9]*$")
 
 
-def get_coalesce_candidate(so_far: str) -> Optional[str]:
+def get_trailing_absolute_path(so_far: str) -> Optional[str]:
+    """
+    Extract a potential file path from the end of a string.
+
+    The coalescing logic will then base decisions on whether this file path
+    exists or not.
+    """
     start_index = -1
     if so_far.startswith("/"):
         start_index = 0
@@ -64,7 +70,7 @@ def should_coalesce(
         return False
 
     coalesced = " ".join(parts)
-    candidate = get_coalesce_candidate(coalesced)
+    candidate = get_trailing_absolute_path(coalesced)
     if not candidate:
         # This is not a candidate for coalescing
         return False

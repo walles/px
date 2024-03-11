@@ -4,17 +4,17 @@ from px import px_commandline
 
 
 def test_get_coalesce_candidate():
-    assert px_commandline.get_coalesce_candidate("/hello") == "/hello"
-    assert px_commandline.get_coalesce_candidate("/hello:/baloo") == "/baloo"
+    assert px_commandline.get_trailing_absolute_path("/hello") == "/hello"
+    assert px_commandline.get_trailing_absolute_path("/hello:/baloo") == "/baloo"
 
-    assert px_commandline.get_coalesce_candidate("-Dx=/hello") == "/hello"
-    assert px_commandline.get_coalesce_candidate("-Dx=/hello:/baloo") == "/baloo"
+    assert px_commandline.get_trailing_absolute_path("-Dx=/hello") == "/hello"
+    assert px_commandline.get_trailing_absolute_path("-Dx=/hello:/baloo") == "/baloo"
 
-    assert px_commandline.get_coalesce_candidate("hello") is None
-    assert px_commandline.get_coalesce_candidate("hello:/baloo") is None
+    assert px_commandline.get_trailing_absolute_path("hello") is None
+    assert px_commandline.get_trailing_absolute_path("hello:/baloo") is None
 
     assert (
-        px_commandline.get_coalesce_candidate(
+        px_commandline.get_trailing_absolute_path(
             "/A/IntelliJ IDEA.app/C/p/mm/lib/mm.jar:/A/IntelliJ IDEA.app/C/p/ms/lib/ms.jar:/A/IntelliJ"
         )
         == "/A/IntelliJ"
