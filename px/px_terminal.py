@@ -13,6 +13,7 @@ from typing import Tuple
 from typing import Optional
 from typing import Iterable
 from . import px_process
+from . import px_sort_order
 
 
 # NOTE: To work with this list it can be useful to find the text "Uncomment to
@@ -314,7 +315,7 @@ def format_with_widths(widths: List[int], strings: List[str]) -> str:
 def to_screen_lines(
     procs: List[px_process.PxProcess],
     row_to_highlight: Optional[int],
-    highlight_heading: Optional[str],
+    sort_order: px_sort_order.SortOrder,
     with_username: bool = True,
 ) -> List[str]:
     """
@@ -325,18 +326,24 @@ def to_screen_lines(
     The column name must be from the hard coded list in this function, see below.
     """
 
+    cputime_name = "CPUTIME"
+    if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+        cputime_name = "CUMLCPU"
     headings = [
         "PID",
         "COMMAND",
         "USERNAME",
         "CPU",
-        "CPUTIME",
+        cputime_name,
         "RAM",
         "COMMANDLINE",
     ]
-    highlight_column: Optional[int] = None
-    if highlight_heading is not None:
-        highlight_column = headings.index(highlight_heading)
+    highlight_column = 5  # "RAM"
+    if (
+        sort_order == px_sort_order.SortOrder.CPU
+        or sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU
+    ):
+        highlight_column = 4  # "CPUTIME" or "CUMLCPU"
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
     pid_width = len(headings[0])
@@ -350,7 +357,12 @@ def to_screen_lines(
         command_width = max(command_width, len(proc.command))
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_percent_s))
-        cputime_width = max(cputime_width, len(proc.cpu_time_s))
+
+        cputime_s = proc.cpu_time_s
+        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            cputime_s = proc.cumulative_cpu_time_s
+        cputime_width = max(cputime_width, len(cputime_s))
+
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     column_widths = [
@@ -363,8 +375,8 @@ def to_screen_lines(
         0,  # The command line can have any length
     ]
 
+    username_index = headings.index("USERNAME")
     if not with_username:
-        username_index = headings.index("USERNAME")
         del headings[username_index]
         del column_widths[username_index]
 
@@ -412,6 +424,8 @@ def to_screen_lines(
             memory_percent_s = bold(memory_percent_s.rjust(mem_width))
 
         cpu_time_s = proc.cpu_time_s
+        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            cpu_time_s = proc.cumulative_cpu_time_s
         if not proc.cpu_time_seconds:
             # Zero or undefined
             cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
