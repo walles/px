@@ -1,3 +1,4 @@
+import enum
 import sys
 import copy
 import logging
@@ -44,8 +45,18 @@ last_highlighted_row: int = 0
 # row even if the tow PID moves away.
 highlight_has_moved: bool = False
 
-# Order top list by memory usage. The opposite is by CPU usage.
-sort_by_memory = False
+
+class SortOrder(enum.Enum):
+    CPU = 1
+    MEMORY = 2
+
+    def next(self):
+        if self == SortOrder.CPU:
+            return SortOrder.MEMORY
+        return SortOrder.CPU
+
+
+sort_order = SortOrder.CPU
 
 
 def adjust_cpu_times(
@@ -130,14 +141,14 @@ def sort_by_cpu_usage(toplist):
 def get_toplist(
     baseline: List[px_process.PxProcess],
     current: List[px_process.PxProcess],
-    by_memory: bool = False,
+    sort_order: SortOrder = SortOrder.CPU,
 ):
     # type(...) -> List[px_process.PxProcess]
     toplist = adjust_cpu_times(baseline, current)
 
     # Sort by interestingness last
     toplist = px_process.order_best_first(toplist)
-    if by_memory:
+    if sort_order == SortOrder.MEMORY:
         toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
     else:
         # By CPU time, this is the default
@@ -349,7 +360,7 @@ def get_screen_lines(
         highlight_row = None
 
     highlight_column = "CPUTIME"
-    if sort_by_memory:
+    if sort_order == SortOrder.MEMORY:
         highlight_column = "RAM"
     toplist_table_lines = px_terminal.to_screen_lines(
         toplist[:max_process_count], highlight_row, highlight_column
@@ -360,7 +371,7 @@ def get_screen_lines(
     toplist_table_lines += screen_rows * [""]
 
     top_what = "CPU"
-    if sort_by_memory:
+    if sort_order == SortOrder.MEMORY:
         top_what = "memory"
     lines += [px_terminal.bold("Top " + top_what + " using processes")]
 
@@ -479,7 +490,7 @@ def get_command(**kwargs):
 
     global last_highlighted_row
     global last_highlighted_pid
-    global sort_by_memory
+    global sort_order
     while len(user_input) > 0:
         if user_input.consume(px_terminal.KEY_UPARROW):
             last_highlighted_row -= 1
@@ -501,7 +512,7 @@ def get_command(**kwargs):
             top_mode = MODE_SEARCH
             return None
         elif user_input.consume("m") or user_input.consume("M"):
-            sort_by_memory = not sort_by_memory
+            sort_order = sort_order.next()
         elif user_input.consume("q"):
             return CMD_QUIT
         elif user_input.consume(px_terminal.SIGWINCH_KEY):
@@ -525,7 +536,7 @@ def _top(search: str = "") -> None:
     baseline = poller.get_all_processes()
     current = poller.get_all_processes()
 
-    toplist = get_toplist(baseline, current, sort_by_memory)
+    toplist = get_toplist(baseline, current, sort_order)
 
     rows, columns = px_terminal.get_window_size()
 
@@ -549,7 +560,7 @@ def _top(search: str = "") -> None:
 
             if command == CMD_POLL_COMPLETE:
                 current = poller.get_all_processes()
-                toplist = get_toplist(baseline, current, sort_by_memory)
+                toplist = get_toplist(baseline, current, sort_order)
 
 
 def top(search: str = "") -> None:
