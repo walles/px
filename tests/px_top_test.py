@@ -65,6 +65,66 @@ def test_adjust_cpu_times():
     assert actual == expected
 
 
+def test_adjust_cpu_time_links():
+    """
+    Verify that adjust_cpu_time() doesn't mess up the links between parent and
+    child processes.
+
+    Otherwise compute_cumulative_cpu_times() will modify the wrong processes.
+    """
+    now = testutils.local_now()
+
+    current = [
+        px_process.create_kernel_process(now),
+        testutils.create_process(
+            pid=100, cputime="0:10.00", commandline="only in current", ppid=0
+        ),
+        testutils.create_process(
+            pid=200,
+            cputime="0:20.00",
+            commandline="re-used PID baseline",
+            timestring="Mon May  7 09:33:11 2010",
+            ppid=0,
+        ),
+        testutils.create_process(
+            pid=300, cputime="0:30.00", commandline="relevant baseline", ppid=0
+        ),
+    ]
+    pid_to_process = {p.pid: p for p in current}
+    px_process.resolve_links(pid_to_process, now)
+
+    baseline = [
+        px_process.create_kernel_process(now),
+        testutils.create_process(
+            pid=200,
+            cputime="0:02.00",
+            commandline="re-used PID baseline",
+            timestring="Mon Apr  7 09:33:11 2010",
+        ),
+        testutils.create_process(
+            pid=300, cputime="0:03.00", commandline="relevant baseline"
+        ),
+        testutils.create_process(
+            pid=400, cputime="0:03.00", commandline="only in baseline"
+        ),
+    ]
+
+    with_adjusted_times = px_top.adjust_cpu_times(baseline, current)
+    parent = with_adjusted_times[0]
+
+    # Verify that the links between parent and child processes are still intact.
+    assert with_adjusted_times[1].parent is parent
+    assert with_adjusted_times[2].parent is parent
+    assert with_adjusted_times[3].parent is parent
+
+    children = sorted(parent.children, key=lambda p: p.pid)
+
+    assert len(children) == 3
+    assert children[0] is with_adjusted_times[1]
+    assert children[1] is with_adjusted_times[2]
+    assert children[2] is with_adjusted_times[3]
+
+
 def test_get_toplist():
     toplist = px_top.get_toplist(px_process.get_all(), px_process.get_all())
 
