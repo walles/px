@@ -315,7 +315,7 @@ def format_with_widths(widths: List[int], strings: List[str]) -> str:
 def to_screen_lines(
     procs: List[px_process.PxProcess],
     row_to_highlight: Optional[int],
-    sort_order: px_sort_order.SortOrder,
+    sort_order: Optional[px_sort_order.SortOrder],
     with_username: bool = True,
 ) -> List[str]:
     """
@@ -338,11 +338,13 @@ def to_screen_lines(
         "RAM",
         "COMMANDLINE",
     ]
-    highlight_column = 5  # "RAM"
-    if (
-        sort_order == px_sort_order.SortOrder.CPU
-        or sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU
-    ):
+    highlight_column = None
+    if sort_order == px_sort_order.SortOrder.MEMORY:
+        highlight_column = 5  # "RAM"
+    elif sort_order in [
+        px_sort_order.SortOrder.CPU,
+        px_sort_order.SortOrder.CUMULATIVE_CPU,
+    ]:
         highlight_column = 4  # "CPUTIME" or "CUMLCPU"
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
