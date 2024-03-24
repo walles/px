@@ -95,6 +95,29 @@ def adjust_cpu_times(
     return list(pid2proc.values())
 
 
+def compute_cumulative_cpu_times(toplist: List[px_process.PxProcess]) -> None:
+    """
+    Compute cumulative CPU times for all processes in the toplist.
+
+    This function modifies the toplist in place.
+    """
+
+    # First, find the root process
+    root_process = toplist[0]
+    while root_process.parent is not None:
+        root_process = root_process.parent
+
+    # Now, walk the process tree and compute cumulative CPU times
+    def walk_tree(proc: px_process.PxProcess) -> float:
+        sum = proc.cpu_time_seconds or 0
+        for child in proc.children:
+            sum += walk_tree(child)
+        proc.set_cumulative_cpu_time_seconds(sum)
+        return sum
+
+    walk_tree(root_process)
+
+
 def get_notnone_cpu_time_seconds(proc: px_process.PxProcess) -> float:
     seconds = proc.cpu_time_seconds
     if seconds is not None:
@@ -148,6 +171,7 @@ def get_toplist(
     sort_order=px_sort_order.SortOrder.CPU,
 ) -> List[px_process.PxProcess]:
     toplist = adjust_cpu_times(baseline, current)
+    compute_cumulative_cpu_times(toplist)
 
     # Sort by interestingness last
     toplist = px_process.order_best_first(toplist)

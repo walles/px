@@ -66,8 +66,11 @@ def test_adjust_cpu_times():
 
 
 def test_get_toplist():
-    # Just make sure this call doesn't crash
-    px_top.get_toplist(px_process.get_all(), px_process.get_all())
+    toplist = px_top.get_toplist(px_process.get_all(), px_process.get_all())
+
+    for process in toplist:
+        assert process.cumulative_cpu_time_seconds is not None
+        assert process.cumulative_cpu_time_s != "--"
 
 
 def test_get_command():

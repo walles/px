@@ -353,4 +353,26 @@ def test_resolve_links():
 
     assert p1.parent is None
     assert p2.parent is p1
+
+    # Verify both equality...
     assert p1.children == {p2}
+    # ... and identity of the child.
+    assert list(p1.children)[0] is p2
+
+
+def test_resolve_links_multiple_roots():
+    """There can be only one. Root. Of the process tree."""
+    processes = px_process.get_all()
+    process_map = {p.pid: p for p in processes}
+    px_process.resolve_links(process_map, testutils.local_now())
+
+    root0 = processes[0]
+    while root0.parent:
+        root0 = root0.parent
+
+    for process in processes:
+        root = process
+        while root.parent:
+            root = root.parent
+
+        assert root is root0
