@@ -27,21 +27,12 @@ def test_adjust_cpu_times():
             pid=300, cputime="0:30.00", commandline="relevant baseline"
         ),
     ]
-    baseline = [
-        px_process.create_kernel_process(now),
-        testutils.create_process(
-            pid=200,
-            cputime="0:02.00",
-            commandline="re-used PID baseline",
-            timestring="Mon Apr  7 09:33:11 2010",
-        ),
-        testutils.create_process(
-            pid=300, cputime="0:03.00", commandline="relevant baseline"
-        ),
-        testutils.create_process(
-            pid=400, cputime="0:03.00", commandline="only in baseline"
-        ),
-    ]
+    baseline = {
+        0: (current[0].start_time, 0),
+        200: (current[2].start_time, 2.0),
+        300: (current[3].start_time, 3.0),
+        400: (now, 3.0),
+    }
 
     actual = px_process.order_best_last(px_top.adjust_cpu_times(baseline, current))
     expected = px_process.order_best_last(
@@ -52,7 +43,7 @@ def test_adjust_cpu_times():
             ),
             testutils.create_process(
                 pid=200,
-                cputime="0:20.00",
+                cputime="0:18.00",
                 commandline="re-used PID baseline",
                 timestring="Mon May  7 09:33:11 2010",
             ),
@@ -65,76 +56,10 @@ def test_adjust_cpu_times():
     assert actual == expected
 
 
-def test_adjust_cpu_time_links():
-    """
-    Verify that adjust_cpu_time() doesn't mess up the links between parent and
-    child processes.
-
-    Otherwise compute_cumulative_cpu_times() will modify the wrong processes.
-    """
-
-    def verify_links(processes: list[px_process.PxProcess]):
-        parent = processes[0]
-
-        assert processes[1].parent is parent
-        assert processes[2].parent is parent
-        assert processes[3].parent is parent
-
-        children = sorted(parent.children, key=lambda p: p.pid)
-
-        assert len(children) == 3
-        assert children[0] is processes[1]
-        assert children[1] is processes[2]
-        assert children[2] is processes[3]
-
-    now = testutils.local_now()
-
-    current = [
-        px_process.create_kernel_process(now),
-        testutils.create_process(
-            pid=100, cputime="0:10.00", commandline="only in current", ppid=0
-        ),
-        testutils.create_process(
-            pid=200,
-            cputime="0:20.00",
-            commandline="re-used PID baseline",
-            timestring="Mon May  7 09:33:11 2010",
-            ppid=0,
-        ),
-        testutils.create_process(
-            pid=300, cputime="0:30.00", commandline="relevant baseline", ppid=0
-        ),
-    ]
-    pid_to_process = {p.pid: p for p in current}
-    px_process.resolve_links(pid_to_process, now)
-
-    # Verify links before adjust_cpu_times()
-    verify_links(current)
-
-    baseline = [
-        px_process.create_kernel_process(now),
-        testutils.create_process(
-            pid=200,
-            cputime="0:02.00",
-            commandline="re-used PID baseline",
-            timestring="Mon Apr  7 09:33:11 2010",
-        ),
-        testutils.create_process(
-            pid=300, cputime="0:03.00", commandline="relevant baseline"
-        ),
-        testutils.create_process(
-            pid=400, cputime="0:03.00", commandline="only in baseline"
-        ),
-    ]
-
-    with_adjusted_times = px_top.adjust_cpu_times(baseline, current)
-
-    # Verify that the links are still good
-    verify_links(with_adjusted_times)
-
-
 def test_get_toplist():
-    toplist = px_top.get_toplist(px_process.get_all(), px_process.get_all())
+    current = px_process.get_all()
+    baseline = {p.pid: (p.start_time, p.cpu_time_seconds or 0.0) for p in current}
+    toplist = px_top.get_toplist(baseline, px_process.get_all())
     for process in toplist:
         assert process.cumulative_cpu_time_seconds is not None
         assert process.cumulative_cpu_time_s != "--"

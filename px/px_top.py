@@ -1,5 +1,5 @@
+import datetime
 import sys
-import copy
 import logging
 import unicodedata
 
@@ -14,6 +14,7 @@ from . import px_category_bar
 
 from typing import List
 from typing import Dict
+from typing import Tuple
 from typing import Optional
 
 LOG = logging.getLogger(__name__)
@@ -50,7 +51,8 @@ sort_order = px_sort_order.SortOrder.CPU
 
 
 def adjust_cpu_times(
-    baseline: List[px_process.PxProcess], current: List[px_process.PxProcess]
+    baseline: Dict[int, Tuple[datetime.datetime, float]],
+    current: List[px_process.PxProcess],
 ) -> List[px_process.PxProcess]:
     """
     Identify processes in current that are also in baseline.
@@ -67,13 +69,14 @@ def adjust_cpu_times(
     for proc in current:
         pid2proc[proc.pid] = proc
 
-    for baseline_proc in baseline:
-        current_proc = pid2proc.get(baseline_proc.pid)
+    for baseline_pid, baseline_times in baseline.items():
+        baseline_start_time, baseline_cputime = baseline_times
+        current_proc = pid2proc.get(baseline_pid)
         if current_proc is None:
             # This process is newer than the baseline
             continue
 
-        if current_proc.start_time != baseline_proc.start_time:
+        if current_proc.start_time != baseline_start_time:
             # This PID has been reused
             continue
 
@@ -81,16 +84,14 @@ def adjust_cpu_times(
             # We can't subtract from None
             continue
 
-        if baseline_proc.cpu_time_seconds is None:
+        if baseline_cputime is None:
             # We can't subtract None
             continue
 
-        current_proc = copy.copy(current_proc)
-        if current_proc.cpu_time_seconds and baseline_proc.cpu_time_seconds:
+        if current_proc.cpu_time_seconds and baseline_cputime:
             current_proc.set_cpu_time_seconds(
-                current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds
+                current_proc.cpu_time_seconds - baseline_cputime
             )
-        pid2proc[current_proc.pid] = current_proc
 
     return list(pid2proc.values())
 
@@ -166,7 +167,7 @@ def sort_by_cpu_usage(
 
 
 def get_toplist(
-    baseline: List[px_process.PxProcess],
+    baseline: Dict[int, Tuple[datetime.datetime, float]],
     current: List[px_process.PxProcess],
     sort_order=px_sort_order.SortOrder.CPU,
 ) -> List[px_process.PxProcess]:
@@ -560,7 +561,10 @@ def _top(search: str = "") -> None:
     poller = px_poller.PxPoller(px_terminal.SIGWINCH_PIPE[1])
     poller.start()
 
-    baseline = poller.get_all_processes()
+    baseline = {
+        p.pid: (p.start_time, p.cpu_time_seconds or 0.0)
+        for p in poller.get_all_processes()
+    }
     current = poller.get_all_processes()
 
     toplist = get_toplist(baseline, current, sort_order)
