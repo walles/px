@@ -72,6 +72,21 @@ def test_adjust_cpu_time_links():
 
     Otherwise compute_cumulative_cpu_times() will modify the wrong processes.
     """
+
+    def verify_links(processes: list[px_process.PxProcess]):
+        parent = processes[0]
+
+        assert processes[1].parent is parent
+        assert processes[2].parent is parent
+        assert processes[3].parent is parent
+
+        children = sorted(parent.children, key=lambda p: p.pid)
+
+        assert len(children) == 3
+        assert children[0] is processes[1]
+        assert children[1] is processes[2]
+        assert children[2] is processes[3]
+
     now = testutils.local_now()
 
     current = [
@@ -93,6 +108,9 @@ def test_adjust_cpu_time_links():
     pid_to_process = {p.pid: p for p in current}
     px_process.resolve_links(pid_to_process, now)
 
+    # Verify links before adjust_cpu_times()
+    verify_links(current)
+
     baseline = [
         px_process.create_kernel_process(now),
         testutils.create_process(
@@ -110,24 +128,13 @@ def test_adjust_cpu_time_links():
     ]
 
     with_adjusted_times = px_top.adjust_cpu_times(baseline, current)
-    parent = with_adjusted_times[0]
 
-    # Verify that the links between parent and child processes are still intact.
-    assert with_adjusted_times[1].parent is parent
-    assert with_adjusted_times[2].parent is parent
-    assert with_adjusted_times[3].parent is parent
-
-    children = sorted(parent.children, key=lambda p: p.pid)
-
-    assert len(children) == 3
-    assert children[0] is with_adjusted_times[1]
-    assert children[1] is with_adjusted_times[2]
-    assert children[2] is with_adjusted_times[3]
+    # Verify that the links are still good
+    verify_links(with_adjusted_times)
 
 
 def test_get_toplist():
     toplist = px_top.get_toplist(px_process.get_all(), px_process.get_all())
-
     for process in toplist:
         assert process.cumulative_cpu_time_seconds is not None
         assert process.cumulative_cpu_time_s != "--"
