@@ -325,7 +325,6 @@ def to_screen_lines(
     If highligh_heading contains a column name, that column will be highlighted.
     The column name must be from the hard coded list in this function, see below.
     """
-
     cputime_name = "CPUTIME"
     if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
         cputime_name = "CUMLCPU"
@@ -405,11 +404,12 @@ def to_screen_lines(
         if proc.memory_percent is not None and proc.memory_percent > max_memory_percent:
             max_memory_percent = proc.memory_percent
             max_memory_percent_s = proc.memory_percent_s
-        if (
-            proc.cpu_time_seconds is not None
-            and proc.cpu_time_seconds > max_cpu_time_seconds
-        ):
-            max_cpu_time_seconds = proc.cpu_time_seconds
+
+        cpu_time_seconds = proc.cpu_time_seconds
+        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            cpu_time_seconds = proc.cumulative_cpu_time_seconds
+        if cpu_time_seconds is not None and cpu_time_seconds > max_cpu_time_seconds:
+            max_cpu_time_seconds = cpu_time_seconds
 
     current_user = os.environ.get("SUDO_USER") or getpass.getuser()
     for line_number, proc in enumerate(procs):
@@ -428,12 +428,17 @@ def to_screen_lines(
         cpu_time_s = proc.cpu_time_s
         if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
             cpu_time_s = proc.cumulative_cpu_time_s
-        if not proc.cpu_time_seconds:
+
+        cpu_time_seconds = proc.cpu_time_seconds
+        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            cpu_time_seconds = proc.cumulative_cpu_time_seconds
+
+        if not cpu_time_seconds:
             # Zero or undefined
             cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
-        elif proc.cpu_time_seconds > 0.75 * max_cpu_time_seconds:
+        elif cpu_time_seconds > 0.75 * max_cpu_time_seconds:
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
-        elif proc.cpu_time_seconds < 0.1 * max_cpu_time_seconds:
+        elif cpu_time_seconds < 0.1 * max_cpu_time_seconds:
             cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
 
         # NOTE: This logic should match its friend in
