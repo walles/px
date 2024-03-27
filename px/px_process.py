@@ -13,7 +13,6 @@ from . import px_exec_util
 
 
 from typing import Dict
-from typing import MutableSet
 from typing import Optional
 from typing import List
 from typing import Iterable
@@ -145,7 +144,7 @@ class PxProcess:
         self.set_cpu_time_seconds(cpu_time)
         self.set_cumulative_cpu_time_seconds(cumulative_cpu_time)
 
-        self.children: MutableSet[PxProcess] = set()
+        self.children: List[PxProcess] = []
         self.parent: Optional[PxProcess] = None
 
     def __repr__(self):
@@ -402,7 +401,7 @@ def resolve_links(processes: Dict[int, PxProcess], now: datetime.datetime) -> No
             process.parent = processes.get(process.ppid)
 
         if process.parent is not None:
-            process.parent.children.add(process)
+            process.parent.children.append(process)
 
 
 def remove_process_and_descendants(processes: Dict[int, PxProcess], pid: int) -> None:

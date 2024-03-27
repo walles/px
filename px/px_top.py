@@ -141,13 +141,11 @@ def get_notnone_memory_percent(proc: px_process.PxProcess) -> float:
 
 
 def sort_by_cpu_usage(
-    toplist: List[px_process.PxProcess], cumulative=False
+    toplist: List[px_process.PxProcess],
 ) -> List[px_process.PxProcess]:
     can_sort_by_time = False
     for process in toplist:
         metric = process.cpu_time_seconds
-        if cumulative:
-            metric = process.cumulative_cpu_time_seconds
         if metric:
             can_sort_by_time = True
             break
@@ -156,14 +154,44 @@ def sort_by_cpu_usage(
         # There is at least one > 0 time in the process list, so sorting by time
         # will be of some use
         key = get_notnone_cpu_time_seconds
-        if cumulative:
-            key = get_notnone_cumulative_cpu_time_seconds
         return sorted(toplist, key=key, reverse=True)
 
     # No > 0 time in the process list, try CPU percentage as an approximation of
     # that. This should happen on the first iteration when ptop has just been
     # launched.
     return sorted(toplist, key=lambda process: process.cpu_percent or 0, reverse=True)
+
+
+def sort_by_cpu_usage_tree(
+    toplist: List[px_process.PxProcess],
+) -> List[px_process.PxProcess]:
+    """
+    Sort the process list by cumulative CPU time, but keep the tree structure.
+    """
+    root_process = toplist[0]
+    while root_process.parent is not None:
+        root_process = root_process.parent
+
+    def sort_children(proc: px_process.PxProcess) -> None:
+        proc.children = sorted(
+            proc.children, key=get_notnone_cumulative_cpu_time_seconds, reverse=True
+        )
+        for child in proc.children:
+            sort_children(child)
+
+    sort_children(root_process)
+
+    # Now, recreate the list by flattening the tree
+    flat_list = []
+
+    def flatten(proc: px_process.PxProcess) -> None:
+        flat_list.append(proc)
+        for child in proc.children:
+            flatten(child)
+
+    flatten(root_process)
+
+    return flat_list
 
 
 def get_toplist(
@@ -181,7 +209,7 @@ def get_toplist(
     elif sort_order == px_sort_order.SortOrder.CPU:
         toplist = sort_by_cpu_usage(toplist)
     elif sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-        toplist = sort_by_cpu_usage(toplist, True)
+        toplist = sort_by_cpu_usage_tree(toplist)
 
     return toplist
 
