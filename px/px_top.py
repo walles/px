@@ -561,11 +561,8 @@ def _top(search: str = "") -> None:
     poller = px_poller.PxPoller(px_terminal.SIGWINCH_PIPE[1])
     poller.start()
 
-    baseline = {
-        p.pid: (p.start_time, p.cpu_time_seconds or 0.0)
-        for p in poller.get_all_processes()
-    }
     current = poller.get_all_processes()
+    baseline = {p.pid: (p.start_time, p.cpu_time_seconds or 0.0) for p in current}
 
     toplist = get_toplist(baseline, current, sort_order)
 

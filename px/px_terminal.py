@@ -322,9 +322,9 @@ def to_screen_lines(
     Returns an array of lines that can be printed to screen. Lines are not
     cropped, so they can be longer than the screen width.
 
-    If highligh_heading contains a column name, that column will be highlighted.
-    The column name must be from the hard coded list in this function, see below.
+    If sort_order is set, the sort order column will be highlighted.
     """
+
     cputime_name = "CPUTIME"
     if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
         cputime_name = "CUMLCPU"
@@ -426,11 +426,9 @@ def to_screen_lines(
             memory_percent_s = bold(memory_percent_s.rjust(mem_width))
 
         cpu_time_s = proc.cpu_time_s
-        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-            cpu_time_s = proc.cumulative_cpu_time_s
-
         cpu_time_seconds = proc.cpu_time_seconds
         if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            cpu_time_s = proc.cumulative_cpu_time_s
             cpu_time_seconds = proc.cumulative_cpu_time_seconds
 
         if not cpu_time_seconds:
