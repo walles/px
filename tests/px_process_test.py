@@ -133,7 +133,7 @@ def _validate_references(processes):
         else:
             assert process.parent is not None
 
-        assert isinstance(process.children, set)
+        assert isinstance(process.children, list)
         if process.parent:
             assert process.parent in processes
             assert process.parent.pid == process.ppid
