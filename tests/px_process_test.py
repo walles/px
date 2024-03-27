@@ -355,7 +355,7 @@ def test_resolve_links():
     assert p2.parent is p1
 
     # Verify both equality...
-    assert p1.children == {p2}
+    assert p1.children == [p2]
     # ... and identity of the child.
     assert list(p1.children)[0] is p2
 
