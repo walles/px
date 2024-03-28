@@ -184,10 +184,11 @@ def sort_by_cpu_usage_tree(
     # Now, recreate the list by flattening the tree
     flat_list = []
 
-    def flatten(proc: px_process.PxProcess) -> None:
+    def flatten(proc: px_process.PxProcess, level=0) -> None:
+        proc.level = level
         flat_list.append(proc)
         for child in proc.children:
-            flatten(child)
+            flatten(child, level + 1)
 
     flatten(root_process)
 

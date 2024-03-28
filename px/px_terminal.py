@@ -355,7 +355,7 @@ def to_screen_lines(
     mem_width = len(headings[5])
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
-        command_width = max(command_width, len(proc.command))
+        command_width = max(command_width, len(proc.command) + proc.level * 2)
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_percent_s))
 
@@ -454,9 +454,13 @@ def to_screen_lines(
             # Neither root nor ourselves, highlight!
             owner = bold(owner)
 
+        indent = ""
+        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+            indent = " " * proc.level * 2
+
         columns = [
             str(proc.pid),
-            proc.command,
+            indent + proc.command,
             owner,
             cpu_percent_s,
             cpu_time_s,

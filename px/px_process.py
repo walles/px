@@ -147,6 +147,10 @@ class PxProcess:
         self.children: List[PxProcess] = []
         self.parent: Optional[PxProcess] = None
 
+        # How many levels down the tree this process is. Kernel is level 0, init
+        # level 1 and everything else 2 and up.
+        self.level = 0
+
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
         # implementing this method is to make the py.test output more readable,
@@ -402,6 +406,9 @@ def resolve_links(processes: Dict[int, PxProcess], now: datetime.datetime) -> No
 
         if process.parent is not None:
             process.parent.children.append(process)
+
+
+# FIXME: Make the tree look like a tree in cumulative CPU time mode
 
 
 def remove_process_and_descendants(processes: Dict[int, PxProcess], pid: int) -> None:
