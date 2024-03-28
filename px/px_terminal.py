@@ -326,8 +326,8 @@ def to_screen_lines(
     """
 
     cputime_name = "CPUTIME"
-    if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-        cputime_name = "CUMLCPU"
+    if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+        cputime_name = "AGGRCPU"
     headings = [
         "PID",
         "COMMAND",
@@ -342,9 +342,9 @@ def to_screen_lines(
         highlight_column = 5  # "RAM"
     elif sort_order in [
         px_sort_order.SortOrder.CPU,
-        px_sort_order.SortOrder.CUMULATIVE_CPU,
+        px_sort_order.SortOrder.AGGREGATED_CPU,
     ]:
-        highlight_column = 4  # "CPUTIME" or "CUMLCPU"
+        highlight_column = 4  # "CPUTIME" or "AGGRCPU"
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
     pid_width = len(headings[0])
@@ -360,8 +360,8 @@ def to_screen_lines(
         cpu_width = max(cpu_width, len(proc.cpu_percent_s))
 
         cputime_s = proc.cpu_time_s
-        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-            cputime_s = proc.cumulative_cpu_time_s
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            cputime_s = proc.aggregated_cpu_time_s
         cputime_width = max(cputime_width, len(cputime_s))
 
         mem_width = max(mem_width, len(proc.memory_percent_s))
@@ -406,14 +406,14 @@ def to_screen_lines(
             max_memory_percent_s = proc.memory_percent_s
 
         cpu_time_seconds = proc.cpu_time_seconds
-        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
             if proc.pid <= 1:
                 # Both the kernel (PID 0) and the init process (PID 1) will just
                 # have contain the total time of all other processes. Since we
                 # only use this max value for highlighting (see below), if we
                 # include these only they will be highlighted. So we skip them.
                 continue
-            cpu_time_seconds = proc.cumulative_cpu_time_seconds
+            cpu_time_seconds = proc.aggregated_cpu_time_seconds
         if cpu_time_seconds is not None and cpu_time_seconds > max_cpu_time_seconds:
             max_cpu_time_seconds = cpu_time_seconds
 
@@ -433,9 +433,9 @@ def to_screen_lines(
 
         cpu_time_s = proc.cpu_time_s
         cpu_time_seconds = proc.cpu_time_seconds
-        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-            cpu_time_s = proc.cumulative_cpu_time_s
-            cpu_time_seconds = proc.cumulative_cpu_time_seconds
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            cpu_time_s = proc.aggregated_cpu_time_s
+            cpu_time_seconds = proc.aggregated_cpu_time_seconds
 
         if not cpu_time_seconds:
             # Zero or undefined
@@ -455,7 +455,7 @@ def to_screen_lines(
             owner = bold(owner)
 
         indent = ""
-        if sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
             indent = " " * proc.level * 2
 
         columns = [

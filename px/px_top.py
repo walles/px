@@ -96,9 +96,9 @@ def adjust_cpu_times(
     return list(pid2proc.values())
 
 
-def compute_cumulative_cpu_times(toplist: List[px_process.PxProcess]) -> None:
+def compute_aggregated_cpu_times(toplist: List[px_process.PxProcess]) -> None:
     """
-    Compute cumulative CPU times for all processes in the toplist.
+    Compute aggregated CPU times for all processes in the toplist.
 
     This function modifies the toplist in place.
     """
@@ -108,12 +108,12 @@ def compute_cumulative_cpu_times(toplist: List[px_process.PxProcess]) -> None:
     while root_process.parent is not None:
         root_process = root_process.parent
 
-    # Now, walk the process tree and compute cumulative CPU times
+    # Now, walk the process tree and compute aggregated CPU times
     def walk_tree(proc: px_process.PxProcess) -> float:
         sum = proc.cpu_time_seconds or 0
         for child in proc.children:
             sum += walk_tree(child)
-        proc.set_cumulative_cpu_time_seconds(sum)
+        proc.set_aggregated_cpu_time_seconds(sum)
         return sum
 
     walk_tree(root_process)
@@ -126,8 +126,8 @@ def get_notnone_cpu_time_seconds(proc: px_process.PxProcess) -> float:
     return 0
 
 
-def get_notnone_cumulative_cpu_time_seconds(proc: px_process.PxProcess) -> float:
-    seconds = proc.cumulative_cpu_time_seconds
+def get_notnone_aggregated_cpu_time_seconds(proc: px_process.PxProcess) -> float:
+    seconds = proc.aggregated_cpu_time_seconds
     if seconds is not None:
         return seconds
     return 0
@@ -166,7 +166,7 @@ def sort_by_cpu_usage_tree(
     toplist: List[px_process.PxProcess],
 ) -> List[px_process.PxProcess]:
     """
-    Sort the process list by cumulative CPU time, but keep the tree structure.
+    Sort the process list by aggregated CPU time, but keep the tree structure.
     """
     root_process = toplist[0]
     while root_process.parent is not None:
@@ -174,7 +174,7 @@ def sort_by_cpu_usage_tree(
 
     def sort_children(proc: px_process.PxProcess) -> None:
         proc.children = sorted(
-            proc.children, key=get_notnone_cumulative_cpu_time_seconds, reverse=True
+            proc.children, key=get_notnone_aggregated_cpu_time_seconds, reverse=True
         )
         for child in proc.children:
             sort_children(child)
@@ -201,7 +201,7 @@ def get_toplist(
     sort_order=px_sort_order.SortOrder.CPU,
 ) -> List[px_process.PxProcess]:
     toplist = adjust_cpu_times(baseline, current)
-    compute_cumulative_cpu_times(toplist)
+    compute_aggregated_cpu_times(toplist)
 
     # Sort by interestingness last
     toplist = px_process.order_best_first(toplist)
@@ -209,7 +209,7 @@ def get_toplist(
         toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
     elif sort_order == px_sort_order.SortOrder.CPU:
         toplist = sort_by_cpu_usage(toplist)
-    elif sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
+    elif sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
         toplist = sort_by_cpu_usage_tree(toplist)
 
     return toplist
@@ -425,12 +425,12 @@ def get_screen_lines(
     # number of processes
     toplist_table_lines += screen_rows * [""]
 
-    top_what = "CPU"
+    top_line = "Top processes by CPU usage"
     if sort_order == px_sort_order.SortOrder.MEMORY:
-        top_what = "memory"
-    elif sort_order == px_sort_order.SortOrder.CUMULATIVE_CPU:
-        top_what = "cumulative CPU"
-    lines += [px_terminal.bold("Top " + top_what + " using processes")]
+        top_line = "Top processes by memory usage"
+    elif sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+        top_line = "Process tree ordered by aggregated CPU time"
+    lines += [px_terminal.bold(top_line)]
 
     if top_mode == MODE_SEARCH:
         lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]

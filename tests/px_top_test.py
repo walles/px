@@ -61,8 +61,8 @@ def test_get_toplist():
     baseline = {p.pid: (p.start_time, p.cpu_time_seconds or 0.0) for p in current}
     toplist = px_top.get_toplist(baseline, px_process.get_all())
     for process in toplist:
-        assert process.cumulative_cpu_time_seconds is not None
-        assert process.cumulative_cpu_time_s != "--"
+        assert process.aggregated_cpu_time_seconds is not None
+        assert process.aggregated_cpu_time_s != "--"
 
 
 def test_get_command():

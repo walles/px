@@ -91,7 +91,7 @@ class PxProcess:
         memory_percent: Optional[float] = None,
         cpu_percent: Optional[float] = None,
         cpu_time: Optional[float] = None,
-        cumulative_cpu_time: Optional[float] = None,
+        aggregated_cpu_time: Optional[float] = None,
     ) -> None:
         self.pid: int = pid
         self.ppid: Optional[int] = ppid
@@ -142,7 +142,7 @@ class PxProcess:
             self.cpu_percent_s = f"{cpu_percent:.0f}%"
 
         self.set_cpu_time_seconds(cpu_time)
-        self.set_cumulative_cpu_time_seconds(cumulative_cpu_time)
+        self.set_aggregated_cpu_time_seconds(aggregated_cpu_time)
 
         self.children: List[PxProcess] = []
         self.parent: Optional[PxProcess] = None
@@ -178,12 +178,12 @@ class PxProcess:
             self.cpu_time_s = seconds_to_str(seconds)
             self.cpu_time_seconds = seconds
 
-    def set_cumulative_cpu_time_seconds(self, seconds: Optional[float]) -> None:
-        self.cumulative_cpu_time_s: str = "--"
-        self.cumulative_cpu_time_seconds = None
+    def set_aggregated_cpu_time_seconds(self, seconds: Optional[float]) -> None:
+        self.aggregated_cpu_time_s: str = "--"
+        self.aggregated_cpu_time_seconds = None
         if seconds is not None:
-            self.cumulative_cpu_time_s = seconds_to_str(seconds)
-            self.cumulative_cpu_time_seconds = seconds
+            self.aggregated_cpu_time_s = seconds_to_str(seconds)
+            self.aggregated_cpu_time_seconds = seconds
 
     def match(self, string, require_exact_user=True):
         """
@@ -406,9 +406,6 @@ def resolve_links(processes: Dict[int, PxProcess], now: datetime.datetime) -> No
 
         if process.parent is not None:
             process.parent.children.append(process)
-
-
-# FIXME: Make the tree look like a tree in cumulative CPU time mode
 
 
 def remove_process_and_descendants(processes: Dict[int, PxProcess], pid: int) -> None:
