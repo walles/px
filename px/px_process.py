@@ -91,7 +91,7 @@ class PxProcess:
         memory_percent: Optional[float] = None,
         cpu_percent: Optional[float] = None,
         cpu_time: Optional[float] = None,
-        aggregated_cpu_time: Optional[float] = None,
+        aggregated_cpu_time: float = 0.0,
     ) -> None:
         self.pid: int = pid
         self.ppid: Optional[int] = ppid
@@ -178,12 +178,9 @@ class PxProcess:
             self.cpu_time_s = seconds_to_str(seconds)
             self.cpu_time_seconds = seconds
 
-    def set_aggregated_cpu_time_seconds(self, seconds: Optional[float]) -> None:
-        self.aggregated_cpu_time_s: str = "--"
-        self.aggregated_cpu_time_seconds = None
-        if seconds is not None:
-            self.aggregated_cpu_time_s = seconds_to_str(seconds)
-            self.aggregated_cpu_time_seconds = seconds
+    def set_aggregated_cpu_time_seconds(self, seconds: float) -> None:
+        self.aggregated_cpu_time_s = seconds_to_str(seconds)
+        self.aggregated_cpu_time_seconds = seconds
 
     def match(self, string, require_exact_user=True):
         """

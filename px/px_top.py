@@ -126,13 +126,6 @@ def get_notnone_cpu_time_seconds(proc: px_process.PxProcess) -> float:
     return 0
 
 
-def get_notnone_aggregated_cpu_time_seconds(proc: px_process.PxProcess) -> float:
-    seconds = proc.aggregated_cpu_time_seconds
-    if seconds is not None:
-        return seconds
-    return 0
-
-
 def get_notnone_memory_percent(proc: px_process.PxProcess) -> float:
     percent = proc.memory_percent
     if percent is not None:
@@ -174,7 +167,9 @@ def sort_by_cpu_usage_tree(
 
     def sort_children(proc: px_process.PxProcess) -> None:
         proc.children = sorted(
-            proc.children, key=get_notnone_aggregated_cpu_time_seconds, reverse=True
+            proc.children,
+            key=lambda child: child.aggregated_cpu_time_seconds,
+            reverse=True,
         )
         for child in proc.children:
             sort_children(child)

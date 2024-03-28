@@ -409,9 +409,9 @@ def to_screen_lines(
         if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
             if proc.pid <= 1:
                 # Both the kernel (PID 0) and the init process (PID 1) will just
-                # have contain the total time of all other processes. Since we
-                # only use this max value for highlighting (see below), if we
-                # include these only they will be highlighted. So we skip them.
+                # contain the total time of all other processes. Since we only
+                # use this max value for highlighting (see below), if we include
+                # these only they will be highlighted. So we skip them.
                 continue
             cpu_time_seconds = proc.aggregated_cpu_time_seconds
         if cpu_time_seconds is not None and cpu_time_seconds > max_cpu_time_seconds:
