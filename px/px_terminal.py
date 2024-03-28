@@ -13,6 +13,7 @@ from typing import Tuple
 from typing import Optional
 from typing import Iterable
 from . import px_process
+from . import px_sort_order
 
 
 # NOTE: To work with this list it can be useful to find the text "Uncomment to
@@ -314,29 +315,36 @@ def format_with_widths(widths: List[int], strings: List[str]) -> str:
 def to_screen_lines(
     procs: List[px_process.PxProcess],
     row_to_highlight: Optional[int],
-    highlight_heading: Optional[str],
+    sort_order: Optional[px_sort_order.SortOrder],
     with_username: bool = True,
 ) -> List[str]:
     """
     Returns an array of lines that can be printed to screen. Lines are not
     cropped, so they can be longer than the screen width.
 
-    If highligh_heading contains a column name, that column will be highlighted.
-    The column name must be from the hard coded list in this function, see below.
+    If sort_order is set, the sort order column will be highlighted.
     """
 
+    cputime_name = "CPUTIME"
+    if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+        cputime_name = "AGGRCPU"
     headings = [
         "PID",
         "COMMAND",
         "USERNAME",
         "CPU",
-        "CPUTIME",
+        cputime_name,
         "RAM",
         "COMMANDLINE",
     ]
-    highlight_column: Optional[int] = None
-    if highlight_heading is not None:
-        highlight_column = headings.index(highlight_heading)
+    highlight_column = None
+    if sort_order == px_sort_order.SortOrder.MEMORY:
+        highlight_column = 5  # "RAM"
+    elif sort_order in [
+        px_sort_order.SortOrder.CPU,
+        px_sort_order.SortOrder.AGGREGATED_CPU,
+    ]:
+        highlight_column = 4  # "CPUTIME" or "AGGRCPU"
 
     # Compute widest width for pid, command, user, cpu and memory usage columns
     pid_width = len(headings[0])
@@ -347,10 +355,15 @@ def to_screen_lines(
     mem_width = len(headings[5])
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
-        command_width = max(command_width, len(proc.command))
+        command_width = max(command_width, len(proc.command) + proc.level * 2)
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_percent_s))
-        cputime_width = max(cputime_width, len(proc.cpu_time_s))
+
+        cputime_s = proc.cpu_time_s
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            cputime_s = proc.aggregated_cpu_time_s
+        cputime_width = max(cputime_width, len(cputime_s))
+
         mem_width = max(mem_width, len(proc.memory_percent_s))
 
     column_widths = [
@@ -363,8 +376,8 @@ def to_screen_lines(
         0,  # The command line can have any length
     ]
 
+    username_index = headings.index("USERNAME")
     if not with_username:
-        username_index = headings.index("USERNAME")
         del headings[username_index]
         del column_widths[username_index]
 
@@ -391,11 +404,18 @@ def to_screen_lines(
         if proc.memory_percent is not None and proc.memory_percent > max_memory_percent:
             max_memory_percent = proc.memory_percent
             max_memory_percent_s = proc.memory_percent_s
-        if (
-            proc.cpu_time_seconds is not None
-            and proc.cpu_time_seconds > max_cpu_time_seconds
-        ):
-            max_cpu_time_seconds = proc.cpu_time_seconds
+
+        cpu_time_seconds = proc.cpu_time_seconds
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            if proc.pid <= 1:
+                # Both the kernel (PID 0) and the init process (PID 1) will just
+                # contain the total time of all other processes. Since we only
+                # use this max value for highlighting (see below), if we include
+                # these only they will be highlighted. So we skip them.
+                continue
+            cpu_time_seconds = proc.aggregated_cpu_time_seconds
+        if cpu_time_seconds is not None and cpu_time_seconds > max_cpu_time_seconds:
+            max_cpu_time_seconds = cpu_time_seconds
 
     current_user = os.environ.get("SUDO_USER") or getpass.getuser()
     for line_number, proc in enumerate(procs):
@@ -412,12 +432,17 @@ def to_screen_lines(
             memory_percent_s = bold(memory_percent_s.rjust(mem_width))
 
         cpu_time_s = proc.cpu_time_s
-        if not proc.cpu_time_seconds:
+        cpu_time_seconds = proc.cpu_time_seconds
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            cpu_time_s = proc.aggregated_cpu_time_s
+            cpu_time_seconds = proc.aggregated_cpu_time_seconds
+
+        if not cpu_time_seconds:
             # Zero or undefined
             cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
-        elif proc.cpu_time_seconds > 0.75 * max_cpu_time_seconds:
+        elif cpu_time_seconds > 0.75 * max_cpu_time_seconds:
             cpu_time_s = bold(cpu_time_s.rjust(cputime_width))
-        elif proc.cpu_time_seconds < 0.1 * max_cpu_time_seconds:
+        elif cpu_time_seconds < 0.1 * max_cpu_time_seconds:
             cpu_time_s = faint(cpu_time_s.rjust(cputime_width))
 
         # NOTE: This logic should match its friend in
@@ -429,9 +454,13 @@ def to_screen_lines(
             # Neither root nor ourselves, highlight!
             owner = bold(owner)
 
+        indent = ""
+        if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+            indent = " " * proc.level * 2
+
         columns = [
             str(proc.pid),
-            proc.command,
+            indent + proc.command,
             owner,
             cpu_percent_s,
             cpu_time_s,

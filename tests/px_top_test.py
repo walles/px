@@ -27,21 +27,12 @@ def test_adjust_cpu_times():
             pid=300, cputime="0:30.00", commandline="relevant baseline"
         ),
     ]
-    baseline = [
-        px_process.create_kernel_process(now),
-        testutils.create_process(
-            pid=200,
-            cputime="0:02.00",
-            commandline="re-used PID baseline",
-            timestring="Mon Apr  7 09:33:11 2010",
-        ),
-        testutils.create_process(
-            pid=300, cputime="0:03.00", commandline="relevant baseline"
-        ),
-        testutils.create_process(
-            pid=400, cputime="0:03.00", commandline="only in baseline"
-        ),
-    ]
+    baseline = {
+        0: (current[0].start_time, 0),
+        200: (current[2].start_time, 2.0),
+        300: (current[3].start_time, 3.0),
+        400: (now, 3.0),
+    }
 
     actual = px_process.order_best_last(px_top.adjust_cpu_times(baseline, current))
     expected = px_process.order_best_last(
@@ -52,7 +43,7 @@ def test_adjust_cpu_times():
             ),
             testutils.create_process(
                 pid=200,
-                cputime="0:20.00",
+                cputime="0:18.00",
                 commandline="re-used PID baseline",
                 timestring="Mon May  7 09:33:11 2010",
             ),
@@ -66,8 +57,12 @@ def test_adjust_cpu_times():
 
 
 def test_get_toplist():
-    # Just make sure this call doesn't crash
-    px_top.get_toplist(px_process.get_all(), px_process.get_all())
+    current = px_process.get_all()
+    baseline = {p.pid: (p.start_time, p.cpu_time_seconds or 0.0) for p in current}
+    toplist = px_top.get_toplist(baseline, px_process.get_all())
+    for process in toplist:
+        assert process.aggregated_cpu_time_seconds is not None
+        assert process.aggregated_cpu_time_s != "--"
 
 
 def test_get_command():

@@ -1,19 +1,20 @@
-import enum
+import datetime
 import sys
-import copy
 import logging
 import unicodedata
 
 import os
+from . import px_poller
 from . import px_process
 from . import px_terminal
+from . import px_sort_order
 from . import px_processinfo
 from . import px_process_menu
-from . import px_poller
 from . import px_category_bar
 
 from typing import List
 from typing import Dict
+from typing import Tuple
 from typing import Optional
 
 LOG = logging.getLogger(__name__)
@@ -46,21 +47,12 @@ last_highlighted_row: int = 0
 highlight_has_moved: bool = False
 
 
-class SortOrder(enum.Enum):
-    CPU = 1
-    MEMORY = 2
-
-    def next(self):
-        if self == SortOrder.CPU:
-            return SortOrder.MEMORY
-        return SortOrder.CPU
-
-
-sort_order = SortOrder.CPU
+sort_order = px_sort_order.SortOrder.CPU
 
 
 def adjust_cpu_times(
-    baseline: List[px_process.PxProcess], current: List[px_process.PxProcess]
+    baseline: Dict[int, Tuple[datetime.datetime, float]],
+    current: List[px_process.PxProcess],
 ) -> List[px_process.PxProcess]:
     """
     Identify processes in current that are also in baseline.
@@ -77,13 +69,14 @@ def adjust_cpu_times(
     for proc in current:
         pid2proc[proc.pid] = proc
 
-    for baseline_proc in baseline:
-        current_proc = pid2proc.get(baseline_proc.pid)
+    for baseline_pid, baseline_times in baseline.items():
+        baseline_start_time, baseline_cputime = baseline_times
+        current_proc = pid2proc.get(baseline_pid)
         if current_proc is None:
             # This process is newer than the baseline
             continue
 
-        if current_proc.start_time != baseline_proc.start_time:
+        if current_proc.start_time != baseline_start_time:
             # This PID has been reused
             continue
 
@@ -91,18 +84,39 @@ def adjust_cpu_times(
             # We can't subtract from None
             continue
 
-        if baseline_proc.cpu_time_seconds is None:
+        if baseline_cputime is None:
             # We can't subtract None
             continue
 
-        current_proc = copy.copy(current_proc)
-        if current_proc.cpu_time_seconds and baseline_proc.cpu_time_seconds:
+        if current_proc.cpu_time_seconds and baseline_cputime:
             current_proc.set_cpu_time_seconds(
-                current_proc.cpu_time_seconds - baseline_proc.cpu_time_seconds
+                current_proc.cpu_time_seconds - baseline_cputime
             )
-        pid2proc[current_proc.pid] = current_proc
 
     return list(pid2proc.values())
+
+
+def compute_aggregated_cpu_times(toplist: List[px_process.PxProcess]) -> None:
+    """
+    Compute aggregated CPU times for all processes in the toplist.
+
+    This function modifies the toplist in place.
+    """
+
+    # First, find the root process
+    root_process = toplist[0]
+    while root_process.parent is not None:
+        root_process = root_process.parent
+
+    # Now, walk the process tree and compute aggregated CPU times
+    def walk_tree(proc: px_process.PxProcess) -> float:
+        sum = proc.cpu_time_seconds or 0
+        for child in proc.children:
+            sum += walk_tree(child)
+        proc.set_aggregated_cpu_time_seconds(sum)
+        return sum
+
+    walk_tree(root_process)
 
 
 def get_notnone_cpu_time_seconds(proc: px_process.PxProcess) -> float:
@@ -119,18 +133,21 @@ def get_notnone_memory_percent(proc: px_process.PxProcess) -> float:
     return 0
 
 
-def sort_by_cpu_usage(toplist):
-    # type(List[px_process.PxProcess]) -> List[px_process.PxProcess]
+def sort_by_cpu_usage(
+    toplist: List[px_process.PxProcess],
+) -> List[px_process.PxProcess]:
     can_sort_by_time = False
     for process in toplist:
-        if process.cpu_time_seconds:
+        metric = process.cpu_time_seconds
+        if metric:
             can_sort_by_time = True
             break
 
     if can_sort_by_time:
         # There is at least one > 0 time in the process list, so sorting by time
         # will be of some use
-        return sorted(toplist, key=get_notnone_cpu_time_seconds, reverse=True)
+        key = get_notnone_cpu_time_seconds
+        return sorted(toplist, key=key, reverse=True)
 
     # No > 0 time in the process list, try CPU percentage as an approximation of
     # that. This should happen on the first iteration when ptop has just been
@@ -138,21 +155,57 @@ def sort_by_cpu_usage(toplist):
     return sorted(toplist, key=lambda process: process.cpu_percent or 0, reverse=True)
 
 
+def sort_by_cpu_usage_tree(
+    toplist: List[px_process.PxProcess],
+) -> List[px_process.PxProcess]:
+    """
+    Sort the process list by aggregated CPU time, but keep the tree structure.
+    """
+    root_process = toplist[0]
+    while root_process.parent is not None:
+        root_process = root_process.parent
+
+    def sort_children(proc: px_process.PxProcess) -> None:
+        proc.children = sorted(
+            proc.children,
+            key=lambda child: child.aggregated_cpu_time_seconds,
+            reverse=True,
+        )
+        for child in proc.children:
+            sort_children(child)
+
+    sort_children(root_process)
+
+    # Now, recreate the list by flattening the tree
+    flat_list = []
+
+    def flatten(proc: px_process.PxProcess, level=0) -> None:
+        proc.level = level
+        flat_list.append(proc)
+        for child in proc.children:
+            flatten(child, level + 1)
+
+    flatten(root_process)
+
+    return flat_list
+
+
 def get_toplist(
-    baseline: List[px_process.PxProcess],
+    baseline: Dict[int, Tuple[datetime.datetime, float]],
     current: List[px_process.PxProcess],
-    sort_order: SortOrder = SortOrder.CPU,
-):
-    # type(...) -> List[px_process.PxProcess]
+    sort_order=px_sort_order.SortOrder.CPU,
+) -> List[px_process.PxProcess]:
     toplist = adjust_cpu_times(baseline, current)
+    compute_aggregated_cpu_times(toplist)
 
     # Sort by interestingness last
     toplist = px_process.order_best_first(toplist)
-    if sort_order == SortOrder.MEMORY:
+    if sort_order == px_sort_order.SortOrder.MEMORY:
         toplist = sorted(toplist, key=get_notnone_memory_percent, reverse=True)
-    else:
-        # By CPU time, this is the default
+    elif sort_order == px_sort_order.SortOrder.CPU:
         toplist = sort_by_cpu_usage(toplist)
+    elif sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+        toplist = sort_by_cpu_usage_tree(toplist)
 
     return toplist
 
@@ -359,21 +412,20 @@ def get_screen_lines(
     if top_mode == MODE_SEARCH:
         highlight_row = None
 
-    highlight_column = "CPUTIME"
-    if sort_order == SortOrder.MEMORY:
-        highlight_column = "RAM"
     toplist_table_lines = px_terminal.to_screen_lines(
-        toplist[:max_process_count], highlight_row, highlight_column
+        toplist[:max_process_count], highlight_row, sort_order
     )
 
     # Ensure that we cover the whole screen, even if it's higher than the
     # number of processes
     toplist_table_lines += screen_rows * [""]
 
-    top_what = "CPU"
-    if sort_order == SortOrder.MEMORY:
-        top_what = "memory"
-    lines += [px_terminal.bold("Top " + top_what + " using processes")]
+    top_line = "Top processes by CPU usage"
+    if sort_order == px_sort_order.SortOrder.MEMORY:
+        top_line = "Top processes by memory usage"
+    elif sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
+        top_line = "Process tree ordered by aggregated CPU time"
+    lines += [px_terminal.bold(top_line)]
 
     if top_mode == MODE_SEARCH:
         lines += [SEARCH_PROMPT_ACTIVE + px_terminal.bold(search or "") + SEARCH_CURSOR]
@@ -533,8 +585,8 @@ def _top(search: str = "") -> None:
     poller = px_poller.PxPoller(px_terminal.SIGWINCH_PIPE[1])
     poller.start()
 
-    baseline = poller.get_all_processes()
     current = poller.get_all_processes()
+    baseline = {p.pid: (p.start_time, p.cpu_time_seconds or 0.0) for p in current}
 
     toplist = get_toplist(baseline, current, sort_order)
 

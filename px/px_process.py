@@ -13,7 +13,6 @@ from . import px_exec_util
 
 
 from typing import Dict
-from typing import MutableSet
 from typing import Optional
 from typing import List
 from typing import Iterable
@@ -92,6 +91,7 @@ class PxProcess:
         memory_percent: Optional[float] = None,
         cpu_percent: Optional[float] = None,
         cpu_time: Optional[float] = None,
+        aggregated_cpu_time: float = 0.0,
     ) -> None:
         self.pid: int = pid
         self.ppid: Optional[int] = ppid
@@ -142,9 +142,14 @@ class PxProcess:
             self.cpu_percent_s = f"{cpu_percent:.0f}%"
 
         self.set_cpu_time_seconds(cpu_time)
+        self.set_aggregated_cpu_time_seconds(aggregated_cpu_time)
 
-        self.children: MutableSet[PxProcess] = set()
+        self.children: List[PxProcess] = []
         self.parent: Optional[PxProcess] = None
+
+        # How many levels down the tree this process is. Kernel is level 0, init
+        # level 1 and everything else 2 and up.
+        self.level = 0
 
     def __repr__(self):
         # I guess this is really what __str__ should be doing, but the point of
@@ -172,6 +177,10 @@ class PxProcess:
         if seconds is not None:
             self.cpu_time_s = seconds_to_str(seconds)
             self.cpu_time_seconds = seconds
+
+    def set_aggregated_cpu_time_seconds(self, seconds: float) -> None:
+        self.aggregated_cpu_time_s = seconds_to_str(seconds)
+        self.aggregated_cpu_time_seconds = seconds
 
     def match(self, string, require_exact_user=True):
         """
@@ -393,7 +402,7 @@ def resolve_links(processes: Dict[int, PxProcess], now: datetime.datetime) -> No
             process.parent = processes.get(process.ppid)
 
         if process.parent is not None:
-            process.parent.children.add(process)
+            process.parent.children.append(process)
 
 
 def remove_process_and_descendants(processes: Dict[int, PxProcess], pid: int) -> None:
