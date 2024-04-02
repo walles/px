@@ -355,7 +355,13 @@ def to_screen_lines(
     mem_width = len(headings[5])
     for proc in procs:
         pid_width = max(pid_width, len(str(proc.pid)))
-        command_width = max(command_width, len(proc.command) + proc.level * 2)
+
+        # Unindent PIDs 0 and 1. Not fully correct, but since PID 1 has only one
+        # parent indenting it doesn't add much information, but does use up
+        # space, so let's just not.
+        level = max(proc.level - 1, 0)
+
+        command_width = max(command_width, len(proc.command) + level * 2)
         username_width = max(username_width, len(proc.username))
         cpu_width = max(cpu_width, len(proc.cpu_percent_s))
 
@@ -456,7 +462,11 @@ def to_screen_lines(
 
         indent = ""
         if sort_order == px_sort_order.SortOrder.AGGREGATED_CPU:
-            indent = " " * proc.level * 2
+            # Unindent PIDs 0 and 1. Not fully correct, but since PID 1 has only
+            # one parent indenting it doesn't add much information, but does use
+            # up space, so let's not.
+            level = max(proc.level - 1, 0)
+            indent = " " * level * 2
 
         columns = [
             str(proc.pid),
