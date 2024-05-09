@@ -6,9 +6,8 @@ env:
   TOX_VERSION: 4.0.9
 
 on:
-  push:
-    tags:
-      - "*"
+  release:
+    types: [released]
 
 jobs:
   homebrew:
