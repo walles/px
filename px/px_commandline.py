@@ -212,6 +212,9 @@ def get_command(commandline: str) -> str:
     if command == "java":
         return faillog(commandline, get_java_command(commandline))
 
+    if command == "dart":
+        return faillog(commandline, get_dart_command(commandline))
+
     if command == "ruby":
         # Switches list inspired by ruby 2.3.7p456 --help output
         return faillog(
@@ -384,6 +387,29 @@ def get_aws_command(args: List[str]) -> Optional[str]:
     return " ".join(result)
 
 
+def get_dart_command(commandline: str) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
+    array = to_array(commandline)
+    dart = os.path.basename(array[0])
+    if len(array) == 1:
+        return dart
+
+    for candidate in array[1:]:
+        if candidate.startswith("-"):
+            continue
+
+        for _, char in enumerate(candidate):
+            if not char.islower():
+                # Not a subcommand, something like "/bin/hello.dart"
+                return os.path.basename(candidate)
+
+        # This was a subcommand
+        return dart + " " + candidate
+
+    # Neither subcommand nor file name found, give up
+    return None
+
+
 def get_sudo_command(commandline: str) -> Optional[str]:
     """Returns None if we failed to figure out the script name"""
     without_sudo = commandline[5:].strip()
@@ -508,7 +534,7 @@ def get_with_subcommand(
 
     if array[1].startswith("-"):
         # Unknown option, help!
-        return command
+        return None
 
     return f"{command} {array[1]}"
 

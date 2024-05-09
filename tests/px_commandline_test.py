@@ -365,6 +365,47 @@ def test_get_command_java_equinox():
     )
 
 
+# Ref:https://github.com/walles/px/issues/126
+def test_get_command_flutter():
+    # Candidate contains no slashes => subcommand
+    assert (
+        px_commandline.get_command(
+            "/usr/local/Caskroom/flutter/3.0.1/flutter/bin/cache/dart-sdk/bin/dart "
+            "devtools "
+            "--machine "
+            "--allow-embedding "
+        )
+        == "dart devtools"
+    )
+
+    # Candidate contains slashes => file to run
+    assert (
+        px_commandline.get_command(
+            "/usr/local/Caskroom/flutter/3.0.1/flutter/bin/cache/dart-sdk/bin/dart "
+            "--disable-dart-dev "
+            "--packages=/usr/local/Caskroom/flutter/3.0.1/flutter/packages/flutter_tools/.dart_tool/package_config.json "
+            "/usr/local/Caskroom/flutter/3.0.1/flutter/bin/cache/flutter_tools "
+            "upgrade"
+        )
+        == "flutter_tools"
+    )
+
+    # Candidate contains dots (.) => file to run
+    assert (
+        px_commandline.get_command(
+            "/usr/local/Caskroom/flutter/3.0.1/flutter/bin/cache/dart-sdk/bin/dart "
+            "--verbosity=error "
+            "--disable-dart-dev "
+            "--snapshot=/usr/local/Caskroom/flutter/3.0.1/flutter/bin/cache/flutter_tools.snapshot "
+            "--snapshot-kind=app-jit "
+            "--packages=/usr/local/Caskroom/flutter/3.0.1/flutter/packages/flutter_tools/.dart_tool/package_config.json "
+            "--no-enable-mirrors "
+            "flutter_tools.dart "
+        )
+        == "flutter_tools.dart"
+    )
+
+
 def test_get_command_electron_macos():
     # Note that if we have spaces inside of the path, the path in
     # question needs to be valid on the local system for it to
