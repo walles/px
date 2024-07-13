@@ -284,8 +284,11 @@ def get_command(commandline: str) -> str:
             ),
         )
 
-    if command in ["bash", "sh"]:
-        return faillog(commandline, get_generic_script_command(commandline))
+    if command in ["bash", "sh", "zsh"]:
+        return faillog(
+            commandline,
+            get_generic_script_command(commandline, ignore_switches=["-p"]),
+        )
 
     if PERL_BIN.match(command):
         return faillog(commandline, get_generic_script_command(commandline))
@@ -562,9 +565,8 @@ def get_generic_script_command(
     if len(array) == 2:
         # vm + script
         return script
-    if script not in ["brew.rb", "yarn.js"]:
+    if script not in ["brew.rb", "brew.sh", "yarn.js"]:
         return script
-    script = os.path.splitext(script)[0]
 
     subcommand = array[2]
     if subcommand.startswith("-"):

@@ -503,7 +503,7 @@ def test_get_command_ruby_switches():
         px_commandline.get_command(
             "/usr/bin/ruby -W0 /usr/local/bin/brew.rb install rust"
         )
-        == "brew install"
+        == "brew.rb install"
     )
 
     # https://github.com/walles/px/issues/87
@@ -621,7 +621,16 @@ def test_get_homebrew_commandline():
                 ]
             )
         )
-        == "brew upgrade"
+        == "brew.rb upgrade"
+    )
+
+
+def test_get_bash_brew_sh_commandline():
+    assert (
+        px_commandline.get_command(
+            "/bin/bash -p /usr/local/Homebrew/Library/Homebrew/brew.sh upgrade"
+        )
+        == "brew.sh upgrade"
     )
 
 
