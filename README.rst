@@ -266,7 +266,6 @@ macOS).
 * Clone: ``git clone git@github.com:walles/px.git ; cd px``
 * Build and test: ``./tox.sh``
 * Run: ``./px.pex``
-* To add dependencies, edit ``requirements.txt``
 
 You can also run ``./devbin/tox-in-docker.sh``, which can be used to run Linux
 tests on a Mac.

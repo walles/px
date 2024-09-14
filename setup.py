@@ -2,34 +2,31 @@
 
 import os
 import re
-import subprocess
 
 from setuptools import setup
 
-from devbin import update_version_py
+from px import version
 
-update_version_py.main()
+try:
+    from devbin import update_version_py
 
-git_version = (
-    subprocess.check_output(["git", "describe", "--dirty"]).decode("utf-8").strip()
-)
-
-requirements = None
-with open("requirements.txt", encoding="utf-8") as reqsfile:
-    requirements = reqsfile.readlines()
+    update_version_py.main()
+except ModuleNotFoundError:
+    print("Devbin not found, assuming source distribution, not updating version.py")
 
 with open(
     os.path.join(os.path.dirname(__file__), "README.rst"), encoding="utf-8"
 ) as fp:
     LONG_DESCRIPTION = fp.read()
 
-if not re.match(r"^[0-9]+\.[0-9]+\.[0-9]+$", git_version):
+version_for_setuptools = version.VERSION
+if not re.match(r"^[0-9]+\.[0-9]+\.[0-9]+$", version_for_setuptools):
     # Setuptools wants nice version numbers
-    git_version = "0.0.0"
+    version_for_setuptools = "0.0.0"
 
 setup(
     name="pxpx",
-    version=git_version,
+    version=version_for_setuptools,
     description="ps and top for Human Beings",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",
@@ -50,14 +47,10 @@ setup(
         "Topic :: Utilities",
     ],
     packages=["px"],
-    install_requires=requirements,
     # See: http://setuptools.readthedocs.io/en/latest/setuptools.html#setting-the-zip-safe-flag
     zip_safe=True,
     setup_requires=[
         "pytest-runner",
-    ],
-    tests_require=[
-        "pytest",
     ],
     entry_points={
         "console_scripts": [

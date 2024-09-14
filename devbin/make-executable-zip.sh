@@ -21,17 +21,12 @@ python3 -m venv "$ENVDIR"
 
 # shellcheck source=/dev/null
 . "$ENVDIR/bin/activate"
-pip install -r "$ROOTDIR/requirements.txt"
 
 # Set up file structure in our temporary directory
 echo 'import px.px; px.px.main()' >"$WORKDIR/__main__.py"
 
 # The main attraction!
 cp -a "$ROOTDIR/px" "$WORKDIR/"
-
-# Dependencies, must match list in requirements.txt
-#
-# NOTE: This section intentionally left blank
 
 # Tidy up a bit
 find "$WORKDIR" -name '*.pyc' -delete
