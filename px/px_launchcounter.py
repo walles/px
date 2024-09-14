@@ -24,7 +24,7 @@ def _get_minus_max_score(tuples_list: List[Tuple[str, int]]) -> int:
 
 
 def sort_launchers_list(
-    launchers_list: List[List[Tuple[str, int]]]
+    launchers_list: List[List[Tuple[str, int]]],
 ) -> List[List[Tuple[str, int]]]:
     return sorted(launchers_list, key=_get_minus_max_score)
 
