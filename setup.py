@@ -6,6 +6,10 @@ import subprocess
 
 from setuptools import setup
 
+from devbin import update_version_py
+
+update_version_py.main()
+
 git_version = (
     subprocess.check_output(["git", "describe", "--dirty"]).decode("utf-8").strip()
 )
