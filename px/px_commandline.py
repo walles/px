@@ -204,6 +204,9 @@ def get_command(commandline: str) -> str:
     if command.startswith("python") or command == "Python":
         return faillog(commandline, get_python_command(commandline))
 
+    if command.startswith("guile"):
+        return faillog(commandline, get_guile_command(commandline))
+
     if command == "Electron":
         clarified = try_clarify_electron(commandline)
         if clarified:
@@ -317,6 +320,61 @@ def get_command(commandline: str) -> str:
             command = command_suggestion
 
     return app_name_prefix + command
+
+
+def get_guile_command(commandline: str) -> Optional[str]:
+    array = to_array(commandline)
+    array = list(filter(lambda s: s, array))
+
+    # Ignore some switches.
+    IGNORE_SWITCHES = [
+        "-s",
+        "--listen",
+        "-ds",
+        "--debug",
+        "--no-debug",
+        "--auto-compile",
+        "--fresh-auto-compile",
+        "--no-auto-compile",
+        "-q",
+        "--r6rs",
+        "--r7rs",
+        "-h",
+        "--help",
+        "-v",
+        "--version",
+    ]
+    IGNORE_ARGFUL_SWITCHES = [
+        "-L",
+        "-C",
+        "-x",
+        "-l",
+        "-e",
+    ]
+    while len(array) > 1 and (
+      array[1] in IGNORE_SWITCHES
+      or array[1] in IGNORE_ARGFUL_SWITCHES
+      or array[1].startswith("--language=")
+      or array[1].startswith("--listen=")
+      or array[1].startswith("--use-srfi=")
+    ):
+        if len(array) > 1 and array[1] in IGNORE_ARGFUL_SWITCHES:
+            if array[1] == "-l" and len(array) > 2:
+                # That guile script will be executed first
+                return array[2]
+            else:
+                del array[1:3]
+        else:
+            del array[1]
+
+    guile = os.path.basename(array[0])
+    if len(array) == 1:
+        return guile
+
+    if array[1].startswith("-"):
+        return None
+
+    return os.path.basename(array[1])
 
 
 def get_python_command(commandline: str) -> Optional[str]:

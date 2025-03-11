@@ -191,6 +191,31 @@ def test_get_command_python():
     assert px_commandline.get_command("python    ") == "python"
 
 
+def test_get_command_guile():
+    assert px_commandline.get_command("guile") == "guile"
+    assert px_commandline.get_command("guile --help") == "guile"
+
+    assert px_commandline.get_command("guile apa.scm") == "apa.scm"
+    assert px_commandline.get_command("guile /usr/bin/apa.scm") == "apa.scm"
+    assert px_commandline.get_command("guile /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile -L foo /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile -L foo -C bar /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile -x ex /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile -l bar /usr/bin/hej") == "bar"
+    assert px_commandline.get_command("guile -e quux /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --language=ecmascript /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --debug /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --no-debug /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --auto-compile /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --fresh-auto-compile /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --no-auto-compile /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --listen /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile -q /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --use-srfi=2,13,14 /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --r6rs /usr/bin/hej") == "hej"
+    assert px_commandline.get_command("guile --r7rs /usr/bin/hej") == "hej"
+
+
 def test_get_command_aws():
     assert px_commandline.get_command("Python /usr/local/bin/aws") == "aws"
     assert px_commandline.get_command("python aws s3") == "aws s3"
