@@ -3,7 +3,7 @@ name: macOS CI
 env:
   # NOTE: This version must match between all .yml files in the
   # .github/workflows directory
-  TOX_VERSION: 4.0.9
+  TOX_VERSION: 4.24.2
 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
@@ -14,14 +14,14 @@ on:
 
 jobs:
   tox:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # For getting tags from the repo
       - name: Cache .tox directory
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .tox
           key: ${{ runner.os }}-${{ hashFiles('tox.ini') }}
