@@ -202,6 +202,8 @@ def test_get_command_guile():
     assert px_commandline.get_command("guile -L foo -C bar /usr/bin/hej") == "hej"
     assert px_commandline.get_command("guile -x ex /usr/bin/hej") == "hej"
     assert px_commandline.get_command("guile -l bar /usr/bin/hej") == "bar"
+    assert px_commandline.get_command("guile -l bar") == "bar"
+    assert px_commandline.get_command("guile -l") == "guile"
     assert px_commandline.get_command("guile -e quux /usr/bin/hej") == "hej"
     assert (
         px_commandline.get_command("guile --language=ecmascript /usr/bin/hej") == "hej"

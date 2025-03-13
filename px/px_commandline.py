@@ -358,7 +358,7 @@ def get_guile_command(commandline: str) -> Optional[str]:
         or array[1].startswith("--listen=")
         or array[1].startswith("--use-srfi=")
     ):
-        if len(array) > 1 and array[1] in IGNORE_ARGFUL_SWITCHES:
+        if array[1] in IGNORE_ARGFUL_SWITCHES:
             if array[1] == "-l" and len(array) > 2:
                 # That guile script will be executed first
                 return array[2]
@@ -367,9 +367,8 @@ def get_guile_command(commandline: str) -> Optional[str]:
         else:
             del array[1]
 
-    guile = os.path.basename(array[0])
     if len(array) == 1:
-        return guile
+        return None
 
     if array[1].startswith("-"):
         return None
