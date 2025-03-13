@@ -5,7 +5,7 @@
 
 See below for `how to install`_.
 
-``ptop`` is what I usually use when `Bubblemon`_ shows something unexpected is
+``ptop`` is what I usually use when `LoadViz`_ shows something unexpected is
 going on.
 
 ``px`` I use for figuring out things like "do I still have any `Flutter`_
@@ -372,7 +372,7 @@ DONE
 * ptop: Let user switch between CPU time sort and memory sort
 
 .. _how to install: #installation
-.. _Bubblemon: https://walles.github.io/bubblemon/
+.. _LoadViz: https://github.com/walles/loadviz/
 .. _Flutter: https://flutter.dev
 .. _Debian 10 Buster: https://wiki.debian.org/DebianBuster
 .. _Ubuntu 19.04 Disco: https://launchpad.net/ubuntu/disco/
