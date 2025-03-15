@@ -5,12 +5,19 @@ import re
 
 from setuptools import setup
 
-from px import version
-
+version_for_setuptools = "0.0.0"
 try:
     from devbin import update_version_py
 
+    # Create px/version.py
     update_version_py.main()
+
+    # Import the px/version.py that we just generated ^
+    from px import version
+
+    if re.match(r"^[0-9]+\.[0-9]+\.[0-9]+$", version.VERSION):
+        # Got a nice version number, use it!
+        version_for_setuptools = version.VERSION
 except ModuleNotFoundError:
     print("Devbin not found, assuming source distribution, not updating version.py")
 
@@ -19,10 +26,6 @@ with open(
 ) as fp:
     LONG_DESCRIPTION = fp.read()
 
-version_for_setuptools = version.VERSION
-if not re.match(r"^[0-9]+\.[0-9]+\.[0-9]+$", version_for_setuptools):
-    # Setuptools wants nice version numbers
-    version_for_setuptools = "0.0.0"
 
 setup(
     name="pxpx",
