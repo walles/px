@@ -139,9 +139,9 @@ def handleLogMessages(messages: Optional[str]) -> None:
     # even if we don't use it. And this will make test avoidance fail to avoid
     # px.py tests every time you make a new commit (because committing recreates
     # version.py).
-    from . import version
+    from .version import __version__
 
-    sys.stderr.write("px version: " + version.VERSION + "\n")
+    sys.stderr.write("px version: " + __version__ + "\n")
 
     sys.stderr.write("\n")
     sys.stderr.write("Python version: " + sys.version + "\n")
@@ -168,9 +168,9 @@ def _main(argv: List[str]) -> None:
         # NOTE: If we "import version" at the top of this file, we will depend on it even if
         # we don't use it. And this will make test avoidance fail to avoid px.py tests every
         # time you make a new commit (because committing recreates version.py).
-        from . import version
+        from .version import __version__
 
-        print(version.VERSION)
+        print(__version__)
         return
 
     with_pager: Optional[bool] = None

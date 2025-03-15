@@ -1,0 +1,57 @@
+[project]
+name = "pxpx"
+description = "ps and top for Human Beings"
+readme = "README.rst"
+license = "MIT"
+authors = [{ name = "Johan Walles", email = "johan.walles@gmail.com" }]
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/walles/px"
+
+[project.scripts]
+px = "px.px:main"
+ptop = "px.px:main"
+pxtree = "px.px:main"
+
+[tool.setuptools.data-files]
+"share/man/man1" = ["doc/*.1"]
+
+[tool.setuptools.packages.find]
+include = ["px*"]
+
+[tool.setuptools_scm]
+version_file = "px/version.py"
+fallback_version = "0.0.0+unknown"
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_any_unimported = true
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+strict_equality = true
+warn_incomplete_stub = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v"]
+
+[build-system]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
