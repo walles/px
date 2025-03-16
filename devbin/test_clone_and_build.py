@@ -43,6 +43,8 @@ subprocess.run(["python3", "setup.py", "build"], check=True)
 
 print("Building sources using python -m build...")
 FAKE_VERSION = "99.99.99"
+subprocess.run(["git", "config", "user.email", "you@example.com"], check=True)
+subprocess.run(["git", "config", "user.name", "Your Name"], check=True)
 subprocess.run(
     [
         "git",
