@@ -23,7 +23,6 @@ def _pump_info_to_fd(with_fileno, process, processes):
     # to who-knows-where.
     try:
         px_processinfo.print_process_info(with_fileno.fileno(), process, processes)
-        with_fileno.close()
     except OSError as e:
         if e.errno == errno.EPIPE:
             # The user probably just exited the pager before we were done piping into it
@@ -33,18 +32,14 @@ def _pump_info_to_fd(with_fileno, process, processes):
             # call above (this is likely), we may want to kill that particular lsof instance.
             # It will use a bunch of CPU for some time, and we will never use its result anyway.
         else:
-            LOG.warning(
+            LOG.error(
                 "Unexpected OSError pumping process info into pager", exc_info=True
             )
     except Exception:
-        # Logging exceptions on warning level will make them visible to somebody
-        # who changes the LOGLEVEL in px.py, but not to ordinary users.
-        #
-        # Getting some exceptions may or may not be benign if the user closes
-        # the pager before we're done writing to its stdin pipe.
-
         # Got exc_info from: https://stackoverflow.com/a/193153/473672
-        LOG.warning("Failed pumping process info into pager", exc_info=True)
+        LOG.error("Failed pumping process info into pager", exc_info=True)
+    finally:
+        with_fileno.close()
 
 
 # From: https://stackoverflow.com/a/377028/473672
