@@ -283,7 +283,12 @@ def get_command(commandline: str) -> str:
         return faillog(
             commandline,
             get_generic_script_command(
-                commandline, ignore_switches=["--max_old_space_size"]
+                commandline,
+                ignore_switches=[
+                    "--max_old_space_size",
+                    "--no-warnings",
+                    "--enable-source-maps",
+                ],
             ),
         )
 
