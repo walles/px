@@ -290,7 +290,11 @@ def _main(argv: List[str]) -> None:
         for line in lines:
             print(px_terminal.crop_ansi_string_at_length(line, columns))
     else:
-        print("\n".join(lines))
+        try:
+            print("\n".join(lines))
+        except BrokenPipeError:
+            # This happens when piping to a command that exits before we finish
+            pass
 
 
 if __name__ == "__main__":
