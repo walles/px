@@ -66,6 +66,46 @@ def test_get_users_at_range(check_output):
     )
 
 
+def test_get_users_at_range_raspbian(check_output):
+    # Test user logged in between two timestamps, test string is from a Raspbian
+    # system: https://github.com/walles/px/issues/130
+    now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
+    lastline = (
+        "sk-tv                                  Thu Mar 31 14:39 - down   (20:29)"
+    )
+
+    # Before
+    assert not get_users_at(
+        lastline,
+        now,
+        datetime.datetime(2016, 3, 31, 14, 38, tzinfo=TIMEZONE),
+    )
+
+    # During
+    assert {"sk-tv"} == get_users_at(
+        lastline,
+        now,
+        datetime.datetime(2016, 3, 31, 14, 39, tzinfo=TIMEZONE),
+    )
+    assert {"sk-tv"} == get_users_at(
+        lastline,
+        now,
+        datetime.datetime(2016, 3, 31, 17, 46, tzinfo=TIMEZONE),
+    )
+    assert {"sk-tv"} == get_users_at(
+        lastline,
+        now,
+        datetime.datetime(2016, 4, 1, 11, 8, tzinfo=TIMEZONE),
+    )
+
+    # After
+    assert not get_users_at(
+        lastline,
+        now,
+        datetime.datetime(2016, 4, 1, 11, 9, tzinfo=TIMEZONE),
+    )
+
+
 def test_get_users_at_still_logged_in(check_output):
     now = datetime.datetime(2016, 4, 3, 12, 8, tzinfo=TIMEZONE)
     lastline = "johan     ttys000                   Sun Apr  3 11:54   still logged in"

@@ -13,7 +13,7 @@ TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 # last regexp parts
 LAST_USERNAME = "([^ ]+)"
-LAST_DEVICE = "([^ ]+)"
+LAST_DEVICE = "([^ ]+)?"
 LAST_ADDRESS = "([^ ]+)?"
 LAST_PID = r"( \[[0-9]+\])?"
 LAST_FROM = "(... ... .. ..:..)"
