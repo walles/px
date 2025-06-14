@@ -1,4 +1,5 @@
 import os
+import re
 
 from px import px_commandline
 
@@ -394,6 +395,67 @@ def test_get_command_java_equinox():
         px_commandline.get_command(commandline)
         == "org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar"
     )
+
+
+# Ref:https://github.com/walles/px/issues/137
+def test_get_command_line_jdk_java_options():
+    commandline = """
+/opt/homebrew/Cellar/openjdk/24.0.1/libexec/openjdk.jdk/Contents/Home/bin/java
+  -classpath
+  /opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec/mvn/boot/plexus-classworlds-2.8.0.jar
+  -javaagent:/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec/mvn/lib/mvnd/mvnd-agent-2.0.0-rc-3.jar
+  -Dmvnd.home=/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec
+  -Dmaven.home=/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec/mvn
+  -Dmaven.conf=/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec/mvn/conf
+  -Dclassworlds.conf=/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec/bin/mvnd-daemon.conf
+  -Dmaven.logger.logFile=/Users/johan/.m2/mvnd/registry/2.0.0-rc-3/daemon-802431a9.log
+  -Dmvnd.java.home=/opt/homebrew/Cellar/openjdk/24.0.1/libexec/openjdk.jdk/Contents/Home
+  -Dmvnd.id=802431a9
+  -Dmvnd.daemonStorage=/Users/johan/.m2/mvnd/registry/2.0.0-rc-3
+  -Dmvnd.registry=/Users/johan/.m2/mvnd/registry/2.0.0-rc-3/registry.bin
+  -Dmvnd.socketFamily=inet
+  -Dmvnd.home=/opt/homebrew/Cellar/mvnd/2.0.0-rc-3/libexec
+  -Djdk.java.options=--add-opens
+  java.base/java.io=ALL-UNNAMED
+  --add-opens
+  java.base/java.lang=ALL-UNNAMED
+  --add-opens
+  java.base/java.util=ALL-UNNAMED
+  --add-opens
+  java.base/jdk.internal.misc=ALL-UNNAMED
+  --add-opens
+  java.base/sun.net.www.protocol.jar=ALL-UNNAMED
+  --add-opens
+  java.base/sun.nio.fs=ALL-UNNAMED
+  -Dmvnd.noDaemon=false
+  -Dmvnd.debug=false
+  -Dmvnd.debug.address=8000
+  -Dmvnd.idleTimeout=3h
+  -Dmvnd.keepAlive=100ms
+  -Dmvnd.extClasspath=
+  -Dmvnd.coreExtensionsDiscriminator=da39a3ee5e6b4b0d3255bfef95601890afd80709
+  -Dmvnd.coreExtensionsExclude=io.takari.maven:takari-smart-builder
+  -Dmvnd.enableAssertions=false
+  -Dmvnd.expirationCheckDelay=10s
+  -Dmvnd.duplicateDaemonGracePeriod=10s
+  -Dmvnd.socketFamily=inet
+  org.codehaus.plexus.classworlds.launcher.Launcher
+""".strip().replace("\n", " ")
+    commandline = re.sub(r"\s+", " ", commandline)
+
+    assert px_commandline.get_command(commandline) == "Launcher"
+
+
+def test_prettify_java_class():
+    assert (
+        px_commandline.prettify_fully_qualified_java_class("com.example.MyClass")
+        == "MyClass"
+    )
+    assert (
+        px_commandline.prettify_fully_qualified_java_class("com.example.Main")
+        == "example.Main"
+    )
+    assert px_commandline.prettify_fully_qualified_java_class("") is None
 
 
 # Ref:https://github.com/walles/px/issues/126

@@ -488,7 +488,10 @@ def get_sudo_command(commandline: str) -> Optional[str]:
     return "sudo " + get_command(without_sudo)
 
 
-def prettify_fully_qualified_java_class(class_name: str) -> str:
+def prettify_fully_qualified_java_class(class_name: str) -> Optional[str]:
+    if not class_name:
+        return None
+
     split = class_name.split(".")
     if len(split) == 1:
         return split[-1]
@@ -525,6 +528,8 @@ def get_java_command(commandline: str) -> Optional[str]:
                 return None
             return os.path.basename(component)
         if state == "scanning":
+            if component.startswith("-Djdk.java.options="):
+                component = component.split("=", 1)[1]
             if component.startswith("-X"):
                 continue
             if component.startswith("-D"):
