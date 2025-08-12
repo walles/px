@@ -214,7 +214,7 @@ def lsof_to_files(lsof: str) -> List[PxFile]:
     for shard in lsof.split("\0"):
         if shard[0] == "\n":
             # Some shards start with newlines. Looks pretty when viewing the
-            # lsof output in moar, but makes the parsing code have to deal with
+            # lsof output in moor, but makes the parsing code have to deal with
             # it.
             shard = shard[1:]
 

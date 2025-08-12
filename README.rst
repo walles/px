@@ -41,7 +41,7 @@ expect from ``ptop``, with explanations below the screenshot:
   ``run_adapter.py`` (the program) rather than ``python3`` (the runtime). `This
   support is available for many VMs`_ like Java, Node, ...
 * Selecting a process with Enter will offer you to see detailed information
-  about that process, in ``$PAGER``, `moar`_ or ``less``. Or to kill it.
+  about that process, in ``$PAGER``, `moor`_ or ``less``. Or to kill it.
 * After you press ``q`` to quit, the display is retained and some lines at the
   bottom are removed to prevent the information you want from scrolling out of
   view.
@@ -381,7 +381,7 @@ DONE
 .. _download the latest px.pex: https://github.com/walles/px/releases/latest
 .. _Unix domain sockets: https://en.wikipedia.org/wiki/Unix_domain_socket
 .. _This support is available for many VMs: https://github.com/walles/px/blob/python/tests/px_commandline_test.py
-.. _moar: https://github.com/walles/moar
+.. _moor: https://github.com/walles/moor
 .. _tox: https://pypi.org/project/tox/
 .. _pyinstrument: https://github.com/joerick/pyinstrument#installation
 .. _fzf: https://github.com/junegunn/fzf

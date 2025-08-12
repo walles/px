@@ -94,7 +94,10 @@ def launch_pager():
 
     pager_cmd = to_command_line(env.get("PAGER", None))
     if not pager_cmd:
-        # Prefer moar: https://github.com/walles/moar
+        # Prefer moor: https://github.com/walles/moor
+        pager_cmd = to_command_line("moor")
+    if not pager_cmd:
+        # Old name for moor: https://github.com/walles/moor/pull/305
         pager_cmd = to_command_line("moar")
     if not pager_cmd:
         pager_cmd = to_command_line("less")

@@ -241,7 +241,7 @@ def print_fds(
     )
 
     # Flush what we have so far so the user has something to read during the pause.
-    # This is useful when piping output into a pager like moar or less.
+    # This is useful when piping output into a pager like moor or less.
 
     # NOTE: If we switch to writing to file-like objects we should flush here,
     # our println() function flushes implicitly.
