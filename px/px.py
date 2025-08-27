@@ -84,7 +84,7 @@ def install(argv: List[str]) -> None:
     px_install.install(px_pex, "/usr/local/bin/pxtree")
 
 
-# This is the setup.py entry point
+# This is the pyproject.toml entry point
 def main():
     argv = list(sys.argv)
 
