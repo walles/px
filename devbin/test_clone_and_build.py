@@ -5,9 +5,9 @@ Build the project from a clean clone to make sure that works.
 """
 
 import os
-import sys
 import shutil
 import subprocess
+import sys
 import tempfile
 
 # Copy everything to a temporary directory
@@ -38,9 +38,6 @@ subprocess.run(
 )
 
 # Build the clone
-print("Building sources using setup.py...")
-subprocess.run(["python3", "setup.py", "build"], check=True)
-
 print("Building sources using python -m build...")
 FAKE_VERSION = "99.99.99"
 subprocess.run(["git", "config", "user.email", "you@example.com"], check=True)

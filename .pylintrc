@@ -1,4 +1,0 @@
-# Disable all categories since we're running ruff instead, but VSCode insists on
-# invoking pylint all the time
-[MESSAGES CONTROL]
-disable=E,W,R,C,F

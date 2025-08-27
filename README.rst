@@ -250,7 +250,7 @@ Development
 Prerequisites
 -------------
 
-* A Python 3.6+ version
+* A Python 3.9+ version
 * `tox`_
 
 Building and Running

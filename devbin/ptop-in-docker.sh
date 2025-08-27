@@ -3,7 +3,7 @@
 set -euo pipefail
 
 DOCKERFILE="
-FROM python:3.6-alpine
+FROM python:3.9-alpine
 
 RUN apk add sudo py3-tox shellcheck bash git unzip lsof gcc python3-dev procps acct musl-dev zip
 RUN echo 'root    ALL=(ALL:ALL) ALL' > /etc/sudoers

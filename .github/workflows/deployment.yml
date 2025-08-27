@@ -56,18 +56,14 @@ jobs:
         run: |
           . ./env/bin/activate
           pip install tox==${{ env.TOX_VERSION }}
-      - name: Prevent 0.0.0 releases I
-        run: |
-          . ./env/bin/activate
-          tox -e version.py
-          cat px/version.py
-          ! grep '0.0.0' px/version.py
       - name: Run tox to create the dist wheel
         run: |
           . ./env/bin/activate
           tox
-      - name: Prevent 0.0.0 releases II
+      - name: Prevent 0.0.0 releases
         run: |
+          cat px/version.py
+          ! grep '0.0.0' px/version.py
           ls dist/
           ! ls dist/ | grep '0.0.0'
 
