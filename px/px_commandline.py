@@ -292,6 +292,9 @@ def get_command(commandline: str) -> str:
             ),
         )
 
+    if command == "dotnet":
+        return faillog(commandline, get_dotnet_command(commandline))
+
     if command in ["bash", "sh", "zsh"]:
         return faillog(
             commandline,
@@ -379,6 +382,29 @@ def get_guile_command(commandline: str) -> Optional[str]:
         return None
 
     return os.path.basename(array[1])
+
+
+def get_dotnet_command(commandline: str) -> Optional[str]:
+    """Returns None if we failed to figure out the script name"""
+    array = to_array(commandline)
+    array = list(filter(lambda s: s, array))  # Remove non-empty entries
+    command = os.path.basename(array[0])
+
+    if len(array) == 1:
+        # Just "dotnet"
+        return command
+
+    if array[1].startswith("-"):
+        # Second argument is a switch, we don't do switches
+        return None
+
+    if os.sep in array[1]:
+        # Second argument is a path, return the file name part
+        return os.path.basename(array[1])
+
+    # No slashes in the second part, can be either a builtin or some tool
+    # installed using NuGet. Include "dotnet", better safe than sorry.
+    return command + " " + array[1]
 
 
 def get_python_command(commandline: str) -> Optional[str]:

@@ -767,6 +767,20 @@ def test_node_max_old_space():
     )
 
 
+def test_dotnet_commandline():
+    # Unclear whether "fable" is a builtin or a separate tool, go with "dotnet fable".
+    assert (
+        px_commandline.get_command("libexec/dotnet fable core/Core.Test.fsproj")
+        == "dotnet fable"
+    )
+
+    # The DLL has a path, so it can't be a builtin. Go with just "fable.dll"
+    assert (
+        px_commandline.get_command("libexec/dotnet any/fable.dll core/Core.Test.fsproj")
+        == "fable.dll"
+    )
+
+
 def test_macos_app():
     assert (
         px_commandline.get_command(
