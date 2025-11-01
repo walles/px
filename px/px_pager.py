@@ -76,7 +76,7 @@ def to_command_line(spec: Optional[str]) -> Optional[List[str]]:
     return [arg0] + split_spec[1:]
 
 
-def launch_pager():
+def launch_pager(label: str):
     env = os.environ.copy()
 
     # Prevent --quit-if-one-screen, we always want a pager
@@ -86,11 +86,14 @@ def launch_pager():
     # and we always want to page, so we go for "RX" only.
     #
     # "F" might work when somebody does "px 1234", but when ptop wants to show
-    # process info it w
+    # process info it won't.
     env["LESS"] = "RX"
 
     # Git does this as well
     env["LV"] = "-c"
+
+    if label:
+        env["PAGER_LABEL"] = label
 
     pager_cmd = to_command_line(env.get("PAGER", None))
     if not pager_cmd:
@@ -115,7 +118,7 @@ def launch_pager():
 def page_process_info(
     process: px_process.PxProcess, processes: List[px_process.PxProcess]
 ) -> None:
-    pager = launch_pager()
+    pager = launch_pager(str(process))
     pager_stdin = pager.stdin
     assert pager_stdin is not None
 
