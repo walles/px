@@ -397,7 +397,7 @@ def test_get_command_java_equinox():
     )
 
 
-# Ref:https://github.com/walles/px/issues/137
+# Ref: https://github.com/walles/px/issues/137
 def test_get_command_line_jdk_java_options():
     commandline = """
 /opt/homebrew/Cellar/openjdk/24.0.1/libexec/openjdk.jdk/Contents/Home/bin/java
@@ -446,6 +446,40 @@ def test_get_command_line_jdk_java_options():
     assert px_commandline.get_command(commandline) == "Launcher"
 
 
+# Ref: https://github.com/walles/px/issues/139
+def test_get_command_line_java_issue_139():
+    commandline = """
+/opt/homebrew/Cellar/openjdk@21/21.0.8/libexec/openjdk.jdk/Contents/Home/bin/java
+  --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+  --add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+  --add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+  --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+  @/Users/johan/.gradle/.tmp/gradle-worker-classpath12697647132064750531txt
+  -Xmx2g
+  -Dfile.encoding=UTF-8
+  -Duser.country=SE
+  -Duser.language=sv
+  -Duser.variant
+  worker.org.gradle.process.internal.worker.GradleWorkerMain
+  'Gradle
+  Worker
+  Daemon
+  3'
+""".strip().replace("\n", " ")
+    commandline = re.sub(r"\s+", " ", commandline)
+
+    assert px_commandline.get_command(commandline) == "GradleWorkerMain"
+
+
 def test_prettify_java_class():
     assert (
         px_commandline.prettify_fully_qualified_java_class("com.example.MyClass")
@@ -458,7 +492,7 @@ def test_prettify_java_class():
     assert px_commandline.prettify_fully_qualified_java_class("") is None
 
 
-# Ref:https://github.com/walles/px/issues/126
+# Ref: https://github.com/walles/px/issues/126
 def test_get_command_flutter():
     # Candidate contains no slashes => subcommand
     assert (

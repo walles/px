@@ -570,6 +570,10 @@ def get_java_command(commandline: str) -> Optional[str]:
                 continue
             if component.startswith("--add-modules="):
                 continue
+            if component.startswith("@"):
+                # Argument file, skip and hope its contents doesn't break the
+                # rest of our parsing
+                continue
             if component == "--add-modules":
                 state = "skip next"
                 continue
