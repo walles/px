@@ -15,7 +15,9 @@
 - Which processes are IO heavy?
   - Process top list by IO usage
 - Is this specific process leaking memory?
-  - FIXME: Unclear
+  - When a process is selected, replace the user top lists with a braille
+    history chart for the current process. This means we need to collect
+    historical data for each process.
 - Which new processes are being launched and why?
   - The ptop launched-binaries tree is excellent for this
 - Is some particular service running?
@@ -129,3 +131,9 @@ have vertical labels made of braille characters:
 1. Downsample colors to 256 colors and verify it still looks OK
 1. Auto pick terminal color depth
 1. Make sure we have Prettiness ^ covered
+1. Update screenshot(s) in the README
+1. Decide on what to do with `px`. It should probably use the same color depth +
+   themes logic as `ptop`.
+1. Merge into the `python` branch
+1. Make a new release.
+1. Make sure we are implementing the memory leak use case.
