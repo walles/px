@@ -85,3 +85,47 @@ Apart from this, TAB should be used for activating different sections. Up and
 down arrow keys for browsing processes in the current list. Enter for selecting
 a process. Once selected you should get options for viewing process info or
 killing it.
+
+## Prettiness
+
+`btop` looks nice, take inspiration from there!
+
+To be able to do that, we need:
+
+- Have different color themes, at least one for light and one for dark terminal
+  backgrounds
+- Enable passing the theme on the command line
+- Enable reading the theme from an environment variable
+- Auto detect light / dark terminal background on terminals which support that
+  and pick the default based on that
+- Define our UI in 24 bit color and adapt the actual output to what the terminal
+  supports. `btop` looks horrible in macOS Terminal because it only supports 256
+  colors.
+- Enable passing the terminal color depth on the command line
+- Enable reading the terminal color depth from our environment variable
+- Auto pick the terminal color depth based on terminal capabilities
+
+Consider having different horizontal sections. On the left, each section could
+have vertical labels made of braille characters:
+
+- CPU
+- RAM
+- IO
+- EXE (binaries launched)
+
+## Implementation
+
+1. Get the UI structure right with plain text only. Verify it works with
+   terminal window resizing. Pressing ESC / q should exit.
+1. Implement filtering
+1. Implement section switching with TAB
+1. Implement process picking with arrow keys
+1. Implement the I-picked-a-process-by-pressing-enter menu screen
+1. Verify we have all Use Cases ^ covered
+1. Put the braille section labels in place
+1. Color things in 24 bit color
+1. Make sure we have two different color themes and the ability to pick. Test
+   them on light and dark terminal backgrounds and verify they look OK.
+1. Downsample colors to 256 colors and verify it still looks OK
+1. Auto pick terminal color depth
+1. Make sure we have Prettiness ^ covered
