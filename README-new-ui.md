@@ -117,6 +117,17 @@ have vertical labels made of braille characters:
 
 ## Implementation
 
+First, consider redoing in Go using:
+
+- Twin (from moor) for the terminal UI
+- gopsutil for process and system metrics
+  - For process info no, seems very slow at listing processes with user names
+    compared to just parsing `ps` output.
+    - https://github.com/shirou/gopsutil/issues/842
+    - https://github.com/shirou/gopsutil/issues/1711
+- Do what gotop does for system info / process listing? It uses gopsutil but
+  overrides (at least) process listing and uses `ps` instead on not-Windows.
+
 1. Get the UI structure right with plain text only. Verify it works with
    terminal window resizing. Pressing ESC / q should exit.
 1. Implement filtering
