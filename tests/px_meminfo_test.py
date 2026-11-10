@@ -20,6 +20,19 @@ def test_get_ram_numbers_in_swedish():
     test_get_ram_numbers_live()
 
 
+def test_get_ram_numbers_from_proc_malformed(tmp_path):
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(
+        "MemTotal: not-a-number kB\n"
+        "MemAvailable: 100 kB\n"
+        "SwapTotal: 0 kB\n"
+        "SwapFree: 0 kB\n"
+    )
+
+    info = px_meminfo._get_ram_numbers_from_proc(str(meminfo))
+    assert info is None
+
+
 def test_get_ram_numbers_from_proc_none():
     my_dir = os.path.dirname(__file__)
 

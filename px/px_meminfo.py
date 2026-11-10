@@ -75,7 +75,12 @@ def _update_from_meminfo(base: Optional[int], line: str, name: str) -> Optional[
 
     just_the_number = line[len(name) + 1 : len(line) - 3]
 
-    return int(just_the_number)
+    try:
+        return int(just_the_number)
+    except ValueError:
+        # Not a number (corrupt /proc file, localized digits, ...): ignore
+        # the line so parsing degrades gracefully instead of crashing.
+        return base
 
 
 def _get_ram_numbers_from_proc(
